@@ -1,4 +1,4 @@
-package com.example.kosmos_client
+package de.loicezt.kosmos_client
 
 import io.flutter.embedding.android.FlutterActivity
 
