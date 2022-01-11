@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'kdecole-api/client.dart';
-import 'screens/home.dart';
+import 'screens/multiview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

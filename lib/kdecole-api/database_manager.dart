@@ -6,7 +6,6 @@ import 'package:sqflite/sqflite.dart';
 class DatabaseManager {
   static fetchMessageData(Client client, Database db) async {
     final result = await client.request(Action.getConversations);
-    var nMessages = 0;
     for (final conversation in result['communications']) {
       db.insert('Conversations', {
         'ID': conversation['id'],
@@ -31,7 +30,6 @@ class DatabaseManager {
             'Name': attachment['name']
           });
         }
-        nMessages++;
       }
     }
   }
