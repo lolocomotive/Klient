@@ -42,7 +42,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "de.loicezt.kosmos_client"
         minSdkVersion 16
         targetSdkVersion 30
