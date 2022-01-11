@@ -1,16 +1,19 @@
 # Kosmos client
 
-Alternative mobile client for ljr ent
+Alternative mobile client for ljr ent made with flutter.
 
-## Getting Started
+## To-do list
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+- Login screen style enhancement
+- Implement backend for absences
+- Home screen (with work to do, recent grades, absences and news feed)
+  - Detailed news article view
+- Messages screen
+  - Conversation list
+  - Conversation view
+  - Message editor
+- Timetable view
+  - Timetable day view
+  - Timetable lesson view
+- Automatically update database correctly
+- Notifications
