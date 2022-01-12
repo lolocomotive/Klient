@@ -1,10 +1,32 @@
+/*
+ * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ *
+ * Copyright (C) 2022 lolocomotive
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import 'dart:io';
 
 import 'package:kosmos_client/kdecole-api/client.dart';
+import 'package:kosmos_client/kdecole-api/exercise.dart';
 
 import '../main.dart';
 
+/// Utility class that fetches data from the API and stores it inside the database
 class DatabaseManager {
+  /// Download the 20 first Conversations, the associated messages and their attachments
   static fetchMessageData() async {
     final result = await Global.client!.request(Action.getConversations);
     for (final conversation in result['communications']) {
@@ -36,6 +58,7 @@ class DatabaseManager {
     }
   }
 
+  /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
     final result = await Global.client!.request(
         Action.getNewsArticlesEtablissement,
@@ -55,7 +78,8 @@ class DatabaseManager {
     }
   }
 
-  static int _lessonIdByTimestamp(
+  /// Returns the ID of the lesson that occurs at the timestamp, returns null if nothing is found
+  static int? _lessonIdByTimestamp(
       int timestamp, Iterable<dynamic> listeJourCdt) {
     for (final day in listeJourCdt) {
       for (final lesson in day['listeSeances']) {
@@ -64,9 +88,10 @@ class DatabaseManager {
         }
       }
     }
-    return 0;
+    return null;
   }
 
+  /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
     final result = await Global.client!.request(Action.getTimeTableEleve,
         params: [(Global.client!.idEleve ?? 0).toString()]);

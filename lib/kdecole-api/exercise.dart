@@ -1,16 +1,59 @@
+/*
+ * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ *
+ * Copyright (C) 2022 lolocomotive
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import 'package:sqflite/sqflite.dart';
 
 enum ExerciseType {
   lessonContent,
-  workToDo,
+  exercise,
 }
-
+/// What is called Exercise here can be either 
+///  - Exercises given for a lesson
+///  - The content of a specific lesson
 class Exercise {
   int uid;
-  int parentLesson;
+
+  /// The ID of the [Lesson] that
+  ///  - The exercise was given on (if type == [ExerciseType.exercise])
+  ///  - The lesson content refers to (if type == [ExerciseType.lessonContent])
+  ///     Is null if the lesson is outside of the range provided by the API
+  ///     (+7 and -7 Days)
+  int? parentLesson;
+
+  /// The ID of the [Lesson] that the exercise is due for (if type == [ExerciseType.exercise])
+  /// It is null if
+  ///  - type == [ExerciseType.lessonContent]
+  ///  - The lesson is outside of the range provided by the API (+7 and -7 Days)
   int? lessonFor;
   ExerciseType type;
+
+  /// The Date that
+  ///  - The exercise was given on (if type == [ExerciseType.exercise])
+  ///  - The lesson content refers to (if type == [ExerciseType.lessonContent])
+  /// It is useful if the lesson is outside of the range provided by the API
+  /// (+7 and -7 Days)
   DateTime date;
+
+  /// The Date that the exercise was is due for (if type == [ExerciseType.exercise])
+  /// Is null if type == [ExerciseType.lessonContent]
+  /// It is useful if the lesson is outside of the range provided by the API
+  /// (+7 and -7 Days)
   DateTime? dateFor;
   String title;
   String htmlContent;
@@ -20,13 +63,14 @@ class Exercise {
       this.htmlContent, this.done,
       [this.lessonFor, this.dateFor]);
 
+  /// Construct an [Exercise] from the result of a database query
   static Exercise _parse(Map<String, Object?> result) {
     return Exercise(
         result['UID'] as int,
         result['ParentLesson'] as int,
         result['Type'] as String == 'Cours'
             ? ExerciseType.lessonContent
-            : ExerciseType.workToDo,
+            : ExerciseType.exercise,
         DateTime.fromMillisecondsSinceEpoch(result['ParentDate'] as int),
         result['Title'] as String,
         result['HTMLContent'] as String,
@@ -35,6 +79,7 @@ class Exercise {
         DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
   }
 
+  /// Get the [Exercise]s by the parent [Lesson] ID
   static Future<List<Exercise>> fromParentLesson(
       int parentLesson, Database db) async {
     final List<Exercise> exercises = [];
@@ -46,6 +91,7 @@ class Exercise {
     return exercises;
   }
 
+  /// Get all [Exercise]s
   static Future<List<Exercise>> fetchAll(Database db) async {
     final List<Exercise> exercises = [];
     final results = await db.query('Exercises');
