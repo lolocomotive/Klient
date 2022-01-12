@@ -2,14 +2,13 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:kosmos_client/main.dart';
 
 class Client {
   static const String _appVersion = '3.7.14';
   static const String _serverURL =
       'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
-  late SharedPreferences _prefs;
   String? idEtablissement;
   String? idEleve;
 
@@ -40,8 +39,8 @@ class Client {
     if ((response.statusCode >= 200 && response.statusCode < 300) ||
         response.statusCode == 204) {
       var data = jsonDecode(response.body);
-      if(response.body.startsWith('[')){
-        data = jsonDecode('{"errmsg":null,"articles":'+response.body+'}');
+      if (response.body.startsWith('[')) {
+        data = jsonDecode('{"errmsg":null,"articles":' + response.body + '}');
       }
       if (data['errmsg'] != null) {
         throw Error();
@@ -55,20 +54,20 @@ class Client {
   }
 
   static Future<Client> login(
-      String username, String password, SharedPreferences prefs) async {
-    final res = await Client('', prefs)
+      String username, String password) async {
+    final res = await Client('')
         .request(Action.activate, params: [username, password]);
     if (res['success'] == true) {
-      return Client(res['authtoken'], prefs);
+      return Client(res['authtoken']);
     } else {
       throw Error();
     }
   }
 
-  Client(String token, SharedPreferences prefs) {
-    _prefs = prefs;
+  Client(String token) {
     _token = token;
-    _prefs.setString('token', _token);
+    Global.storage!.write(key: 'token', value: _token);
+    Global.token = _token;
   }
 }
 

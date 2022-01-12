@@ -6,17 +6,11 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../kdecole-api/database_manager.dart';
+import '../main.dart';
 import 'home.dart';
 import 'messages.dart';
 
 class Main extends StatefulWidget {
-  final Database _db;
-  final SharedPreferences _prefs;
-  late Client _client;
-
-  Main(this._db, this._prefs, {Key? key}) : super(key: key) {
-    _client = Client(_prefs.getString('token') as String, _prefs);
-  }
 
   @override
   State<Main> createState() => _MainState();
@@ -32,30 +26,30 @@ class _MainState extends State<Main> {
   Widget? _currentWidget;
 
   _updateMessages() {
-    DatabaseManager.fetchMessageData(widget._client, widget._db);
+    DatabaseManager.fetchMessageData();
   }
 
   _updateNews() {
-    DatabaseManager.fetchNewsData(widget._client, widget._db);
+    DatabaseManager.fetchNewsData();
   }
 
   _updateTimetable() {
-    DatabaseManager.fetchTimetable(widget._client, widget._db);
+    DatabaseManager.fetchTimetable();
   }
 
   _closeDB() {
-    widget._db.close();
+    Global.db!.close();
   }
 
   _clearDatabase() {
-    widget._db.delete('NewsArticles');
-    widget._db.delete('NewsAttachments');
-    widget._db.delete('Conversations');
-    widget._db.delete('Messages');
-    widget._db.delete('MessageAttachments');
-    widget._db.delete('Grades');
-    widget._db.delete('Lessons');
-    widget._db.delete('Exercises');
+    Global.db!.delete('NewsArticles');
+    Global.db!.delete('NewsAttachments');
+    Global.db!.delete('Conversations');
+    Global.db!.delete('Messages');
+    Global.db!.delete('MessageAttachments');
+    Global.db!.delete('Grades');
+    Global.db!.delete('Lessons');
+    Global.db!.delete('Exercises');
   }
 
   _changeScreen(String label, BuildContext context) {

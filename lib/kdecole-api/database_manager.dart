@@ -1,29 +1,31 @@
 import 'dart:io';
 
 import 'package:kosmos_client/kdecole-api/client.dart';
-import 'package:sqflite/sqflite.dart';
+
+import '../main.dart';
 
 class DatabaseManager {
-  static fetchMessageData(Client client, Database db) async {
-    final result = await client.request(Action.getConversations);
+  static fetchMessageData() async {
+    final result = await Global.client!.request(Action.getConversations);
     for (final conversation in result['communications']) {
-      db.insert('Conversations', {
+      Global.db!.insert('Conversations', {
         'ID': conversation['id'],
         'Subject': conversation['objet'],
         'Preview': conversation['premieresLignes'],
         'HasAttachment': (conversation['pieceJointe'] as bool) ? 1 : 0,
         'LastDate': (conversation['dateDernierMessage'])
       });
-      final messages = await client.request(Action.getConversationDetail,
+      final messages = await Global.client!.request(
+          Action.getConversationDetail,
           params: [(conversation['id'] as int).toString()]);
       for (final message in messages['participations']) {
-        db.insert('Messages', {
+        Global.db!.insert('Messages', {
           'ParentID': conversation['id'],
           'HTMLContent': message['corpsMessage'],
           'Author': message['redacteur']['libelle']
         });
         for (final attachment in message['pjs'] ?? []) {
-          db.insert('MessageAttachments', {
+          Global.db!.insert('MessageAttachments', {
             'ID': attachment['idRessource'],
             'ParentID': message['id'],
             'URL': attachment['url'],
@@ -34,13 +36,14 @@ class DatabaseManager {
     }
   }
 
-  static fetchNewsData(Client client, Database db) async {
-    final result = await client.request(Action.getNewsArticlesEtablissement,
-        params: [client.idEtablissement ?? '0']);
+  static fetchNewsData() async {
+    final result = await Global.client!.request(
+        Action.getNewsArticlesEtablissement,
+        params: [Global.client!.idEtablissement ?? '0']);
     for (final newsArticle in result['articles']) {
-      final articleDetails = await client
+      final articleDetails = await Global.client!
           .request(Action.getArticleDetails, params: [newsArticle['uid']]);
-      await db.insert('NewsArticles', {
+      await Global.db!.insert('NewsArticles', {
         'UID': newsArticle['uid'],
         'Type': articleDetails['type'],
         'Author': articleDetails['auteur'],
@@ -52,7 +55,7 @@ class DatabaseManager {
     }
   }
 
-  static int _lessonIDByTimestamp(
+  static int _lessonIdByTimestamp(
       int timestamp, Iterable<dynamic> listeJourCdt) {
     for (final day in listeJourCdt) {
       for (final lesson in day['listeSeances']) {
@@ -64,12 +67,12 @@ class DatabaseManager {
     return 0;
   }
 
-  static fetchTimetable(Client client, Database db) async {
-    final result = await client.request(Action.getTimeTableEleve,
-        params: [(client.idEleve ?? 0).toString()]);
+  static fetchTimetable() async {
+    final result = await Global.client!.request(Action.getTimeTableEleve,
+        params: [(Global.client!.idEleve ?? 0).toString()]);
     for (final day in result['listeJourCdt']) {
       for (final lesson in day['listeSeances']) {
-        db.insert('Lessons', {
+        Global.db!.insert('Lessons', {
           'ID': lesson['idSeance'],
           'LessonDate': lesson['hdeb'],
           'StartTime': lesson['heureDebut'],
@@ -83,17 +86,17 @@ class DatabaseManager {
 
         for (final exercise in lesson['aFaire'] ?? []) {
           final exerciseDetails =
-              await client.request(Action.getExerciseDetails, params: [
-            (client.idEleve ?? 0).toString(),
+              await Global.client!.request(Action.getExerciseDetails, params: [
+            (Global.client!.idEleve ?? 0).toString(),
             (lesson['idSeance']).toString(),
             (exercise['uid']).toString()
           ]);
-          db.insert('Exercises', {
+          Global.db!.insert('Exercises', {
             'Type': exercise['type'],
             'Title': exerciseDetails['titre'],
             'ID': exercise['uid'],
             'LessonFor':
-                _lessonIDByTimestamp(exercise['date'], result['listeJourCdt']),
+                _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
             'DateFor': exercise['date'],
             'ParentDate': lesson['hdeb'],
             'ParentLesson': lesson['idSeance'],
@@ -101,7 +104,7 @@ class DatabaseManager {
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            db.insert('MessageAttachments', {
+            Global.db!.insert('MessageAttachments', {
               'ID': attachment['idRessource'],
               'ParentID': exerciseDetails['uid'],
               'URL': attachment['url'],
@@ -111,12 +114,12 @@ class DatabaseManager {
         }
         for (final exercise in lesson['enSeance'] ?? []) {
           final exerciseDetails =
-              await client.request(Action.getExerciseDetails, params: [
-            (client.idEleve ?? 0).toString(),
+              await Global.client!.request(Action.getExerciseDetails, params: [
+            (Global.client!.idEleve ?? 0).toString(),
             (lesson['idSeance']).toString(),
             (exercise['uid']).toString()
           ]);
-          db.insert('Exercises', {
+          Global.db!.insert('Exercises', {
             'Type': 'Cours',
             'Title': exerciseDetails['titre'],
             'ID': exercise['uid'],
@@ -126,7 +129,7 @@ class DatabaseManager {
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            db.insert('MessageAttachments', {
+            Global.db!.insert('MessageAttachments', {
               'ID': attachment['idRessource'],
               'ParentID': exerciseDetails['uid'],
               'URL': attachment['url'],
@@ -135,14 +138,14 @@ class DatabaseManager {
           }
         }
         for (final exercise in lesson['aRendre'] ?? []) {
-          if ((await db.query('Exercises',
+          if ((await Global.db!.query('Exercises',
                   where: 'ID = ?', whereArgs: exercise['id']))
               .isEmpty) {
             continue;
           }
           final exerciseDetails =
-              await client.request(Action.getExerciseDetails, params: [
-            (client.idEleve ?? 0).toString(),
+              await Global.client!.request(Action.getExerciseDetails, params: [
+            (Global.client!.idEleve ?? 0).toString(),
             (lesson['idSeance']).toString(),
             (exercise['uid']).toString()
           ]);
@@ -150,7 +153,7 @@ class DatabaseManager {
               exercise['date'].toString() +
               ' exerciseDetails[date]: ' +
               exerciseDetails['date'].toString());
-          db.insert('Exercises', {
+          Global.db!.insert('Exercises', {
             'Type': exercise['type'],
             'Title': exerciseDetails['titre'],
             'ID': exercise['uid'],
@@ -158,12 +161,12 @@ class DatabaseManager {
             'DateFor': exerciseDetails['date'],
             'ParentDate': exercise['date'],
             'ParentLesson':
-                _lessonIDByTimestamp(exercise['date'], result['listeJourCdt']),
+                _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
             'HTMLContent': exerciseDetails['codeHTML'],
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            db.insert('MessageAttachments', {
+            Global.db!.insert('MessageAttachments', {
               'ID': attachment['idRessource'],
               'ParentID': exerciseDetails['uid'],
               'URL': attachment['url'],

@@ -1,22 +1,29 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'kdecole-api/client.dart';
 import 'screens/multiview.dart';
-
+class Global{
+  static FlutterSecureStorage? storage;
+  static Database? db;
+  static String? token;
+  static Client? client;
+}
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final prefs = await SharedPreferences.getInstance();
   final dbDir = await getTemporaryDirectory();
   final dbPath = dbDir.path + '/kdecole.db';
   await deleteDatabase(dbPath);
   stdout.writeln('Database URL: ' + dbPath);
-  final db = await openDatabase(dbPath);
-  final queryResult = await db.query('sqlite_master');
+  Global.storage = const FlutterSecureStorage();
+  Global.token = await Global.storage!.read(key: 'token');
+  Global.db = await openDatabase(dbPath);
+  final queryResult = await Global.db!.query('sqlite_master');
   final tables = [
     'NewsArticles',
     'NewsAttachments',
@@ -34,7 +41,7 @@ void main() async {
   }
   if (tables.isNotEmpty) {
     stdout.writeln('Initializing database');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS NewsArticles(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       UID TEXT UNIQUE NOT NULL,
@@ -46,7 +53,7 @@ void main() async {
       URL TEXT NOT NULL
     );''');
 
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS NewsAttachments(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       parentUID TEXT NOT NULL,
@@ -54,7 +61,7 @@ void main() async {
       foreign KEY(parentUID) REFERENCES NewsArticles(UID)
     );''');
 
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Conversations(
       ID INTEGER PRIMARY KEY NOT NULL,
       Subject TEXT NOT NULL,
@@ -62,7 +69,7 @@ void main() async {
       HasAttachment BOOLEAN NOT NULL,
       LastDate INTEGER NOT NULL
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Messages(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       ParentID INTEGER NOT NULL,
@@ -70,7 +77,7 @@ void main() async {
       Author TEXT NOT NULL,
       FOREIGN KEY (ParentID) REFERENCES Conversations(ID)
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS MessageAttachments(
       ID INTEGER PRIMARY KEY NOT NULL,
       ParentID INTEGER NOT NULL,
@@ -78,7 +85,7 @@ void main() async {
       Name TEXT NOT NULL,
       FOREIGN KEY (ParentID) references Messages(ID)
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Grades(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       Subject TEXT NOT NULL,
@@ -86,7 +93,7 @@ void main() async {
       Grade TEXT NOT NULL,
       Description TEXT NOT NULL
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Lessons(
       ID INTEGER PRIMARY KEY NOT NULL,
       LessonDate INTEGER NOT NULL,
@@ -98,7 +105,7 @@ void main() async {
       IsModified BOOLEAN NOT NULL,
       ModificationMessage TEXT
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Exercises(
       ID INTEGER PRIMARY KEY NOT NULL,
       ParentLesson INTEGER NOT NULL,
@@ -112,7 +119,7 @@ void main() async {
       foreign KEY (ParentLesson) REFERENCES Lessons(ID),
       FOREIGN KEY (LessonFor) REFERENCES Lessons(ID)
     );''');
-    await db.execute('''
+    await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS ExerciseAttachments(
       ID INTEGER PRIMARY KEY NOT NULL,
       ParentID INTEGER NOT NULL,
@@ -122,28 +129,21 @@ void main() async {
     );''');
     stdout.writeln('Done creating tables');
   }
-  runApp(KosmosApp(prefs, db));
+  runApp(KosmosApp());
 }
 
 class KosmosApp extends StatefulWidget {
-  final SharedPreferences _prefs;
-  final Database _db;
-
-  const KosmosApp(this._prefs, this._db, {Key? key}) : super(key: key);
+  const KosmosApp({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return KosmosState(_prefs, _db);
+    return KosmosState();
   }
 }
 
 class KosmosState extends State {
-  KosmosState(this._prefs, this._db);
-
   final title = 'Kosmos client';
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
-  final SharedPreferences _prefs;
-  final Database _db;
   final _loginFormKey = GlobalKey<FormState>();
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
@@ -152,10 +152,10 @@ class KosmosState extends State {
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
       try {
-        final client = await Client.login(_unameController.text,
-            _pwdController.text, await SharedPreferences.getInstance());
+        Global.client = await Client.login(_unameController.text,
+            _pwdController.text);
         setState(() {
-          _mainWidget = Main(_db, _prefs);
+          _mainWidget = Main();
         });
       } catch (e) {
         _messengerKey.currentState!.showSnackBar(
@@ -173,13 +173,12 @@ class KosmosState extends State {
   }
 
   @override
-  Widget build(BuildContext context) {
-    _mainWidget = Main(_db, _prefs);
-    final token = _prefs.getString('token');
-    if (token == null || token == '') {
+  Widget build(BuildContext context){
+    _mainWidget = Main();
+    if (Global.token == null || Global.token == '') {
       _mainWidget = loginScreen();
     } else {
-      stdout.writeln("Token:" + _prefs.getString('token')!);
+      stdout.writeln("Token:" + Global.token!);
     }
 
     return MaterialApp(

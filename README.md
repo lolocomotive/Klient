@@ -16,4 +16,5 @@ Alternative mobile client for ljr ent made with flutter.
   - Timetable day view
   - Timetable lesson view
 - Automatically update database correctly
+- Encrypt database  
 - Notifications

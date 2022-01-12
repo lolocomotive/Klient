@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../kdecole-api/client.dart';
+import '../main.dart';
 
 class Login extends StatefulWidget {
   Login(this._messengerKey, {Key? key}) : super(key: key);
@@ -24,11 +25,9 @@ class LoginState extends State<Login> {
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
       try {
-        final client = await Client.login(_unameController.text,
-            _pwdController.text, await SharedPreferences.getInstance());
-        setState(() {
-
-        });
+        Global.client = await Client.login(_unameController.text,
+            _pwdController.text);
+        setState(() {});
       } catch (e) {
         _messengerKey.currentState!.showSnackBar(
             const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
