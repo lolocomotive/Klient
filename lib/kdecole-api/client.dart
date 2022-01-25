@@ -22,6 +22,9 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:kosmos_client/main.dart';
+
+import 'conversation.dart';
+
 /// Utility class making it easier to communicate with the API
 class Client {
   static const String _appVersion = '3.7.14';
@@ -73,11 +76,17 @@ class Client {
     }
   }
 
+  markConversationRead(Conversation conv) {
+    conv.read = true;
+    request(Action.markConversationRead, params: [conv.id.toString()]);
+    Global.db!.update('Conversations', {'Read': 1},
+        where: 'ID = ?', whereArgs: [conv.id.toString()]);
+  }
+
   /// Log in using username and activation code provided by the ENT
-  static Future<Client> login(
-      String username, String password) async {
-    final res = await Client('')
-        .request(Action.activate, params: [username, password]);
+  static Future<Client> login(String username, String password) async {
+    final res =
+        await Client('').request(Action.activate, params: [username, password]);
     if (res['success'] == true) {
       return Client(res['authtoken']);
     } else {
@@ -113,4 +122,8 @@ class Action {
 
   //params ideleve/idseance/idexercise/
   static final Action getExerciseDetails = Action('contenuActivite/ideleve/');
+
+  //param idconversations
+  static final Action markConversationRead =
+      Action('messagerie/communication/lu/', HTTPRequestMethod.put);
 }

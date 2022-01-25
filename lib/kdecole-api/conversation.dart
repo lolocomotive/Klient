@@ -17,8 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:sqflite/sqflite.dart';
+import 'dart:io';
+import 'dart:math';
 
+import 'package:flutter/material.dart';
+
+import '../main.dart';
 import 'message.dart';
 
 class Conversation {
@@ -28,29 +32,152 @@ class Conversation {
   bool hasAttachment;
   DateTime lastDate;
   List<Message> messages;
+  String lastAuthor;
+  String firstAuthor;
+  bool read;
+  Widget? customPreview;
+  Widget? customSubject;
 
-  Conversation(this.id, this.subject, this.preview, this.hasAttachment,
-      this.lastDate, this.messages);
+  Conversation(
+      this.id,
+      this.subject,
+      this.preview,
+      this.hasAttachment,
+      this.lastDate,
+      this.messages,
+      this.read,
+      this.lastAuthor,
+      this.firstAuthor,
+      [this.customPreview,
+      this.customSubject]);
 
-  static Future<List<Conversation>> fetchAll(Database db,
-      {int? offset, int? limit, getMessages = false}) async {
+  /// DOES NOT return messages
+  static Future<List<Conversation>> fetchAll({int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
     final results =
-        await db.query('Conversation', limit: limit, offset: offset);
+        await Global.db!.query('Conversations', limit: limit, offset: offset);
     for (final result in results) {
       List<Message> messages = [];
-      if (getMessages) {
-        messages = await Message.fromConversationID(result['ID'] as int, db);
-      }
-      conversations.add(Conversation(
+      conversations.add(
+        Conversation(
           result['ID'] as int,
           result['Subject'] as String,
           result['Preview'] as String,
-          result['HasAttachment'] as bool,
-          DateTime.fromMillisecondsSinceEpoch(
-              (result['LastDate'] as int)),
-          messages));
+          result['HasAttachment'] as int == 1 ? true : false,
+          DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
+          messages,
+          result['Read'] as int == 1 ? true : false,
+          result['LastAuthor'] as String,
+          result['FirstAuthor'] as String,
+        ),
+      );
     }
+    conversations.sort((a, b) => b.lastDate.compareTo(a.lastDate));
     return conversations;
+  }
+
+  static Widget highlight(String query, String content,
+      {Color? color, Color? background, double? fontSize}) {
+    //Using regex te replace all matches with a marker and split by a marker
+    //because dart doesn't allow to split ignoring case
+    //Using <!-- REPLACE ME --> because all HTML has been removed
+    const String magic = '<!-- REPLACE ME -->';
+    List<String> split = content
+        .replaceAll(RegExp(RegExp.escape(query), caseSensitive: false), magic)
+        .split(magic);
+
+    //Can't use query here because we want to keep the original case
+    List<String> replaceWith =
+        RegExp(RegExp.escape(query), caseSensitive: false)
+            .allMatches(content)
+            .map((e) => e.group(0)!)
+            .toList();
+    List<InlineSpan> children = [];
+    for (int i = 0; i < split.length; i++) {
+      if (i == split.length - 1) break;
+      children.add(TextSpan(
+          text: split[i].length > 75
+              ? '...' + split[i].substring(max(split[i].length - 75, 0))
+              : i == 0
+                  ? split[i]
+                  : ''));
+      children.add(TextSpan(
+          text: replaceWith[i],
+          style: TextStyle(
+              backgroundColor:
+                  background ?? const Color.fromARGB(70, 255, 255, 0))));
+      children.add(TextSpan(
+          text: split[i + 1].substring(0, min(75, split[i + 1].length)) +
+              (split[i + 1].length > 75 ? '...\n' : '')));
+    }
+    return RichText(
+      text: TextSpan(
+        children: children,
+        style: TextStyle(color: color ?? Colors.black45, fontSize: fontSize),
+      ),
+    );
+  }
+
+  ///Only searches by subject
+  static Future<List<Conversation>> search(String query,
+      {int? offset, int? limit}) async {
+    final List<Conversation> conversations = [];
+    String likeClause =
+        "(upper(Subject) like upper('%$query%')) or (FullMessageContents like upper('%$query%'))";
+    String orderClause =
+        "(upper(Subject) like upper('%$query%')) + (upper(FullMessageContents) like upper('%$query%'))";
+    final results = await Global.db!.query('Conversations',
+        where: likeClause, orderBy: orderClause, limit: limit, offset: offset);
+    for (final result in results) {
+      List<Message> messages = [];
+      String fullMessageContents = result['FullMessageContents'] as String;
+
+      //TODO separate individual messages from each other
+
+      conversations.add(
+        Conversation(
+          result['ID'] as int,
+          result['Subject'] as String,
+          result['Preview'] as String,
+          result['HasAttachment'] as int == 1 ? true : false,
+          DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
+          messages,
+          result['Read'] as int == 1 ? true : false,
+          result['LastAuthor'] as String,
+          result['FirstAuthor'] as String,
+          fullMessageContents.toUpperCase().contains(query.toUpperCase())
+              ? highlight(query, fullMessageContents)
+              : null,
+          (result['Subject'] as String)
+                  .toUpperCase()
+                  .contains(query.toUpperCase())
+              ? highlight(query, result['Subject'] as String,
+                  color: Colors.black, fontSize: 14)
+              : null,
+        ),
+      );
+    }
+    stdout.writeln(conversations);
+    return conversations;
+  }
+
+  static Future<Conversation?> byID(int id) async {
+    final results = await Global.db!
+        .query('Conversations', where: 'ID = ?', whereArgs: [id]);
+    for (final result in results) {
+      List<Message> messages = [];
+      messages = await Message.fromConversationID(result['ID'] as int);
+      return Conversation(
+        result['ID'] as int,
+        result['Subject'] as String,
+        result['Preview'] as String,
+        result['HasAttachment'] as int == 1 ? true : false,
+        DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
+        messages,
+        result['Read'] as int == 1 ? true : false,
+        result['LastAuthor'] as String,
+        result['FirstAuthor'] as String,
+      );
+    }
   }
 }

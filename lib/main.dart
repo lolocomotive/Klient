@@ -2,23 +2,81 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kosmos_client/screens/messages.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'kdecole-api/client.dart';
 import 'screens/multiview.dart';
-class Global{
+
+class Global {
   static FlutterSecureStorage? storage;
   static Database? db;
   static String? token;
   static Client? client;
+  static int? currentConversation;
+  static String? currentConversationSubject;
+  static MessagesState? messagesState;
+  static bool loadingMessages = false;
+  static String? searchQuery;
+  static MessageSearchResultsState? messageSearchSuggestionState;
+
+  static String monthToString(int month) {
+    switch (month) {
+      case 1:
+        return 'Jan.';
+      case 2:
+        return 'Fév.';
+      case 3:
+        return 'Mars';
+      case 4:
+        return 'Avril';
+      case 5:
+        return 'Mai';
+      case 6:
+        return 'Juin';
+      case 7:
+        return 'Juil.';
+      case 8:
+        return 'Août';
+      case 9:
+        return 'Sept.';
+      case 10:
+        return 'Oct.';
+      case 11:
+        return 'Nov.';
+      case 12:
+        return 'Déc.';
+      default:
+        throw Error();
+    }
+  }
+
+  static String dateToString(DateTime date) {
+    final DateTime now = DateTime.now();
+    if (date.day == now.day &&
+        date.month == now.month &&
+        date.year == now.year) {
+      return date.hour.toString() +
+          ':' +
+          date.second.toString().padLeft(2, '0');
+    } else if (date.year == now.year) {
+      return date.day.toString() + ' ' + monthToString(date.month);
+    } else {
+      return date.day.toString() +
+          '/' +
+          date.month.toString() +
+          '/' +
+          date.year.toString();
+    }
+  }
 }
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dbDir = await getTemporaryDirectory();
   final dbPath = dbDir.path + '/kdecole.db';
-  await deleteDatabase(dbPath);
+  //await deleteDatabase(dbPath);
   stdout.writeln('Database URL: ' + dbPath);
   Global.storage = const FlutterSecureStorage();
   Global.token = await Global.storage!.read(key: 'token');
@@ -32,7 +90,7 @@ void main() async {
     'MessageAttachments',
     'Grades',
     'Lessons',
-    'Exercises'
+    'Exercises',
   ];
   for (final el in queryResult) {
     if (tables.contains(el['name'])) {
@@ -40,6 +98,9 @@ void main() async {
     }
   }
   if (tables.isNotEmpty) {
+    await deleteDatabase(dbPath);
+    Global.db = await openDatabase(dbPath);
+
     stdout.writeln('Initializing database');
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS NewsArticles(
@@ -60,14 +121,17 @@ void main() async {
       Name TEXT NOT NULL,
       foreign KEY(parentUID) REFERENCES NewsArticles(UID)
     );''');
-
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Conversations(
       ID INTEGER PRIMARY KEY NOT NULL,
       Subject TEXT NOT NULL,
       Preview TEXT NOT NULL,
       HasAttachment BOOLEAN NOT NULL,
-      LastDate INTEGER NOT NULL
+      Read BOOLEAN NOT NULL,
+      LastDate INTEGER NOT NULL,
+      LastAuthor STRING NOT NULL,
+      FirstAuthor STRING NOT NULL,
+      FullMessageContents STRING NOT NULL
     );''');
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Messages(
@@ -75,6 +139,7 @@ void main() async {
       ParentID INTEGER NOT NULL,
       HTMLContent TEXT NOT NULL,
       Author TEXT NOT NULL,
+      DateSent INT NOT NULL,
       FOREIGN KEY (ParentID) REFERENCES Conversations(ID)
     );''');
     await Global.db!.execute('''
@@ -152,10 +217,10 @@ class KosmosState extends State {
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
       try {
-        Global.client = await Client.login(_unameController.text,
-            _pwdController.text);
+        Global.client =
+            await Client.login(_unameController.text, _pwdController.text);
         setState(() {
-          _mainWidget = Main();
+          _mainWidget = const Main();
         });
       } catch (e) {
         _messengerKey.currentState!.showSnackBar(
@@ -173,12 +238,13 @@ class KosmosState extends State {
   }
 
   @override
-  Widget build(BuildContext context){
-    _mainWidget = Main();
+  Widget build(BuildContext context) {
+    _mainWidget = const Main();
     if (Global.token == null || Global.token == '') {
       _mainWidget = loginScreen();
     } else {
       stdout.writeln("Token:" + Global.token!);
+      Global.client = Client(Global.token!);
     }
 
     return MaterialApp(
@@ -193,9 +259,9 @@ class KosmosState extends State {
 
   Widget loginScreen() {
     return Scaffold(
-      appBar: AppBar(title: Text('Connexion')),
+      appBar: AppBar(title: const Text('Connexion')),
       body: Container(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _loginFormKey,
           child: Column(
@@ -224,7 +290,8 @@ class KosmosState extends State {
                 autocorrect: false,
                 obscureText: true,
               ),
-              ElevatedButton(onPressed: _login, child: Text('Se connecter'))
+              ElevatedButton(
+                  onPressed: _login, child: const Text('Se connecter'))
             ],
           ),
         ),

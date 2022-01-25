@@ -18,35 +18,41 @@
  */
 
 import 'package:kosmos_client/kdecole-api/conversation.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:kosmos_client/main.dart';
 
 import 'message_attachment.dart';
+
 /// An message that is linked to a [Conversation] (only it's id to avoid circular
 /// references though)
 class Message {
   int id;
+
   /// The ID of the corresponding conversation
   int parentID;
   String htmlContent;
   String author;
+  DateTime date;
   List<MessageAttachment> attachments;
 
-  Message(
-      this.id, this.parentID, this.htmlContent, this.author, this.attachments);
+  Message(this.id, this.parentID, this.htmlContent, this.author, this.date,
+      this.attachments);
 
   /// Get the messages of a specific [Conversation]
-  static Future<List<Message>> fromConversationID(
-      int conversationID, Database db) async {
+  static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
-    final results = await db
-        .query('Messages', where: 'ParentID = ?', whereArgs: [conversationID]);
+    final results = await Global.db!
+        .query('Messages', where: 'ParentID = ' + conversationID.toString());
     for (final result in results) {
-      messages.add(Message(
+      messages.add(
+        Message(
           result['ID'] as int,
           conversationID,
           result['HTMLContent'] as String,
-          result['author'] as String,
-          await MessageAttachment.fromMessageID(result['ID'] as int, db)));
+          result['Author'] as String,
+          DateTime.fromMillisecondsSinceEpoch(result['DateSent'] as int),
+          await MessageAttachment.fromMessageID(conversationID),
+        ),
+      );
     }
     return messages;
   }

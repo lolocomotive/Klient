@@ -23,7 +23,7 @@ import '../kdecole-api/client.dart';
 import '../main.dart';
 
 class Login extends StatefulWidget {
-  Login(this._messengerKey, {Key? key}) : super(key: key);
+  const Login(this._messengerKey, {Key? key}) : super(key: key);
   final GlobalKey<ScaffoldMessengerState> _messengerKey;
 
   @override
@@ -64,9 +64,9 @@ class LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Connexion')),
+      appBar: AppBar(title: const Text('Connexion')),
       body: Container(
-        padding: EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20.0),
         child: Form(
           key: _loginFormKey,
           child: Column(
@@ -95,7 +95,7 @@ class LoginState extends State<Login> {
                 autocorrect: false,
                 obscureText: true,
               ),
-              ElevatedButton(onPressed: _login, child: Text('Se connecter'))
+              ElevatedButton(onPressed: _login, child: const Text('Se connecter'))
             ],
           ),
         ),

@@ -18,11 +18,8 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 import 'package:kosmos_client/widgets/user_info.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:sqflite/sqflite.dart';
 
 import '../kdecole-api/database_manager.dart';
 import '../main.dart';
@@ -113,11 +110,8 @@ class _MainState extends State<Main> {
           ],
         ),
       ),
-      appBar: AppBar(
-        title: Text(_currentLabel ?? 'Accueuil'),
-      ),
-      body: Container(
-          padding: EdgeInsets.all(10.0), child: _currentWidget ?? Home()),
+
+      body: _currentWidget ?? Home(),
     );
   }
 

@@ -26,36 +26,89 @@ import '../main.dart';
 
 /// Utility class that fetches data from the API and stores it inside the database
 class DatabaseManager {
+  static String _cleanupHTML(String html) {
+    String result = html
+        .replaceAll(RegExp('title=".*"'), '')
+        .replaceAll(RegExp('style=".*" type="cite"'), '')
+        .replaceAll(RegExp("<a.*Consulter le message dans l'ENT<\\/a><br>"), '')
+        .replaceAll('onclick="window.open(this.href);return false;"', '')
+        .replaceAll('&nbsp;', '')
+        .replaceAll('\r', '')
+        .replaceAll('\f', '')
+        .replaceAll('\n', '')
+        .replaceAll(RegExp("<p>\\s+<\\/p>"), '')
+        .replaceAll(RegExp("<div>\\s+<\\/div>"), '')
+        .replaceAll('<p class="notsupported"></p>', '')
+        .replaceAll(
+            '<div class="js-signature panel panel--full panel--margin-sm">', '')
+        .replaceAll('</div>', '')
+        .replaceAll('<div>', '<br>')
+        .replaceAll(
+            '<div class="detail-code" style="padding: 0; border: none;">', '');
+    return result;
+  }
+
   /// Download the 20 first Conversations, the associated messages and their attachments
   static fetchMessageData() async {
-    final result = await Global.client!.request(Action.getConversations);
-    for (final conversation in result['communications']) {
-      Global.db!.insert('Conversations', {
-        'ID': conversation['id'],
-        'Subject': conversation['objet'],
-        'Preview': conversation['premieresLignes'],
-        'HasAttachment': (conversation['pieceJointe'] as bool) ? 1 : 0,
-        'LastDate': (conversation['dateDernierMessage'])
-      });
-      final messages = await Global.client!.request(
-          Action.getConversationDetail,
-          params: [(conversation['id'] as int).toString()]);
-      for (final message in messages['participations']) {
-        Global.db!.insert('Messages', {
-          'ParentID': conversation['id'],
-          'HTMLContent': message['corpsMessage'],
-          'Author': message['redacteur']['libelle']
+    Global.loadingMessages = true;
+    int pgNumber = 0;
+    // TODO Keep all the read messages and download only new messages
+    // compare the last date of all conversation on one page and if it's the
+    // same just stop there. If the date differs download the whole conversation
+    // again since there's no other way to download messages anyways.
+    while (true) {
+      final result = await Global.client!.request(Action.getConversations,
+          params: [(pgNumber * 20).toString()]);
+      pgNumber++;
+      if (result['communications'].isEmpty) break;
+      for (final conversation in result['communications']) {
+        final batch = Global.db!.batch();
+        batch.insert('Conversations', {
+          'ID': conversation['id'],
+          'Subject': conversation['objet'],
+          'Preview': conversation['premieresLignes'],
+          'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
+          'LastDate': (conversation['dateDernierMessage']),
+          'Read': conversation['etatLecture'] as bool ? 1 : 0,
+          'LastAuthor': conversation['expediteurActuel']['libelle'],
+          'FirstAuthor': conversation['expediteurInitial']['libelle'],
+          'FullMessageContents': '',
         });
-        for (final attachment in message['pjs'] ?? []) {
-          Global.db!.insert('MessageAttachments', {
-            'ID': attachment['idRessource'],
-            'ParentID': message['id'],
-            'URL': attachment['url'],
-            'Name': attachment['name']
+        String messageContents = '';
+        final messages = await Global.client!.request(
+            Action.getConversationDetail,
+            params: [(conversation['id'] as int).toString()]);
+        for (final message in messages['participations']) {
+          batch.insert('Messages', {
+            'ParentID': conversation['id'],
+            'HTMLContent': _cleanupHTML(message['corpsMessage']),
+            'Author': message['redacteur']['libelle'],
+            'DateSent': message['dateEnvoi'],
           });
+          messageContents += _cleanupHTML(message['corpsMessage']) +
+              '\n'.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
+          for (final attachment in message['pjs'] ?? []) {
+            batch.insert('MessageAttachments', {
+              'ParentID': message['id'],
+              'URL': attachment['url'],
+              'Name': attachment['name']
+            });
+          }
+          batch.update(
+              'Conversations', {'FullMessageContents': messageContents},
+              where: 'ID = ' + conversation['id'].toString());
         }
+        await batch.commit();
+        // Reload messages in the messages view if it is opened
+        // TODO check if it is actually opened
+
+        if (Global.messagesState == null) {
+          continue;
+        }
+        Global.messagesState!.reloadFromDB();
       }
     }
+    Global.loadingMessages = false;
   }
 
   /// Download all the available NewsArticles, and their associated attachments
@@ -72,7 +125,7 @@ class DatabaseManager {
         'Author': articleDetails['auteur'],
         'Title': articleDetails['titre'],
         'PublishingDate': articleDetails['date'],
-        'HTMLContent': articleDetails['codeHTML'],
+        'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
         'URL': articleDetails['url'],
       });
     }
@@ -125,7 +178,7 @@ class DatabaseManager {
             'DateFor': exercise['date'],
             'ParentDate': lesson['hdeb'],
             'ParentLesson': lesson['idSeance'],
-            'HTMLContent': exerciseDetails['codeHTML'],
+            'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
@@ -150,7 +203,7 @@ class DatabaseManager {
             'ID': exercise['uid'],
             'ParentDate': exercise['date'],
             'ParentLesson': lesson['idSeance'],
-            'HTMLContent': exerciseDetails['codeHTML'],
+            'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
@@ -187,7 +240,7 @@ class DatabaseManager {
             'ParentDate': exercise['date'],
             'ParentLesson':
                 _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
-            'HTMLContent': exerciseDetails['codeHTML'],
+            'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
