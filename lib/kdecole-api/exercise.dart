@@ -66,7 +66,7 @@ class Exercise {
   /// Construct an [Exercise] from the result of a database query
   static Exercise _parse(Map<String, Object?> result) {
     return Exercise(
-        result['UID'] as int,
+        result['ID'] as int,
         result['ParentLesson'] as int,
         result['Type'] as String == 'Cours'
             ? ExerciseType.lessonContent
@@ -75,8 +75,8 @@ class Exercise {
         result['Title'] as String,
         result['HTMLContent'] as String,
         result['Done'] == 1 ? true : false,
-        result['LessonFor'] as int,
-        DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
+        result['LessonFor'] as int?,
+        (result['DateFor'] as int?) == null ? null : DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
   }
 
   /// Get the [Exercise]s by the parent [Lesson] ID

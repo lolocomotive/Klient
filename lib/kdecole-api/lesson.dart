@@ -18,15 +18,19 @@
  */
 
 import 'package:kosmos_client/kdecole-api/exercise.dart';
-import 'package:sqflite/sqflite.dart';
+
+import '../main.dart';
 
 class Lesson {
   int id;
   DateTime date;
+
   /// Start time of the lesson formatted  HH:MM
   String startTime;
+
   /// End time of the lesson formatted HH:MM
   String endTime;
+
   /// Contains the room and also the group (304 - 1ALLG1 for example)
   String room;
   String title;
@@ -38,19 +42,19 @@ class Lesson {
       this.title, this.exercises, this.isModified,
       [this.modificationMessage]);
 
-  static Future<List<Lesson>> fetchAll(Database db) async {
+  static Future<List<Lesson>> fetchAll() async {
     final List<Lesson> lessons = [];
-    final results = await db.query('Lessons');
+    final results = await Global.db!.query('Lessons',orderBy: 'LessonDate');
     for (final result in results) {
       lessons.add(Lesson(
           result['ID'] as int,
-          DateTime.fromMillisecondsSinceEpoch((result['date'] as int)),
-          result['startTime'] as String,
+          DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
+          result['StartTime'] as String,
           result['EndTime'] as String,
           result['Room'] as String,
-          result['Title'] as String,
-          await Exercise.fromParentLesson(result['ID'] as int, db),
-          result['IsModified'] as bool,
+          result['Subject'] as String,
+          await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
+          result['IsModified'] as int == 1,
           result['ModificationMessage'] as String?));
     }
     return lessons;

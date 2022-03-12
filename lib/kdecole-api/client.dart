@@ -20,6 +20,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kosmos_client/main.dart';
 
@@ -31,8 +32,10 @@ class Client {
   static const String _serverURL =
       'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
+  late BuildContext? _ctx;
   String? idEtablissement;
   String? idEleve;
+
 
   /// Make a request to the API
   Future<Map<String, dynamic>> request(Action action,
@@ -70,6 +73,10 @@ class Client {
       }
       return data;
     } else {
+      if(response.statusCode == 403){
+        //TODO show message and log user out
+
+      }
       stdout.writeln('Error!');
       stdout.writeln(response.body);
       throw Error();
@@ -88,14 +95,16 @@ class Client {
     final res =
         await Client('').request(Action.activate, params: [username, password]);
     if (res['success'] == true) {
+
       return Client(res['authtoken']);
     } else {
       throw Error();
     }
   }
-
-  Client(String token) {
+/// the build context is for showing an error notification
+  Client(String token,[BuildContext? ctx]) {
     _token = token;
+    _ctx = ctx;
     Global.storage!.write(key: 'token', value: _token);
     Global.token = _token;
   }

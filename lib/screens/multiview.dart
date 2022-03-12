@@ -30,14 +30,17 @@ class Main extends StatefulWidget {
   const Main({Key? key}) : super(key: key);
 
   @override
-  State<Main> createState() => _MainState();
+  State<Main> createState() => MainState();
 }
 
-class _MainState extends State<Main> {
+class MainState extends State<Main> {
   static const _homeLabel = 'Accueuil';
   static const _messagesLabel = 'Messagerie';
   static const _timetableLabel = 'Emploi du temps';
   static const _debugLabel = 'Debug';
+
+  MainState() {
+  }
 
   String? _currentLabel;
   Widget? _currentWidget;
@@ -98,11 +101,15 @@ class _MainState extends State<Main> {
 
   @override
   Widget build(BuildContext context) {
+    Global.mainState = this;
+if(_currentWidget is! Messages){
+  Global.fab = null;
+}
     return Scaffold(
       drawer: Drawer(
         child: Column(
           children: [
-            Container(child: UserInfo()),
+            UserInfo(),
             drawerLink(_homeLabel),
             drawerLink(_messagesLabel),
             drawerLink(_timetableLabel),
@@ -110,8 +117,8 @@ class _MainState extends State<Main> {
           ],
         ),
       ),
-
       body: _currentWidget ?? Home(),
+      floatingActionButton: Global.fab,
     );
   }
 

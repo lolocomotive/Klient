@@ -20,6 +20,8 @@ class Global {
   static bool loadingMessages = false;
   static String? searchQuery;
   static MessageSearchResultsState? messageSearchSuggestionState;
+  static Widget? fab;
+  static MainState? mainState;
 
   static String monthToString(int month) {
     switch (month) {
@@ -181,7 +183,7 @@ void main() async {
       Title TEXT NOT NULL,
       HTMLContent TEXT NOT NULL,
       Done BOOLEAN NOT NULL,
-      foreign KEY (ParentLesson) REFERENCES Lessons(ID),
+      FOREIGN KEY (ParentLesson) REFERENCES Lessons(ID),
       FOREIGN KEY (LessonFor) REFERENCES Lessons(ID)
     );''');
     await Global.db!.execute('''

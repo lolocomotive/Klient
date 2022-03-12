@@ -23,6 +23,7 @@ import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 
 import '../main.dart';
+import 'conversation.dart';
 
 /// Utility class that fetches data from the API and stores it inside the database
 class DatabaseManager {
@@ -48,20 +49,35 @@ class DatabaseManager {
     return result;
   }
 
-  /// Download the 20 first Conversations, the associated messages and their attachments
+  /// Download/update, the associated messages and their attachments
   static fetchMessageData() async {
     Global.loadingMessages = true;
     int pgNumber = 0;
-    // TODO Keep all the read messages and download only new messages
-    // compare the last date of all conversation on one page and if it's the
-    // same just stop there. If the date differs download the whole conversation
-    // again since there's no other way to download messages anyways.
+
     while (true) {
-      final result = await Global.client!.request(Action.getConversations,
-          params: [(pgNumber * 20).toString()]);
+      final result = await Global.client!.request(
+        Action.getConversations,
+        params: [(pgNumber * 20).toString()],
+      );
       pgNumber++;
+      var modified = false;
       if (result['communications'].isEmpty) break;
       for (final conversation in result['communications']) {
+        final conv = await Conversation.byID(conversation['id']);
+        if (conv != null) {
+          if (conv.lastDate ==
+              DateTime.fromMillisecondsSinceEpoch(
+                  conversation['dateDernierMessage'])) {
+            continue;
+          }
+          Global.db!.delete('Conversations',
+              where: 'ID = ?', whereArgs: [conversation['id']]);
+          Global.db!.delete('Messages',
+              where: 'ParentID = ?', whereArgs: [conversation['id']]);
+          Global.db!.delete('MessageAttachments',
+              where: 'ParentID = ?', whereArgs: [conversation['id']]);
+        }
+        modified = true;
         final batch = Global.db!.batch();
         batch.insert('Conversations', {
           'ID': conversation['id'],
@@ -85,8 +101,8 @@ class DatabaseManager {
             'Author': message['redacteur']['libelle'],
             'DateSent': message['dateEnvoi'],
           });
-          messageContents += _cleanupHTML(message['corpsMessage']) +
-              '\n'.replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
+          messageContents += (_cleanupHTML(message['corpsMessage']) + '\n')
+              .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
           for (final attachment in message['pjs'] ?? []) {
             batch.insert('MessageAttachments', {
               'ParentID': message['id'],
@@ -100,12 +116,14 @@ class DatabaseManager {
         }
         await batch.commit();
         // Reload messages in the messages view if it is opened
-        // TODO check if it is actually opened
 
         if (Global.messagesState == null) {
           continue;
         }
         Global.messagesState!.reloadFromDB();
+      }
+      if (!modified) {
+        break;
       }
     }
     Global.loadingMessages = false;
@@ -182,9 +200,9 @@ class DatabaseManager {
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            Global.db!.insert('MessageAttachments', {
+            Global.db!.insert('ExerciseAttachments', {
               'ID': attachment['idRessource'],
-              'ParentID': exerciseDetails['uid'],
+              'ParentID': exercise['uid'],
               'URL': attachment['url'],
               'Name': attachment['name']
             });
@@ -207,9 +225,9 @@ class DatabaseManager {
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            Global.db!.insert('MessageAttachments', {
+            Global.db!.insert('ExerciseAttachments', {
               'ID': attachment['idRessource'],
-              'ParentID': exerciseDetails['uid'],
+              'ParentID': exercise['uid'],
               'URL': attachment['url'],
               'Name': attachment['name']
             });
@@ -244,9 +262,9 @@ class DatabaseManager {
             'Done': exerciseDetails['flagRealise'] ? 1 : 0,
           });
           for (final attachment in exerciseDetails['pjs'] ?? []) {
-            Global.db!.insert('MessageAttachments', {
+            Global.db!.insert('ExerciseAttachments', {
               'ID': attachment['idRessource'],
-              'ParentID': exerciseDetails['uid'],
+              'ParentID': exercise['uid'],
               'URL': attachment['url'],
               'Name': attachment['name']
             });
