@@ -23,7 +23,8 @@ enum ExerciseType {
   lessonContent,
   exercise,
 }
-/// What is called Exercise here can be either 
+
+/// What is called Exercise here can be either
 ///  - Exercises given for a lesson
 ///  - The content of a specific lesson
 class Exercise {
@@ -76,7 +77,9 @@ class Exercise {
         result['HTMLContent'] as String,
         result['Done'] == 1 ? true : false,
         result['LessonFor'] as int?,
-        (result['DateFor'] as int?) == null ? null : DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
+        (result['DateFor'] as int?) == null
+            ? null
+            : DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
   }
 
   /// Get the [Exercise]s by the parent [Lesson] ID
@@ -84,7 +87,8 @@ class Exercise {
       int parentLesson, Database db) async {
     final List<Exercise> exercises = [];
     final results = await db.query('Exercises',
-        where: 'ParentLesson = ?', whereArgs: [parentLesson]);
+        where: 'ParentLesson = ? OR LessonFor = ?',
+        whereArgs: [parentLesson.toString(), parentLesson.toString()]);
     for (final result in results) {
       exercises.add(_parse(result));
     }

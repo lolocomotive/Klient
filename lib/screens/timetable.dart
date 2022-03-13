@@ -21,7 +21,11 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
+import 'package:intl/intl.dart';
+import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
+import 'package:morpheus/morpheus.dart';
 
 import '../main.dart';
 
@@ -176,80 +180,192 @@ class SingleDayCalendarView extends StatelessWidget {
 
 class SingleLessonView extends StatelessWidget {
   final Lesson _lesson;
+  final GlobalKey _key = GlobalKey();
 
-  const SingleLessonView(this._lesson, {Key? key}) : super(key: key);
+  SingleLessonView(this._lesson, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    const boxShadow = [
-      BoxShadow(
-        color: Colors.black12,
-        blurRadius: 8,
-        offset: Offset(0, 4),
-      )
-    ];
     return Positioned(
       top: (_lesson.startDouble - Global.startTime) * Global.heightPerHour,
       left: 0,
       right: 0,
-      child: Container(
-        height: _lesson.length * Global.heightPerHour,
-        padding: const EdgeInsets.all(8.0),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.of(context).push(
+            MorpheusPageRoute(
+              builder: (_) => DetailedLessonView(_lesson),
+              parentKey: _key,
+            ),
+          );
+        },
+        key: _key,
         child: Container(
-          decoration: BoxDecoration(
-            boxShadow: boxShadow,
-            color: _lesson.isModified ? Colors.yellow.shade200 : Colors.white,
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                color: _lesson.color,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Text(
-                      _lesson.title,
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    if (_lesson.isModified) Text(_lesson.modificationMessage!)
-                  ],
-                ),
-              ),
-              Expanded(
-                child: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
+          height: _lesson.length * Global.heightPerHour,
+          padding: const EdgeInsets.all(8.0),
+          child: Container(
+            decoration: BoxDecoration(
+              boxShadow: Global.standardShadow,
+              color: _lesson.isModified ? Colors.yellow.shade200 : Colors.white,
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8.0),
+                  color: _lesson.color,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
-                        child: Text(
-                          _lesson.room,
-                          textAlign: TextAlign.center,
+                      Text(
+                        _lesson.title,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-                        child: Text(
-                          _lesson.startTime + ' - ' + _lesson.endTime,
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
+                      if (_lesson.isModified)
+                        Text(_lesson.modificationMessage!),
                     ],
                   ),
                 ),
-              ),
-            ],
+                Expanded(
+                  child: Center(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Padding(
+                          padding:
+                              const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                          child: Text(
+                            _lesson.room,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+                          child: Text(
+                            _lesson.startTime + ' - ' + _lesson.endTime,
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class DetailedLessonView extends StatelessWidget {
+  final Lesson _lesson;
+  const DetailedLessonView(this._lesson, {Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    print(_lesson.exercises);
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(_lesson.title),
+        backgroundColor: _lesson.color,
+        foregroundColor: Colors.black,
+      ),
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Text(
+              "Séance du " +
+                  DateFormat('dd/MM').format(_lesson.date) +
+                  " de " +
+                  _lesson.startTime +
+                  " à " +
+                  _lesson.endTime,
+              textAlign: TextAlign.center,
+            ),
+          ),
+          if (_lesson.exercises.isNotEmpty)
+            ..._lesson.exercises.map((e) => ExerciceView(e, _lesson)).toList(),
+          if (_lesson.exercises.isEmpty)
+            const Text(
+              'Aucun contenu renseigné',
+              style: TextStyle(color: Colors.black45),
+              textAlign: TextAlign.center,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class ExerciceView extends StatelessWidget {
+  const ExerciceView(this._exercise, this._lesson, {Key? key})
+      : super(key: key);
+  final Exercise _exercise;
+  final Lesson _lesson;
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
+          child: Text(
+            _exercise.type == ExerciseType.exercise
+                ? _exercise.dateFor == _lesson.date
+                    ? 'À faire pour cette séance'
+                    : 'Donné lors de cette séance'
+                : 'Contenu de cours:',
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          ),
+        ),
+        Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Container(
+            clipBehavior: Clip.antiAlias,
+            decoration: const BoxDecoration(
+              borderRadius: BorderRadius.all(Radius.circular(8)),
+              boxShadow: Global.standardShadow,
+            ),
+            child: Container(
+              color: Colors.white,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    color: _lesson.color,
+                    padding: const EdgeInsets.all(8.0),
+                    child: Text(
+                      _exercise.title,
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: _exercise.htmlContent == ''
+                        ? const Text(
+                            'Aucun contenu renseigné',
+                            style: TextStyle(color: Colors.black45),
+                            textAlign: TextAlign.center,
+                          )
+                        : Html(data: _exercise.htmlContent),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

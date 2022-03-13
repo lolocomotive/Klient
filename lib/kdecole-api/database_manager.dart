@@ -235,8 +235,8 @@ class DatabaseManager {
         }
         for (final exercise in lesson['aRendre'] ?? []) {
           if ((await Global.db!.query('Exercises',
-                  where: 'ID = ?', whereArgs: exercise['id']))
-              .isEmpty) {
+                  where: 'ID = ?', whereArgs: [exercise['uid']]))
+              .isNotEmpty) {
             continue;
           }
           final exerciseDetails =

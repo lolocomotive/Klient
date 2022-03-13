@@ -27,6 +27,13 @@ class Global {
   static const lessonLength = 55.0 / 55.0;
   static const maxLessonsPerDay = 11;
   static const startTime = 8;
+  static const standardShadow = [
+    BoxShadow(
+      color: Colors.black12,
+      blurRadius: 8,
+      offset: Offset(0, 4),
+    )
+  ];
   static String monthToString(int month) {
     switch (month) {
       case 1:
