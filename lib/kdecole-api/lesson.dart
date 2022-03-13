@@ -17,6 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
+import 'dart:math';
+
+import 'package:flutter/cupertino.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 
 import '../main.dart';
@@ -38,13 +42,36 @@ class Lesson {
   bool isModified;
   String? modificationMessage;
 
+  ///1 = 1 hour
+  late double length;
+  late double startDouble;
+  late Color color;
+
   Lesson(this.id, this.date, this.startTime, this.endTime, this.room,
       this.title, this.exercises, this.isModified,
-      [this.modificationMessage]);
+      [this.modificationMessage]) {
+    startDouble = int.parse(startTime.substring(0, 2)) +
+        int.parse(startTime.substring(3)) / 60;
+    final e = int.parse(endTime.substring(0, 2)) +
+        int.parse(endTime.substring(3)) / 60;
+
+    length = e - startDouble;
+    int seed = 0;
+    List<int> encoded = utf8.encode(title);
+    for (int i = 0; i < encoded.length; i++) {
+      seed += encoded[i] * i * 256;
+    }
+    color = HSLColor.fromAHSL(
+      1,
+      Random(seed).nextDouble() * 360,
+      .7,
+      .8,
+    ).toColor();
+  }
 
   static Future<List<Lesson>> fetchAll() async {
     final List<Lesson> lessons = [];
-    final results = await Global.db!.query('Lessons',orderBy: 'LessonDate');
+    final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
       lessons.add(Lesson(
           result['ID'] as int,

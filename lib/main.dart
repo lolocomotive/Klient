@@ -22,7 +22,11 @@ class Global {
   static MessageSearchResultsState? messageSearchSuggestionState;
   static Widget? fab;
   static MainState? mainState;
-
+  static const timeWidth = 32.0;
+  static const heightPerHour = 110.0;
+  static const lessonLength = 55.0 / 55.0;
+  static const maxLessonsPerDay = 11;
+  static const startTime = 8;
   static String monthToString(int month) {
     switch (month) {
       case 1:

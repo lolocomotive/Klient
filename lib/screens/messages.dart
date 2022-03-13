@@ -213,7 +213,7 @@ class MessagesState extends State<Messages> {
                   );
                 }
                 final _parentKey = GlobalKey();
-                return GestureDetector(
+                return InkWell(
                   child: Container(
                       margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
                           index == _conversations.length - 1 ? 14 : 7),
@@ -324,7 +324,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
             : ListView.separated(
                 itemBuilder: (context, index) {
                   final _parentKey = GlobalKey();
-                  return GestureDetector(
+                  return InkWell(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: MessagePreview(_conversations![index], _parentKey),

@@ -123,9 +123,11 @@ if(_currentWidget is! Messages){
   }
 
   Widget drawerLink(String label) {
-    return ListTile(
-      title: Text(label),
-      onTap: () => {_changeScreen(label, context)},
+    return InkWell(
+      child: ListTile(
+        title: Text(label),
+        onTap: () => {_changeScreen(label, context)},
+      ),
     );
   }
 
