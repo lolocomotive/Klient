@@ -28,6 +28,7 @@ class Home extends StatelessWidget {
       children: [
         AppBar(
           title: const Text('Accueil'),
+          centerTitle: true,
         )
         //TODO implement homepage
       ],

@@ -43,7 +43,7 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> {
-  List<List<Lesson>> _calendar = [];
+  final List<List<Lesson>> _calendar = [];
   final _pageController = PageController(viewportFraction: 0.8);
   _TimetableState() {
     Lesson.fetchAll().then((lessons) {
@@ -81,55 +81,61 @@ class _TimetableState extends State<Timetable> {
     return Column(
       children: [
         AppBar(
-          title: const Text("Emploi du temps"),
+          title: const Text(
+            "Emploi du temps",
+          ),
+          centerTitle: true,
         ),
-        Expanded(
-          child: SingleChildScrollView(
-            child: SizedBox(
-              height: Global.heightPerHour *
-                      Global.maxLessonsPerDay *
-                      Global.lessonLength +
-                  32, //TODO compute maximum height.
-              child: Container(
-                color: const Color.fromARGB(255, 240, 240, 240),
-                child: Stack(
-                  children: [
-                    PageView.builder(
-                      controller: _pageController,
-                      itemBuilder: (ctx, index) {
-                        return SingleDayCalendarView(_calendar[index]);
-                      },
-                      itemCount: _calendar.length,
-                    ),
-                    Container(
-                      color: Colors.white60,
-                      width: Global.timeWidth,
-                      child: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
-                          child: ListView.builder(
+        _calendar.isEmpty
+            ? const Expanded(child: Center(child: CircularProgressIndicator()))
+            : Expanded(
+                child: SingleChildScrollView(
+                  child: SizedBox(
+                    height: Global.heightPerHour *
+                            Global.maxLessonsPerDay *
+                            Global.lessonLength +
+                        32, //TODO compute maximum height.
+                    child: Container(
+                      color: const Color.fromARGB(255, 240, 240, 240),
+                      child: Stack(
+                        children: [
+                          PageView.builder(
+                            controller: _pageController,
                             itemBuilder: (ctx, index) {
-                              return SizedBox(
-                                height: Global.heightPerHour,
-                                child: Text(
-                                  (index + Global.startTime).toString() + 'h',
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
+                              return SingleDayCalendarView(_calendar[index]);
                             },
-                            itemCount: Global.maxLessonsPerDay,
+                            itemCount: _calendar.length,
                           ),
-                        ),
+                          Container(
+                            color: Colors.white60,
+                            width: Global.timeWidth,
+                            child: MediaQuery.removePadding(
+                              removeTop: true,
+                              context: context,
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                                child: ListView.builder(
+                                  itemBuilder: (ctx, index) {
+                                    return SizedBox(
+                                      height: Global.heightPerHour,
+                                      child: Text(
+                                        (index + Global.startTime).toString() +
+                                            'h',
+                                        textAlign: TextAlign.center,
+                                      ),
+                                    );
+                                  },
+                                  itemCount: Global.maxLessonsPerDay,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
+                  ),
                 ),
-              ),
-            ),
-          ),
-        )
+              )
       ],
     );
   }

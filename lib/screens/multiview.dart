@@ -34,16 +34,9 @@ class Main extends StatefulWidget {
 }
 
 class MainState extends State<Main> {
-  static const _homeLabel = 'Accueuil';
-  static const _messagesLabel = 'Messagerie';
-  static const _timetableLabel = 'Emploi du temps';
-  static const _debugLabel = 'Debug';
+  int _currentIndex = 0;
 
-  MainState() {
-  }
-
-  String? _currentLabel;
-  Widget? _currentWidget;
+  MainState();
 
   _updateMessages() {
     DatabaseManager.fetchMessageData();
@@ -72,62 +65,62 @@ class MainState extends State<Main> {
     Global.db!.delete('Exercises');
   }
 
-  _changeScreen(String label, BuildContext context) {
-    Navigator.pop(context);
-    _currentLabel = label;
-    switch (label) {
-      case _homeLabel:
-        setState(() {
-          _currentWidget = Home();
-        });
-        break;
-      case _messagesLabel:
-        setState(() {
-          _currentWidget = Messages();
-        });
-        break;
-      case _timetableLabel:
-        setState(() {
-          _currentWidget = Timetable();
-        });
-        break;
-      case _debugLabel:
-        setState(() {
-          _currentWidget = Debug();
-        });
-        break;
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     Global.mainState = this;
-if(_currentWidget is! Messages){
-  Global.fab = null;
-}
-    return Scaffold(
-      drawer: Drawer(
-        child: Column(
-          children: [
-            UserInfo(),
-            drawerLink(_homeLabel),
-            drawerLink(_messagesLabel),
-            drawerLink(_timetableLabel),
-            drawerLink(_debugLabel),
-          ],
-        ),
-      ),
-      body: _currentWidget ?? Home(),
-      floatingActionButton: Global.fab,
-    );
-  }
+    final Widget currentWidget;
+    switch (_currentIndex) {
+      case 0:
+        currentWidget = const Home();
+        break;
+      case 1:
+        currentWidget = const Messages();
+        break;
+      case 2:
+        currentWidget = const Timetable();
+        break;
+      default:
+        currentWidget = Debug();
+    }
 
-  Widget drawerLink(String label) {
-    return InkWell(
-      child: ListTile(
-        title: Text(label),
-        onTap: () => {_changeScreen(label, context)},
+    if (currentWidget is! Messages) {
+      Global.fab = null;
+    }
+    return Scaffold(
+      bottomNavigationBar: BottomNavigationBar(
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Accueil',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.message),
+            label: 'Messagerie',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Emploi du temps',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.bug_report),
+            label: 'Debug',
+          ),
+        ],
+        currentIndex: _currentIndex,
+        unselectedItemColor: Colors.black45,
+        unselectedFontSize: 12,
+        selectedItemColor: Colors.black,
+        selectedFontSize: 12,
+        selectedIconTheme: const IconThemeData(size: 30),
+        showUnselectedLabels: true,
+        onTap: (index) {
+          setState(() {
+            _currentIndex = index;
+          });
+        },
       ),
+      body: currentWidget,
+      floatingActionButton: Global.fab,
     );
   }
 
@@ -137,13 +130,15 @@ if(_currentWidget is! Messages){
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         ElevatedButton(
-            onPressed: _updateMessages, child: Text('Update messages')),
-        ElevatedButton(onPressed: _updateNews, child: Text('Update news')),
+            onPressed: _updateMessages, child: const Text('Update messages')),
         ElevatedButton(
-            onPressed: _updateTimetable, child: Text('Update Timetable')),
+            onPressed: _updateNews, child: const Text('Update news')),
         ElevatedButton(
-            onPressed: _clearDatabase, child: Text('Clear database')),
-        ElevatedButton(onPressed: _closeDB, child: Text('Close database')),
+            onPressed: _updateTimetable, child: const Text('Update Timetable')),
+        ElevatedButton(
+            onPressed: _clearDatabase, child: const Text('Clear database')),
+        ElevatedButton(
+            onPressed: _closeDB, child: const Text('Close database')),
       ],
     );
   }
