@@ -84,16 +84,17 @@ class MessagePreview extends StatelessWidget {
                   ),
                 ],
               ),
-              _conversation.customSubject ?? Text(
-                _conversation.subject,
-                textAlign: TextAlign.left,
-                overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                    fontWeight: _conversation.read
-                        ? FontWeight.normal
-                        : FontWeight.bold,
-                    fontSize: 14),
-              ),
+              _conversation.customSubject ??
+                  Text(
+                    _conversation.subject,
+                    textAlign: TextAlign.left,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        fontWeight: _conversation.read
+                            ? FontWeight.normal
+                            : FontWeight.bold,
+                        fontSize: 14),
+                  ),
               _conversation.customPreview ??
                   Text(HtmlUnescape().convert(_conversation.preview),
                       style:
@@ -130,7 +131,7 @@ class MessagesState extends State<Messages> {
 
   reloadFromDB() {
     Conversation.fetchAll().then((conversations) {
-      if(!mounted) return;
+      if (!mounted) return;
       setState(() {
         _conversations = conversations;
       });
@@ -138,9 +139,6 @@ class MessagesState extends State<Messages> {
   }
 
   refresh() async {
-    await Global.db!.delete('Messages');
-    await Global.db!.delete('Conversations');
-    await Global.db!.delete('MessageAttachments');
     await DatabaseManager.fetchMessageData();
   }
 
@@ -151,7 +149,7 @@ class MessagesState extends State<Messages> {
         refresh();
         return;
       }
-      if(!mounted) return;
+      if (!mounted) return;
       setState(() {
         _conversations = conversations;
       });
@@ -179,12 +177,12 @@ class MessagesState extends State<Messages> {
                       delegate: MessagesSearchDelegate(),
                     );
                   },
-                )
+                ),
+                Global.popupMenuButton
               ],
               title: const Text('Messagerie'),
               floating: true,
               forceElevated: innerBoxScrolled,
-              centerTitle: true,
             )
           ];
         },
@@ -359,7 +357,7 @@ class _ConversationViewState extends State<ConversationView> {
         Global.client!.markConversationRead(conversation);
         Global.messagesState!.reloadFromDB();
       }
-      if(!mounted) return;
+      if (!mounted) return;
       setState(() {
         _conversation = conversation;
       });

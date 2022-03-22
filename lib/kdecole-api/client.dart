@@ -36,7 +36,6 @@ class Client {
   String? idEtablissement;
   String? idEleve;
 
-
   /// Make a request to the API
   Future<Map<String, dynamic>> request(Action action,
       {List<String>? params}) async {
@@ -73,7 +72,7 @@ class Client {
       }
       return data;
     } else {
-      if(response.statusCode == 403){
+      if (response.statusCode == 403) {
         //TODO show message and log user out
 
       }
@@ -95,14 +94,14 @@ class Client {
     final res =
         await Client('').request(Action.activate, params: [username, password]);
     if (res['success'] == true) {
-
       return Client(res['authtoken']);
     } else {
       throw Error();
     }
   }
-/// the build context is for showing an error notification
-  Client(String token,[BuildContext? ctx]) {
+
+  /// the build context is for showing an error notification
+  Client(String token, [BuildContext? ctx]) {
     _token = token;
     _ctx = ctx;
     Global.storage!.write(key: 'token', value: _token);
@@ -135,4 +134,5 @@ class Action {
   //param idconversations
   static final Action markConversationRead =
       Action('messagerie/communication/lu/', HTTPRequestMethod.put);
+  static final Action getGrades = Action('consulterNotes/idetablissement/');
 }

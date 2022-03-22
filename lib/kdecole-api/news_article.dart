@@ -21,6 +21,7 @@ import 'dart:io';
 
 import 'package:sqflite/sqflite.dart';
 
+import '../main.dart';
 import 'news_attachment.dart';
 
 class NewsArticle {
@@ -36,20 +37,19 @@ class NewsArticle {
   NewsArticle(this.uid, this.type, this.author, this.title, this.date,
       this.htmlContent, this.url, this.attachments);
 
-  static Future<List<NewsArticle>> fetchAll(Database db) async {
+  static Future<List<NewsArticle>> fetchAll() async {
     final List<NewsArticle> articles = [];
-    final results = await db.query('NewsArticles');
+    final results = await Global.db!.query('NewsArticles');
     for (final result in results) {
       articles.add(NewsArticle(
         result['UID'] as String,
         result['Type'] as String,
         result['Author'] as String,
         result['Title'] as String,
-        DateTime.fromMillisecondsSinceEpoch(
-            (result['PublishingDate'] as int)),
+        DateTime.fromMillisecondsSinceEpoch((result['PublishingDate'] as int)),
         result['HTMLContent'] as String,
         result['URL'] as String,
-        await NewsAttachment.fromParentUID(result['UID'] as String, db),
+        await NewsAttachment.fromParentUID(result['UID'] as String, Global.db!),
       ));
     }
     return articles;

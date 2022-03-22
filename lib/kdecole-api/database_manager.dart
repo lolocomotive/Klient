@@ -28,6 +28,7 @@ import 'conversation.dart';
 /// Utility class that fetches data from the API and stores it inside the database
 class DatabaseManager {
   static String _cleanupHTML(String html) {
+    //TODO add anchors to links
     String result = html
         .replaceAll(RegExp('title=".*"'), '')
         .replaceAll(RegExp('style=".*" type="cite"'), '')
@@ -129,6 +130,20 @@ class DatabaseManager {
     Global.loadingMessages = false;
   }
 
+  /// Download all the grades
+  static fetchGradesData() async {
+    final result = await Global.client!.request(Action.getGrades,
+        params: [Global.client!.idEtablissement ?? '0']);
+    for (final grade in result["listeNotes"]) {
+      Global.db!.insert('Grades', {
+        'Subject': grade['matiere'] as String,
+        'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
+        'Of': (grade['bareme'] as int).toDouble(),
+        'Date': grade['date'] as int,
+      });
+    }
+  }
+
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
     final result = await Global.client!.request(
@@ -164,6 +179,7 @@ class DatabaseManager {
 
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
+    //TODO clean up this horrific code
     final result = await Global.client!.request(Action.getTimeTableEleve,
         params: [(Global.client!.idEleve ?? 0).toString()]);
     for (final day in result['listeJourCdt']) {

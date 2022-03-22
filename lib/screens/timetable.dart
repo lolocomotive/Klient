@@ -17,12 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
+import 'package:kosmos_client/kdecole-api/database_manager.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:morpheus/morpheus.dart';
@@ -46,11 +46,14 @@ class _TimetableState extends State<Timetable> {
   final List<List<Lesson>> _calendar = [];
   final _pageController = PageController(viewportFraction: 0.8);
   _TimetableState() {
+    _reload();
+  }
+  void _reload([r = true]) {
     Lesson.fetchAll().then((lessons) {
       List<Lesson> day = [];
       if (lessons.isEmpty) {
-        //TODO handle Error
-        throw UnimplementedError();
+        if (r) DatabaseManager.fetchTimetable().then(_reload(false));
+        return;
       }
       DateTime lastDate = lessons[0].date;
       var page = 0;
@@ -84,58 +87,74 @@ class _TimetableState extends State<Timetable> {
           title: const Text(
             "Emploi du temps",
           ),
-          centerTitle: true,
+          actions: [Global.popupMenuButton],
         ),
-        _calendar.isEmpty
-            ? const Expanded(child: Center(child: CircularProgressIndicator()))
-            : Expanded(
-                child: SingleChildScrollView(
-                  child: SizedBox(
-                    height: Global.heightPerHour *
-                            Global.maxLessonsPerDay *
-                            Global.lessonLength +
-                        32, //TODO compute maximum height.
-                    child: Container(
-                      color: const Color.fromARGB(255, 240, 240, 240),
-                      child: Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            itemBuilder: (ctx, index) {
-                              return SingleDayCalendarView(_calendar[index]);
-                            },
-                            itemCount: _calendar.length,
-                          ),
-                          Container(
-                            color: Colors.white60,
-                            width: Global.timeWidth,
-                            child: MediaQuery.removePadding(
-                              removeTop: true,
-                              context: context,
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
-                                child: ListView.builder(
-                                  itemBuilder: (ctx, index) {
-                                    return SizedBox(
-                                      height: Global.heightPerHour,
-                                      child: Text(
-                                        (index + Global.startTime).toString() +
-                                            'h',
-                                        textAlign: TextAlign.center,
-                                      ),
-                                    );
-                                  },
-                                  itemCount: Global.maxLessonsPerDay,
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: () async {
+              await Global.db!.delete('ExerciseAttachments');
+              await Global.db!.delete('Exercises');
+              await Global.db!.delete('Lessons');
+              await DatabaseManager.fetchTimetable();
+              setState(() {});
+            },
+            child: SingleChildScrollView(
+              child: SizedBox(
+                height: (Global.heightPerHour *
+                        Global.maxLessonsPerDay *
+                        Global.lessonLength +
+                    32),
+                child: Container(
+                  color: const Color.fromARGB(255, 240, 240, 240),
+                  child: Stack(
+                    children: [
+                      PageView.builder(
+                        controller: _pageController,
+                        itemBuilder: (ctx, index) {
+                          if (_calendar.isEmpty) {
+                            return Column(
+                              children: const [
+                                Padding(
+                                  padding: EdgeInsets.all(8.0),
+                                  child: CircularProgressIndicator(),
                                 ),
-                              ),
+                              ],
+                            );
+                          }
+                          return SingleDayCalendarView(_calendar[index]);
+                        },
+                        itemCount: max(_calendar.length, 1),
+                      ),
+                      Container(
+                        color: Colors.white60,
+                        width: Global.timeWidth,
+                        child: MediaQuery.removePadding(
+                          removeTop: true,
+                          context: context,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                            child: ListView.builder(
+                              itemBuilder: (ctx, index) {
+                                return SizedBox(
+                                  height: Global.heightPerHour,
+                                  child: Text(
+                                    (index + Global.startTime).toString() + 'h',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                );
+                              },
+                              itemCount: Global.maxLessonsPerDay,
                             ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                    ],
                   ),
                 ),
-              )
+              ),
+            ),
+          ),
+        )
       ],
     );
   }
@@ -277,10 +296,11 @@ class DetailedLessonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(_lesson.exercises);
     return Scaffold(
       appBar: AppBar(
-        title: Text(_lesson.title),
+        title: Text(
+          _lesson.title,
+        ),
         backgroundColor: _lesson.color,
         foregroundColor: Colors.black,
       ),
@@ -314,8 +334,11 @@ class DetailedLessonView extends StatelessWidget {
 }
 
 class ExerciceView extends StatelessWidget {
-  const ExerciceView(this._exercise, this._lesson, {Key? key})
+  const ExerciceView(this._exercise, this._lesson,
+      {Key? key, this.showDate = false, this.showSubject = false})
       : super(key: key);
+  final bool showDate;
+  final bool showSubject;
   final Exercise _exercise;
   final Lesson _lesson;
   @override
@@ -323,17 +346,16 @@ class ExerciceView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-          child: Text(
-            _exercise.type == ExerciseType.exercise
-                ? _exercise.dateFor == _lesson.date
-                    ? 'À faire pour cette séance'
-                    : 'Donné lors de cette séance'
-                : 'Contenu de cours:',
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+        if (showDate)
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
+            child: Text(
+              (showSubject ? _lesson.title + ': ' : '') +
+                  'À faire pour le ' +
+                  DateFormat('dd/MM - HH:mm').format(_exercise.dateFor!),
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
           ),
-        ),
         Padding(
           padding: const EdgeInsets.all(16.0),
           child: Container(

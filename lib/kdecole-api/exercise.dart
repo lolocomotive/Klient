@@ -19,6 +19,8 @@
 
 import 'package:sqflite/sqflite.dart';
 
+import '../main.dart';
+
 enum ExerciseType {
   lessonContent,
   exercise,
@@ -68,7 +70,7 @@ class Exercise {
   static Exercise _parse(Map<String, Object?> result) {
     return Exercise(
         result['ID'] as int,
-        result['ParentLesson'] as int,
+        result['ParentLesson'] as int?,
         result['Type'] as String == 'Cours'
             ? ExerciseType.lessonContent
             : ExerciseType.exercise,
@@ -96,9 +98,9 @@ class Exercise {
   }
 
   /// Get all [Exercise]s
-  static Future<List<Exercise>> fetchAll(Database db) async {
+  static Future<List<Exercise>> fetchAll() async {
     final List<Exercise> exercises = [];
-    final results = await db.query('Exercises');
+    final results = await Global.db!.query('Exercises');
     for (final result in results) {
       exercises.add(_parse(result));
     }

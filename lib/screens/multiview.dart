@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 import 'package:kosmos_client/widgets/user_info.dart';
+import 'package:sqflite/sqlite_api.dart';
 
 import '../kdecole-api/database_manager.dart';
 import '../main.dart';
@@ -52,6 +53,10 @@ class MainState extends State<Main> {
 
   _closeDB() {
     Global.db!.close();
+  }
+
+  _updateGrades() {
+    DatabaseManager.fetchGradesData();
   }
 
   _clearDatabase() {
@@ -90,29 +95,35 @@ class MainState extends State<Main> {
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
+            icon: Icon(Icons.home_outlined),
+            activeIcon: Icon(Icons.home),
             label: 'Accueil',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.message),
+            icon: Icon(Icons.message_outlined),
+            activeIcon: Icon(Icons.message),
             label: 'Messagerie',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
+            icon: Icon(Icons.calendar_today_outlined),
+            activeIcon: Icon(Icons.calendar_today),
             label: 'Emploi du temps',
           ),
           BottomNavigationBarItem(
-            icon: Icon(Icons.bug_report),
+            icon: Icon(Icons.bug_report_outlined),
+            activeIcon: Icon(Icons.bug_report),
             label: 'Debug',
           ),
         ],
         currentIndex: _currentIndex,
         unselectedItemColor: Colors.black45,
         unselectedFontSize: 12,
+        unselectedIconTheme: const IconThemeData(size: 26),
         selectedItemColor: Colors.black,
         selectedFontSize: 12,
-        selectedIconTheme: const IconThemeData(size: 30),
+        selectedIconTheme: const IconThemeData(size: 26),
         showUnselectedLabels: true,
+        type: BottomNavigationBarType.fixed,
         onTap: (index) {
           setState(() {
             _currentIndex = index;
@@ -136,9 +147,16 @@ class MainState extends State<Main> {
         ElevatedButton(
             onPressed: _updateTimetable, child: const Text('Update Timetable')),
         ElevatedButton(
+            onPressed: _updateGrades, child: const Text('Update grades')),
+        ElevatedButton(
             onPressed: _clearDatabase, child: const Text('Clear database')),
         ElevatedButton(
             onPressed: _closeDB, child: const Text('Close database')),
+        ElevatedButton(
+            onPressed: () {
+              Global.db!.execute('DROP TABLE GRADES');
+            },
+            child: const Text('drop grades')),
       ],
     );
   }

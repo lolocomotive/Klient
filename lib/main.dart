@@ -3,13 +3,35 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/screens/messages.dart';
+import 'package:kosmos_client/screens/settings.dart';
+import 'package:morpheus/morpheus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'kdecole-api/client.dart';
 import 'screens/multiview.dart';
 
+class PopupMenuItemWithIcon extends PopupMenuItem {
+  PopupMenuItemWithIcon(String label, IconData icon)
+      : super(
+          value: label,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                child: Icon(
+                  icon,
+                  color: Colors.black54,
+                ),
+              ),
+              Text(label),
+            ],
+          ),
+        );
+}
+
 class Global {
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static FlutterSecureStorage? storage;
   static Database? db;
   static String? token;
@@ -34,6 +56,25 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
+
+  static PopupMenuButton popupMenuButton = PopupMenuButton(
+    onSelected: (choice) {
+      switch (choice) {
+        case 'Paramètres':
+          navigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (_) => const SettingsPage()),
+          );
+          break;
+      }
+    },
+    itemBuilder: (context) {
+      return [
+        PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined),
+        PopupMenuItemWithIcon("Aide", Icons.help_outline),
+        PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined),
+      ];
+    },
+  );
   static String monthToString(int month) {
     switch (month) {
       case 1:
@@ -167,9 +208,9 @@ void main() async {
     CREATE TABLE IF NOT EXISTS Grades(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       Subject TEXT NOT NULL,
-      Prof TEXT NOT NULL,
-      Grade TEXT NOT NULL,
-      Description TEXT NOT NULL
+      Grade REAL NOT NULL,
+      Of REAL NOT NULL,
+      Date INT NOT NULL
     );''');
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Lessons(
@@ -186,7 +227,7 @@ void main() async {
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Exercises(
       ID INTEGER PRIMARY KEY NOT NULL,
-      ParentLesson INTEGER NOT NULL,
+      ParentLesson INTEGER,
       LessonFor INTEGER,
       Type TEXT NOT NULL,
       DateFor INTEGER,
@@ -207,7 +248,7 @@ void main() async {
     );''');
     stdout.writeln('Done creating tables');
   }
-  runApp(KosmosApp());
+  runApp(const KosmosApp());
 }
 
 class KosmosApp extends StatefulWidget {
@@ -262,6 +303,7 @@ class KosmosState extends State {
 
     return MaterialApp(
       scaffoldMessengerKey: _messengerKey,
+      navigatorKey: Global.navigatorKey,
       title: title,
       theme: ThemeData(
         primarySwatch: Colors.blue,

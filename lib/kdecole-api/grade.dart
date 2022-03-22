@@ -17,22 +17,31 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:sqflite/sqflite.dart';
+import '../main.dart';
 
 class Grade {
   String subject;
-  String prof;
-  String grade;
-  String description;
+  num grade;
+  num of;
+  DateTime date;
 
-  Grade(this.subject, this.prof, this.grade, this.description);
+  Grade(
+    this.subject,
+    this.grade,
+    this.of,
+    this.date,
+  );
 
-  static Future<List<Grade>> fetchAll(Database db) async {
+  static Future<List<Grade>> fetchAll() async {
     final List<Grade> grades = [];
-    final results = await db.query('Grades');
+    final results = await Global.db!.query('Grades');
     for (final result in results) {
-      grades.add(Grade(result['Subject'] as String, result['Prof'] as String,
-          result['Grade'] as String, result['Description'] as String));
+      grades.add(Grade(
+        result['Subject'] as String,
+        result['Grade'] as num,
+        result['Of'] as num,
+        DateTime.fromMillisecondsSinceEpoch(result['Date'] as int),
+      ));
     }
     return grades;
   }

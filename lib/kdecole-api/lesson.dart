@@ -56,12 +56,16 @@ class Lesson {
         int.parse(endTime.substring(3)) / 60;
 
     length = e - startDouble;
+    color = fromSubject(title);
+  }
+
+  static Color fromSubject(String subject) {
     int seed = 0;
-    List<int> encoded = utf8.encode(title);
+    List<int> encoded = utf8.encode(subject);
     for (int i = 0; i < encoded.length; i++) {
       seed += encoded[i] * i * 256;
     }
-    color = HSLColor.fromAHSL(
+    return HSLColor.fromAHSL(
       1,
       Random(seed).nextDouble() * 360,
       .7,
@@ -69,21 +73,33 @@ class Lesson {
     ).toColor();
   }
 
+  static Future<Lesson> _parse(result) async {
+    return Lesson(
+      result['ID'] as int,
+      DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
+      result['StartTime'] as String,
+      result['EndTime'] as String,
+      result['Room'] as String,
+      result['Subject'] as String,
+      await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
+      result['IsModified'] as int == 1,
+      result['ModificationMessage'] as String?,
+    );
+  }
+
   static Future<List<Lesson>> fetchAll() async {
     final List<Lesson> lessons = [];
     final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
-      lessons.add(Lesson(
-          result['ID'] as int,
-          DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
-          result['StartTime'] as String,
-          result['EndTime'] as String,
-          result['Room'] as String,
-          result['Subject'] as String,
-          await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
-          result['IsModified'] as int == 1,
-          result['ModificationMessage'] as String?));
+      lessons.add(await _parse(result));
     }
     return lessons;
+  }
+
+  static Future<Lesson?> byID(int id) async {
+    final results =
+        await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
+    if (results.isEmpty) return null;
+    return _parse(results[0]);
   }
 }
