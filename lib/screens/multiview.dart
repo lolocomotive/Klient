@@ -19,10 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/screens/timetable.dart';
-import 'package:kosmos_client/widgets/user_info.dart';
-import 'package:sqflite/sqlite_api.dart';
 
-import '../kdecole-api/database_manager.dart';
 import '../main.dart';
 import 'home.dart';
 import 'messages.dart';
@@ -58,9 +55,12 @@ class MainState extends State<Main> {
       Global.fab = null;
     }
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Global.theme!.colorScheme.background,
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Colors.deepPurple.shade100,
+        height: 64,
+        backgroundColor: Global.theme!.colorScheme.brightness == Brightness.dark
+            ? Colors.deepPurple.shade900
+            : Colors.deepPurple.shade100,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

@@ -118,7 +118,6 @@ class Conversation {
     );
   }
 
-  ///Only searches by subject
   static Future<List<Conversation>> search(String query,
       {int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
@@ -146,13 +145,14 @@ class Conversation {
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
-              ? highlight(query, fullMessageContents)
+              ? highlight(query, fullMessageContents,
+                  color: Global.theme!.colorScheme.onTertiary)
               : null,
           (result['Subject'] as String)
                   .toUpperCase()
                   .contains(query.toUpperCase())
               ? highlight(query, result['Subject'] as String,
-                  color: Colors.black, fontSize: 14)
+                  color: Global.theme!.colorScheme.onTertiary, fontSize: 14)
               : null,
         ),
       );
@@ -179,5 +179,6 @@ class Conversation {
         result['FirstAuthor'] as String,
       );
     }
+    return null;
   }
 }

@@ -49,7 +49,7 @@ class _TimetableState extends State<Timetable> {
     _reload();
   }
   void _reload([r = true]) {
-    Lesson.fetchAll().then((lessons) {
+    Lesson.fetchAll(context).then((lessons) {
       List<Lesson> day = [];
       if (lessons.isEmpty) {
         if (r) DatabaseManager.fetchTimetable().then(_reload(false));
@@ -124,7 +124,10 @@ class _TimetableState extends State<Timetable> {
                       itemCount: max(_calendar.length, 1),
                     ),
                     Container(
-                      color: Colors.white60,
+                      color: Global.theme!.colorScheme.brightness ==
+                              Brightness.dark
+                          ? Colors.black38
+                          : Colors.white60,
                       width: Global.timeWidth,
                       child: MediaQuery.removePadding(
                         removeTop: true,
@@ -219,7 +222,11 @@ class SingleLessonView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          color: _lesson.isModified ? Colors.yellow.shade200 : Colors.white,
+          color: _lesson.isModified
+              ? Global.theme!.brightness == Brightness.dark
+                  ? const Color.fromARGB(255, 90, 77, 0)
+                  : Colors.yellow.shade100
+              : null,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: () {
@@ -293,13 +300,12 @@ class DetailedLessonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(
         title: Text(
           _lesson.title,
         ),
         backgroundColor: _lesson.color,
-        foregroundColor: Colors.black,
       ),
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -319,9 +325,9 @@ class DetailedLessonView extends StatelessWidget {
           if (_lesson.exercises.isNotEmpty)
             ..._lesson.exercises.map((e) => ExerciceView(e, _lesson)).toList(),
           if (_lesson.exercises.isEmpty)
-            const Text(
+            Text(
               'Aucun contenu renseigné',
-              style: TextStyle(color: Colors.black45),
+              style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
               textAlign: TextAlign.center,
             ),
         ],
@@ -360,32 +366,30 @@ class ExerciceView extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          child: Container(
-            color: Colors.white,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  color: _lesson.color,
-                  padding: const EdgeInsets.all(8.0),
-                  child: Text(
-                    _exercise.title,
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Container(
+                color: _lesson.color,
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  _exercise.title,
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  textAlign: TextAlign.center,
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: _exercise.htmlContent == ''
-                      ? const Text(
-                          'Aucun contenu renseigné',
-                          style: TextStyle(color: Colors.black45),
-                          textAlign: TextAlign.center,
-                        )
-                      : Html(data: _exercise.htmlContent),
-                ),
-              ],
-            ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: _exercise.htmlContent == ''
+                    ? Text(
+                        'Aucun contenu renseigné',
+                        style: TextStyle(
+                            color: Global.theme!.colorScheme.onTertiary),
+                        textAlign: TextAlign.center,
+                      )
+                    : Html(data: _exercise.htmlContent),
+              ),
+            ],
           ),
         ),
       ],

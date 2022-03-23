@@ -18,8 +18,11 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/main.dart';
 
 class UserInfo extends StatelessWidget {
+  const UserInfo({Key? key}) : super(key: key);
+
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -27,10 +30,9 @@ class UserInfo extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            padding: EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 20.0),
-            decoration:
-                BoxDecoration(color: Theme.of(context).colorScheme.primary),
-            child: Text(
+            padding: const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 20.0),
+            decoration: BoxDecoration(color: Global.theme!.colorScheme.primary),
+            child: const Text(
               'Username',
               style: TextStyle(fontSize: 30.0),
             ),

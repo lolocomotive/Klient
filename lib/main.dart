@@ -12,128 +12,6 @@ import 'package:sqflite/sqflite.dart';
 import 'kdecole-api/client.dart';
 import 'screens/multiview.dart';
 
-class PopupMenuItemWithIcon extends PopupMenuItem {
-  PopupMenuItemWithIcon(String label, IconData icon, {Key? key})
-      : super(
-          key: key,
-          value: label,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                child: Icon(
-                  icon,
-                  color: Colors.black54,
-                ),
-              ),
-              Text(label),
-            ],
-          ),
-        );
-}
-
-class Global {
-  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-  static FlutterSecureStorage? storage;
-  static Database? db;
-  static String? token;
-  static Client? client;
-  static int? currentConversation;
-  static String? currentConversationSubject;
-  static MessagesState? messagesState;
-  static bool loadingMessages = false;
-  static String? searchQuery;
-  static MessageSearchResultsState? messageSearchSuggestionState;
-  static Widget? fab;
-  static MainState? mainState;
-  static const timeWidth = 32.0;
-  static const heightPerHour = 110.0;
-  static const lessonLength = 55.0 / 55.0;
-  static const maxLessonsPerDay = 11;
-  static const startTime = 8;
-  static const standardShadow = [
-    BoxShadow(
-      color: Colors.black12,
-      blurRadius: 8,
-      offset: Offset(0, 4),
-    )
-  ];
-
-  static PopupMenuButton popupMenuButton = PopupMenuButton(
-    onSelected: (choice) {
-      switch (choice) {
-        case 'Paramètres':
-          navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => const SettingsPage()),
-          );
-          break;
-        case 'Debug':
-          navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => const DebugScreen()),
-          );
-          break;
-      }
-    },
-    itemBuilder: (context) {
-      return [
-        PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined),
-        PopupMenuItemWithIcon("Aide", Icons.help_outline),
-        PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined),
-        PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined),
-      ];
-    },
-  );
-  static String monthToString(int month) {
-    switch (month) {
-      case 1:
-        return 'Jan.';
-      case 2:
-        return 'Fév.';
-      case 3:
-        return 'Mars';
-      case 4:
-        return 'Avril';
-      case 5:
-        return 'Mai';
-      case 6:
-        return 'Juin';
-      case 7:
-        return 'Juil.';
-      case 8:
-        return 'Août';
-      case 9:
-        return 'Sept.';
-      case 10:
-        return 'Oct.';
-      case 11:
-        return 'Nov.';
-      case 12:
-        return 'Déc.';
-      default:
-        throw Error();
-    }
-  }
-
-  static String dateToString(DateTime date) {
-    final DateTime now = DateTime.now();
-    if (date.day == now.day &&
-        date.month == now.month &&
-        date.year == now.year) {
-      return date.hour.toString() +
-          ':' +
-          date.second.toString().padLeft(2, '0');
-    } else if (date.year == now.year) {
-      return date.day.toString() + ' ' + monthToString(date.month);
-    } else {
-      return date.day.toString() +
-          '/' +
-          date.month.toString() +
-          '/' +
-          date.year.toString();
-    }
-  }
-}
-
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dbDir = await getTemporaryDirectory();
@@ -143,7 +21,7 @@ void main() async {
   Global.storage = const FlutterSecureStorage();
   try {
     Global.token = await Global.storage!.read(key: 'token');
-  } on PlatformException catch (e) {
+  } on PlatformException catch (_) {
     // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
     await Global.storage!.deleteAll();
     Global.token = '';
@@ -265,6 +143,132 @@ void main() async {
   runApp(const KosmosApp());
 }
 
+class PopupMenuItemWithIcon extends PopupMenuItem {
+  PopupMenuItemWithIcon(String label, IconData icon, BuildContext context,
+      {Key? key})
+      : super(
+          key: key,
+          value: label,
+          child: Row(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
+                child: Icon(
+                  icon,
+                  color: Global.theme!.colorScheme.brightness == Brightness.dark
+                      ? Colors.white54
+                      : Colors.black54,
+                ),
+              ),
+              Text(label),
+            ],
+          ),
+        );
+}
+
+class Global {
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static FlutterSecureStorage? storage;
+  static Database? db;
+  static String? token;
+  static Client? client;
+  static int? currentConversation;
+  static String? currentConversationSubject;
+  static MessagesState? messagesState;
+  static bool loadingMessages = false;
+  static String? searchQuery;
+  static MessageSearchResultsState? messageSearchSuggestionState;
+  static Widget? fab;
+  static MainState? mainState;
+  static ThemeData? theme;
+  static const timeWidth = 32.0;
+  static const heightPerHour = 110.0;
+  static const lessonLength = 55.0 / 55.0;
+  static const maxLessonsPerDay = 11;
+  static const startTime = 8;
+  static const standardShadow = [
+    BoxShadow(
+      color: Colors.black12,
+      blurRadius: 8,
+      offset: Offset(0, 4),
+    )
+  ];
+
+  static PopupMenuButton popupMenuButton = PopupMenuButton(
+    onSelected: (choice) {
+      switch (choice) {
+        case 'Paramètres':
+          navigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (_) => const SettingsPage()),
+          );
+          break;
+        case 'Debug':
+          navigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (_) => const DebugScreen()),
+          );
+          break;
+      }
+    },
+    itemBuilder: (context) {
+      return [
+        PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined, context),
+        PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
+        PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
+        PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined, context),
+      ];
+    },
+  );
+  static String monthToString(int month) {
+    switch (month) {
+      case 1:
+        return 'Jan.';
+      case 2:
+        return 'Fév.';
+      case 3:
+        return 'Mars';
+      case 4:
+        return 'Avril';
+      case 5:
+        return 'Mai';
+      case 6:
+        return 'Juin';
+      case 7:
+        return 'Juil.';
+      case 8:
+        return 'Août';
+      case 9:
+        return 'Sept.';
+      case 10:
+        return 'Oct.';
+      case 11:
+        return 'Nov.';
+      case 12:
+        return 'Déc.';
+      default:
+        throw Error();
+    }
+  }
+
+  static String dateToString(DateTime date) {
+    final DateTime now = DateTime.now();
+    if (date.day == now.day &&
+        date.month == now.month &&
+        date.year == now.year) {
+      return date.hour.toString() +
+          ':' +
+          date.second.toString().padLeft(2, '0');
+    } else if (date.year == now.year) {
+      return date.day.toString() + ' ' + monthToString(date.month);
+    } else {
+      return date.day.toString() +
+          '/' +
+          date.month.toString() +
+          '/' +
+          date.year.toString();
+    }
+  }
+}
+
 class KosmosApp extends StatefulWidget {
   const KosmosApp({Key? key}) : super(key: key);
 
@@ -319,21 +323,26 @@ class KosmosState extends State with WidgetsBindingObserver {
       stdout.writeln("Token:" + Global.token!);
       Global.client = Client(Global.token!);
     }
-
+    Global.theme = ThemeData(
+      colorScheme: const ColorScheme.light().copyWith(
+        primary: Colors.teal.shade100,
+        onPrimary: Colors.black,
+        secondary: Colors.deepPurple,
+        surface: Colors.white,
+        background: const Color.fromARGB(255, 245, 245, 245),
+        onTertiary: Colors.black45,
+      ),
+      /*  const ColorScheme.dark().copyWith(
+          onTertiary: Colors.white54,
+          primary: Colors.teal.shade900,
+        ), */
+      useMaterial3: true,
+    );
     return MaterialApp(
       scaffoldMessengerKey: _messengerKey,
       navigatorKey: Global.navigatorKey,
       title: title,
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light().copyWith(
-          primary: Colors.teal.shade100,
-          onPrimary: Colors.black,
-          secondary: Colors.deepPurple,
-          surface: Colors.white,
-          background: const Color.fromARGB(255, 245, 245, 245),
-        ),
-        useMaterial3: true,
-      ),
+      theme: Global.theme!,
       home: _mainWidget,
     );
   }

@@ -98,7 +98,9 @@ class MessagePreview extends StatelessWidget {
               _conversation.customPreview ??
                   Text(
                     HtmlUnescape().convert(_conversation.preview),
-                    style: const TextStyle(fontSize: 13, color: Colors.black45),
+                    style: TextStyle(
+                        fontSize: 13,
+                        color: Global.theme!.colorScheme.onTertiary),
                   ),
             ],
           ),
@@ -165,7 +167,7 @@ class MessagesState extends State<Messages> {
       key: key,
       child: NestedScrollView(
         floatHeaderSlivers: true,
-        headerSliverBuilder: (ctx, innerBoxScrolled) {
+        headerSliverBuilder: (ctx, innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
               actions: [
@@ -182,7 +184,7 @@ class MessagesState extends State<Messages> {
               ],
               title: const Text('Messagerie'),
               floating: true,
-              forceElevated: innerBoxScrolled,
+              forceElevated: innerBoxIsScrolled,
             )
           ];
         },
@@ -273,9 +275,9 @@ class MessagesSearchDelegate extends SearchDelegate {
   @override
   Widget buildSuggestions(BuildContext context) {
     if (query.length < 3) {
-      return const Center(
+      return Center(
           child: Text('Entrez au moins 3 caractères',
-              style: TextStyle(color: Colors.black45)));
+              style: TextStyle(color: Global.theme!.colorScheme.onTertiary)));
     }
     Global.searchQuery = query;
     if (Global.messageSearchSuggestionState != null) {
@@ -314,10 +316,10 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
     return _conversations == null
         ? const Center(child: CircularProgressIndicator())
         : _conversations!.isEmpty
-            ? const Center(
+            ? Center(
                 child: Text(
                 'Aucun résultat trouvé.',
-                style: TextStyle(color: Colors.black45),
+                style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
                 textAlign: TextAlign.center,
               ))
             : ListView.separated(
@@ -375,7 +377,7 @@ class _ConversationViewState extends State<ConversationView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Global.theme!.colorScheme.background,
       body: CustomScrollView(
         slivers: [
           SliverAppBar(
@@ -388,54 +390,50 @@ class _ConversationViewState extends State<ConversationView> {
             delegate: SliverChildBuilderDelegate(
               (BuildContext context, int index) {
                 final _parentKey = GlobalKey();
-                return Container(
-                  margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                      index == _conversation!.messages.length - 1 ? 14 : 7),
-                  decoration: const BoxDecoration(
-                      boxShadow: [
-                        BoxShadow(
-                            color: Colors.black12,
-                            blurRadius: 8,
-                            offset: Offset(0, 4))
-                      ],
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(Radius.circular(8))),
-                  padding: const EdgeInsets.all(8.0),
-                  child: Column(
-                    key: _parentKey,
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              _conversation!.messages[index].author,
-                              textAlign: TextAlign.left,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(fontSize: 14),
+                return Card(
+                  margin: const EdgeInsets.all(8.0),
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                      key: _parentKey,
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                _conversation!.messages[index].author,
+                                textAlign: TextAlign.left,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 14),
+                              ),
                             ),
-                          ),
-                          Text(Global.dateToString(
-                              _conversation!.messages[index].date)),
-                        ],
-                      ),
-                      Html(
-                        data: HtmlUnescape().convert(
-                            _conversation!.messages[index].htmlContent),
-                        style: {
-                          'blockquote': Style(
-                              border: const Border(
-                                  left: BorderSide(
-                                      color: Colors.black12, width: 2)),
-                              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                              margin: EdgeInsets.zero)
-                        },
-                        onLinkTap: (url, context, map, element) {
-                          launch(url!);
-                        },
-                      ),
-                    ],
+                            Text(Global.dateToString(
+                                _conversation!.messages[index].date)),
+                          ],
+                        ),
+                        Html(
+                          data: HtmlUnescape().convert(
+                              _conversation!.messages[index].htmlContent),
+                          style: {
+                            'blockquote': Style(
+                                border: const Border(
+                                    left: BorderSide(
+                                        color: Colors.black12, width: 2)),
+                                padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                margin: EdgeInsets.zero)
+                          },
+                          onLinkTap: (url, context, map, element) {
+                            launch(url!);
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },

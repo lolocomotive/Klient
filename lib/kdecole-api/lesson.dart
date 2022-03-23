@@ -20,7 +20,7 @@
 import 'dart:convert';
 import 'dart:math';
 
-import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 
 import '../main.dart';
@@ -69,7 +69,7 @@ class Lesson {
       1,
       Random(seed).nextDouble() * 360,
       .7,
-      .8,
+      Global.theme!.colorScheme.brightness == Brightness.dark ? .15 : .85,
     ).toColor();
   }
 
@@ -87,7 +87,7 @@ class Lesson {
     );
   }
 
-  static Future<List<Lesson>> fetchAll() async {
+  static Future<List<Lesson>> fetchAll(BuildContext context) async {
     final List<Lesson> lessons = [];
     final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
@@ -96,7 +96,7 @@ class Lesson {
     return lessons;
   }
 
-  static Future<Lesson?> byID(int id) async {
+  static Future<Lesson?> byID(int id, BuildContext context) async {
     final results =
         await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
     if (results.isEmpty) return null;

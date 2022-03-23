@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/main.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -6,12 +7,12 @@ class SettingsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
+      backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(
         title: const Text('Paramètres'),
       ),
       body: Column(
-        children: [Text('Dinkdonk')],
+        children: const [Text('Dinkdonk')],
       ),
     );
   }

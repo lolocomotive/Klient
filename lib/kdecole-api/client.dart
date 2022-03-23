@@ -32,7 +32,6 @@ class Client {
   static const String _serverURL =
       'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
-  late BuildContext? _ctx;
   String? idEtablissement;
   String? idEleve;
 
@@ -103,7 +102,6 @@ class Client {
   /// the build context is for showing an error notification
   Client(String token, [BuildContext? ctx]) {
     _token = token;
-    _ctx = ctx;
     Global.storage!.write(key: 'token', value: _token);
     Global.token = _token;
   }

@@ -18,7 +18,6 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/grade.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
@@ -35,29 +34,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<List<Grade>> _grades = [];
+  final List<List<Grade>> _grades = [];
   final List<MapEntry<Exercise, Lesson>> _homework = [];
   List<NewsArticle> _news = [];
   _HomeState() {
     Grade.fetchAll().then((grades) => setState(() {
-          print(grades);
           for (int i = 0; i < grades.length; i++) {
-            print(_grades);
-            print((i / 2).floor());
             if (i % 2 == 0) {
               _grades.add([grades[i]]);
             } else {
               _grades[(i / 2).floor()].add(grades[i]);
             }
           }
-          print(_grades);
         }));
     Exercise.fetchAll().then((exercises) async {
       for (final exercise in exercises) {
         if (exercise.lessonFor == null) continue;
         if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-        _homework
-            .add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
+        _homework.add(MapEntry(
+            exercise, (await Lesson.byID(exercise.lessonFor!, context))!));
       }
       setState(() {});
     });
@@ -73,81 +68,92 @@ class _HomeState extends State<Home> {
   }
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          AppBar(
-            title: const Text('Accueil'),
-            actions: [Global.popupMenuButton],
-          ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
-            child: Text(
-              "Dernières notes",
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-          _grades.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                )
-              : SizedBox(
-                  child: Column(
-                    children: _grades
-                        .map((twoGrades) => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                SingleGradeView(twoGrades[0]),
-                                if (twoGrades.length > 1)
-                                  SingleGradeView(twoGrades[1])
-                              ],
-                            ))
-                        .toList(),
+    return NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              actions: [Global.popupMenuButton],
+              title: const Text('Accueil'),
+              floating: true,
+              forceElevated: innerBoxIsScrolled,
+            )
+          ];
+        },
+        body: Scrollbar(
+          child: SingleChildScrollView(
+            child: Column(
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
+                  child: Text(
+                    "Dernières notes",
+                    style: TextStyle(fontSize: 20),
                   ),
                 ),
-          const Padding(
-            padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
-            child: Text(
-              "Travail à faire",
-              style: TextStyle(fontSize: 20),
+                _grades.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      )
+                    : SizedBox(
+                        child: Column(
+                          children: _grades
+                              .map((twoGrades) => Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      SingleGradeView(twoGrades[0]),
+                                      if (twoGrades.length > 1)
+                                        SingleGradeView(twoGrades[1])
+                                    ],
+                                  ))
+                              .toList(),
+                        ),
+                      ),
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
+                  child: Text(
+                    "Travail à faire",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                _homework.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      )
+                    : Column(
+                        children: _homework
+                            .map((homework) => ExerciceView(
+                                  homework.key,
+                                  homework.value,
+                                  showDate: true,
+                                  showSubject: true,
+                                ))
+                            .toList(),
+                      ),
+                const Padding(
+                  padding: EdgeInsets.all(16.0),
+                  child: Text(
+                    "Actualités",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                ),
+                _news.isEmpty
+                    ? const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: CircularProgressIndicator(),
+                      )
+                    : Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: _news
+                            .map((article) => ArticlePreview(article))
+                            .toList(),
+                      ),
+              ],
             ),
           ),
-          _homework.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                )
-              : Column(
-                  children: _homework
-                      .map((homework) => ExerciceView(
-                            homework.key,
-                            homework.value,
-                            showDate: true,
-                            showSubject: true,
-                          ))
-                      .toList(),
-                ),
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              "Actualités",
-              style: TextStyle(fontSize: 20),
-            ),
-          ),
-          _news.isEmpty
-              ? const Padding(
-                  padding: EdgeInsets.all(8.0),
-                  child: CircularProgressIndicator(),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children:
-                      _news.map((article) => ArticlePreview(article)).toList(),
-                ),
-        ],
-      ),
-    );
+        ));
   }
 }
 
@@ -212,7 +218,7 @@ class SingleGradeView extends StatelessWidget {
                   children: [
                     Text(
                       _grade.subject,
-                      style: TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(fontWeight: FontWeight.bold),
                     ),
                     Text(
                       Global.dateToString(_grade.date),
@@ -231,7 +237,7 @@ class SingleGradeView extends StatelessWidget {
                         children: [
                           Text(
                             _grade.grade.toString().replaceAll('.', ','),
-                            style: TextStyle(
+                            style: const TextStyle(
                                 fontWeight: FontWeight.bold, fontSize: 15),
                           ),
                           const Divider(height: 10),

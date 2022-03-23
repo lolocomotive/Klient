@@ -17,10 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:io';
-
-import 'package:sqflite/sqflite.dart';
-
 import '../main.dart';
 import 'news_attachment.dart';
 

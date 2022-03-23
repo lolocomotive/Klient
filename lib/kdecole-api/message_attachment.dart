@@ -19,13 +19,15 @@
 
 import 'package:kosmos_client/kdecole-api/message.dart';
 import 'package:kosmos_client/main.dart';
-import 'package:sqflite/sqflite.dart';
+
 /// An attachment that is linked to a [Message] (only it's id to avoid circular
 /// references though)
 class MessageAttachment {
   int id;
+
   /// The ID of the [Message] this attachment belongs to
   int parentID;
+
   /// Normally the URL you would download the attachment app, but null is always
   /// provided by the API so we have to redirect the user to a web browser for
   /// him to be able to download the attachment
@@ -35,8 +37,7 @@ class MessageAttachment {
   MessageAttachment(this.id, this.parentID, this.url, this.name);
 
   /// Get the attachments of a specific [Message]
-  static Future<List<MessageAttachment>> fromMessageID(
-      int messageID) async {
+  static Future<List<MessageAttachment>> fromMessageID(int messageID) async {
     final List<MessageAttachment> attachments = [];
     final results = await Global.db!.query('MessageAttachments',
         where: 'ParentID = ?', whereArgs: [messageID]);
