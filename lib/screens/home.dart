@@ -35,12 +35,22 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<Grade> _grades = [];
+  List<List<Grade>> _grades = [];
   final List<MapEntry<Exercise, Lesson>> _homework = [];
   List<NewsArticle> _news = [];
   _HomeState() {
     Grade.fetchAll().then((grades) => setState(() {
-          _grades = grades;
+          print(grades);
+          for (int i = 0; i < grades.length; i++) {
+            print(_grades);
+            print((i / 2).floor());
+            if (i % 2 == 0) {
+              _grades.add([grades[i]]);
+            } else {
+              _grades[(i / 2).floor()].add(grades[i]);
+            }
+          }
+          print(_grades);
         }));
     Exercise.fetchAll().then((exercises) async {
       for (final exercise in exercises) {
@@ -51,6 +61,11 @@ class _HomeState extends State<Home> {
       }
       setState(() {});
     });
+    _homework.sort(
+      (a, b) =>
+          a.key.dateFor!.millisecondsSinceEpoch -
+          b.key.dateFor!.millisecondsSinceEpoch,
+    );
     NewsArticle.fetchAll().then((news) {
       _news = news;
       setState(() {});
@@ -78,11 +93,17 @@ class _HomeState extends State<Home> {
                   child: CircularProgressIndicator(),
                 )
               : SizedBox(
-                  height: 200,
-                  child: GridView.count(
-                    crossAxisCount: 2,
-                    children:
-                        _grades.map((grade) => SingleGradeView(grade)).toList(),
+                  child: Column(
+                    children: _grades
+                        .map((twoGrades) => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                SingleGradeView(twoGrades[0]),
+                                if (twoGrades.length > 1)
+                                  SingleGradeView(twoGrades[1])
+                              ],
+                            ))
+                        .toList(),
                   ),
                 ),
           const Padding(
@@ -107,7 +128,6 @@ class _HomeState extends State<Home> {
                           ))
                       .toList(),
                 ),
-          const Divider(),
           const Padding(
             padding: EdgeInsets.all(16.0),
             child: Text(
@@ -175,10 +195,10 @@ class SingleGradeView extends StatelessWidget {
   const SingleGradeView(this._grade, {Key? key}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
+    return Flexible(
       child: Card(
-          elevation: 2,
+          margin: const EdgeInsets.all(8.0),
+          elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           clipBehavior: Clip.antiAlias,
           child: Column(
@@ -196,15 +216,30 @@ class SingleGradeView extends StatelessWidget {
                     ),
                     Text(
                       Global.dateToString(_grade.date),
+                      textAlign: TextAlign.center,
                     ),
                   ],
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.all(8.0),
-                child:
-                    Text(_grade.grade.toString() + '/' + _grade.of.toString()),
-              ),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: SizedBox(
+                      width: 50,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            _grade.grade.toString().replaceAll('.', ','),
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold, fontSize: 15),
+                          ),
+                          const Divider(height: 10),
+                          Text(_grade.of.toInt().toString())
+                        ],
+                      ),
+                    ),
+                  )),
             ],
           )),
     );

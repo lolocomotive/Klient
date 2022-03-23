@@ -6,7 +6,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/screens/debug.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/settings.dart';
-import 'package:morpheus/morpheus.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
