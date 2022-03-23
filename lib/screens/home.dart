@@ -78,7 +78,7 @@ class _HomeState extends State<Home> {
                   child: CircularProgressIndicator(),
                 )
               : SizedBox(
-                  height: 100,
+                  height: 200,
                   child: GridView.count(
                     crossAxisCount: 2,
                     children:
@@ -137,16 +137,15 @@ class ArticlePreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        padding: const EdgeInsets.all(8.0),
-        decoration: const BoxDecoration(
-          borderRadius: BorderRadius.all(Radius.circular(8)),
-          boxShadow: Global.standardShadow,
-          color: Colors.white,
-        ),
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
@@ -178,13 +177,10 @@ class SingleGradeView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
-      child: Container(
+      child: Card(
+          elevation: 2,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           clipBehavior: Clip.antiAlias,
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.all(Radius.circular(8.0)),
-            boxShadow: Global.standardShadow,
-          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [

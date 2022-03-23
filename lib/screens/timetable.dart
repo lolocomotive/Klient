@@ -212,26 +212,25 @@ class SingleLessonView extends StatelessWidget {
       top: (_lesson.startDouble - Global.startTime) * Global.heightPerHour,
       left: 0,
       right: 0,
-      child: GestureDetector(
-        onTap: () {
-          Navigator.of(context).push(
-            MorpheusPageRoute(
-              builder: (_) => DetailedLessonView(_lesson),
-              parentKey: _key,
-            ),
-          );
-        },
-        key: _key,
-        child: Container(
-          height: _lesson.length * Global.heightPerHour,
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            decoration: BoxDecoration(
-              boxShadow: Global.standardShadow,
-              color: _lesson.isModified ? Colors.yellow.shade200 : Colors.white,
-              borderRadius: const BorderRadius.all(Radius.circular(8)),
-            ),
-            clipBehavior: Clip.antiAlias,
+      child: SizedBox(
+        height: _lesson.length * Global.heightPerHour,
+        child: Card(
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          color: _lesson.isModified ? Colors.yellow.shade200 : Colors.white,
+          clipBehavior: Clip.antiAlias,
+          child: InkWell(
+            onTap: () {
+              Navigator.of(context).push(
+                MorpheusPageRoute(
+                  builder: (_) => DetailedLessonView(_lesson),
+                  parentKey: _key,
+                ),
+              );
+            },
+            key: _key,
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -354,40 +353,38 @@ class ExerciceView extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
-        Padding(
-          padding: const EdgeInsets.all(16.0),
+        Card(
+          margin: const EdgeInsets.all(8.0),
+          clipBehavior: Clip.antiAlias,
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: const BoxDecoration(
-              borderRadius: BorderRadius.all(Radius.circular(8)),
-              boxShadow: Global.standardShadow,
-            ),
-            child: Container(
-              color: Colors.white,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    color: _lesson.color,
-                    padding: const EdgeInsets.all(8.0),
-                    child: Text(
-                      _exercise.title,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
-                      textAlign: TextAlign.center,
-                    ),
+            color: Colors.white,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Container(
+                  color: _lesson.color,
+                  padding: const EdgeInsets.all(8.0),
+                  child: Text(
+                    _exercise.title,
+                    style: const TextStyle(fontWeight: FontWeight.bold),
+                    textAlign: TextAlign.center,
                   ),
-                  Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: _exercise.htmlContent == ''
-                        ? const Text(
-                            'Aucun contenu renseigné',
-                            style: TextStyle(color: Colors.black45),
-                            textAlign: TextAlign.center,
-                          )
-                        : Html(data: _exercise.htmlContent),
-                  ),
-                ],
-              ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: _exercise.htmlContent == ''
+                      ? const Text(
+                          'Aucun contenu renseigné',
+                          style: TextStyle(color: Colors.black45),
+                          textAlign: TextAlign.center,
+                        )
+                      : Html(data: _exercise.htmlContent),
+                ),
+              ],
             ),
           ),
         ),

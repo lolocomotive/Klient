@@ -96,9 +96,10 @@ class MessagePreview extends StatelessWidget {
                         fontSize: 14),
                   ),
               _conversation.customPreview ??
-                  Text(HtmlUnescape().convert(_conversation.preview),
-                      style:
-                          const TextStyle(fontSize: 13, color: Colors.black45)),
+                  Text(
+                    HtmlUnescape().convert(_conversation.preview),
+                    style: const TextStyle(fontSize: 13, color: Colors.black45),
+                  ),
             ],
           ),
         ),
@@ -210,23 +211,24 @@ class MessagesState extends State<Messages> {
                   );
                 }
                 final _parentKey = GlobalKey();
-                return InkWell(
-                  child: Container(
-                      margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                          index == _conversations.length - 1 ? 14 : 7),
-                      decoration: const BoxDecoration(
-                          boxShadow: [
-                            BoxShadow(
-                                color: Colors.black12,
-                                blurRadius: 8,
-                                offset: Offset(0, 4))
-                          ],
-                          color: Colors.white,
-                          borderRadius: BorderRadius.all(Radius.circular(8))),
+                return Card(
+                  margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
+                      index == _conversations.length - 1 ? 14 : 7),
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: InkWell(
+                    child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MessagePreview(_conversations[index], _parentKey)),
-                  onTap: () => openConversation(context, _parentKey,
-                      _conversations[index].id, _conversations[index].subject),
+                      child: MessagePreview(_conversations[index], _parentKey),
+                    ),
+                    onTap: () => openConversation(
+                        context,
+                        _parentKey,
+                        _conversations[index].id,
+                        _conversations[index].subject),
+                  ),
                 );
               },
             ),
