@@ -26,6 +26,7 @@ import 'package:kosmos_client/kdecole-api/database_manager.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../main.dart';
 
@@ -81,81 +82,84 @@ class _TimetableState extends State<Timetable> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        AppBar(
-          title: const Text(
-            "Emploi du temps",
-          ),
-          actions: [Global.popupMenuButton],
-        ),
-        Expanded(
-          child: RefreshIndicator(
-            onRefresh: () async {
-              await Global.db!.delete('ExerciseAttachments');
-              await Global.db!.delete('Exercises');
-              await Global.db!.delete('Lessons');
-              await DatabaseManager.fetchTimetable();
-              setState(() {});
-            },
-            child: SingleChildScrollView(
-              child: SizedBox(
-                height: (Global.heightPerHour *
-                        Global.maxLessonsPerDay *
-                        Global.lessonLength +
-                    32),
-                child: Stack(
-                  children: [
-                    PageView.builder(
-                      controller: _pageController,
-                      itemBuilder: (ctx, index) {
-                        if (_calendar.isEmpty) {
-                          return Column(
-                            children: const [
-                              Padding(
-                                padding: EdgeInsets.all(8.0),
-                                child: CircularProgressIndicator(),
+    return NestedScrollView(
+      floatHeaderSlivers: true,
+      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
+        return [
+          SliverAppBar(
+            floating: true,
+            forceElevated: innerBoxIsScrolled,
+            title: const Text("Emploi du temps"),
+            actions: [Global.popupMenuButton],
+          )
+        ];
+      },
+      body: Scrollbar(
+        child: RefreshIndicator(
+          onRefresh: () async {
+            await Global.db!.delete('ExerciseAttachments');
+            await Global.db!.delete('Exercises');
+            await Global.db!.delete('Lessons');
+            await DatabaseManager.fetchTimetable();
+            setState(() {});
+          },
+          child: SingleChildScrollView(
+            child: SizedBox(
+              height: (Global.heightPerHour *
+                      Global.maxLessonsPerDay *
+                      Global.lessonLength +
+                  32),
+              child: Stack(
+                children: [
+                  PageView.builder(
+                    controller: _pageController,
+                    itemBuilder: (ctx, index) {
+                      if (_calendar.isEmpty) {
+                        return Column(
+                          children: const [
+                            Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: CircularProgressIndicator(),
+                            ),
+                          ],
+                        );
+                      }
+                      return SingleDayCalendarView(_calendar[index]);
+                    },
+                    itemCount: max(_calendar.length, 1),
+                  ),
+                  Container(
+                    color:
+                        Global.theme!.colorScheme.brightness == Brightness.dark
+                            ? Colors.black38
+                            : Colors.white60,
+                    width: Global.timeWidth,
+                    child: MediaQuery.removePadding(
+                      removeTop: true,
+                      context: context,
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                        child: ListView.builder(
+                          itemBuilder: (ctx, index) {
+                            return SizedBox(
+                              height: Global.heightPerHour,
+                              child: Text(
+                                (index + Global.startTime).toString() + 'h',
+                                textAlign: TextAlign.center,
                               ),
-                            ],
-                          );
-                        }
-                        return SingleDayCalendarView(_calendar[index]);
-                      },
-                      itemCount: max(_calendar.length, 1),
-                    ),
-                    Container(
-                      color: Global.theme!.colorScheme.brightness ==
-                              Brightness.dark
-                          ? Colors.black38
-                          : Colors.white60,
-                      width: Global.timeWidth,
-                      child: MediaQuery.removePadding(
-                        removeTop: true,
-                        context: context,
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
-                          child: ListView.builder(
-                            itemBuilder: (ctx, index) {
-                              return SizedBox(
-                                height: Global.heightPerHour,
-                                child: Text(
-                                  (index + Global.startTime).toString() + 'h',
-                                  textAlign: TextAlign.center,
-                                ),
-                              );
-                            },
-                            itemCount: Global.maxLessonsPerDay,
-                          ),
+                            );
+                          },
+                          itemCount: Global.maxLessonsPerDay,
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
-        )
-      ],
+        ),
+      ),
     );
   }
 }
@@ -387,7 +391,12 @@ class ExerciceView extends StatelessWidget {
                             color: Global.theme!.colorScheme.onTertiary),
                         textAlign: TextAlign.center,
                       )
-                    : Html(data: _exercise.htmlContent),
+                    : Html(
+                        data: _exercise.htmlContent,
+                        onLinkTap: (url, context, map, element) {
+                          launch(url!);
+                        },
+                      ),
               ),
             ],
           ),
