@@ -92,39 +92,33 @@ class MainState extends State<Main> {
       Global.fab = null;
     }
     return Scaffold(
-      bottomNavigationBar: BottomNavigationBar(
-        items: const [
-          BottomNavigationBarItem(
+      backgroundColor: Theme.of(context).colorScheme.background,
+      bottomNavigationBar: NavigationBar(
+        backgroundColor: Colors.deepPurple.shade100,
+        destinations: const [
+          NavigationDestination(
             icon: Icon(Icons.home_outlined),
-            activeIcon: Icon(Icons.home),
+            selectedIcon: Icon(Icons.home),
             label: 'Accueil',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.message_outlined),
-            activeIcon: Icon(Icons.message),
+            selectedIcon: Icon(Icons.message),
             label: 'Messagerie',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.calendar_today_outlined),
-            activeIcon: Icon(Icons.calendar_today),
+            selectedIcon: Icon(Icons.calendar_today),
             label: 'Emploi du temps',
           ),
-          BottomNavigationBarItem(
+          NavigationDestination(
             icon: Icon(Icons.bug_report_outlined),
-            activeIcon: Icon(Icons.bug_report),
+            selectedIcon: Icon(Icons.bug_report),
             label: 'Debug',
           ),
         ],
-        currentIndex: _currentIndex,
-        unselectedItemColor: Colors.black45,
-        unselectedFontSize: 12,
-        unselectedIconTheme: const IconThemeData(size: 26),
-        selectedItemColor: Colors.black,
-        selectedFontSize: 12,
-        selectedIconTheme: const IconThemeData(size: 26),
-        showUnselectedLabels: true,
-        type: BottomNavigationBarType.fixed,
-        onTap: (index) {
+        selectedIndex: _currentIndex,
+        onDestinationSelected: (index) {
           setState(() {
             _currentIndex = index;
           });

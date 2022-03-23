@@ -104,52 +104,49 @@ class _TimetableState extends State<Timetable> {
                         Global.maxLessonsPerDay *
                         Global.lessonLength +
                     32),
-                child: Container(
-                  color: const Color.fromARGB(255, 240, 240, 240),
-                  child: Stack(
-                    children: [
-                      PageView.builder(
-                        controller: _pageController,
-                        itemBuilder: (ctx, index) {
-                          if (_calendar.isEmpty) {
-                            return Column(
-                              children: const [
-                                Padding(
-                                  padding: EdgeInsets.all(8.0),
-                                  child: CircularProgressIndicator(),
+                child: Stack(
+                  children: [
+                    PageView.builder(
+                      controller: _pageController,
+                      itemBuilder: (ctx, index) {
+                        if (_calendar.isEmpty) {
+                          return Column(
+                            children: const [
+                              Padding(
+                                padding: EdgeInsets.all(8.0),
+                                child: CircularProgressIndicator(),
+                              ),
+                            ],
+                          );
+                        }
+                        return SingleDayCalendarView(_calendar[index]);
+                      },
+                      itemCount: max(_calendar.length, 1),
+                    ),
+                    Container(
+                      color: Colors.white60,
+                      width: Global.timeWidth,
+                      child: MediaQuery.removePadding(
+                        removeTop: true,
+                        context: context,
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                          child: ListView.builder(
+                            itemBuilder: (ctx, index) {
+                              return SizedBox(
+                                height: Global.heightPerHour,
+                                child: Text(
+                                  (index + Global.startTime).toString() + 'h',
+                                  textAlign: TextAlign.center,
                                 ),
-                              ],
-                            );
-                          }
-                          return SingleDayCalendarView(_calendar[index]);
-                        },
-                        itemCount: max(_calendar.length, 1),
-                      ),
-                      Container(
-                        color: Colors.white60,
-                        width: Global.timeWidth,
-                        child: MediaQuery.removePadding(
-                          removeTop: true,
-                          context: context,
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
-                            child: ListView.builder(
-                              itemBuilder: (ctx, index) {
-                                return SizedBox(
-                                  height: Global.heightPerHour,
-                                  child: Text(
-                                    (index + Global.startTime).toString() + 'h',
-                                    textAlign: TextAlign.center,
-                                  ),
-                                );
-                              },
-                              itemCount: Global.maxLessonsPerDay,
-                            ),
+                              );
+                            },
+                            itemCount: Global.maxLessonsPerDay,
                           ),
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -297,6 +294,7 @@ class DetailedLessonView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(
         title: Text(
           _lesson.title,

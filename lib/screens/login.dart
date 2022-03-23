@@ -43,8 +43,8 @@ class LoginState extends State<Login> {
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
       try {
-        Global.client = await Client.login(_unameController.text,
-            _pwdController.text);
+        Global.client =
+            await Client.login(_unameController.text, _pwdController.text);
         setState(() {});
       } catch (e) {
         _messengerKey.currentState!.showSnackBar(
@@ -64,6 +64,7 @@ class LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Theme.of(context).colorScheme.background,
       appBar: AppBar(title: const Text('Connexion')),
       body: Container(
         padding: const EdgeInsets.all(20.0),
@@ -95,7 +96,8 @@ class LoginState extends State<Login> {
                 autocorrect: false,
                 obscureText: true,
               ),
-              ElevatedButton(onPressed: _login, child: const Text('Se connecter'))
+              ElevatedButton(
+                  onPressed: _login, child: const Text('Se connecter'))
             ],
           ),
         ),

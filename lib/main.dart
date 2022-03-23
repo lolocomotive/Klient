@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/settings.dart';
@@ -128,12 +129,31 @@ class Global {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  //SystemChrome.setSystemUIOverlayStyle(
+  //  const SystemUiOverlayStyle(
+  //    systemNavigationBarColor: Colors.transparent,
+  //    systemNavigationBarDividerColor: Colors.transparent,
+  //    systemNavigationBarIconBrightness: Brightness.light,
+  //    statusBarIconBrightness: Brightness.light,
+  //    statusBarBrightness: Brightness.dark,
+  //  ),
+  //);
+  //SystemChrome.setEnabledSystemUIMode(
+  //  SystemUiMode.edgeToEdge,
+  //  overlays: [SystemUiOverlay.top],
+  //);
   final dbDir = await getTemporaryDirectory();
   final dbPath = dbDir.path + '/kdecole.db';
   //await deleteDatabase(dbPath);
   stdout.writeln('Database URL: ' + dbPath);
   Global.storage = const FlutterSecureStorage();
-  Global.token = await Global.storage!.read(key: 'token');
+  try {
+    Global.token = await Global.storage!.read(key: 'token');
+  } on PlatformException catch (e) {
+    // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
+    await Global.storage!.deleteAll();
+    Global.token = '';
+  }
   Global.db = await openDatabase(dbPath);
   final queryResult = await Global.db!.query('sqlite_master');
   final tables = [
@@ -260,7 +280,7 @@ class KosmosApp extends StatefulWidget {
   }
 }
 
-class KosmosState extends State {
+class KosmosState extends State with WidgetsBindingObserver {
   final title = 'Kosmos client';
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
   final _loginFormKey = GlobalKey<FormState>();
@@ -292,6 +312,11 @@ class KosmosState extends State {
   }
 
   @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {}
+  }
+
+  @override
   Widget build(BuildContext context) {
     _mainWidget = const Main();
     if (Global.token == null || Global.token == '') {
@@ -306,7 +331,14 @@ class KosmosState extends State {
       navigatorKey: Global.navigatorKey,
       title: title,
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: const ColorScheme.light().copyWith(
+          primary: Colors.teal.shade100,
+          onPrimary: Colors.black,
+          secondary: Colors.deepPurple,
+          surface: Colors.white,
+          background: const Color.fromARGB(255, 245, 245, 245),
+        ),
+        useMaterial3: true,
       ),
       home: _mainWidget,
     );

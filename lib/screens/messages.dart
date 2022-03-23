@@ -162,7 +162,6 @@ class MessagesState extends State<Messages> {
   Widget build(BuildContext context) {
     return Container(
       key: key,
-      color: const Color.fromARGB(255, 240, 240, 240),
       child: NestedScrollView(
         floatHeaderSlivers: true,
         headerSliverBuilder: (ctx, innerBoxScrolled) {
@@ -367,77 +366,75 @@ class _ConversationViewState extends State<ConversationView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
-        color: const Color.fromARGB(255, 240, 240, 240),
-        child: CustomScrollView(
-          slivers: [
-            SliverAppBar(
-              title: Text(_conversation != null
-                  ? _conversation!.subject
-                  : Global.currentConversationSubject!),
-              floating: true,
-            ),
-            SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (BuildContext context, int index) {
-                  final _parentKey = GlobalKey();
-                  return Container(
-                    margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                        index == _conversation!.messages.length - 1 ? 14 : 7),
-                    decoration: const BoxDecoration(
-                        boxShadow: [
-                          BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 8,
-                              offset: Offset(0, 4))
-                        ],
-                        color: Colors.white,
-                        borderRadius: BorderRadius.all(Radius.circular(8))),
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      key: _parentKey,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _conversation!.messages[index].author,
-                                textAlign: TextAlign.left,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            Text(Global.dateToString(
-                                _conversation!.messages[index].date)),
-                          ],
-                        ),
-                        Html(
-                          data: HtmlUnescape().convert(
-                              _conversation!.messages[index].htmlContent),
-                          style: {
-                            'blockquote': Style(
-                                border: const Border(
-                                    left: BorderSide(
-                                        color: Colors.black12, width: 2)),
-                                padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                margin: EdgeInsets.zero)
-                          },
-                          onLinkTap: (url, context, map, element) {
-                            launch(url!);
-                          },
-                        ),
+      backgroundColor: Theme.of(context).colorScheme.background,
+      body: CustomScrollView(
+        slivers: [
+          SliverAppBar(
+            title: Text(_conversation != null
+                ? _conversation!.subject
+                : Global.currentConversationSubject!),
+            floating: true,
+          ),
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                final _parentKey = GlobalKey();
+                return Container(
+                  margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
+                      index == _conversation!.messages.length - 1 ? 14 : 7),
+                  decoration: const BoxDecoration(
+                      boxShadow: [
+                        BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, 4))
                       ],
-                    ),
-                  );
-                },
-                childCount:
-                    _conversation != null ? _conversation!.messages.length : 0,
-              ),
+                      color: Colors.white,
+                      borderRadius: BorderRadius.all(Radius.circular(8))),
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    key: _parentKey,
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              _conversation!.messages[index].author,
+                              textAlign: TextAlign.left,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 14),
+                            ),
+                          ),
+                          Text(Global.dateToString(
+                              _conversation!.messages[index].date)),
+                        ],
+                      ),
+                      Html(
+                        data: HtmlUnescape().convert(
+                            _conversation!.messages[index].htmlContent),
+                        style: {
+                          'blockquote': Style(
+                              border: const Border(
+                                  left: BorderSide(
+                                      color: Colors.black12, width: 2)),
+                              padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                              margin: EdgeInsets.zero)
+                        },
+                        onLinkTap: (url, context, map, element) {
+                          launch(url!);
+                        },
+                      ),
+                    ],
+                  ),
+                );
+              },
+              childCount:
+                  _conversation != null ? _conversation!.messages.length : 0,
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
