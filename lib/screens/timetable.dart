@@ -49,7 +49,7 @@ class _TimetableState extends State<Timetable> {
     _reload();
   }
   void _reload([r = true]) {
-    Lesson.fetchAll(context).then((lessons) {
+    Lesson.fetchAll().then((lessons) {
       List<Lesson> day = [];
       if (lessons.isEmpty) {
         if (r) DatabaseManager.fetchTimetable().then(_reload(false));

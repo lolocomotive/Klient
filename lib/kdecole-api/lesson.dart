@@ -87,7 +87,7 @@ class Lesson {
     );
   }
 
-  static Future<List<Lesson>> fetchAll(BuildContext context) async {
+  static Future<List<Lesson>> fetchAll() async {
     final List<Lesson> lessons = [];
     final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
@@ -96,7 +96,7 @@ class Lesson {
     return lessons;
   }
 
-  static Future<Lesson?> byID(int id, BuildContext context) async {
+  static Future<Lesson?> byID(int id) async {
     final results =
         await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
     if (results.isEmpty) return null;

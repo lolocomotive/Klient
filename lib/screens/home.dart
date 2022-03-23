@@ -51,8 +51,8 @@ class _HomeState extends State<Home> {
       for (final exercise in exercises) {
         if (exercise.lessonFor == null) continue;
         if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-        _homework.add(MapEntry(
-            exercise, (await Lesson.byID(exercise.lessonFor!, context))!));
+        _homework
+            .add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
       }
       setState(() {});
     });
