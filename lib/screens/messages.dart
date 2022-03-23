@@ -29,7 +29,7 @@ import '../main.dart';
 
 class MessagePreview extends StatelessWidget {
   final Conversation _conversation;
-  final GlobalKey _parentKey;
+  final GlobalKey? _parentKey;
 
   const MessagePreview(this._conversation, this._parentKey, {Key? key})
       : super(key: key);
@@ -118,7 +118,7 @@ class Messages extends StatefulWidget {
 class MessagesState extends State<Messages> {
   final GlobalKey<MessagesState> key = GlobalKey();
 
-  static void openConversation(BuildContext context, GlobalKey parentKey,
+  static void openConversation(BuildContext context, GlobalKey? parentKey,
       int conversationId, String conversationSubject) {
     Global.currentConversation = conversationId;
     Global.currentConversationSubject = conversationSubject;
@@ -322,18 +322,25 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
               ))
             : ListView.separated(
                 itemBuilder: (context, index) {
-                  final _parentKey = GlobalKey();
+                  const _parentKey = null; //FIXME fix transition //GlobalKey();
                   return InkWell(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MessagePreview(_conversations![index], _parentKey),
-                    ),
-                    onTap: () => MessagesState.openConversation(
-                        context,
-                        _parentKey,
-                        _conversations![index].id,
-                        _conversations![index].subject),
-                  );
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: MessagePreview(
+                          _conversations![index],
+                          _parentKey,
+                        ),
+                      ),
+                      onTap: () {
+                        Global.currentConversation = _conversations![index].id;
+                        Global.currentConversationSubject =
+                            _conversations![index].subject;
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ConversationView(),
+                          ),
+                        );
+                      });
                 },
                 separatorBuilder: (context, index) {
                   return const Divider();
