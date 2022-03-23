@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kosmos_client/screens/debug.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/settings.dart';
 import 'package:morpheus/morpheus.dart';
@@ -13,8 +14,9 @@ import 'kdecole-api/client.dart';
 import 'screens/multiview.dart';
 
 class PopupMenuItemWithIcon extends PopupMenuItem {
-  PopupMenuItemWithIcon(String label, IconData icon)
+  PopupMenuItemWithIcon(String label, IconData icon, {Key? key})
       : super(
+          key: key,
           value: label,
           child: Row(
             children: [
@@ -66,6 +68,11 @@ class Global {
             MaterialPageRoute(builder: (_) => const SettingsPage()),
           );
           break;
+        case 'Debug':
+          navigatorKey.currentState!.push(
+            MaterialPageRoute(builder: (_) => const DebugScreen()),
+          );
+          break;
       }
     },
     itemBuilder: (context) {
@@ -73,6 +80,7 @@ class Global {
         PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined),
         PopupMenuItemWithIcon("Aide", Icons.help_outline),
         PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined),
+        PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined),
       ];
     },
   );
@@ -129,19 +137,6 @@ class Global {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  //SystemChrome.setSystemUIOverlayStyle(
-  //  const SystemUiOverlayStyle(
-  //    systemNavigationBarColor: Colors.transparent,
-  //    systemNavigationBarDividerColor: Colors.transparent,
-  //    systemNavigationBarIconBrightness: Brightness.light,
-  //    statusBarIconBrightness: Brightness.light,
-  //    statusBarBrightness: Brightness.dark,
-  //  ),
-  //);
-  //SystemChrome.setEnabledSystemUIMode(
-  //  SystemUiMode.edgeToEdge,
-  //  overlays: [SystemUiOverlay.top],
-  //);
   final dbDir = await getTemporaryDirectory();
   final dbPath = dbDir.path + '/kdecole.db';
   //await deleteDatabase(dbPath);
