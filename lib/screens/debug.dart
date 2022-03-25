@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);

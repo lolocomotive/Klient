@@ -18,7 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 
 class UserInfo extends StatelessWidget {
   const UserInfo({Key? key}) : super(key: key);

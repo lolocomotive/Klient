@@ -20,15 +20,14 @@
 import 'package:flutter/material.dart';
 
 import '../kdecole-api/client.dart';
-import '../main.dart';
+import '../global.dart';
 
 class Login extends StatefulWidget {
-  const Login(this._messengerKey, {Key? key}) : super(key: key);
-  final GlobalKey<ScaffoldMessengerState> _messengerKey;
+  const Login({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return LoginState(_messengerKey);
+    return LoginState();
   }
 }
 
@@ -36,9 +35,8 @@ class LoginState extends State<Login> {
   final _loginFormKey = GlobalKey<FormState>();
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
-  final GlobalKey<ScaffoldMessengerState> _messengerKey;
 
-  LoginState(this._messengerKey);
+  LoginState();
 
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
@@ -47,7 +45,7 @@ class LoginState extends State<Login> {
             await Client.login(_unameController.text, _pwdController.text);
         setState(() {});
       } catch (e) {
-        _messengerKey.currentState!.showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
       }
     }
@@ -64,7 +62,6 @@ class LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(title: const Text('Connexion')),
       body: Container(
         padding: const EdgeInsets.all(20.0),

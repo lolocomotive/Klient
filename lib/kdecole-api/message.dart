@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/kdecole-api/conversation.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 
 import 'message_attachment.dart';
 

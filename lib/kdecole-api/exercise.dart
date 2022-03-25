@@ -19,7 +19,7 @@
 
 import 'package:sqflite/sqflite.dart';
 
-import '../main.dart';
+import '../global.dart';
 
 enum ExerciseType {
   lessonContent,

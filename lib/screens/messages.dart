@@ -25,7 +25,7 @@ import 'package:kosmos_client/kdecole-api/database_manager.dart';
 import 'package:morpheus/morpheus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../main.dart';
+import '../global.dart';
 
 class MessagePreview extends StatelessWidget {
   final Conversation _conversation;

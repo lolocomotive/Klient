@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
-import '../main.dart';
+import '../global.dart';
 import 'home.dart';
 import 'messages.dart';
 

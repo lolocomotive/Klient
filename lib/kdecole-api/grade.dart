@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '../main.dart';
+import '../global.dart';
 
 class Grade {
   String subject;

@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/kdecole-api/message.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 
 /// An attachment that is linked to a [Message] (only it's id to avoid circular
 /// references though)

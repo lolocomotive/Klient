@@ -28,7 +28,7 @@ import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:morpheus/morpheus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../main.dart';
+import '../global.dart';
 
 extension DateOnlyCompare on DateTime {
   bool isSameDay(DateTime other) {
@@ -53,7 +53,7 @@ class _TimetableState extends State<Timetable> {
     Lesson.fetchAll().then((lessons) {
       List<Lesson> day = [];
       if (lessons.isEmpty) {
-        if (r) DatabaseManager.fetchTimetable().then(_reload(false));
+        if (r) DatabaseManager.fetchTimetable().then((_) => {_reload(false)});
         return;
       }
       DateTime lastDate = lessons[0].date;

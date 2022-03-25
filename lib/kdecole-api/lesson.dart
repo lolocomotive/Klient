@@ -23,7 +23,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 
-import '../main.dart';
+import '../global.dart';
 
 class Lesson {
   int id;

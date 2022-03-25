@@ -22,7 +22,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 
-import '../main.dart';
+import '../global.dart';
 import 'message.dart';
 
 class Conversation {

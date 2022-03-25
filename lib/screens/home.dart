@@ -24,7 +24,7 @@ import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:kosmos_client/kdecole-api/news_article.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
-import '../main.dart';
+import '../global.dart';
 
 class Home extends StatefulWidget {
   const Home({Key? key}) : super(key: key);

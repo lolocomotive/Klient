@@ -22,9 +22,63 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 
 import 'conversation.dart';
+
+class Request {
+  final String _url;
+  final HTTPRequestMethod _method;
+  final void Function(Map<String, dynamic> result) _onSuccess;
+  final void Function(Map<String, dynamic> result) _onJsonErr;
+  final void Function() _onHttp400;
+  final bool _retryOnNetworkError;
+  final Map<String, String> _headers;
+
+  Request(this._url, this._onSuccess, this._headers, this._method,
+      this._onJsonErr, this._onHttp400, this._retryOnNetworkError);
+
+  process() async {
+    http.Response? response;
+    bool success = false;
+    do {
+      try {
+        switch (_method) {
+          case HTTPRequestMethod.get:
+            response = await http.get(Uri.parse(_url), headers: _headers);
+            break;
+          case HTTPRequestMethod.put:
+            response = await http.put(Uri.parse(_url), headers: _headers);
+            break;
+          case HTTPRequestMethod.delete:
+            response = await http.delete(Uri.parse(_url), headers: _headers);
+            break;
+        }
+        success = true;
+      } catch (_) {
+        success = false;
+        sleep(const Duration(milliseconds: 100));
+      }
+    } while (!success);
+
+    if ((response!.statusCode >= 200 && response.statusCode < 300) ||
+        response.statusCode == 204) {
+      var data = jsonDecode(response.body);
+      if (response.body.startsWith('[')) {
+        data = jsonDecode('{"errmsg":null,"articles":' + response.body + '}');
+      }
+      if (data['errmsg'] != null) {
+        _onJsonErr(data);
+      }
+      _onSuccess(data);
+    } else {
+      if (response.statusCode >= 400) {
+        _onHttp400();
+      }
+      throw Error();
+    }
+  }
+}
 
 /// Utility class making it easier to communicate with the API
 class Client {
@@ -34,6 +88,60 @@ class Client {
   late String _token;
   String? idEtablissement;
   String? idEleve;
+  final List<Request> _requests = [];
+  static const int _maxConcurrentDownloads = 4;
+  int _currentlyDownloading = 0;
+
+  addRequest(
+      Action action, void Function(Map<String, dynamic> result) onSuccess,
+      {List<String>? params,
+      void Function(Map<String, dynamic> result)? onJsonErr,
+      void Function()? onHttpErr}) {
+    Map<String, String> headers = {
+      'X-Kdecole-Vers': _appVersion,
+      'X-Kdecole-Auth': _token,
+    };
+    String url = _serverURL + action.url;
+    for (final param in params ?? []) {
+      url += param + '/';
+    }
+    _requests.add(
+      Request(
+        url,
+        onSuccess,
+        headers,
+        action.method,
+        onJsonErr ??
+            (result) {
+              throw UnimplementedError();
+            },
+        onHttpErr ??
+            () {
+              throw UnimplementedError();
+            },
+        true,
+      ),
+    );
+  }
+
+  process() async {
+    Global.progress = 0;
+    Global.progressOf = _requests.length;
+    while (_requests.isNotEmpty) {
+      if (_currentlyDownloading <= _maxConcurrentDownloads) {
+        _currentlyDownloading++;
+        _requests[0].process().then((_) {
+          _currentlyDownloading--;
+          Global.progress++;
+        });
+        _requests.removeAt(0);
+      } else {
+        await Future.delayed(const Duration(milliseconds: 10));
+      }
+    }
+    Global.progress = 0;
+    Global.progressOf = 0;
+  }
 
   /// Make a request to the API
   Future<Map<String, dynamic>> request(Action action,
@@ -48,6 +156,7 @@ class Client {
     }
 
     http.Response response;
+
     switch (action.method) {
       case HTTPRequestMethod.get:
         response = await http.get(Uri.parse(url), headers: headers);

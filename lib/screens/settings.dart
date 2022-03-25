@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/global.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatefulWidget {
