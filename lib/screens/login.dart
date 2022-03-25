@@ -43,6 +43,7 @@ class LoginState extends State<Login> {
       try {
         Global.client =
             await Client.login(_unameController.text, _pwdController.text);
+        Navigator.of(context).pop();
         setState(() {});
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

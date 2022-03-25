@@ -22,6 +22,7 @@ import 'dart:io';
 
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';
 import 'conversation.dart';
@@ -157,12 +158,17 @@ class DatabaseManager {
       final result = await Global.client!.request(Action.getGrades,
           params: [Global.client!.idEtablissement ?? '0']);
       for (final grade in result["listeNotes"]) {
-        Global.db!.insert('Grades', {
-          'Subject': grade['matiere'] as String,
-          'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
-          'Of': (grade['bareme'] as int).toDouble(),
-          'Date': grade['date'] as int,
-        });
+        Global.db!.insert(
+          'Grades',
+          {
+            'Subject': grade['matiere'] as String,
+            'Grade':
+                double.parse((grade['note'] as String).replaceAll(',', '.')),
+            'Of': (grade['bareme'] as int).toDouble(),
+            'Date': grade['date'] as int,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }
     } on Error catch (_) {
       await Future.delayed(Duration(seconds: 1));
@@ -178,15 +184,19 @@ class DatabaseManager {
     for (final newsArticle in result['articles']) {
       Global.client!.addRequest(Action.getArticleDetails,
           (articleDetails) async {
-        await Global.db!.insert('NewsArticles', {
-          'UID': newsArticle['uid'],
-          'Type': articleDetails['type'],
-          'Author': articleDetails['auteur'],
-          'Title': articleDetails['titre'],
-          'PublishingDate': articleDetails['date'],
-          'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
-          'URL': articleDetails['url'],
-        });
+        await Global.db!.insert(
+          'NewsArticles',
+          {
+            'UID': newsArticle['uid'],
+            'Type': articleDetails['type'],
+            'Author': articleDetails['auteur'],
+            'Title': articleDetails['titre'],
+            'PublishingDate': articleDetails['date'],
+            'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
+            'URL': articleDetails['url'],
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
       }, params: [newsArticle['uid']]);
     }
     await Global.client!.process();
@@ -212,40 +222,52 @@ class DatabaseManager {
         params: [(Global.client!.idEleve ?? 0).toString()]);
     for (final day in result['listeJourCdt']) {
       for (final lesson in day['listeSeances']) {
-        Global.db!.insert('Lessons', {
-          'ID': lesson['idSeance'],
-          'LessonDate': lesson['hdeb'],
-          'StartTime': lesson['heureDebut'],
-          'EndTime': lesson['heureFin'],
-          'Room': lesson['salle'],
-          'Title': lesson['titre'],
-          'Subject': lesson['matiere'],
-          'IsModified': lesson['flagModif'] ? 1 : 0,
-          'ModificationMessage': lesson['motifModif'],
-        });
+        Global.db!.insert(
+          'Lessons',
+          {
+            'ID': lesson['idSeance'],
+            'LessonDate': lesson['hdeb'],
+            'StartTime': lesson['heureDebut'],
+            'EndTime': lesson['heureFin'],
+            'Room': lesson['salle'],
+            'Title': lesson['titre'],
+            'Subject': lesson['matiere'],
+            'IsModified': lesson['flagModif'] ? 1 : 0,
+            'ModificationMessage': lesson['motifModif'],
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
 
         for (final exercise in lesson['aFaire'] ?? []) {
           Global.client!.addRequest(Action.getExerciseDetails,
               (exerciseDetails) async {
-            await Global.db!.insert('Exercises', {
-              'Type': exercise['type'],
-              'Title': exerciseDetails['titre'],
-              'ID': exercise['uid'],
-              'LessonFor': _lessonIdByTimestamp(
-                  exercise['date'], result['listeJourCdt']),
-              'DateFor': exercise['date'],
-              'ParentDate': lesson['hdeb'],
-              'ParentLesson': lesson['idSeance'],
-              'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-              'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-            });
+            await Global.db!.insert(
+              'Exercises',
+              {
+                'Type': exercise['type'],
+                'Title': exerciseDetails['titre'],
+                'ID': exercise['uid'],
+                'LessonFor': _lessonIdByTimestamp(
+                    exercise['date'], result['listeJourCdt']),
+                'DateFor': exercise['date'],
+                'ParentDate': lesson['hdeb'],
+                'ParentLesson': lesson['idSeance'],
+                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
             for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert('ExerciseAttachments', {
-                'ID': attachment['idRessource'],
-                'ParentID': exercise['uid'],
-                'URL': attachment['url'],
-                'Name': attachment['name']
-              });
+              Global.db!.insert(
+                'ExerciseAttachments',
+                {
+                  'ID': attachment['idRessource'],
+                  'ParentID': exercise['uid'],
+                  'URL': attachment['url'],
+                  'Name': attachment['name']
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
             }
           }, params: [
             (Global.client!.idEleve ?? 0).toString(),
@@ -256,22 +278,30 @@ class DatabaseManager {
         for (final exercise in lesson['enSeance'] ?? []) {
           Global.client!.addRequest(Action.getExerciseDetails,
               (exerciseDetails) async {
-            await Global.db!.insert('Exercises', {
-              'Type': 'Cours',
-              'Title': exerciseDetails['titre'],
-              'ID': exercise['uid'],
-              'ParentDate': exercise['date'],
-              'ParentLesson': lesson['idSeance'],
-              'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-              'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-            });
+            await Global.db!.insert(
+              'Exercises',
+              {
+                'Type': 'Cours',
+                'Title': exerciseDetails['titre'],
+                'ID': exercise['uid'],
+                'ParentDate': exercise['date'],
+                'ParentLesson': lesson['idSeance'],
+                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
             for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert('ExerciseAttachments', {
-                'ID': attachment['idRessource'],
-                'ParentID': exercise['uid'],
-                'URL': attachment['url'],
-                'Name': attachment['name']
-              });
+              Global.db!.insert(
+                'ExerciseAttachments',
+                {
+                  'ID': attachment['idRessource'],
+                  'ParentID': exercise['uid'],
+                  'URL': attachment['url'],
+                  'Name': attachment['name']
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
             }
           }, params: [
             (Global.client!.idEleve ?? 0).toString(),
@@ -291,25 +321,33 @@ class DatabaseManager {
                 exercise['date'].toString() +
                 ' exerciseDetails[date]: ' +
                 exerciseDetails['date'].toString());
-            await Global.db!.insert('Exercises', {
-              'Type': exercise['type'],
-              'Title': exerciseDetails['titre'],
-              'ID': exercise['uid'],
-              'LessonFor': lesson['idSeance'],
-              'DateFor': exerciseDetails['date'],
-              'ParentDate': exercise['date'],
-              'ParentLesson': _lessonIdByTimestamp(
-                  exercise['date'], result['listeJourCdt']),
-              'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-              'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-            });
+            await Global.db!.insert(
+              'Exercises',
+              {
+                'Type': exercise['type'],
+                'Title': exerciseDetails['titre'],
+                'ID': exercise['uid'],
+                'LessonFor': lesson['idSeance'],
+                'DateFor': exerciseDetails['date'],
+                'ParentDate': exercise['date'],
+                'ParentLesson': _lessonIdByTimestamp(
+                    exercise['date'], result['listeJourCdt']),
+                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
             for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert('ExerciseAttachments', {
-                'ID': attachment['idRessource'],
-                'ParentID': exercise['uid'],
-                'URL': attachment['url'],
-                'Name': attachment['name']
-              });
+              Global.db!.insert(
+                'ExerciseAttachments',
+                {
+                  'ID': attachment['idRessource'],
+                  'ParentID': exercise['uid'],
+                  'URL': attachment['url'],
+                  'Name': attachment['name']
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
             }
           }, params: [
             (Global.client!.idEleve ?? 0).toString(),

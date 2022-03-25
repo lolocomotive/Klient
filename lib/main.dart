@@ -169,6 +169,37 @@ class PopupMenuItemWithIcon extends PopupMenuItem {
         );
 }
 
+class RestartWidget extends StatefulWidget {
+  RestartWidget({required this.child});
+
+  final Widget child;
+
+  static void restartApp(BuildContext context) {
+    context.findAncestorStateOfType<_RestartWidgetState>()!.restartApp();
+  }
+
+  @override
+  _RestartWidgetState createState() => _RestartWidgetState();
+}
+
+class _RestartWidgetState extends State<RestartWidget> {
+  Key key = UniqueKey();
+
+  void restartApp() {
+    setState(() {
+      key = UniqueKey();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return KeyedSubtree(
+      key: key,
+      child: widget.child,
+    );
+  }
+}
+
 class KosmosApp extends StatefulWidget {
   const KosmosApp({Key? key}) : super(key: key);
 
@@ -185,6 +216,16 @@ class KosmosState extends State with WidgetsBindingObserver {
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
   Widget? _mainWidget;
+
+  KosmosState() {
+    _mainWidget = const Main();
+    if (Global.token == null || Global.token == '') {
+      _mainWidget = const Login();
+    } else {
+      stdout.writeln("Token:" + Global.token!);
+      Global.client = Client(Global.token!);
+    }
+  }
 
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
@@ -216,13 +257,6 @@ class KosmosState extends State with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    _mainWidget = const Main();
-    if (Global.token == null || Global.token == '') {
-      _mainWidget = Login();
-    } else {
-      stdout.writeln("Token:" + Global.token!);
-      Global.client = Client(Global.token!);
-    }
     Global.theme = ThemeData(
       colorScheme: const ColorScheme.light().copyWith(
         primary: Colors.teal.shade100,
@@ -238,12 +272,14 @@ class KosmosState extends State with WidgetsBindingObserver {
         ), */
       useMaterial3: true,
     );
-    return MaterialApp(
-      scaffoldMessengerKey: _messengerKey,
-      navigatorKey: Global.navigatorKey,
-      title: title,
-      theme: Global.theme!,
-      home: _mainWidget,
+    return RestartWidget(
+      child: MaterialApp(
+        scaffoldMessengerKey: _messengerKey,
+        navigatorKey: Global.navigatorKey,
+        title: title,
+        theme: Global.theme!,
+        home: _mainWidget,
+      ),
     );
   }
 }

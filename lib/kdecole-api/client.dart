@@ -23,6 +23,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/screens/login.dart';
 
 import 'conversation.dart';
 
@@ -91,6 +93,46 @@ class Client {
   final List<Request> _requests = [];
   static const int _maxConcurrentDownloads = 4;
   int _currentlyDownloading = 0;
+
+  ///This usually happens when the user is logged out
+  default403Handler() {
+    showDialog(
+        context: Global.navigatorKey.currentContext!,
+        builder: (context) {
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme:
+                  Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
+            ),
+            child: AlertDialog(
+              alignment: Alignment.center,
+              actionsAlignment: MainAxisAlignment.end,
+              title: const Text('Erreur 403'),
+              content: const Text(
+                  'Cette erreur se produit en général quand le jeton d\'authentification n\'est plus valide auquel cas il faut se reconnecter.'),
+              actions: [
+                TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop();
+                    },
+                    child: Text(
+                      'ANNULER',
+                      style: TextStyle(
+                          color: Theme.of(context).colorScheme.onPrimary),
+                    )),
+                TextButton(
+                    onPressed: () {
+                      Global.storage!.delete(key: 'token');
+                      Global.navigatorKey.currentState!
+                        ..pop()
+                        ..push(MaterialPageRoute(builder: (_) => Login()));
+                    },
+                    child: const Text('SE RECONNTECTER')),
+              ],
+            ),
+          );
+        });
+  }
 
   addRequest(
       Action action, void Function(Map<String, dynamic> result) onSuccess,
@@ -181,8 +223,7 @@ class Client {
       return data;
     } else {
       if (response.statusCode == 403) {
-        //TODO show message and log user out
-
+        default403Handler();
       }
       stdout.writeln('Error!');
       stdout.writeln(response.body);
@@ -213,6 +254,8 @@ class Client {
     _token = token;
     Global.storage!.write(key: 'token', value: _token);
     Global.token = _token;
+    if (token == '') return;
+    request(Action.startup);
   }
 }
 
@@ -226,6 +269,7 @@ class Action {
   Action(this.url, [this.method = HTTPRequestMethod.get]);
 
   static final Action activate = Action('activation/');
+  static final Action startup = Action('starting/');
   static final Action getConversations = Action('messagerie/boiteReception/');
   static final Action getConversationDetail =
       Action('messagerie/communication/');
