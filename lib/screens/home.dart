@@ -18,11 +18,13 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_html/flutter_html.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/grade.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:kosmos_client/kdecole-api/news_article.dart';
 import 'package:kosmos_client/screens/timetable.dart';
+import 'package:morpheus/morpheus.dart';
 
 import '../global.dart';
 
@@ -157,38 +159,77 @@ class _HomeState extends State<Home> {
   }
 }
 
+class ArticleView extends StatelessWidget {
+  const ArticleView(this._article, {Key? key}) : super(key: key);
+  final NewsArticle _article;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverAppBar(
+              title: Text(_article.title),
+              floating: true,
+              forceElevated: innerBoxIsScrolled,
+            )
+          ];
+        },
+        body: Scrollbar(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Html(data: _article.htmlContent),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class ArticlePreview extends StatelessWidget {
   final NewsArticle _article;
-  const ArticlePreview(this._article, {Key? key}) : super(key: key);
+  final GlobalKey _key = GlobalKey();
+  ArticlePreview(this._article, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Card(
+      key: _key,
       margin: const EdgeInsets.all(8.0),
       elevation: 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
       ),
       clipBehavior: Clip.antiAlias,
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  _article.author,
-                  style: const TextStyle(fontSize: 16),
-                ),
-                Text(Global.dateToString(_article.date))
-              ],
-            ),
-            Text(
-              _article.title,
-            ),
-          ],
+      child: InkWell(
+        onTap: (() {
+          Navigator.of(context).push(MorpheusPageRoute(
+              builder: (_) => ArticleView(_article), parentKey: _key));
+        }),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    _article.author,
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  Text(Global.dateToString(_article.date))
+                ],
+              ),
+              Text(
+                _article.title,
+              ),
+            ],
+          ),
         ),
       ),
     );
