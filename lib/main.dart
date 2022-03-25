@@ -3,12 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:kosmos_client/screens/debug.dart';
 import 'package:kosmos_client/screens/login.dart';
-import 'package:kosmos_client/screens/messages.dart';
-import 'package:kosmos_client/screens/settings.dart';
-import 'package:kosmos_client/screens/setup.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:sqflite/sqflite.dart';
 
 import 'global.dart';
@@ -17,8 +12,8 @@ import 'screens/multiview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final dbDir = await getTemporaryDirectory();
-  final dbPath = dbDir.path + '/kdecole.db';
+  final dbDir = await getDatabasesPath();
+  final dbPath = dbDir + '/kdecole.db';
   //await deleteDatabase(dbPath);
   stdout.writeln('Database URL: ' + dbPath);
   Global.storage = const FlutterSecureStorage();
@@ -105,7 +100,8 @@ void main() async {
       Subject TEXT NOT NULL,
       Grade REAL NOT NULL,
       Of REAL NOT NULL,
-      Date INT NOT NULL
+      Date INT NOT NULL,
+      UniqueID TEXT NOT NULL UNIQUE
     );''');
     await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS Lessons(
@@ -169,37 +165,6 @@ class PopupMenuItemWithIcon extends PopupMenuItem {
         );
 }
 
-class RestartWidget extends StatefulWidget {
-  RestartWidget({required this.child});
-
-  final Widget child;
-
-  static void restartApp(BuildContext context) {
-    context.findAncestorStateOfType<_RestartWidgetState>()!.restartApp();
-  }
-
-  @override
-  _RestartWidgetState createState() => _RestartWidgetState();
-}
-
-class _RestartWidgetState extends State<RestartWidget> {
-  Key key = UniqueKey();
-
-  void restartApp() {
-    setState(() {
-      key = UniqueKey();
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return KeyedSubtree(
-      key: key,
-      child: widget.child,
-    );
-  }
-}
-
 class KosmosApp extends StatefulWidget {
   const KosmosApp({Key? key}) : super(key: key);
 
@@ -212,9 +177,6 @@ class KosmosApp extends StatefulWidget {
 class KosmosState extends State with WidgetsBindingObserver {
   final title = 'Kosmos client';
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
-  final _loginFormKey = GlobalKey<FormState>();
-  final _unameController = TextEditingController();
-  final _pwdController = TextEditingController();
   Widget? _mainWidget;
 
   KosmosState() {
@@ -225,29 +187,6 @@ class KosmosState extends State with WidgetsBindingObserver {
       stdout.writeln("Token:" + Global.token!);
       Global.client = Client(Global.token!);
     }
-  }
-
-  _login() async {
-    if (_loginFormKey.currentState!.validate()) {
-      try {
-        Global.client =
-            await Client.login(_unameController.text, _pwdController.text);
-        setState(() {
-          _mainWidget = const Main();
-        });
-      } catch (e) {
-        _messengerKey.currentState!.showSnackBar(
-            const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
-      }
-    }
-  }
-
-  @override
-  void dispose() {
-    _unameController.dispose();
-    _pwdController.dispose();
-
-    super.dispose();
   }
 
   @override
@@ -272,14 +211,12 @@ class KosmosState extends State with WidgetsBindingObserver {
         ), */
       useMaterial3: true,
     );
-    return RestartWidget(
-      child: MaterialApp(
-        scaffoldMessengerKey: _messengerKey,
-        navigatorKey: Global.navigatorKey,
-        title: title,
-        theme: Global.theme!,
-        home: _mainWidget,
-      ),
+    return MaterialApp(
+      scaffoldMessengerKey: _messengerKey,
+      navigatorKey: Global.navigatorKey,
+      title: title,
+      theme: Global.theme!,
+      home: _mainWidget,
     );
   }
 }

@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/screens/setup.dart';
 
 import '../kdecole-api/client.dart';
 import '../global.dart';
@@ -43,7 +44,13 @@ class LoginState extends State<Login> {
       try {
         Global.client =
             await Client.login(_unameController.text, _pwdController.text);
+
         Navigator.of(context).pop();
+        if (await Global.storage!.read(key: 'firstTime') != 'false') {
+          Global.storage!.write(key: 'firstTime', value: 'false');
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => const SetupPage()));
+        }
         setState(() {});
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(

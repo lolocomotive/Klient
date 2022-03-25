@@ -166,6 +166,10 @@ class DatabaseManager {
                 double.parse((grade['note'] as String).replaceAll(',', '.')),
             'Of': (grade['bareme'] as int).toDouble(),
             'Date': grade['date'] as int,
+            'UniqueID': (grade['date'] as int).toString() +
+                (grade['matiere'] as String) +
+                (grade['note'] as String) +
+                (grade['bareme'] as int).toString(),
           },
           conflictAlgorithm: ConflictAlgorithm.replace,
         );

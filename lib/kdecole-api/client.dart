@@ -213,7 +213,12 @@ class Client {
 
     if ((response.statusCode >= 200 && response.statusCode < 300) ||
         response.statusCode == 204) {
-      var data = jsonDecode(response.body);
+      dynamic data;
+      try {
+        data = jsonDecode(response.body);
+      } catch (_) {
+        data = jsonDecode('{"errmsg":null}');
+      }
       if (response.body.startsWith('[')) {
         data = jsonDecode('{"errmsg":null,"articles":' + response.body + '}');
       }
