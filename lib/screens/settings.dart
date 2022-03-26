@@ -19,40 +19,56 @@ class _SettingsPageState extends State<SettingsPage> {
       appBar: AppBar(
         title: const Text('Paramètres'),
       ),
-      body: SettingsList(
-        sections: [
-          SettingsSection(
-            title: Text(
-              'Notifications',
+      body: Column(
+        children: [
+          const Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Text(
+              "Les paramètres ne font rien pour l'instant",
               style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Colors.teal.shade700,
-              ),
+                  color: Colors.teal,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16),
             ),
-            tiles: <SettingsTile>[
-              SettingsTile.switchTile(
-                initialValue: notifMsgEnabled,
-                onToggle: (_) {
-                  notifMsgEnabled = !notifMsgEnabled;
-                  setState(() {});
-                },
-                leading: const Icon(Icons.message_outlined),
-                title: const Text('Messagerie'),
-                description: const Text(
-                    'Recevoir une notification quand il y a un nouveau message'),
-              ),
-              SettingsTile.switchTile(
-                initialValue: notifCalEnabled,
-                onToggle: (_) {
-                  notifCalEnabled = !notifCalEnabled;
-                  setState(() {});
-                },
-                leading: const Icon(Icons.calendar_today_outlined),
-                title: const Text('Emploi du temps'),
-                description: const Text(
-                    'Recevoir une notification quand une séance est annulée'),
-              ),
-            ],
+          ),
+          Expanded(
+            child: SettingsList(
+              sections: [
+                SettingsSection(
+                  title: Text(
+                    'Notifications',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.teal.shade700,
+                    ),
+                  ),
+                  tiles: <SettingsTile>[
+                    SettingsTile.switchTile(
+                      initialValue: notifMsgEnabled,
+                      onToggle: (_) {
+                        notifMsgEnabled = !notifMsgEnabled;
+                        setState(() {});
+                      },
+                      leading: const Icon(Icons.message_outlined),
+                      title: const Text('Messagerie'),
+                      description: const Text(
+                          'Recevoir une notification quand il y a un nouveau message'),
+                    ),
+                    SettingsTile.switchTile(
+                      initialValue: notifCalEnabled,
+                      onToggle: (_) {
+                        notifCalEnabled = !notifCalEnabled;
+                        setState(() {});
+                      },
+                      leading: const Icon(Icons.calendar_today_outlined),
+                      title: const Text('Emploi du temps'),
+                      description: const Text(
+                          'Recevoir une notification quand une séance est annulée'),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ],
       ),

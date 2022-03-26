@@ -49,13 +49,9 @@ class _TimetableState extends State<Timetable> {
   _TimetableState() {
     _reload();
   }
-  void _reload([r = true]) {
+  void _reload() {
     Lesson.fetchAll().then((lessons) {
       List<Lesson> day = [];
-      if (lessons.isEmpty) {
-        if (r) DatabaseManager.fetchTimetable().then((_) => {_reload(false)});
-        return;
-      }
       DateTime lastDate = lessons[0].date;
       var page = 0;
       for (int i = 0; i < lessons.length; i++) {
@@ -97,10 +93,8 @@ class _TimetableState extends State<Timetable> {
       body: Scrollbar(
         child: RefreshIndicator(
           onRefresh: () async {
-            await Global.db!.delete('ExerciseAttachments');
-            await Global.db!.delete('Exercises');
-            await Global.db!.delete('Lessons');
             await DatabaseManager.fetchTimetable();
+            _reload();
             setState(() {});
           },
           child: SingleChildScrollView(

@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
+import 'package:kosmos_client/kdecole-api/database_manager.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/grade.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
@@ -99,77 +100,86 @@ class _HomeState extends State<Home> {
             )
           ];
         },
-        body: Scrollbar(
-          child: SingleChildScrollView(
-            child: Column(
-              children: [
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
-                  child: Text(
-                    "Dernières notes",
-                    style: TextStyle(fontSize: 20),
+        body: RefreshIndicator(
+          onRefresh: (() async {
+            await DatabaseManager.fetchGradesData();
+            await DatabaseManager.fetchNewsData();
+            await DatabaseManager.fetchTimetable();
+            _reload();
+          }),
+          child: Scrollbar(
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
+                    child: Text(
+                      "Dernières notes",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
-                ),
-                _grades.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    : SizedBox(
-                        child: Column(
-                          children: _grades
-                              .map((twoGrades) => Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      SingleGradeView(twoGrades[0]),
-                                      if (twoGrades.length > 1)
-                                        SingleGradeView(twoGrades[1])
-                                    ],
+                  _grades.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : SizedBox(
+                          child: Column(
+                            children: _grades
+                                .map((twoGrades) => Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        SingleGradeView(twoGrades[0]),
+                                        if (twoGrades.length > 1)
+                                          SingleGradeView(twoGrades[1])
+                                      ],
+                                    ))
+                                .toList(),
+                          ),
+                        ),
+                  const Padding(
+                    padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
+                    child: Text(
+                      "Travail à faire",
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                  _homework.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : Column(
+                          children: _homework
+                              .map((homework) => ExerciceView(
+                                    homework.key,
+                                    homework.value,
+                                    showDate: true,
+                                    showSubject: true,
                                   ))
                               .toList(),
                         ),
-                      ),
-                const Padding(
-                  padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
-                  child: Text(
-                    "Travail à faire",
-                    style: TextStyle(fontSize: 20),
+                  const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text(
+                      "Actualités",
+                      style: TextStyle(fontSize: 20),
+                    ),
                   ),
-                ),
-                _homework.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    : Column(
-                        children: _homework
-                            .map((homework) => ExerciceView(
-                                  homework.key,
-                                  homework.value,
-                                  showDate: true,
-                                  showSubject: true,
-                                ))
-                            .toList(),
-                      ),
-                const Padding(
-                  padding: EdgeInsets.all(16.0),
-                  child: Text(
-                    "Actualités",
-                    style: TextStyle(fontSize: 20),
-                  ),
-                ),
-                _news.isEmpty
-                    ? const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: CircularProgressIndicator(),
-                      )
-                    : Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: _news
-                            .map((article) => ArticlePreview(article))
-                            .toList(),
-                      ),
-              ],
+                  _news.isEmpty
+                      ? const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: CircularProgressIndicator(),
+                        )
+                      : Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: _news
+                              .map((article) => ArticlePreview(article))
+                              .toList(),
+                        ),
+                ],
+              ),
             ),
           ),
         ));

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
@@ -67,10 +68,10 @@ class Global {
     itemBuilder: (context) {
       return [
         PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined, context),
-        PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
-        PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
-        PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined, context),
-        PopupMenuItemWithIcon("Initial setup", Icons.login, context),
+        //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
+        //PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
+        if (kDebugMode)
+          PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined, context),
       ];
     },
   );
