@@ -18,14 +18,13 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/screens/setup.dart';
 
 import '../kdecole-api/client.dart';
 import '../global.dart';
 
 class Login extends StatefulWidget {
-  const Login({Key? key}) : super(key: key);
-
+  const Login(this.onLogin, {Key? key}) : super(key: key);
+  final void Function() onLogin;
   @override
   State<StatefulWidget> createState() {
     return LoginState();
@@ -41,17 +40,13 @@ class LoginState extends State<Login> {
 
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
+//      widget.onLogin();
+//
+//      return;
       try {
         Global.client =
             await Client.login(_unameController.text, _pwdController.text);
-
-        Navigator.of(context).pop();
-        if (await Global.storage!.read(key: 'firstTime') != 'false') {
-          Global.storage!.write(key: 'firstTime', value: 'false');
-          Navigator.of(context)
-              .push(MaterialPageRoute(builder: (_) => const SetupPage()));
-        }
-        setState(() {});
+        widget.onLogin();
       } catch (e) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
@@ -78,6 +73,8 @@ class LoginState extends State<Login> {
           child: Column(
             children: [
               TextFormField(
+                decoration:
+                    const InputDecoration(hintText: 'Nom d\'utilisateur'),
                 controller: _unameController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -90,10 +87,12 @@ class LoginState extends State<Login> {
                 autofocus: true,
               ),
               TextFormField(
+                decoration:
+                    const InputDecoration(hintText: 'Code d\'activation'),
                 controller: _pwdController,
                 validator: (value) {
                   if (value == null || value.isEmpty) {
-                    return 'Veuillez entrer un mot de passe';
+                    return 'Veuillez entrer un code d\'activation';
                   }
                   return null;
                 },

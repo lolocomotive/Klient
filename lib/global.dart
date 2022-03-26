@@ -49,7 +49,7 @@ class Global {
       switch (choice) {
         case 'Paramètres':
           navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => SettingsPage()),
+            MaterialPageRoute(builder: (_) => const SettingsPage()),
           );
           break;
         case 'Debug':
@@ -59,7 +59,7 @@ class Global {
           break;
         case 'Initial setup':
           navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => const SetupPage()),
+            MaterialPageRoute(builder: (_) => SetupPage(() {})),
           );
           break;
       }

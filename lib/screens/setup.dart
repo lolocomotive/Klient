@@ -5,7 +5,9 @@ import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
 
 class SetupPage extends StatefulWidget {
-  const SetupPage({Key? key}) : super(key: key);
+  final Function() _callback;
+
+  const SetupPage(this._callback, {Key? key}) : super(key: key);
 
   @override
   State<SetupPage> createState() => _SetupPageState();
@@ -40,7 +42,7 @@ class _SetupPageState extends State<SetupPage> {
       return;
     }
 
-    Timer(Duration(milliseconds: 250), update);
+    Timer(const Duration(milliseconds: 250), update);
   }
 
   @override
@@ -170,51 +172,54 @@ class _SetupPageState extends State<SetupPage> {
                       ),
                       if (step1)
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Téléchargement de l\'emploi du temps'),
+                              const Text(
+                                  'Téléchargement de l\'emploi du temps'),
                               step2
-                                  ? Icon(Icons.done)
-                                  : CircularProgressIndicator(),
+                                  ? const Icon(Icons.done)
+                                  : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
                       if (step2)
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Téléchargement des actualités'),
+                              const Text('Téléchargement des actualités'),
                               step3
-                                  ? Icon(Icons.done)
-                                  : CircularProgressIndicator(),
+                                  ? const Icon(Icons.done)
+                                  : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
                       if (step3)
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Téléchargement de la liste des messages'),
+                              const Text(
+                                  'Téléchargement de la liste des messages'),
                               step4
-                                  ? Icon(Icons.done)
-                                  : CircularProgressIndicator(),
+                                  ? const Icon(Icons.done)
+                                  : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
                       if (step4)
                         Padding(
-                          padding: EdgeInsets.all(8.0),
+                          padding: const EdgeInsets.all(8.0),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text('Téléchargement du contenu des messages'),
-                              step5 ? Icon(Icons.done) : Container(),
+                              const Text(
+                                  'Téléchargement du contenu des messages'),
+                              step5 ? const Icon(Icons.done) : Container(),
                             ],
                           ),
                         ),
@@ -242,10 +247,12 @@ class _SetupPageState extends State<SetupPage> {
           ),
           if (step5)
             ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: Text('Fermer'))
+              onPressed: () {
+                widget._callback();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Fermer'),
+            )
         ],
       ),
     );

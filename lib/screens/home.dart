@@ -23,6 +23,7 @@ import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/grade.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:kosmos_client/kdecole-api/news_article.dart';
+import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 import 'package:morpheus/morpheus.dart';
 
@@ -36,10 +37,25 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  final List<List<Grade>> _grades = [];
-  final List<MapEntry<Exercise, Lesson>> _homework = [];
+  List<List<Grade>> _grades = [];
+  List<MapEntry<Exercise, Lesson>> _homework = [];
+  _openFirstSteps() async {
+    if (await Global.storage!.read(key: 'firstTime') != 'false') {
+      Global.storage!.write(key: 'firstTime', value: 'false');
+      Navigator.of(context)
+          .push(MaterialPageRoute(builder: (_) => SetupPage(_reload)));
+    }
+  }
+
   List<NewsArticle> _news = [];
   _HomeState() {
+    _openFirstSteps();
+    _reload();
+  }
+  _reload() {
+    _grades = [];
+    _homework = [];
+    _news = [];
     Grade.fetchAll().then((grades) => setState(() {
           for (int i = 0; i < grades.length; i++) {
             if (i % 2 == 0) {
@@ -68,6 +84,7 @@ class _HomeState extends State<Home> {
       setState(() {});
     });
   }
+
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(

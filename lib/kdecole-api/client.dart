@@ -23,7 +23,6 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/login.dart';
 
 import 'conversation.dart';
@@ -34,11 +33,10 @@ class Request {
   final void Function(Map<String, dynamic> result) _onSuccess;
   final void Function(Map<String, dynamic> result) _onJsonErr;
   final void Function() _onHttp400;
-  final bool _retryOnNetworkError;
   final Map<String, String> _headers;
 
   Request(this._url, this._onSuccess, this._headers, this._method,
-      this._onJsonErr, this._onHttp400, this._retryOnNetworkError);
+      this._onJsonErr, this._onHttp400);
 
   process() async {
     http.Response? response;
@@ -125,7 +123,7 @@ class Client {
                       Global.storage!.delete(key: 'token');
                       Global.navigatorKey.currentState!
                         ..pop()
-                        ..push(MaterialPageRoute(builder: (_) => Login()));
+                        ..push(MaterialPageRoute(builder: (_) => Login(() {})));
                     },
                     child: const Text('SE RECONNTECTER')),
               ],
@@ -161,7 +159,6 @@ class Client {
             () {
               throw UnimplementedError();
             },
-        true,
       ),
     );
   }
@@ -254,8 +251,7 @@ class Client {
     }
   }
 
-  /// the build context is for showing an error notification
-  Client(String token, [BuildContext? ctx]) {
+  Client(String token) {
     _token = token;
     Global.storage!.write(key: 'token', value: _token);
     Global.token = _token;

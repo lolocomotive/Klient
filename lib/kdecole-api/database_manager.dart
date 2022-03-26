@@ -72,8 +72,6 @@ class DatabaseManager {
   static fetchMessageData() async {
     Global.loadingMessages = true;
     int pgNumber = 0;
-    int msgCount = 0;
-    DateTime startTime = DateTime.now();
     while (true) {
       final result = await Global.client!.request(
         Action.getConversations,
@@ -114,7 +112,6 @@ class DatabaseManager {
         await Global.client!.addRequest(Action.getConversationDetail,
             (messages) async {
           for (final message in messages['participations']) {
-            msgCount++;
             batch.insert('Messages', {
               'ParentID': conversation['id'],
               'HTMLContent': _cleanupHTML(message['corpsMessage']),
@@ -136,9 +133,6 @@ class DatabaseManager {
           }
           await batch.commit();
         }, params: [(conversation['id'] as int).toString()]);
-
-        // Reload messages in the messages view if it is opened
-
       }
       if (!modified) {
         break;
@@ -175,7 +169,7 @@ class DatabaseManager {
         );
       }
     } on Error catch (_) {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       fetchGradesData();
     }
   }

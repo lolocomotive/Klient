@@ -14,9 +14,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final dbDir = await getDatabasesPath();
   final dbPath = dbDir + '/kdecole.db';
-  //await deleteDatabase(dbPath);
   stdout.writeln('Database URL: ' + dbPath);
   Global.storage = const FlutterSecureStorage();
+  //Comment this out in production
+  //await deleteDatabase(dbPath);
+  //Global.storage!.deleteAll();
   try {
     Global.token = await Global.storage!.read(key: 'token');
   } on PlatformException catch (_) {
@@ -177,16 +179,23 @@ class KosmosApp extends StatefulWidget {
 class KosmosState extends State with WidgetsBindingObserver {
   final title = 'Kosmos client';
   final _messengerKey = GlobalKey<ScaffoldMessengerState>();
+
   Widget? _mainWidget;
 
   KosmosState() {
     _mainWidget = const Main();
     if (Global.token == null || Global.token == '') {
-      _mainWidget = const Login();
+      _mainWidget = Login(loginCallback);
     } else {
       stdout.writeln("Token:" + Global.token!);
       Global.client = Client(Global.token!);
     }
+  }
+
+  void loginCallback() {
+    setState(() {
+      _mainWidget = const Main();
+    });
   }
 
   @override
