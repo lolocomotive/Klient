@@ -47,9 +47,25 @@ class LoginState extends State<Login> {
         Global.client =
             await Client.login(_unameController.text, _pwdController.text);
         widget.onLogin();
-      } catch (e) {
+      } on BadCredentialsException catch (_) {
         ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
+      } catch (e, st) {
+        Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Erreur'),
+            ),
+            body: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Text(e.toString()),
+                  Text(st.toString()),
+                ],
+              ),
+            ),
+          );
+        }));
       }
     }
   }

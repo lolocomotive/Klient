@@ -247,7 +247,7 @@ class Client {
     if (res['success'] == true) {
       return Client(res['authtoken']);
     } else {
-      throw Error();
+      throw BadCredentialsException();
     }
   }
 
@@ -259,6 +259,8 @@ class Client {
     request(Action.startup);
   }
 }
+
+class BadCredentialsException implements Exception {}
 
 enum HTTPRequestMethod { get, put, delete }
 
