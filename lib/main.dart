@@ -17,8 +17,8 @@ void main() async {
   stdout.writeln('Database URL: ' + dbPath);
   Global.storage = const FlutterSecureStorage();
   //Comment this out in production
-  await deleteDatabase(dbPath);
-  Global.storage!.deleteAll();
+  //await deleteDatabase(dbPath);
+  //Global.storage!.deleteAll();
   try {
     Global.token = await Global.storage!.read(key: 'token');
   } on PlatformException catch (_) {
