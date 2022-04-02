@@ -24,7 +24,6 @@ import 'package:kosmos_client/kdecole-api/exercise.dart';
 import 'package:kosmos_client/kdecole-api/grade.dart';
 import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:kosmos_client/kdecole-api/news_article.dart';
-import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 import 'package:morpheus/morpheus.dart';
 
@@ -40,17 +39,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<List<Grade>> _grades = [];
   List<MapEntry<Exercise, Lesson>> _homework = [];
-  _openFirstSteps() async {
-    if (await Global.storage!.read(key: 'firstTime') != 'false') {
-      Global.storage!.write(key: 'firstTime', value: 'false');
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => SetupPage(_reload)));
-    }
-  }
 
   List<NewsArticle> _news = [];
   _HomeState() {
-    _openFirstSteps();
     _reload();
   }
   _reload() {
@@ -110,6 +101,7 @@ class _HomeState extends State<Home> {
           child: Scrollbar(
             child: SingleChildScrollView(
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
@@ -121,7 +113,7 @@ class _HomeState extends State<Home> {
                   _grades.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
+                          child: Center(child: CircularProgressIndicator()),
                         )
                       : SizedBox(
                           child: Column(
@@ -148,7 +140,7 @@ class _HomeState extends State<Home> {
                   _homework.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
+                          child: Center(child: CircularProgressIndicator()),
                         )
                       : Column(
                           children: _homework
@@ -170,7 +162,7 @@ class _HomeState extends State<Home> {
                   _news.isEmpty
                       ? const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: CircularProgressIndicator(),
+                          child: Center(child: CircularProgressIndicator()),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,

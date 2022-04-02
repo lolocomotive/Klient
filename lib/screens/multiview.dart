@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
 import '../global.dart';
@@ -33,22 +34,39 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   int _currentIndex = 0;
+  _openFirstSteps() async {
+    if (await Global.storage!.read(key: 'firstTime') != 'false') {
+      Global.storage!.write(key: 'firstTime', value: 'false');
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => SetupPage(() {
+            setState(() {
+              _currentIndex = 0;
+            });
+          }),
+        ),
+      );
+    }
+  }
 
   MainState();
 
   @override
   Widget build(BuildContext context) {
+    _openFirstSteps();
     Global.mainState = this;
     final Widget currentWidget;
     switch (_currentIndex) {
       case 0:
-        currentWidget = const Home();
+        currentWidget = Home(
+          key: GlobalKey(),
+        );
         break;
       case 1:
-        currentWidget = const Messages();
+        currentWidget = Messages(key: GlobalKey());
         break;
       default:
-        currentWidget = const Timetable();
+        currentWidget = Timetable(key: GlobalKey());
     }
 
     if (currentWidget is! Messages) {

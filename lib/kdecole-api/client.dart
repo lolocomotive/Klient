@@ -57,7 +57,7 @@ class Request {
         success = true;
       } catch (_) {
         success = false;
-        sleep(const Duration(milliseconds: 100));
+        sleep(const Duration(milliseconds: 1000));
       }
     } while (!success);
 
@@ -94,6 +94,9 @@ class Client {
 
   ///This usually happens when the user is logged out
   default403Handler() {
+    while (_requests.isNotEmpty) {
+      _requests.removeAt(0);
+    }
     showDialog(
         context: Global.navigatorKey.currentContext!,
         builder: (context) {
@@ -123,13 +126,21 @@ class Client {
                       Global.storage!.delete(key: 'token');
                       Global.navigatorKey.currentState!
                         ..pop()
-                        ..push(MaterialPageRoute(builder: (_) => Login(() {})));
+                        ..push(
+                          MaterialPageRoute(
+                            builder: (_) => Login(() {
+                              Global.navigatorKey.currentState!.pop();
+                              Global.onLogin!();
+                            }),
+                          ),
+                        );
                     },
                     child: const Text('SE RECONNTECTER')),
               ],
             ),
           );
         });
+    throw NetworkException403();
   }
 
   addRequest(
@@ -258,7 +269,15 @@ class Client {
     if (token == '') return;
     request(Action.startup);
   }
+
+  void clear() {
+    while (_requests.isNotEmpty) {
+      _requests.removeAt(0);
+    }
+  }
 }
+
+class NetworkException403 implements Exception {}
 
 class BadCredentialsException implements Exception {}
 

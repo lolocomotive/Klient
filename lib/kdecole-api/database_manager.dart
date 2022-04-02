@@ -147,7 +147,8 @@ class DatabaseManager {
   }
 
   /// Download all the grades
-  static fetchGradesData() async {
+  static fetchGradesData([r = 3]) async {
+    if (r == 0) return;
     try {
       final result = await Global.client!.request(Action.getGrades,
           params: [Global.client!.idEtablissement ?? '0']);
@@ -168,9 +169,11 @@ class DatabaseManager {
           conflictAlgorithm: ConflictAlgorithm.replace,
         );
       }
+    } on NetworkException403 catch (_) {
+      rethrow;
     } on Error catch (_) {
       await Future.delayed(const Duration(seconds: 1));
-      fetchGradesData();
+      fetchGradesData(r - 1);
     }
   }
 
