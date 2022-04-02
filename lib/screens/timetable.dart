@@ -85,7 +85,7 @@ class _TimetableState extends State<Timetable> {
           SliverAppBar(
             floating: true,
             forceElevated: innerBoxIsScrolled,
-            title: const Text("Emploi du temps"),
+            title: const Text('Emploi du temps'),
             actions: [Global.popupMenuButton],
           )
         ];
@@ -164,13 +164,13 @@ class SingleDayCalendarView extends StatelessWidget {
   const SingleDayCalendarView(this._lessons, {Key? key}) : super(key: key);
 
   static const _days = [
-    "Lundi",
-    "Mardi",
-    "Mercredi",
-    "Jeudi",
-    "Vendredi",
-    "Samedi",
-    "Dimanche"
+    'Lundi',
+    'Mardi',
+    'Mercredi',
+    'Jeudi',
+    'Vendredi',
+    'Samedi',
+    'Dimanche'
   ];
   @override
   Widget build(BuildContext context) {
@@ -311,11 +311,11 @@ class DetailedLessonView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Text(
-              "Séance du " +
+              'Séance du ' +
                   DateFormat('dd/MM').format(_lesson.date) +
-                  " de " +
+                  ' de ' +
                   _lesson.startTime +
-                  " à " +
+                  ' à ' +
                   _lesson.endTime,
               textAlign: TextAlign.center,
             ),

@@ -39,8 +39,8 @@ class DatabaseManager {
         .replaceAll('\r', '')
         .replaceAll('\f', '')
         .replaceAll('\n', '')
-        .replaceAll(RegExp("<p>\\s+<\\/p>"), '')
-        .replaceAll(RegExp("<div>\\s+<\\/div>"), '')
+        .replaceAll(RegExp('<p>\\s+<\\/p>'), '')
+        .replaceAll(RegExp('<div>\\s+<\\/div>'), '')
         .replaceAll('<p class="notsupported"></p>', '')
         .replaceAll(
             '<div class="js-signature panel panel--full panel--margin-sm">', '')
@@ -156,7 +156,7 @@ class DatabaseManager {
     try {
       final result = await Global.client!.request(Action.getGrades,
           params: [Global.client!.idEtablissement ?? '0']);
-      for (final grade in result["listeNotes"]) {
+      for (final grade in result['listeNotes']) {
         Global.db!.insert(
           'Grades',
           {

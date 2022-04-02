@@ -248,7 +248,7 @@ class _SetupPageState extends State<SetupPage> {
                             Padding(
                               padding: const EdgeInsets.all(8.0),
                               child:
-                                  Text("Téléchargement $progress/$progressOf"),
+                                  Text('Téléchargement $progress/$progressOf'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),

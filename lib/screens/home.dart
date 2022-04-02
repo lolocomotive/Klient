@@ -106,7 +106,7 @@ class _HomeState extends State<Home> {
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
                     child: Text(
-                      "Dernières notes",
+                      'Dernières notes',
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
@@ -133,7 +133,7 @@ class _HomeState extends State<Home> {
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
                     child: Text(
-                      "Travail à faire",
+                      'Travail à faire',
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
@@ -155,7 +155,7 @@ class _HomeState extends State<Home> {
                   const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(
-                      "Actualités",
+                      'Actualités',
                       style: TextStyle(fontSize: 20),
                     ),
                   ),

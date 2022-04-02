@@ -28,7 +28,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
   if (isTimeout) {
     // This task has exceeded its allowed running-time.
     // You must stop what you're doing and immediately .finish(taskId)
-    print("[BackgroundFetch] Headless task timed-out: $taskId");
+    print('[BackgroundFetch] Headless task timed-out: $taskId');
 
     BackgroundFetch.finish(taskId);
     return;
@@ -72,7 +72,7 @@ Future<void> initPlatformState() async {
       ), (String taskId) async {
     // <-- Event handler
     // This is the fetch-event callback.
-    print("[BackgroundFetch feur] Event received $taskId");
+    print('[BackgroundFetch feur] Event received $taskId');
 
     // IMPORTANT:  You must signal completion of your task or the OS can^ punish your app
     // for taking too long in the background.
@@ -81,7 +81,7 @@ Future<void> initPlatformState() async {
   }, (String taskId) async {
     // <-- Task timeout handler.
     // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
-    print("[BackgroundFetch] TASK TIMEOUT taskId: $taskId");
+    print('[BackgroundFetch] TASK TIMEOUT taskId: $taskId');
     BackgroundFetch.finish(taskId);
   });
   print('[BackgroundFetch] configure success: $status');

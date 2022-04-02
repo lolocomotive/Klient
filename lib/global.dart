@@ -193,11 +193,11 @@ class Global {
     },
     itemBuilder: (context) {
       return [
-        PopupMenuItemWithIcon("Paramètres", Icons.settings_outlined, context),
+        PopupMenuItemWithIcon('Paramètres', Icons.settings_outlined, context),
         //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
         //PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
         if (kDebugMode)
-          PopupMenuItemWithIcon("Debug", Icons.bug_report_outlined, context),
+          PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
       ];
     },
   );

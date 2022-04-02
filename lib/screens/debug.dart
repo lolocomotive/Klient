@@ -58,7 +58,7 @@ class DebugScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Debug")),
+      appBar: AppBar(title: const Text('Debug')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
         child: Column(
