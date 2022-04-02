@@ -63,14 +63,18 @@ Future<void> initPlatformState() async {
         minimumFetchInterval: 15,
         stopOnTerminate: false,
         enableHeadless: true,
-        startOnBoot: true,
+        requiresBatteryNotLow: false,
+        requiresCharging: false,
+        requiresStorageNotLow: false,
+        requiresDeviceIdle: false,
+        forceAlarmManager: false,
         requiredNetworkType: NetworkType.NONE,
       ), (String taskId) async {
     // <-- Event handler
     // This is the fetch-event callback.
     print("[BackgroundFetch feur] Event received $taskId");
 
-    // IMPORTANT:  You must signal completion of your task or the OS can punish your app
+    // IMPORTANT:  You must signal completion of your task or the OS can^ punish your app
     // for taking too long in the background.
     await DatabaseManager.downloadAll();
     BackgroundFetch.finish(taskId);
