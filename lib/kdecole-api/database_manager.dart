@@ -18,7 +18,6 @@
  */
 
 import 'dart:async';
-import 'dart:io';
 
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
@@ -52,20 +51,25 @@ class DatabaseManager {
     return result;
   }
 
-  static initalDownloads() async {
+  static downloadAll() async {
     Global.step1 = false;
     Global.step2 = false;
     Global.step3 = false;
     Global.step4 = false;
     Global.step5 = false;
+    print('Downloading grades');
     await fetchGradesData();
     Global.step1 = true;
+    print('Downloading timetable');
     await fetchTimetable();
     Global.step2 = true;
+    print('Downloading News');
     await fetchNewsData();
     Global.step3 = true;
+    print('Downloading Messages');
     await fetchMessageData();
     Global.step5 = true;
+    print('Finished downloading');
   }
 
   /// Download/update, the associated messages and their attachments
@@ -318,7 +322,7 @@ class DatabaseManager {
           }
           Global.client!.addRequest(Action.getExerciseDetails,
               (exerciseDetails) async {
-            stdout.writeln('exercise[date]: ' +
+            print('exercise[date]: ' +
                 exercise['date'].toString() +
                 ' exerciseDetails[date]: ' +
                 exerciseDetails['date'].toString());

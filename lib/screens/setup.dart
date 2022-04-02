@@ -151,7 +151,7 @@ class _SetupPageState extends State<SetupPage> {
                               onPressed: () {
                                 currentStep++;
                                 update();
-                                DatabaseManager.initalDownloads();
+                                DatabaseManager.downloadAll();
                                 setState(() {});
                               },
                               child: const Text(
@@ -161,7 +161,7 @@ class _SetupPageState extends State<SetupPage> {
                               onPressed: () {
                                 currentStep++;
                                 update();
-                                DatabaseManager.initalDownloads();
+                                DatabaseManager.downloadAll();
                                 setState(() {});
                               },
                               child: const Text(

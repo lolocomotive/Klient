@@ -238,8 +238,8 @@ class Client {
       if (response.statusCode == 403) {
         default403Handler();
       }
-      stdout.writeln('Error!');
-      stdout.writeln(response.body);
+      print('Error!');
+      print(response.body);
       throw Error();
     }
   }

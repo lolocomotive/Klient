@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/main.dart';
@@ -44,9 +43,9 @@ class Global {
     final dbDir = await getDatabasesPath();
     final dbPath = dbDir + '/kdecole.db';
     if (kDebugMode) {
-      await deleteDatabase(dbPath);
+      //await deleteDatabase(dbPath);
     }
-    stdout.writeln('Database URL: ' + dbPath);
+    print('Database URL: ' + dbPath);
     Global.db = await openDatabase(dbPath);
     final queryResult = await Global.db!.query('sqlite_master');
     final tables = [
@@ -68,7 +67,7 @@ class Global {
       await deleteDatabase(dbPath);
       Global.db = await openDatabase(dbPath);
 
-      stdout.writeln('Initializing database');
+      print('Initializing database');
       await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS NewsArticles(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
@@ -160,7 +159,7 @@ class Global {
       Name TEXT NOT NULL,
       FOREIGN KEY (ParentID) references Exercises(ID)
     );''');
-      stdout.writeln('Done creating tables');
+      print('Done creating tables');
     }
   }
 
@@ -249,6 +248,20 @@ class Global {
           date.month.toString() +
           '/' +
           date.year.toString();
+    }
+  }
+
+  static Future<void> readPrefs() async {
+    Global.storage = const FlutterSecureStorage();
+    if (kDebugMode) {
+      //Global.storage!.deleteAll();
+    }
+    try {
+      Global.token = await Global.storage!.read(key: 'token');
+    } on PlatformException catch (_) {
+      // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
+      await Global.storage!.deleteAll();
+      Global.token = '';
     }
   }
 }

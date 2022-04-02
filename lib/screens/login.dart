@@ -85,58 +85,61 @@ class LoginState extends State<Login> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Connexion')),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Card(
-            elevation: 2,
-            margin: const EdgeInsets.all(32.0),
-            child: Container(
-              padding: const EdgeInsets.all(20.0),
-              child: Form(
-                key: _loginFormKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    TextFormField(
-                      decoration:
-                          const InputDecoration(hintText: 'Nom d\'utilisateur'),
-                      controller: _unameController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un nom d\'utilisateur';
-                        }
-                        return null;
-                      },
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      autofocus: true,
-                    ),
-                    TextFormField(
-                      decoration:
-                          const InputDecoration(hintText: 'Code d\'activation'),
-                      controller: _pwdController,
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Veuillez entrer un code d\'activation';
-                        }
-                        return null;
-                      },
-                      enableSuggestions: false,
-                      autocorrect: false,
-                      obscureText: true,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                      child: ElevatedButton(
-                          onPressed: _login, child: const Text('Se connecter')),
-                    )
-                  ],
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Card(
+              elevation: 2,
+              margin: const EdgeInsets.all(32.0),
+              child: Container(
+                padding: const EdgeInsets.all(20.0),
+                child: Form(
+                  key: _loginFormKey,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            hintText: 'Nom d\'utilisateur'),
+                        controller: _unameController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Veuillez entrer un nom d\'utilisateur';
+                          }
+                          return null;
+                        },
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        autofocus: true,
+                      ),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                            hintText: 'Code d\'activation'),
+                        controller: _pwdController,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Veuillez entrer un code d\'activation';
+                          }
+                          return null;
+                        },
+                        enableSuggestions: false,
+                        autocorrect: false,
+                        obscureText: true,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                        child: ElevatedButton(
+                            onPressed: _login,
+                            child: const Text('Se connecter')),
+                      )
+                    ],
+                  ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

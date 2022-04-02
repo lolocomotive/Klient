@@ -1,9 +1,5 @@
-import 'dart:io';
-
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kosmos_client/kdecole-api/background_tasks.dart';
 import 'package:kosmos_client/screens/login.dart';
 
 import 'global.dart';
@@ -12,18 +8,10 @@ import 'screens/multiview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  Global.storage = const FlutterSecureStorage();
-  if (kDebugMode) {
-    Global.storage!.deleteAll();
-  }
-  try {
-    Global.token = await Global.storage!.read(key: 'token');
-  } on PlatformException catch (_) {
-    // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
-    await Global.storage!.deleteAll();
-    Global.token = '';
-  }
-  Global.initDB();
+
+  await Global.readPrefs();
+  await Global.initDB();
+  registerTasks();
   runApp(const KosmosApp());
 }
 
@@ -65,6 +53,12 @@ class KosmosState extends State with WidgetsBindingObserver {
 
   Widget? _mainWidget;
 
+  @override
+  void initState() {
+    super.initState();
+    initPlatformState();
+  }
+
   KosmosState() {
     Global.onLogin = () {
       setState(() {
@@ -75,7 +69,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     if (Global.token == null || Global.token == '') {
       _mainWidget = Login(Global.onLogin!);
     } else {
-      stdout.writeln("Token:" + Global.token!);
+      print("Token:" + Global.token!);
       Global.client = Client(Global.token!);
     }
   }
@@ -113,12 +107,12 @@ class KosmosState extends State with WidgetsBindingObserver {
         ),
         useMaterial3: true,
       ),
-      darkTheme: ThemeData(
+      /* darkTheme: ThemeData(
         colorScheme: const ColorScheme.dark().copyWith(
           onTertiary: Colors.white54,
           primary: Colors.teal.shade900,
         ),
-      ),
+      ), */
       home: _mainWidget,
     );
   }
