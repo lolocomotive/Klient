@@ -113,7 +113,7 @@ Future<void> showNotifications() async {
 
   convs = convs
       .where((conv) => !conv.read)
-      //    .where((conv) => !conv.notificationShown)
+      .where((conv) => !conv.notificationShown)
       .toList();
   if (convs.isEmpty) {
     print('Showing no notifications');
