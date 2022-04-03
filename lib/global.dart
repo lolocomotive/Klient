@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/main.dart';
@@ -14,6 +15,7 @@ import 'package:sqflite/sqflite.dart';
 class Global {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static FlutterSecureStorage? storage;
+  static FlutterLocalNotificationsPlugin? notifications;
   static Database? db;
   static String? token;
   static Client? client;
@@ -39,6 +41,7 @@ class Global {
   static int progress = 0;
   static int progressOf = 0;
   static void Function()? onLogin;
+
   static initDB() async {
     final dbDir = await getDatabasesPath();
     final dbPath = dbDir + '/kdecole.db';
@@ -94,6 +97,7 @@ class Global {
       Preview TEXT NOT NULL,
       HasAttachment BOOLEAN NOT NULL,
       Read BOOLEAN NOT NULL,
+      NotificationShown BOOLEAN NOT NULL,
       LastDate INTEGER NOT NULL,
       LastAuthor STRING NOT NULL,
       FirstAuthor STRING NOT NULL,
@@ -263,5 +267,15 @@ class Global {
       await Global.storage!.deleteAll();
       Global.token = '';
     }
+  }
+
+  static Future<void> initNotifications() async {
+    Global.notifications = FlutterLocalNotificationsPlugin();
+    await Global.notifications!.initialize(
+        const InitializationSettings(
+            android: AndroidInitializationSettings('ic_stat_name')),
+        onSelectNotification: (_) {
+      print(_);
+    });
   }
 }

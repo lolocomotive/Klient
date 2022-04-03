@@ -34,6 +34,7 @@ class Conversation {
   String lastAuthor;
   String firstAuthor;
   bool read;
+  bool notificationShown;
   Widget? customPreview;
   Widget? customSubject;
 
@@ -45,6 +46,7 @@ class Conversation {
       this.lastDate,
       this.messages,
       this.read,
+      this.notificationShown,
       this.lastAuthor,
       this.firstAuthor,
       [this.customPreview,
@@ -66,6 +68,7 @@ class Conversation {
           DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
           messages,
           result['Read'] as int == 1 ? true : false,
+          result['NotificationShown'] as int == 1 ? true : false,
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
         ),
@@ -141,6 +144,7 @@ class Conversation {
           DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
           messages,
           result['Read'] as int == 1 ? true : false,
+          result['NotificationShown'] as int == 1 ? true : false,
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
@@ -174,6 +178,7 @@ class Conversation {
         DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
         messages,
         result['Read'] as int == 1 ? true : false,
+        result['NotificationShown'] as int == 1 ? true : false,
         result['LastAuthor'] as String,
         result['FirstAuthor'] as String,
       );

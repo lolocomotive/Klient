@@ -18,8 +18,11 @@
  */
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
+import 'package:kosmos_client/kdecole-api/conversation.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -44,6 +47,10 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
       Global.client = Client(token);
       print('Fetching data');
       await DatabaseManager.downloadAll();
+      print('Initializing notifications');
+      await Global.initNotifications();
+      print('Showing notifications');
+      await showNotifications();
     }
   } catch (_) {
     print(_.toString());
@@ -89,4 +96,41 @@ Future<void> initPlatformState() async {
   // If the widget was removed from the tree while the asynchronous platform
   // message was in flight, we want to discard the reply rather than calling
   // setState to update our non-existent appearance.
+}
+
+Future<void> showNotifications() async {
+  const AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+    'channel-msg',
+    'channel-msg',
+    channelDescription: 'The channel for displaying messages',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+  const NotificationDetails platformChannelSpecifics =
+      NotificationDetails(android: androidPlatformChannelSpecifics);
+  List<Conversation> convs = (await Conversation.fetchAll());
+
+  convs = convs
+      .where((conv) => !conv.read)
+      //    .where((conv) => !conv.notificationShown)
+      .toList();
+  if (convs.isEmpty) {
+    print('Showing no notifications');
+  } else {
+    print('Notifications to show:');
+    print(convs);
+  }
+  for (var i = 0; i < convs.length; i++) {
+    Conversation conv = convs[i];
+    Global.db!.update('Conversations', {'NotificationShown': 1},
+        where: 'ID = ?', whereArgs: [conv.id.toString()]);
+    await Global.notifications!.show(
+      conv.id,
+      conv.lastAuthor + ' - ' + conv.subject,
+      HtmlUnescape().convert(conv.preview),
+      platformChannelSpecifics,
+      payload: 'conv-${conv.id}',
+    );
+  }
 }

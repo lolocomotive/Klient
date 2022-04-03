@@ -61,9 +61,7 @@ class DebugScreen extends StatelessWidget {
       appBar: AppBar(title: const Text('Debug')),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+        child: ListView(
           children: [
             ElevatedButton(
                 onPressed: _updateMessages,

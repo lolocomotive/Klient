@@ -9,6 +9,7 @@ import 'screens/multiview.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
+  await Global.initNotifications();
   await Global.readPrefs();
   await Global.initDB();
   registerTasks();

@@ -101,35 +101,45 @@ class DatabaseManager {
         }
         modified = true;
         final batch = Global.db!.batch();
-        batch.insert('Conversations', {
-          'ID': conversation['id'],
-          'Subject': conversation['objet'],
-          'Preview': conversation['premieresLignes'],
-          'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
-          'LastDate': (conversation['dateDernierMessage']),
-          'Read': conversation['etatLecture'] as bool ? 1 : 0,
-          'LastAuthor': conversation['expediteurActuel']['libelle'],
-          'FirstAuthor': conversation['expediteurInitial']['libelle'],
-          'FullMessageContents': '',
-        });
+        batch.insert(
+            'Conversations',
+            {
+              'ID': conversation['id'],
+              'Subject': conversation['objet'],
+              'Preview': conversation['premieresLignes'],
+              'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
+              'LastDate': (conversation['dateDernierMessage']),
+              'Read': conversation['etatLecture'] as bool ? 1 : 0,
+              'NotificationShown': false,
+              'LastAuthor': conversation['expediteurActuel']['libelle'],
+              'FirstAuthor': conversation['expediteurInitial']['libelle'],
+              'FullMessageContents': '',
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace);
         String messageContents = '';
         await Global.client!.addRequest(Action.getConversationDetail,
             (messages) async {
           for (final message in messages['participations']) {
-            batch.insert('Messages', {
-              'ParentID': conversation['id'],
-              'HTMLContent': _cleanupHTML(message['corpsMessage']),
-              'Author': message['redacteur']['libelle'],
-              'DateSent': message['dateEnvoi'],
-            });
+            batch.insert(
+                'Messages',
+                {
+                  'ParentID': conversation['id'],
+                  'HTMLContent': _cleanupHTML(message['corpsMessage']),
+                  'Author': message['redacteur']['libelle'],
+                  'DateSent': message['dateEnvoi'],
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace);
             messageContents += (_cleanupHTML(message['corpsMessage']) + '\n')
                 .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
             for (final attachment in message['pjs'] ?? []) {
-              batch.insert('MessageAttachments', {
-                'ParentID': message['id'],
-                'URL': attachment['url'],
-                'Name': attachment['name']
-              });
+              batch.insert(
+                  'MessageAttachments',
+                  {
+                    'ParentID': message['id'],
+                    'URL': attachment['url'],
+                    'Name': attachment['name']
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.replace);
             }
             batch.update(
                 'Conversations', {'FullMessageContents': messageContents},

@@ -18,7 +18,6 @@
  */
 
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
@@ -56,12 +55,13 @@ class Request {
         }
         success = true;
       } catch (_) {
-        success = false;
-        sleep(const Duration(milliseconds: 1000));
+        rethrow;
+        //success = false;
+        //sleep(const Duration(milliseconds: 1000));
       }
     } while (!success);
 
-    if ((response!.statusCode >= 200 && response.statusCode < 300) ||
+    if ((response.statusCode >= 200 && response.statusCode < 300) ||
         response.statusCode == 204) {
       var data = jsonDecode(response.body);
       if (response.body.startsWith('[')) {
