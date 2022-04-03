@@ -24,15 +24,13 @@ import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/conversation.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
+import 'package:kosmos_client/kdecole-api/lesson.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
   if (isTimeout) {
-    // This task has exceeded its allowed running-time.
-    // You must stop what you're doing and immediately .finish(taskId)
     print('[BackgroundFetch] Headless task timed-out: $taskId');
-
     BackgroundFetch.finish(taskId);
     return;
   }
@@ -64,7 +62,6 @@ registerTasks() {
 }
 
 Future<void> initPlatformState() async {
-  // Configure BackgroundFetch.
   int status = await BackgroundFetch.configure(
       BackgroundFetchConfig(
         minimumFetchInterval: 15,
@@ -77,38 +74,27 @@ Future<void> initPlatformState() async {
         forceAlarmManager: false,
         requiredNetworkType: NetworkType.NONE,
       ), (String taskId) async {
-    // <-- Event handler
-    // This is the fetch-event callback.
     print('[BackgroundFetch feur] Event received $taskId');
-
-    // IMPORTANT:  You must signal completion of your task or the OS can^ punish your app
-    // for taking too long in the background.
     await DatabaseManager.downloadAll();
+    await showNotifications();
     BackgroundFetch.finish(taskId);
   }, (String taskId) async {
-    // <-- Task timeout handler.
-    // This task has exceeded its allowed running-time.  You must stop what you're doing and immediately .finish(taskId)
     print('[BackgroundFetch] TASK TIMEOUT taskId: $taskId');
     BackgroundFetch.finish(taskId);
   });
   print('[BackgroundFetch] configure success: $status');
-
-  // If the widget was removed from the tree while the asynchronous platform
-  // message was in flight, we want to discard the reply rather than calling
-  // setState to update our non-existent appearance.
 }
 
 Future<void> showNotifications() async {
-  const AndroidNotificationDetails androidPlatformChannelSpecifics =
-      AndroidNotificationDetails(
+  const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
     'channel-msg',
     'channel-msg',
     channelDescription: 'The channel for displaying messages',
     importance: Importance.max,
     priority: Priority.high,
   );
-  const NotificationDetails platformChannelSpecifics =
-      NotificationDetails(android: androidPlatformChannelSpecifics);
+  const NotificationDetails msgDetails =
+      NotificationDetails(android: msgChannel);
   List<Conversation> convs = (await Conversation.fetchAll());
 
   convs = convs
@@ -116,10 +102,10 @@ Future<void> showNotifications() async {
       .where((conv) => !conv.notificationShown)
       .toList();
   if (convs.isEmpty) {
-    print('Showing no notifications');
+    print('Showing no message notifications');
   } else {
-    print('Notifications to show:');
-    print(convs);
+    print('Message notifications to show:');
+    print(convs.map((e) => e.subject).toList());
   }
   for (var i = 0; i < convs.length; i++) {
     Conversation conv = convs[i];
@@ -129,8 +115,40 @@ Future<void> showNotifications() async {
       conv.id,
       conv.lastAuthor + ' - ' + conv.subject,
       HtmlUnescape().convert(conv.preview),
-      platformChannelSpecifics,
+      msgDetails,
       payload: 'conv-${conv.id}',
+    );
+  }
+  const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
+    'channel-lessons',
+    'channel-lessons',
+    channelDescription: 'The channel for displaying lesson modifications',
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+  const NotificationDetails lessonDetails =
+      NotificationDetails(android: lessonChannel);
+  List<Lesson> lessons = (await Lesson.fetchAll());
+
+  lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
+  if (lessons.isEmpty) {
+    print('Showing no lesson update notifications');
+  } else {
+    print('Lesson update notifications to show:');
+    print(lessons.map((e) => e.title + (e.modificationMessage ?? '')));
+  }
+  for (var i = 0; i < lessons.length; i++) {
+    Lesson lesson = lessons[i];
+    Global.db!.update('Conversations', {'NotificationShown': 1},
+        where: 'ID = ?', whereArgs: [lesson.id.toString()]);
+    await Global.notifications!.show(
+      lesson.id,
+      lesson.title + ' - ' + lesson.startTime + '-' + lesson.endTime,
+      HtmlUnescape().convert(lesson.isModified
+          ? 'Cours modifié: ' + lesson.modificationMessage!
+          : "Le cours n'est plus modifié"),
+      lessonDetails,
+      payload: 'conv-${lesson.id}',
     );
   }
 }

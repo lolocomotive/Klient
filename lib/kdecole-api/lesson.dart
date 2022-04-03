@@ -40,6 +40,7 @@ class Lesson {
   String title;
   List<Exercise> exercises;
   bool isModified;
+  bool shouldNotify;
   String? modificationMessage;
 
   ///1 = 1 hour
@@ -48,7 +49,7 @@ class Lesson {
   late Color color;
 
   Lesson(this.id, this.date, this.startTime, this.endTime, this.room,
-      this.title, this.exercises, this.isModified,
+      this.title, this.exercises, this.isModified, this.shouldNotify,
       [this.modificationMessage]) {
     startDouble = int.parse(startTime.substring(0, 2)) +
         int.parse(startTime.substring(3)) / 60;
@@ -83,6 +84,7 @@ class Lesson {
       result['Subject'] as String,
       await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
       result['IsModified'] as int == 1,
+      result['ShouldNotify'] as int == 1,
       result['ModificationMessage'] as String?,
     );
   }

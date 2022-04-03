@@ -21,6 +21,7 @@ import 'dart:async';
 
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
+import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';
@@ -110,7 +111,7 @@ class DatabaseManager {
               'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
               'LastDate': (conversation['dateDernierMessage']),
               'Read': conversation['etatLecture'] as bool ? 1 : 0,
-              'NotificationShown': false,
+              'NotificationShown': 0,
               'LastAuthor': conversation['expediteurActuel']['libelle'],
               'FirstAuthor': conversation['expediteurInitial']['libelle'],
               'FullMessageContents': '',
@@ -237,6 +238,14 @@ class DatabaseManager {
         params: [(Global.client!.idEleve ?? 0).toString()]);
     for (final day in result['listeJourCdt']) {
       for (final lesson in day['listeSeances']) {
+        //Check if this lesson is the same as the previous
+
+        final oldLesson = await Lesson.byID(lesson['idSeance']);
+        var shouldNotify = false;
+        if (oldLesson != null) {
+          shouldNotify = oldLesson.isModified != lesson['flagModif'];
+        }
+
         Global.db!.insert(
           'Lessons',
           {
@@ -248,6 +257,7 @@ class DatabaseManager {
             'Title': lesson['titre'],
             'Subject': lesson['matiere'],
             'IsModified': lesson['flagModif'] ? 1 : 0,
+            'ShouldNotify': shouldNotify ? 1 : 0,
             'ModificationMessage': lesson['motifModif'],
           },
           conflictAlgorithm: ConflictAlgorithm.replace,

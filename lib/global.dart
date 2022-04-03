@@ -139,6 +139,7 @@ class Global {
       Subject TEXT NOT NULL,
       Title TEXT NOT NULL,
       IsModified BOOLEAN NOT NULL,
+      ShouldNotify BOOLEAN NOT NULL,
       ModificationMessage TEXT
     );''');
       await Global.db!.execute('''
