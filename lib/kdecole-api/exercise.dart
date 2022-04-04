@@ -77,7 +77,7 @@ class Exercise {
         DateTime.fromMillisecondsSinceEpoch(result['ParentDate'] as int),
         result['Title'] as String,
         result['HTMLContent'] as String,
-        result['Done'] == 1 ? true : false,
+        result['Done'] == 1,
         result['LessonFor'] as int?,
         (result['DateFor'] as int?) == null
             ? null

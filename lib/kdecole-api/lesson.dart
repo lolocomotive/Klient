@@ -48,8 +48,17 @@ class Lesson {
   late double startDouble;
   late Color color;
 
-  Lesson(this.id, this.date, this.startTime, this.endTime, this.room,
-      this.title, this.exercises, this.isModified, this.shouldNotify,
+  Lesson(
+      this.id,
+      this.date,
+      this.startTime,
+      this.endTime,
+      this.room,
+      this.title,
+      this.exercises,
+      this.isModified,
+      this.shouldNotify,
+      bool headless,
       [this.modificationMessage]) {
     startDouble = int.parse(startTime.substring(0, 2)) +
         int.parse(startTime.substring(3)) / 60;
@@ -57,7 +66,11 @@ class Lesson {
         int.parse(endTime.substring(3)) / 60;
 
     length = e - startDouble;
-    color = fromSubject(title);
+    if (headless) {
+      color = Colors.black;
+    } else {
+      color = fromSubject(title);
+    }
   }
 
   static Color fromSubject(String subject) {
@@ -74,7 +87,7 @@ class Lesson {
     ).toColor();
   }
 
-  static Future<Lesson> _parse(result) async {
+  static Future<Lesson> _parse(result, bool headless) async {
     return Lesson(
       result['ID'] as int,
       DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
@@ -85,23 +98,24 @@ class Lesson {
       await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
       result['IsModified'] as int == 1,
       result['ShouldNotify'] as int == 1,
+      headless,
       result['ModificationMessage'] as String?,
     );
   }
 
-  static Future<List<Lesson>> fetchAll() async {
+  static Future<List<Lesson>> fetchAll([headless = false]) async {
     final List<Lesson> lessons = [];
     final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
-      lessons.add(await _parse(result));
+      lessons.add(await _parse(result, headless));
     }
     return lessons;
   }
 
-  static Future<Lesson?> byID(int id) async {
+  static Future<Lesson?> byID(int id, [headless = false]) async {
     final results =
         await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
     if (results.isEmpty) return null;
-    return _parse(results[0]);
+    return _parse(results[0], headless);
   }
 }

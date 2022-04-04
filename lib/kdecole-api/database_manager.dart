@@ -240,7 +240,7 @@ class DatabaseManager {
       for (final lesson in day['listeSeances']) {
         //Check if this lesson is the same as the previous
 
-        final oldLesson = await Lesson.byID(lesson['idSeance']);
+        final oldLesson = await Lesson.byID(lesson['idSeance'], true);
         var shouldNotify = false;
         if (oldLesson != null) {
           shouldNotify = oldLesson.isModified != lesson['flagModif'];

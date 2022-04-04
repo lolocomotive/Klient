@@ -50,8 +50,9 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
       print('Showing notifications');
       await showNotifications();
     }
-  } catch (_) {
+  } catch (_, st) {
     print(_.toString());
+    print(st.toString());
   } finally {
     BackgroundFetch.finish(taskId);
   }
@@ -128,7 +129,7 @@ Future<void> showNotifications() async {
   );
   const NotificationDetails lessonDetails =
       NotificationDetails(android: lessonChannel);
-  List<Lesson> lessons = (await Lesson.fetchAll());
+  List<Lesson> lessons = (await Lesson.fetchAll(true));
 
   lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
   if (lessons.isEmpty) {
@@ -148,7 +149,7 @@ Future<void> showNotifications() async {
           ? 'Cours modifié: ' + lesson.modificationMessage!
           : "Le cours n'est plus modifié"),
       lessonDetails,
-      payload: 'conv-${lesson.id}',
+      payload: 'lesson-${lesson.id}',
     );
   }
 }
