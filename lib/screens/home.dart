@@ -64,13 +64,13 @@ class _HomeState extends State<Home> {
         _homework
             .add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
       }
+      _homework.sort(
+        (a, b) =>
+            a.key.dateFor!.millisecondsSinceEpoch -
+            b.key.dateFor!.millisecondsSinceEpoch,
+      );
       setState(() {});
     });
-    _homework.sort(
-      (a, b) =>
-          a.key.dateFor!.millisecondsSinceEpoch -
-          b.key.dateFor!.millisecondsSinceEpoch,
-    );
     NewsArticle.fetchAll().then((news) {
       _news = news;
       setState(() {});
@@ -144,12 +144,14 @@ class _HomeState extends State<Home> {
                         )
                       : Column(
                           children: _homework
-                              .map((homework) => ExerciceView(
-                                    homework.key,
-                                    homework.value,
-                                    showDate: true,
-                                    showSubject: true,
-                                  ))
+                              .map(
+                                (homework) => ExerciceView(
+                                  homework.key,
+                                  homework.value,
+                                  showDate: true,
+                                  showSubject: true,
+                                ),
+                              )
                               .toList(),
                         ),
                   const Padding(

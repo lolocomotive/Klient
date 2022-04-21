@@ -297,6 +297,15 @@ class DetailedLessonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    //FIXME remove this debug logging
+    print('Exercise: ');
+    for (final e in _lesson.exercises) {
+      print(e.title +
+          ' | ' +
+          e.lessonFor.toString() +
+          ' | ' +
+          e.parentLesson.toString());
+    }
     return Scaffold(
       backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(
@@ -305,30 +314,98 @@ class DetailedLessonView extends StatelessWidget {
         ),
         backgroundColor: _lesson.color,
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: ListView(
         children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Text(
-              'Séance du ' +
-                  DateFormat('dd/MM').format(_lesson.date) +
-                  ' de ' +
-                  _lesson.startTime +
-                  ' à ' +
-                  _lesson.endTime,
-              textAlign: TextAlign.center,
+          Card(
+            margin: const EdgeInsets.all(8),
+            elevation: 2,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                children: [
+                  Text(
+                    'Séance du ' +
+                        DateFormat('dd/MM').format(_lesson.date) +
+                        ' de ' +
+                        _lesson.startTime +
+                        ' à ' +
+                        _lesson.endTime,
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    'Salle ' + _lesson.room,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
           ),
-          if (_lesson.exercises.isNotEmpty)
-            ..._lesson.exercises.map((e) => ExerciceView(e, _lesson)).toList(),
-          if (_lesson.exercises.isEmpty)
-            Text(
-              'Aucun contenu renseigné',
-              style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
-              textAlign: TextAlign.center,
-            ),
+          MultiExerciseView(
+            _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
+            'Travail à faire pour cette séance',
+            _lesson,
+          ),
+          MultiExerciseView(
+            _lesson.exercises
+                .where((e) => e.type == ExerciseType.lessonContent)
+                .toList(),
+            'Contenu de la séance',
+            _lesson,
+          ),
+          MultiExerciseView(
+            _lesson.exercises
+                .where((e) =>
+                        e.type == ExerciseType.exercise &&
+                        e.parentLesson == _lesson.id &&
+                        e.parentLesson !=
+                            e.lessonFor // don't display those twice
+                    )
+                .toList(),
+            'Travail donné lors de la séance',
+            _lesson,
+          ),
         ],
+      ),
+    );
+  }
+}
+
+class MultiExerciseView extends StatelessWidget {
+  final List<Exercise> _exercises;
+  final String _title;
+  final Lesson _lesson;
+
+  const MultiExerciseView(this._exercises, this._title, this._lesson,
+      {Key? key})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      elevation: 2,
+      margin: const EdgeInsets.all(8.0),
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            Text(
+              _title,
+              style: const TextStyle(fontSize: 16),
+            ),
+            ..._exercises.map((e) => ExerciceView(e, _lesson)).toList(),
+            if (_exercises.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                child: Text(
+                  'Aucun contenu rensiegné',
+                  style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }
