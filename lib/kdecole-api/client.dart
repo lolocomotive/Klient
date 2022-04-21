@@ -42,18 +42,28 @@ class Request {
 
   process() async {
     http.Response? response;
+    final context = SecurityContext.defaultContext;
+    //Including the ISRG root certificate for older devices (looking at you Gloria)
+    ByteData data = await rootBundle.load('assets/isrgrootx1.pem');
+    try {
+      context.setTrustedCertificatesBytes(data.buffer.asUint8List());
+    } on TlsException {
+      //Ignore the exception since this happens when the certificate is already there
+    }
+    final httpClient = HttpClient(context: context);
+    final client = IOClient(httpClient);
     bool success = false;
     do {
       try {
         switch (_method) {
           case HTTPRequestMethod.get:
-            response = await http.get(Uri.parse(_url), headers: _headers);
+            response = await client.get(Uri.parse(_url), headers: _headers);
             break;
           case HTTPRequestMethod.put:
-            response = await http.put(Uri.parse(_url), headers: _headers);
+            response = await client.put(Uri.parse(_url), headers: _headers);
             break;
           case HTTPRequestMethod.delete:
-            response = await http.delete(Uri.parse(_url), headers: _headers);
+            response = await client.delete(Uri.parse(_url), headers: _headers);
             break;
         }
         success = true;
@@ -210,7 +220,6 @@ class Client {
 
     http.Response response;
     final context = SecurityContext.defaultContext;
-
     //Including the ISRG root certificate for older devices (looking at you Gloria)
     ByteData data = await rootBundle.load('assets/isrgrootx1.pem');
     try {
@@ -218,9 +227,9 @@ class Client {
     } on TlsException {
       //Ignore the exception since this happens when the certificate is already there
     }
-
     final httpClient = HttpClient(context: context);
     final client = IOClient(httpClient);
+
     switch (action.method) {
       case HTTPRequestMethod.get:
         response = await client.get(Uri.parse(url), headers: headers);
