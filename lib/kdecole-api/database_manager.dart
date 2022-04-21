@@ -342,10 +342,6 @@ class DatabaseManager {
           }
           Global.client!.addRequest(Action.getExerciseDetails,
               (exerciseDetails) async {
-            print('exercise[date]: ' +
-                exercise['date'].toString() +
-                ' exerciseDetails[date]: ' +
-                exerciseDetails['date'].toString());
             await Global.db!.insert(
               'Exercises',
               {

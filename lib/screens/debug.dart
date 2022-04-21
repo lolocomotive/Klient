@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
 
@@ -55,6 +56,19 @@ class DebugScreen extends StatelessWidget {
     Global.db!.delete('Exercises');
   }
 
+  void _showNotification() {
+    const AndroidNotificationDetails channel = AndroidNotificationDetails(
+      'channel-lessons',
+      'channel-lessons',
+      channelDescription: 'The channel for displaying lesson modifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails details = NotificationDetails(android: channel);
+    Global.notifications!.show(
+        0, 'Example notification', 'This is an example notification', details);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -82,6 +96,9 @@ class DebugScreen extends StatelessWidget {
                   Global.db!.execute('DROP TABLE GRADES');
                 },
                 child: const Text('drop grades')),
+            ElevatedButton(
+                onPressed: _showNotification,
+                child: const Text('Force notification'))
           ],
         ),
       ),
