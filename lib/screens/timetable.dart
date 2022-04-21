@@ -297,15 +297,6 @@ class DetailedLessonView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //FIXME remove this debug logging
-    print('Exercise: ');
-    for (final e in _lesson.exercises) {
-      print(e.title +
-          ' | ' +
-          e.lessonFor.toString() +
-          ' | ' +
-          e.parentLesson.toString());
-    }
     return Scaffold(
       backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(
