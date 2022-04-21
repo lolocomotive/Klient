@@ -111,9 +111,13 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   _grades.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(child: CircularProgressIndicator()),
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                              child: Text('Rien à afficher',
+                                  style: TextStyle(
+                                      color: Global
+                                          .theme!.colorScheme.onTertiary))),
                         )
                       : SizedBox(
                           child: Column(
