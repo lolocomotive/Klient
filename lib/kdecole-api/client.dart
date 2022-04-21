@@ -18,9 +18,12 @@
  */
 
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
+import 'package:http/io_client.dart';
 import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/screens/login.dart';
 
@@ -206,16 +209,27 @@ class Client {
     }
 
     http.Response response;
+    final context = SecurityContext.defaultContext;
 
+    //Including the ISRG root certificate for older devices (looking at you Gloria)
+    ByteData data = await rootBundle.load('assets/isrgrootx1.pem');
+    try {
+      context.setTrustedCertificatesBytes(data.buffer.asUint8List());
+    } on TlsException {
+      //Ignore the exception since this happens when the certificate is already there
+    }
+
+    final httpClient = HttpClient(context: context);
+    final client = IOClient(httpClient);
     switch (action.method) {
       case HTTPRequestMethod.get:
-        response = await http.get(Uri.parse(url), headers: headers);
+        response = await client.get(Uri.parse(url), headers: headers);
         break;
       case HTTPRequestMethod.put:
-        response = await http.put(Uri.parse(url), headers: headers);
+        response = await client.put(Uri.parse(url), headers: headers);
         break;
       case HTTPRequestMethod.delete:
-        response = await http.delete(Uri.parse(url), headers: headers);
+        response = await client.delete(Uri.parse(url), headers: headers);
         break;
     }
 
