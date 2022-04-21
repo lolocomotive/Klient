@@ -143,7 +143,7 @@ class MessagesState extends State<Messages> {
 
   refresh() async {
     await DatabaseManager.fetchMessageData();
-    setState(() {});
+    await reloadFromDB();
   }
 
   MessagesState() {
