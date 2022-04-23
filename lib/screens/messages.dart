@@ -379,70 +379,70 @@ class _ConversationViewState extends State<ConversationView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Global.theme!.colorScheme.background,
-      body: CustomScrollView(
-        slivers: [
-          SliverAppBar(
-            title: Text(_conversation != null
-                ? _conversation!.subject
-                : Global.currentConversationSubject!),
-            floating: true,
-          ),
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (BuildContext context, int index) {
-                final _parentKey = GlobalKey();
-                return Card(
-                  margin: const EdgeInsets.all(8.0),
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Column(
-                      key: _parentKey,
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+      body: NestedScrollView(
+        floatHeaderSlivers: true,
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return <Widget>[
+            SliverAppBar(
+              title: Text(_conversation != null
+                  ? _conversation!.subject
+                  : Global.currentConversationSubject!),
+              floating: true,
+            ),
+          ];
+        },
+        body: ListView.builder(
+          itemBuilder: (BuildContext context, int index) {
+            final _parentKey = GlobalKey();
+            return Card(
+              margin: const EdgeInsets.all(8.0),
+              elevation: 1,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  key: _parentKey,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(
                       children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                _conversation!.messages[index].author,
-                                textAlign: TextAlign.left,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 14),
-                              ),
-                            ),
-                            Text(Global.dateToString(
-                                _conversation!.messages[index].date)),
-                          ],
+                        Expanded(
+                          child: Text(
+                            _conversation!.messages[index].author,
+                            textAlign: TextAlign.left,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(fontSize: 14),
+                          ),
                         ),
-                        Html(
-                          data: HtmlUnescape().convert(
-                              _conversation!.messages[index].htmlContent),
-                          style: {
-                            'blockquote': Style(
-                                border: const Border(
-                                    left: BorderSide(
-                                        color: Colors.black12, width: 2)),
-                                padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                margin: EdgeInsets.zero)
-                          },
-                          onLinkTap: (url, context, map, element) {
-                            launch(url!);
-                          },
-                        ),
+                        Text(Global.dateToString(
+                            _conversation!.messages[index].date)),
                       ],
                     ),
-                  ),
-                );
-              },
-              childCount:
-                  _conversation != null ? _conversation!.messages.length : 0,
-            ),
-          ),
-        ],
+                    Html(
+                      data: HtmlUnescape()
+                          .convert(_conversation!.messages[index].htmlContent),
+                      style: {
+                        'blockquote': Style(
+                            border: const Border(
+                                left: BorderSide(
+                                    color: Colors.black12, width: 2)),
+                            padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                            margin: EdgeInsets.zero)
+                      },
+                      onLinkTap: (url, context, map, element) {
+                        launch(url!);
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+          itemCount: _conversation != null ? _conversation!.messages.length : 0,
+        ),
       ),
     );
   }
