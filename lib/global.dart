@@ -203,6 +203,9 @@ class Global {
         //PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
         if (kDebugMode)
           PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
+        if (kDebugMode)
+          PopupMenuItemWithIcon(
+              'Initial setup', Icons.bug_report_outlined, context),
       ];
     },
   );

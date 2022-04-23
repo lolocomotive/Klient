@@ -31,6 +31,17 @@ class SettingsPage extends StatefulWidget {
 class _SettingsPageState extends State<SettingsPage> {
   bool notifMsgEnabled = false;
   bool notifCalEnabled = false;
+  _SettingsPageState() {
+    _readPrefs();
+  }
+  _readPrefs() async {
+    notifMsgEnabled =
+        await Global.storage!.read(key: 'notifications.messages') == 'true';
+    notifCalEnabled =
+        await Global.storage!.read(key: 'notifications.calendar') == 'true';
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -40,16 +51,6 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
       body: Column(
         children: [
-          const Padding(
-            padding: EdgeInsets.all(16.0),
-            child: Text(
-              "Les paramètres ne font rien pour l'instant",
-              style: TextStyle(
-                  color: Colors.teal,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16),
-            ),
-          ),
           Expanded(
             child: SettingsList(
               sections: [
@@ -66,6 +67,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       initialValue: notifMsgEnabled,
                       onToggle: (_) {
                         notifMsgEnabled = !notifMsgEnabled;
+                        Global.storage!.write(
+                            key: 'notifications.messages',
+                            value: notifMsgEnabled ? 'true' : 'false');
                         setState(() {});
                       },
                       leading: const Icon(Icons.message_outlined),
@@ -77,6 +81,9 @@ class _SettingsPageState extends State<SettingsPage> {
                       initialValue: notifCalEnabled,
                       onToggle: (_) {
                         notifCalEnabled = !notifCalEnabled;
+                        Global.storage!.write(
+                            key: 'notifications.calendar',
+                            value: notifCalEnabled ? 'true' : 'false');
                         setState(() {});
                       },
                       leading: const Icon(Icons.calendar_today_outlined),

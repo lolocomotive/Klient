@@ -75,7 +75,7 @@ Future<void> initPlatformState() async {
         forceAlarmManager: false,
         requiredNetworkType: NetworkType.NONE,
       ), (String taskId) async {
-    print('[BackgroundFetch feur] Event received $taskId');
+    print('[BackgroundFetch] Event received $taskId');
     await DatabaseManager.downloadAll();
     await showNotifications();
     BackgroundFetch.finish(taskId);
@@ -87,69 +87,77 @@ Future<void> initPlatformState() async {
 }
 
 Future<void> showNotifications() async {
-  const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
-    'channel-msg',
-    'channel-msg',
-    channelDescription: 'The channel for displaying messages',
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-  const NotificationDetails msgDetails =
-      NotificationDetails(android: msgChannel);
-  List<Conversation> convs = (await Conversation.fetchAll());
-
-  convs = convs
-      .where((conv) => !conv.read)
-      .where((conv) => !conv.notificationShown)
-      .toList();
-  if (convs.isEmpty) {
-    print('Showing no message notifications');
-  } else {
-    print('Message notifications to show:');
-    print(convs.map((e) => e.subject).toList());
-  }
-  for (var i = 0; i < convs.length; i++) {
-    Conversation conv = convs[i];
-    Global.db!.update('Conversations', {'NotificationShown': 1},
-        where: 'ID = ?', whereArgs: [conv.id.toString()]);
-    await Global.notifications!.show(
-      conv.id,
-      conv.lastAuthor + ' - ' + conv.subject,
-      HtmlUnescape().convert(conv.preview),
-      msgDetails,
-      payload: 'conv-${conv.id}',
+  if (await Global.storage!.read(key: 'notifications.messages') == 'true') {
+    const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
+      'channel-msg',
+      'channel-msg',
+      channelDescription: 'The channel for displaying messages',
+      importance: Importance.max,
+      priority: Priority.high,
     );
-  }
-  const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
-    'channel-lessons',
-    'channel-lessons',
-    channelDescription: 'The channel for displaying lesson modifications',
-    importance: Importance.max,
-    priority: Priority.high,
-  );
-  const NotificationDetails lessonDetails =
-      NotificationDetails(android: lessonChannel);
-  List<Lesson> lessons = (await Lesson.fetchAll(true));
+    const NotificationDetails msgDetails =
+        NotificationDetails(android: msgChannel);
+    List<Conversation> convs = (await Conversation.fetchAll());
 
-  lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
-  if (lessons.isEmpty) {
-    print('Showing no lesson update notifications');
+    convs = convs
+        .where((conv) => !conv.read)
+        .where((conv) => !conv.notificationShown)
+        .toList();
+    if (convs.isEmpty) {
+      print('Showing no message notifications');
+    } else {
+      print('Message notifications to show:');
+      print(convs.map((e) => e.subject).toList());
+    }
+    for (var i = 0; i < convs.length; i++) {
+      Conversation conv = convs[i];
+      Global.db!.update('Conversations', {'NotificationShown': 1},
+          where: 'ID = ?', whereArgs: [conv.id.toString()]);
+      await Global.notifications!.show(
+        conv.id,
+        conv.lastAuthor + ' - ' + conv.subject,
+        HtmlUnescape().convert(conv.preview),
+        msgDetails,
+        payload: 'conv-${conv.id}',
+      );
+    }
   } else {
-    print('Lesson update notifications to show:');
-    print(lessons.map((e) => e.title + (e.modificationMessage ?? '')));
+    print('Message notifications disabled');
   }
-  for (var i = 0; i < lessons.length; i++) {
-    Lesson lesson = lessons[i];
-    Global.db!.update('Conversations', {'NotificationShown': 1},
-        where: 'ID = ?', whereArgs: [lesson.id.toString()]);
-    await Global.notifications!.show(
-      lesson.id,
-      lesson.title + ' - ' + lesson.startTime + '-' + lesson.endTime,
-      HtmlUnescape().convert(lesson.isModified
-          ? 'Cours modifié: ' + lesson.modificationMessage!
-          : "Le cours n'est plus modifié"),
-      lessonDetails,
-      payload: 'lesson-${lesson.id}',
+
+  if (await Global.storage!.read(key: 'notifications.calendar') == 'true') {
+    const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
+      'channel-lessons',
+      'channel-lessons',
+      channelDescription: 'The channel for displaying lesson modifications',
+      importance: Importance.max,
+      priority: Priority.high,
     );
+    const NotificationDetails lessonDetails =
+        NotificationDetails(android: lessonChannel);
+    List<Lesson> lessons = (await Lesson.fetchAll(true));
+    lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
+    if (lessons.isEmpty) {
+      print('Showing no lesson update notifications');
+    } else {
+      print('Lesson update notifications to show:');
+      print(lessons.map((e) => e.title + (e.modificationMessage ?? '')));
+    }
+    for (var i = 0; i < lessons.length; i++) {
+      Lesson lesson = lessons[i];
+      Global.db!.update('Conversations', {'NotificationShown': 1},
+          where: 'ID = ?', whereArgs: [lesson.id.toString()]);
+      await Global.notifications!.show(
+        lesson.id,
+        lesson.title + ' - ' + lesson.startTime + '-' + lesson.endTime,
+        HtmlUnescape().convert(lesson.isModified
+            ? 'Cours modifié: ' + lesson.modificationMessage!
+            : "Le cours n'est plus modifié"),
+        lessonDetails,
+        payload: 'lesson-${lesson.id}',
+      );
+    }
+  } else {
+    print('Calendar notifications disabled');
   }
 }

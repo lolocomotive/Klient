@@ -107,15 +107,16 @@ class _SetupPageState extends State<SetupPage> {
                             setState(() {});
                           }),
                       SwitchListTile(
-                          title: const Text('Emploi du temps'),
-                          subtitle: const Text(
-                              'Recevoir des notifications quand un cours est annulé'),
-                          activeColor: Colors.teal,
-                          value: notifCalEnabled,
-                          onChanged: (value) {
-                            notifCalEnabled = !notifCalEnabled;
-                            setState(() {});
-                          }),
+                        title: const Text('Emploi du temps'),
+                        subtitle: const Text(
+                            'Recevoir des notifications quand un cours est annulé'),
+                        activeColor: Colors.teal,
+                        value: notifCalEnabled,
+                        onChanged: (value) {
+                          notifCalEnabled = !notifCalEnabled;
+                          setState(() {});
+                        },
+                      ),
                       const Padding(padding: EdgeInsets.all(8.0)),
                       Row(
                         children: [
@@ -151,20 +152,21 @@ class _SetupPageState extends State<SetupPage> {
                               onPressed: () {
                                 currentStep++;
                                 update();
+                                Global.storage!.write(
+                                    key: 'notifications.messages',
+                                    value: notifMsgEnabled ? 'true' : 'false');
+                                Global.storage!.write(
+                                    key: 'notifications.calendar',
+                                    value: notifCalEnabled ? 'true' : 'false');
                                 DatabaseManager.downloadAll();
                                 setState(() {});
                               },
                               child: const Text(
                                 'TOUS',
                               )),
-                          TextButton(
-                              onPressed: () {
-                                currentStep++;
-                                update();
-                                DatabaseManager.downloadAll();
-                                setState(() {});
-                              },
-                              child: const Text(
+                          const TextButton(
+                              onPressed: null,
+                              child: Text(
                                 'LES 20 PREMIERS',
                               )),
                         ],
