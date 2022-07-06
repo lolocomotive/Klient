@@ -117,37 +117,7 @@ class DatabaseManager {
               'FullMessageContents': '',
             },
             conflictAlgorithm: ConflictAlgorithm.replace);
-        String messageContents = '';
-        await Global.client!.addRequest(Action.getConversationDetail,
-            (messages) async {
-          for (final message in messages['participations']) {
-            batch.insert(
-                'Messages',
-                {
-                  'ParentID': conversation['id'],
-                  'HTMLContent': _cleanupHTML(message['corpsMessage']),
-                  'Author': message['redacteur']['libelle'],
-                  'DateSent': message['dateEnvoi'],
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace);
-            messageContents += (_cleanupHTML(message['corpsMessage']) + '\n')
-                .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
-            for (final attachment in message['pjs'] ?? []) {
-              batch.insert(
-                  'MessageAttachments',
-                  {
-                    'ParentID': message['id'],
-                    'URL': attachment['url'],
-                    'Name': attachment['name']
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.replace);
-            }
-            batch.update(
-                'Conversations', {'FullMessageContents': messageContents},
-                where: 'ID = ' + conversation['id'].toString());
-          }
-          await batch.commit();
-        }, params: [(conversation['id'] as int).toString()]);
+        fetchSingleConversation(conversation['id'], batch);
       }
       if (!modified) {
         break;
@@ -159,6 +129,39 @@ class DatabaseManager {
       Global.messagesState!.reloadFromDB();
     }
     Global.loadingMessages = false;
+  }
+
+  static fetchSingleConversation(int id, Batch batch) async {
+    String messageContents = '';
+    await Global.client!.addRequest(Action.getConversationDetail,
+        (messages) async {
+      for (final message in messages['participations']) {
+        batch.insert(
+            'Messages',
+            {
+              'ParentID': id,
+              'HTMLContent': _cleanupHTML(message['corpsMessage']),
+              'Author': message['redacteur']['libelle'],
+              'DateSent': message['dateEnvoi'],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace);
+        messageContents += (_cleanupHTML(message['corpsMessage']) + '\n')
+            .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
+        for (final attachment in message['pjs'] ?? []) {
+          batch.insert(
+              'MessageAttachments',
+              {
+                'ParentID': message['id'],
+                'URL': attachment['url'],
+                'Name': attachment['name']
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace);
+        }
+        batch.update('Conversations', {'FullMessageContents': messageContents},
+            where: 'ID = ' + id.toString());
+      }
+      await batch.commit();
+    }, params: [(id).toString()]);
   }
 
   /// Download all the grades

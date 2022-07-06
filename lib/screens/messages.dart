@@ -17,9 +17,10 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
+import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/kdecole-api/conversation.dart';
 import 'package:kosmos_client/kdecole-api/database_manager.dart';
 import 'package:morpheus/morpheus.dart';
@@ -361,8 +362,11 @@ class ConversationView extends StatefulWidget {
 
 class _ConversationViewState extends State<ConversationView> {
   Conversation? _conversation;
-
+  final FocusNode _textFieldFocusNode = FocusNode();
+  final TextEditingController _textFieldController = TextEditingController();
+  bool _busy = false;
   _ConversationViewState() {
+    _textFieldFocusNode.addListener(() => setState(() {}));
     Conversation.byID(Global.currentConversation!).then((conversation) {
       if (!conversation!.read) {
         Global.client!.markConversationRead(conversation);
@@ -393,6 +397,73 @@ class _ConversationViewState extends State<ConversationView> {
         },
         body: ListView.builder(
           itemBuilder: (BuildContext context, int index) {
+            if (_conversation == null ||
+                index >= _conversation!.messages.length) {
+              return Opacity(
+                opacity: _textFieldFocusNode.hasFocus ? 1 : .5,
+                child: Card(
+                  margin: const EdgeInsets.all(8.0),
+                  elevation: 1,
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8)),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
+                            'Répondre à tous',
+                            style: TextStyle(
+                              color: Colors.teal.shade700,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          TextField(
+                            maxLines: null,
+                            focusNode: _textFieldFocusNode,
+                            controller: _textFieldController,
+                          ),
+                          ElevatedButton(
+                            onPressed: _busy
+                                ? null
+                                : () async {
+                                    _busy = true;
+                                    setState(() {});
+                                    await Global.client!.request(Action.reply,
+                                        params: [_conversation!.id.toString()],
+                                        body:
+                                            '{"dateEnvoi":0,"corpsMessage": "' +
+                                                _textFieldController.text
+                                                    .replaceAll('\\', '\\\\')
+                                                    .replaceAll('"', '\\"')
+                                                    .replaceAll('\n', '<br/>') +
+                                                '"}');
+                                    _textFieldController.clear();
+                                    final batch = Global.db!.batch();
+                                    await DatabaseManager
+                                        .fetchSingleConversation(
+                                            _conversation!.id, batch);
+                                    await Global.client!.process();
+                                    await batch.commit();
+                                    await Conversation.byID(_conversation!.id)
+                                        .then((conversation) {
+                                      if (!mounted) return;
+                                      setState(() {
+                                        _busy = false;
+                                        _conversation = conversation;
+                                      });
+                                    });
+                                  },
+                            child: _busy
+                                ? const CircularProgressIndicator()
+                                : const Text('Envoyer'),
+                          ),
+                        ]),
+                  ),
+                ),
+              );
+            }
             final _parentKey = GlobalKey();
             return Card(
               margin: const EdgeInsets.all(8.0),
@@ -441,7 +512,8 @@ class _ConversationViewState extends State<ConversationView> {
               ),
             );
           },
-          itemCount: _conversation != null ? _conversation!.messages.length : 0,
+          itemCount:
+              (_conversation != null ? _conversation!.messages.length : 0) + 1,
         ),
       ),
     );

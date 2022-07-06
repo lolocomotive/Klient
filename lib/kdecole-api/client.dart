@@ -200,17 +200,21 @@ class Client {
         await Future.delayed(const Duration(milliseconds: 10));
       }
     }
+    while (_currentlyDownloading > 0) {
+      await Future.delayed(const Duration(milliseconds: 10));
+    }
     Global.progress = 0;
     Global.progressOf = 0;
   }
 
   /// Make a request to the API
   Future<Map<String, dynamic>> request(Action action,
-      {List<String>? params}) async {
+      {List<String>? params, String? body}) async {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
     };
+
     String url = Global.apiurl + action.url;
     for (final param in params ?? []) {
       url += param + '/';
@@ -233,7 +237,8 @@ class Client {
         response = await client.get(Uri.parse(url), headers: headers);
         break;
       case HTTPRequestMethod.put:
-        response = await client.put(Uri.parse(url), headers: headers);
+        response =
+            await client.put(Uri.parse(url), headers: headers, body: body);
         break;
       case HTTPRequestMethod.delete:
         response = await client.delete(Uri.parse(url), headers: headers);
@@ -329,4 +334,6 @@ class Action {
   static final Action markConversationRead =
       Action('messagerie/communication/lu/', HTTPRequestMethod.put);
   static final Action getGrades = Action('consulterNotes/idetablissement/');
+  static final Action reply = Action(
+      'messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
 }
