@@ -73,12 +73,8 @@ class MainState extends State<Main> {
       Global.fab = null;
     }
     return Scaffold(
-      backgroundColor: Global.theme!.colorScheme.background,
       bottomNavigationBar: NavigationBar(
-        height: 64,
-        backgroundColor: Global.theme!.colorScheme.brightness == Brightness.dark
-            ? Colors.deepPurple.shade900
-            : Colors.deepPurple.shade100,
+        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

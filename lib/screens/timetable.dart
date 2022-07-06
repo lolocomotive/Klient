@@ -138,7 +138,7 @@ class _TimetableState extends State<Timetable> {
                             return SizedBox(
                               height: Global.heightPerHour,
                               child: Text(
-                                (index + Global.startTime).toString() + 'h',
+                                '${index + Global.startTime}h',
                                 textAlign: TextAlign.center,
                               ),
                             );
@@ -179,11 +179,7 @@ class SingleDayCalendarView extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            _days[_lessons[0].date.weekday - 1] +
-                ' ' +
-                _lessons[0].date.day.toString() +
-                '/' +
-                _lessons[0].date.month.toString(),
+            '${_days[_lessons[0].date.weekday - 1]} ${_lessons[0].date.day}/${_lessons[0].date.month}',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
@@ -274,7 +270,7 @@ class SingleLessonView extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
                           child: Text(
-                            _lesson.startTime + ' - ' + _lesson.endTime,
+                            '${_lesson.startTime} - ${_lesson.endTime}',
                             textAlign: TextAlign.center,
                           ),
                         ),
@@ -315,16 +311,11 @@ class DetailedLessonView extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    'Séance du ' +
-                        DateFormat('dd/MM').format(_lesson.date) +
-                        ' de ' +
-                        _lesson.startTime +
-                        ' à ' +
-                        _lesson.endTime,
+                    'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
                     textAlign: TextAlign.center,
                   ),
                   Text(
-                    'Salle ' + _lesson.room,
+                    'Salle ${_lesson.room}',
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -392,7 +383,8 @@ class MultiExerciseView extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: Text(
                   'Aucun contenu rensiegné',
-                  style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
               ),
           ],
@@ -419,9 +411,7 @@ class ExerciceView extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
             child: Text(
-              (showSubject ? _lesson.title + ': ' : '') +
-                  'À faire pour le ' +
-                  DateFormat('dd/MM - HH:mm').format(_exercise.dateFor!),
+              '${showSubject ? '${_lesson.title}: ' : ''}À faire pour le ${DateFormat('dd/MM - HH:mm').format(_exercise.dateFor!)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
@@ -450,13 +440,13 @@ class ExerciceView extends StatelessWidget {
                     ? Text(
                         'Aucun contenu renseigné',
                         style: TextStyle(
-                            color: Global.theme!.colorScheme.onTertiary),
+                            color: Theme.of(context).colorScheme.secondary),
                         textAlign: TextAlign.center,
                       )
                     : Html(
                         data: _exercise.htmlContent,
                         onLinkTap: (url, context, map, element) {
-                          launch(url!);
+                          launchUrl(Uri.parse(url!));
                         },
                       ),
               ),

@@ -116,8 +116,9 @@ class _HomeState extends State<Home> {
                           child: Center(
                               child: Text('Rien à afficher',
                                   style: TextStyle(
-                                      color: Global
-                                          .theme!.colorScheme.onTertiary))),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .secondary))),
                         )
                       : SizedBox(
                           child: Column(
@@ -148,7 +149,7 @@ class _HomeState extends State<Home> {
                               child: Text('Rien à afficher',
                                   style: TextStyle(
                                       color: Global
-                                          .theme!.colorScheme.onTertiary))),
+                                          .theme!.colorScheme.secondary))),
                         )
                       : Column(
                           children: _homework

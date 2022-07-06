@@ -63,7 +63,7 @@ class MessagePreview extends StatelessWidget {
                     child: Text(
                       _conversation.firstAuthor +
                           (_conversation.lastAuthor != _conversation.firstAuthor
-                              ? ', ' + _conversation.lastAuthor
+                              ? ', ${_conversation.lastAuthor}'
                               : ''),
                       style: TextStyle(
                         fontSize: 16,
@@ -101,7 +101,7 @@ class MessagePreview extends StatelessWidget {
                     HtmlUnescape().convert(_conversation.preview),
                     style: TextStyle(
                         fontSize: 13,
-                        color: Global.theme!.colorScheme.onTertiary),
+                        color: Theme.of(context).colorScheme.secondary),
                   ),
             ],
           ),
@@ -214,7 +214,7 @@ class MessagesState extends State<Messages> {
                     ),
                   );
                 }
-                final _parentKey = GlobalKey();
+                final parentKey = GlobalKey();
                 return Card(
                   margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
                       index == _conversations.length - 1 ? 14 : 7),
@@ -225,11 +225,11 @@ class MessagesState extends State<Messages> {
                   child: InkWell(
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
-                      child: MessagePreview(_conversations[index], _parentKey),
+                      child: MessagePreview(_conversations[index], parentKey),
                     ),
                     onTap: () => openConversation(
                         context,
-                        _parentKey,
+                        parentKey,
                         _conversations[index].id,
                         _conversations[index].subject),
                   ),
@@ -279,7 +279,8 @@ class MessagesSearchDelegate extends SearchDelegate {
     if (query.length < 3) {
       return Center(
           child: Text('Entrez au moins 3 caractères',
-              style: TextStyle(color: Global.theme!.colorScheme.onTertiary)));
+              style:
+                  TextStyle(color: Theme.of(context).colorScheme.secondary)));
     }
     Global.searchQuery = query;
     if (Global.messageSearchSuggestionState != null) {
@@ -321,18 +322,19 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
             ? Center(
                 child: Text(
                 'Aucun résultat trouvé.',
-                style: TextStyle(color: Global.theme!.colorScheme.onTertiary),
+                style:
+                    TextStyle(color: Theme.of(context).colorScheme.secondary),
                 textAlign: TextAlign.center,
               ))
             : ListView.separated(
                 itemBuilder: (context, index) {
-                  const _parentKey = null; //FIXME fix transition //GlobalKey();
+                  const parentKey = null; //FIXME fix transition //GlobalKey();
                   return InkWell(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: MessagePreview(
                           _conversations![index],
-                          _parentKey,
+                          parentKey,
                         ),
                       ),
                       onTap: () {
@@ -433,12 +435,7 @@ class _ConversationViewState extends State<ConversationView> {
                                     await Global.client!.request(Action.reply,
                                         params: [_conversation!.id.toString()],
                                         body:
-                                            '{"dateEnvoi":0,"corpsMessage": "' +
-                                                _textFieldController.text
-                                                    .replaceAll('\\', '\\\\')
-                                                    .replaceAll('"', '\\"')
-                                                    .replaceAll('\n', '<br/>') +
-                                                '"}');
+                                            '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                     _textFieldController.clear();
                                     final batch = Global.db!.batch();
                                     await DatabaseManager
@@ -464,7 +461,7 @@ class _ConversationViewState extends State<ConversationView> {
                 ),
               );
             }
-            final _parentKey = GlobalKey();
+            final parentKey = GlobalKey();
             return Card(
               margin: const EdgeInsets.all(8.0),
               elevation: 1,
@@ -474,7 +471,7 @@ class _ConversationViewState extends State<ConversationView> {
               child: Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: Column(
-                  key: _parentKey,
+                  key: parentKey,
                   mainAxisAlignment: MainAxisAlignment.start,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
@@ -504,7 +501,7 @@ class _ConversationViewState extends State<ConversationView> {
                             margin: EdgeInsets.zero)
                       },
                       onLinkTap: (url, context, map, element) {
-                        launch(url!);
+                        launchUrl(Uri.parse(url!));
                       },
                     ),
                   ],

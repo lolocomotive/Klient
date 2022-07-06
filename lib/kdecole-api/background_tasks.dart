@@ -115,7 +115,7 @@ Future<void> showNotifications() async {
           where: 'ID = ?', whereArgs: [conv.id.toString()]);
       await Global.notifications!.show(
         conv.id,
-        conv.lastAuthor + ' - ' + conv.subject,
+        '${conv.lastAuthor} - ${conv.subject}',
         HtmlUnescape().convert(conv.preview),
         msgDetails,
         payload: 'conv-${conv.id}',
@@ -149,9 +149,9 @@ Future<void> showNotifications() async {
           where: 'ID = ?', whereArgs: [lesson.id.toString()]);
       await Global.notifications!.show(
         lesson.id,
-        lesson.title + ' - ' + lesson.startTime + '-' + lesson.endTime,
+        '${lesson.title} - ${lesson.startTime}-${lesson.endTime}',
         HtmlUnescape().convert(lesson.isModified
-            ? 'Cours modifié: ' + lesson.modificationMessage!
+            ? 'Cours modifié: ${lesson.modificationMessage!}'
             : "Le cours n'est plus modifié"),
         lessonDetails,
         payload: 'lesson-${lesson.id}',

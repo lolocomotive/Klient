@@ -29,7 +29,7 @@ class Global {
   static MainState? mainState;
   static ThemeData? theme;
   static const timeWidth = 32.0;
-  static const heightPerHour = 110.0;
+  static const heightPerHour = 120.0;
   static const lessonLength = 55.0 / 55.0;
   static const maxLessonsPerDay = 11;
   static const startTime = 8;
@@ -70,11 +70,11 @@ class Global {
 
   static initDB() async {
     final dbDir = await getDatabasesPath();
-    final dbPath = dbDir + '/kdecole.db';
+    final dbPath = '$dbDir/kdecole.db';
     if (kDebugMode) {
       //await deleteDatabase(dbPath);
     }
-    print('Database URL: ' + dbPath);
+    print('Database URL: $dbPath');
     Global.db = await openDatabase(dbPath);
     final queryResult = await Global.db!.query('sqlite_master');
     final tables = [
@@ -271,25 +271,19 @@ class Global {
     if (date.day == now.day &&
         date.month == now.month &&
         date.year == now.year) {
-      return date.hour.toString() +
-          ':' +
-          date.second.toString().padLeft(2, '0');
+      return '${date.hour}:${date.second.toString().padLeft(2, '0')}';
     } else if (date.year == now.year) {
-      return date.day.toString() + ' ' + monthToString(date.month);
+      return '${date.day} ${monthToString(date.month)}';
     } else {
-      return date.day.toString() +
-          '/' +
-          date.month.toString() +
-          '/' +
-          date.year.toString();
+      return '${date.day}/${date.month}/${date.year}';
     }
   }
 
   static Future<void> readPrefs() async {
     apiUrls.forEach((key, value) {
       dropdownItems.add(DropdownMenuItem(
-        child: Text(key),
         value: value,
+        child: Text(key),
       ));
     });
     Global.storage = const FlutterSecureStorage();

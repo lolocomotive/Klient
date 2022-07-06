@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:kosmos_client/kdecole-api/background_tasks.dart';
 import 'package:kosmos_client/screens/login.dart';
 
@@ -81,38 +82,22 @@ class KosmosState extends State with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    Global.theme = ThemeData(
-      colorScheme: const ColorScheme.light().copyWith(
-        primary: Colors.teal.shade100,
-        onPrimary: Colors.black,
-        secondary: Colors.deepPurple,
-        surface: Colors.white,
-        background: const Color.fromARGB(255, 245, 245, 245),
-        onTertiary: Colors.black45,
-      ),
+    Global.theme = ThemeData.from(
+      colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.deepPurple,
+          brightness: SchedulerBinding.instance.window.platformBrightness),
       useMaterial3: true,
     );
     return MaterialApp(
       scaffoldMessengerKey: _messengerKey,
       navigatorKey: Global.navigatorKey,
       title: title,
-      theme: ThemeData(
-        colorScheme: const ColorScheme.light().copyWith(
-          primary: Colors.teal.shade100,
-          onPrimary: Colors.black,
-          secondary: Colors.deepPurple,
-          surface: Colors.white,
-          background: const Color.fromARGB(255, 245, 245, 245),
-          onTertiary: Colors.black45,
-        ),
+      theme: Global.theme!,
+      darkTheme: ThemeData.from(
+        colorScheme: ColorScheme.fromSeed(
+            seedColor: Colors.deepPurple, brightness: Brightness.dark),
         useMaterial3: true,
       ),
-      /* darkTheme: ThemeData(
-        colorScheme: const ColorScheme.dark().copyWith(
-          onTertiary: Colors.white54,
-          primary: Colors.teal.shade900,
-        ),
-      ), */
       home: _mainWidget,
     );
   }

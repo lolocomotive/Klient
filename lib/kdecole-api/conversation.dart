@@ -99,7 +99,7 @@ class Conversation {
       if (i == split.length - 1) break;
       children.add(TextSpan(
           text: split[i].length > 75
-              ? '...' + split[i].substring(max(split[i].length - 75, 0))
+              ? '...${split[i].substring(max(split[i].length - 75, 0))}'
               : i == 0
                   ? split[i]
                   : ''));
@@ -149,13 +149,13 @@ class Conversation {
           result['FirstAuthor'] as String,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
               ? highlight(query, fullMessageContents,
-                  color: Global.theme!.colorScheme.onTertiary)
+                  color: Global.theme!.colorScheme.secondary)
               : null,
           (result['Subject'] as String)
                   .toUpperCase()
                   .contains(query.toUpperCase())
               ? highlight(query, result['Subject'] as String,
-                  color: Global.theme!.colorScheme.onTertiary, fontSize: 14)
+                  color: Global.theme!.colorScheme.secondary, fontSize: 14)
               : null,
         ),
       );

@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:kosmos_client/kdecole-api/conversation.dart';
 import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/kdecole-api/conversation.dart';
 
 import 'message_attachment.dart';
 
@@ -40,8 +40,8 @@ class Message {
   /// Get the messages of a specific [Conversation]
   static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
-    final results = await Global.db!
-        .query('Messages', where: 'ParentID = ' + conversationID.toString());
+    final results =
+        await Global.db!.query('Messages', where: 'ParentID = $conversationID');
     for (final result in results) {
       messages.add(
         Message(

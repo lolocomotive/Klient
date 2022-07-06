@@ -145,7 +145,7 @@ class DatabaseManager {
               'DateSent': message['dateEnvoi'],
             },
             conflictAlgorithm: ConflictAlgorithm.replace);
-        messageContents += (_cleanupHTML(message['corpsMessage']) + '\n')
+        messageContents += ('${_cleanupHTML(message['corpsMessage'])}\n')
             .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
         for (final attachment in message['pjs'] ?? []) {
           batch.insert(
@@ -158,7 +158,7 @@ class DatabaseManager {
               conflictAlgorithm: ConflictAlgorithm.replace);
         }
         batch.update('Conversations', {'FullMessageContents': messageContents},
-            where: 'ID = ' + id.toString());
+            where: 'ID = $id');
       }
       await batch.commit();
     }, params: [(id).toString()]);

@@ -78,7 +78,7 @@ class Request {
         response.statusCode == 204) {
       var data = jsonDecode(response.body);
       if (response.body.startsWith('[')) {
-        data = jsonDecode('{"errmsg":null,"articles":' + response.body + '}');
+        data = jsonDecode('{"errmsg":null,"articles":${response.body}}');
       }
       if (data['errmsg'] != null) {
         _onJsonErr(data);
@@ -254,7 +254,7 @@ class Client {
         data = jsonDecode('{"errmsg":null}');
       }
       if (response.body.startsWith('[')) {
-        data = jsonDecode('{"errmsg":null,"articles":' + response.body + '}');
+        data = jsonDecode('{"errmsg":null,"articles":${response.body}}');
       }
       if (data['errmsg'] != null) {
         throw Error();
