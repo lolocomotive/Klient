@@ -96,8 +96,6 @@ class Request {
 /// Utility class making it easier to communicate with the API
 class Client {
   static const String _appVersion = '3.7.14';
-  static const String _serverURL =
-      'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
   String? idEtablissement;
   String? idEleve;
@@ -165,7 +163,7 @@ class Client {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
     };
-    String url = _serverURL + action.url;
+    String url = Global.apiurl + action.url;
     for (final param in params ?? []) {
       url += param + '/';
     }
@@ -213,7 +211,7 @@ class Client {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
     };
-    String url = _serverURL + action.url;
+    String url = Global.apiurl + action.url;
     for (final param in params ?? []) {
       url += param + '/';
     }

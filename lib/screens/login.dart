@@ -36,7 +36,6 @@ class LoginState extends State<Login> {
   final _loginFormKey = GlobalKey<FormState>();
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
-
   LoginState();
 
   _login() async {
@@ -99,6 +98,16 @@ class LoginState extends State<Login> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      DropdownButton(
+                          isExpanded: true,
+                          value: Global.apiurl,
+                          items: Global.dropdownItems,
+                          onChanged: (dynamic newValue) async {
+                            await Global.storage!
+                                .write(key: 'apiurl', value: newValue);
+                            Global.apiurl = newValue;
+                            setState(() {});
+                          }),
                       TextFormField(
                         decoration: const InputDecoration(
                             hintText: 'Nom d\'utilisateur'),

@@ -55,6 +55,28 @@ class _SettingsPageState extends State<SettingsPage> {
             child: SettingsList(
               sections: [
                 SettingsSection(
+                    title: Text(
+                      'API URL',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.teal.shade700,
+                      ),
+                    ),
+                    tiles: [
+                      SettingsTile(
+                        title: DropdownButton(
+                            value: Global.apiurl,
+                            isExpanded: true,
+                            items: Global.dropdownItems,
+                            onChanged: (dynamic newValue) async {
+                              await Global.storage!
+                                  .write(key: 'apirul', value: newValue);
+                              Global.apiurl = newValue;
+                              setState(() {});
+                            }),
+                      ),
+                    ]),
+                SettingsSection(
                   title: Text(
                     'Notifications',
                     style: TextStyle(

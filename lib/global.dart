@@ -41,6 +41,32 @@ class Global {
   static int progress = 0;
   static int progressOf = 0;
   static void Function()? onLogin;
+  static String apiurl = '';
+  static const apiUrls = {
+    'Mon Bureau Numérique': 'https://mobilite.monbureaunumerique.fr/mobilite/',
+    'Mon ENT Occitanie': 'https://mobilite.mon-ent-occitanie.fr/mobilite/',
+    'Arsene 76': 'https://mobilite.arsene76.fr/mobilite/',
+    'ENT27': 'https://mobilite.ent27.fr/mobilite/',
+    'ENT Creuse': 'https://mobilite.entcreuse.fr/mobilite/',
+    'ENT Auvergne-Rhône-Alpes':
+        'https://mobilite.ent.auvergnerhonealpes.fr/mobilite/',
+    'Agora 06': 'https://mobilite.agora06.fr/mobilite/',
+    'CyberCollèges 42': 'https://mobilite.cybercolleges42.fr/mobilite/',
+    'eCollège 31 Haute-Garonne':
+        'https://mobilite.ecollege.haute-garonne.fr/mobilite/',
+    "Mon collège en Val d'Oise":
+        'https://mobilite.moncollege.valdoise.fr/mobilite/',
+    'Webcollège Seine-Saint-Denis  ':
+        'https://mobilite.webcollege.seinesaintdenis.fr/mobilite/',
+    'Eclat-BFC': 'https://mobilite.eclat-bfc.fr/mobilite/',
+    '@ucollège84': 'https://mobilite.aucollege84.vaucluse.fr/mobilite/',
+    'Skolengo Demo': 'https://mobilite.demo.skolengo.com/mobilite/',
+    'Kosmos Éducation (aefe, etc.)':
+        'https://mobilite.kosmoseducation.com/mobilite/',
+    'Skolengo formation': 'https://mobilite.formation.skolengo.com/mobilite/',
+    'Schulportal Ostbelgien': 'https://mobilite.schulen.be/mobilite/'
+  };
+  static List<DropdownMenuItem> dropdownItems = [];
 
   static initDB() async {
     final dbDir = await getDatabasesPath();
@@ -260,11 +286,19 @@ class Global {
   }
 
   static Future<void> readPrefs() async {
+    apiUrls.forEach((key, value) {
+      dropdownItems.add(DropdownMenuItem(
+        child: Text(key),
+        value: value,
+      ));
+    });
     Global.storage = const FlutterSecureStorage();
     if (kDebugMode) {
       //Global.storage!.deleteAll();
     }
     try {
+      Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
+          'https://mobilite.kosmoseducation.com/mobilite/';
       Global.token = await Global.storage!.read(key: 'token');
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43

@@ -70,7 +70,6 @@ class KosmosState extends State with WidgetsBindingObserver {
     if (Global.token == null || Global.token == '') {
       _mainWidget = Login(Global.onLogin!);
     } else {
-      print('Token:' + Global.token!);
       Global.client = Client(Global.token!);
     }
   }
