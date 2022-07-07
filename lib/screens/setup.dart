@@ -72,183 +72,171 @@ class _SetupPageState extends State<SetupPage> {
       ),
       body: Column(
         children: [
-          Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
-            ),
-            child: Stepper(
-              currentStep: currentStep,
-              controlsBuilder: (context, details) {
-                return Container();
-              },
-              steps: [
-                Step(
-                  isActive: currentStep == 0,
-                  title: const Text('Notifications'),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text('Sélectionner quelle notifications activer'),
-                      Text(
-                        'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
-                      ),
-                      const Padding(padding: EdgeInsets.all(16.0)),
-                      SwitchListTile(
-                          title: const Text('Messagerie'),
-                          subtitle: const Text(
-                              'Recevoir des notifications quand il y a un nouveau message'),
-                          activeColor: Colors.teal,
-                          value: notifMsgEnabled,
-                          onChanged: (value) {
-                            notifMsgEnabled = !notifMsgEnabled;
-                            setState(() {});
-                          }),
-                      SwitchListTile(
-                        title: const Text('Emploi du temps'),
-                        subtitle:
-                            const Text('Recevoir des notifications quand un cours est annulé'),
-                        activeColor: Colors.teal,
-                        value: notifCalEnabled,
+          Stepper(
+            currentStep: currentStep,
+            controlsBuilder: (context, details) {
+              return Container();
+            },
+            steps: [
+              Step(
+                isActive: currentStep == 0,
+                title: const Text('Notifications'),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text('Sélectionner quelle notifications activer'),
+                    const Padding(padding: EdgeInsets.all(16.0)),
+                    SwitchListTile(
+                        title: const Text('Messagerie'),
+                        subtitle: const Text(
+                            'Recevoir des notifications quand il y a un nouveau message'),
+                        value: notifMsgEnabled,
                         onChanged: (value) {
-                          notifCalEnabled = !notifCalEnabled;
+                          notifMsgEnabled = !notifMsgEnabled;
                           setState(() {});
-                        },
-                      ),
-                      const Padding(padding: EdgeInsets.all(8.0)),
-                      Row(
-                        children: [
-                          TextButton(
-                              onPressed: () {
-                                currentStep++;
-                                setState(() {});
-                              },
-                              child: const Text(
-                                'CONTINUER',
-                              )),
-                        ],
-                      )
-                    ],
-                  ),
+                        }),
+                    SwitchListTile(
+                      title: const Text('Emploi du temps'),
+                      subtitle: const Text('Recevoir des notifications quand un cours est annulé'),
+                      value: notifCalEnabled,
+                      onChanged: (value) {
+                        notifCalEnabled = !notifCalEnabled;
+                        setState(() {});
+                      },
+                    ),
+                    const Padding(padding: EdgeInsets.all(8.0)),
+                    Row(
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              currentStep++;
+                              setState(() {});
+                            },
+                            child: const Text(
+                              'CONTINUER',
+                            )),
+                      ],
+                    )
+                  ],
                 ),
-                Step(
-                  isActive: currentStep == 1,
-                  title: const Text('Messagerie'),
-                  content: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      const Text('Sélectionner combien de messages télécharger.'),
-                      Text(
-                        'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
-                        style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
-                      ),
-                      Row(
-                        children: [
-                          TextButton(
-                              onPressed: () {
-                                currentStep++;
-                                update();
-                                Global.storage!.write(
-                                    key: 'notifications.messages',
-                                    value: notifMsgEnabled ? 'true' : 'false');
-                                Global.storage!.write(
-                                    key: 'notifications.calendar',
-                                    value: notifCalEnabled ? 'true' : 'false');
-                                DatabaseManager.downloadAll();
-                                setState(() {});
-                              },
-                              child: const Text(
-                                'TOUS',
-                              )),
-                          const TextButton(
-                              onPressed: null,
-                              child: Text(
-                                'LES 20 PREMIERS',
-                              )),
-                        ],
-                      )
-                    ],
-                  ),
+              ),
+              Step(
+                isActive: currentStep == 1,
+                title: const Text('Messagerie'),
+                content: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text('Sélectionner combien de messages télécharger.'),
+                    Text(
+                      'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
+                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                    Row(
+                      children: [
+                        TextButton(
+                            onPressed: () {
+                              currentStep++;
+                              update();
+                              Global.storage!.write(
+                                  key: 'notifications.messages',
+                                  value: notifMsgEnabled ? 'true' : 'false');
+                              Global.storage!.write(
+                                  key: 'notifications.calendar',
+                                  value: notifCalEnabled ? 'true' : 'false');
+                              DatabaseManager.downloadAll();
+                              setState(() {});
+                            },
+                            child: const Text(
+                              'TOUS',
+                            )),
+                        const TextButton(
+                            onPressed: null,
+                            child: Text(
+                              'LES 20 PREMIERS',
+                            )),
+                      ],
+                    )
+                  ],
                 ),
-                Step(
-                  isActive: currentStep == 2,
-                  title: const Text('Téléchergement des données'),
-                  content: Column(
-                    children: [
+              ),
+              Step(
+                isActive: currentStep == 2,
+                title: const Text('Téléchergement des données'),
+                content: Column(
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Téléchargement des dernières notes'),
+                          step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                        ],
+                      ),
+                    ),
+                    if (step1)
                       Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Téléchargement des dernières notes'),
-                            step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                            const Text('Téléchargement de l\'emploi du temps'),
+                            step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
                       ),
-                      if (step1)
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Téléchargement de l\'emploi du temps'),
-                              step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
-                            ],
-                          ),
-                        ),
-                      if (step2)
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Téléchargement des actualités'),
-                              step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
-                            ],
-                          ),
-                        ),
-                      if (step3)
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Téléchargement de la liste des messages'),
-                              step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
-                            ],
-                          ),
-                        ),
-                      if (step4)
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Téléchargement du contenu des messages'),
-                              step5 ? const Icon(Icons.done) : Container(),
-                            ],
-                          ),
-                        ),
-                      if (progressOf != 0)
-                        Column(
+                    if (step2)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Text('Téléchargement $progress/$progressOf'),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: LinearProgressIndicator(
-                                value: progress / progressOf,
-                              ),
-                            ),
+                            const Text('Téléchargement des actualités'),
+                            step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
-                    ],
-                  ),
-                )
-              ],
-            ),
+                      ),
+                    if (step3)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Téléchargement de la liste des messages'),
+                            step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                          ],
+                        ),
+                      ),
+                    if (step4)
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Téléchargement du contenu des messages'),
+                            step5 ? const Icon(Icons.done) : Container(),
+                          ],
+                        ),
+                      ),
+                    if (progressOf != 0)
+                      Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text('Téléchargement $progress/$progressOf'),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: LinearProgressIndicator(
+                              value: progress / progressOf,
+                            ),
+                          ),
+                        ],
+                      ),
+                  ],
+                ),
+              )
+            ],
           ),
           if (step5)
             ElevatedButton(
