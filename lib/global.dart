@@ -223,11 +223,20 @@ class Global {
             );
           }));
           Global.client!.clear();
-          await Global.client!.request(Action.logout);
+          try {
+            await Global.client!.request(Action.logout);
+          } catch (_) {}
           await Global.db!.close();
           await deleteDatabase(Global.db!.path);
+          print('Storage before erase:');
+          var data = await Global.storage!.readAll();
+          data.forEach((key, value) {
+            print('$key:$value');
+          });
           await Global.storage!.deleteAll();
-          Restart.restartApp();
+          await Global.initDB();
+          await Global.readPrefs();
+          await Restart.restartApp();
           break;
         case 'Initial setup':
           navigatorKey.currentState!.push(
@@ -295,17 +304,25 @@ class Global {
         child: Text(key),
       ));
     });
-    Global.storage = const FlutterSecureStorage();
+    Global.storage =
+        const FlutterSecureStorage(aOptions: AndroidOptions(encryptedSharedPreferences: true));
     if (kDebugMode) {
       //Global.storage!.deleteAll();
     }
+
     try {
+      print('Reading prefernces');
+      var data = await Global.storage!.readAll();
+      data.forEach((key, value) {
+        print('$key: $value');
+      });
       Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
           'https://mobilite.kosmoseducation.com/mobilite/';
       Global.token = await Global.storage!.read(key: 'token');
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
       await Global.storage!.deleteAll();
+      await Future.delayed(const Duration(seconds: 1));
       Global.token = '';
     }
   }

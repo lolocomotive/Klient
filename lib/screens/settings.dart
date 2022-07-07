@@ -70,7 +70,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             isExpanded: true,
                             items: Global.dropdownItems,
                             onChanged: (dynamic newValue) async {
-                              await Global.storage!.write(key: 'apirul', value: newValue);
+                              await Global.storage!.write(key: 'apiurl', value: newValue);
                               Global.apiurl = newValue;
                               setState(() {});
                             }),
