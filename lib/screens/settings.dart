@@ -59,7 +59,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       'API URL',
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: Colors.teal.shade700,
+                        color: Theme.of(context).colorScheme.primary,
                       ),
                     ),
                     tiles: [
@@ -81,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     'Notifications',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      color: Colors.teal.shade700,
+                      color: Theme.of(context).colorScheme.primary,
                     ),
                   ),
                   tiles: <SettingsTile>[

@@ -84,8 +84,9 @@ class KosmosState extends State with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     Global.theme = ThemeData.from(
       colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: SchedulerBinding.instance.window.platformBrightness),
+        seedColor: Colors.deepPurple,
+        brightness: SchedulerBinding.instance.window.platformBrightness,
+      ),
       useMaterial3: true,
     );
     return MaterialApp(
@@ -95,7 +96,9 @@ class KosmosState extends State with WidgetsBindingObserver {
       theme: Global.theme!,
       darkTheme: ThemeData.from(
         colorScheme: ColorScheme.fromSeed(
-            seedColor: Colors.deepPurple, brightness: Brightness.dark),
+          seedColor: Colors.deepPurple,
+          brightness: Brightness.dark,
+        ),
         useMaterial3: true,
       ),
       home: _mainWidget,
