@@ -110,42 +110,37 @@ class Client {
     showDialog(
         context: Global.navigatorKey.currentContext!,
         builder: (context) {
-          return Theme(
-            data: Theme.of(context).copyWith(
-              colorScheme: Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
-            ),
-            child: AlertDialog(
-              alignment: Alignment.center,
-              actionsAlignment: MainAxisAlignment.end,
-              title: const Text('Erreur 403'),
-              content: const Text(
-                  'Cette erreur se produit en général quand le jeton d\'authentification n\'est plus valide auquel cas il faut se reconnecter.'),
-              actions: [
-                TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                    child: Text(
-                      'ANNULER',
-                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
-                    )),
-                TextButton(
-                    onPressed: () {
-                      Global.storage!.delete(key: 'token');
-                      Global.navigatorKey.currentState!
-                        ..pop()
-                        ..push(
-                          MaterialPageRoute(
-                            builder: (_) => Login(() {
-                              Global.navigatorKey.currentState!.pop();
-                              Global.onLogin!();
-                            }),
-                          ),
-                        );
-                    },
-                    child: const Text('SE RECONNTECTER')),
-              ],
-            ),
+          return AlertDialog(
+            alignment: Alignment.center,
+            actionsAlignment: MainAxisAlignment.end,
+            title: const Text('Erreur 403'),
+            content: const Text(
+                'Cette erreur se produit en général quand le jeton d\'authentification n\'est plus valide auquel cas il faut se reconnecter.'),
+            actions: [
+              TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    'ANNULER',
+                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                  )),
+              TextButton(
+                  onPressed: () {
+                    Global.storage!.delete(key: 'token');
+                    Global.navigatorKey.currentState!
+                      ..pop()
+                      ..push(
+                        MaterialPageRoute(
+                          builder: (_) => Login(() {
+                            Global.navigatorKey.currentState!.pop();
+                            Global.onLogin!();
+                          }),
+                        ),
+                      );
+                  },
+                  child: const Text('SE RECONNTECTER')),
+            ],
           );
         });
     throw NetworkException403();

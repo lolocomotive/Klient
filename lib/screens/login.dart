@@ -119,22 +119,62 @@ class LoginState extends State<Login> {
                         autocorrect: false,
                         autofocus: true,
                       ),
-                      TextFormField(
-                        decoration: const InputDecoration(hintText: 'Code d\'activation'),
-                        controller: _pwdController,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un code d\'activation';
-                          }
-                          return null;
-                        },
-                        enableSuggestions: false,
-                        autocorrect: false,
-                        obscureText: true,
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              decoration: const InputDecoration(hintText: 'Code d\'activation'),
+                              controller: _pwdController,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Veuillez entrer un code d\'activation';
+                                }
+                                return null;
+                              },
+                              enableSuggestions: false,
+                              autocorrect: false,
+                              obscureText: true,
+                            ),
+                          ),
+                          IconButton(
+                            alignment: Alignment.bottomCenter,
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder: (_) => AlertDialog(
+                                  content: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: [
+                                      const Text(
+                                          'L\'identifiant mobile et le code d\'activation sont disponibles dans le menu "Application mobile" dans les paramètres utilisateur de l\'ENT'),
+                                      TextButton(
+                                        onPressed: () {
+                                          Navigator.of(context).pop();
+                                        },
+                                        child: const Text('OK'),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              );
+                            },
+                            icon: Icon(
+                              Icons.help_outline,
+                              color: Theme.of(context).colorScheme.secondary,
+                            ),
+                          )
+                        ],
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                        child: ElevatedButton(onPressed: _login, child: const Text('Se connecter')),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            OutlinedButton(onPressed: _login, child: const Text('Se connecter')),
+                          ],
+                        ),
                       )
                     ],
                   ),
