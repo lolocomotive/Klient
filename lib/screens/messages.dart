@@ -109,6 +109,8 @@ class Messages extends StatefulWidget {
 
 class MessagesState extends State<Messages> {
   final GlobalKey<MessagesState> key = GlobalKey();
+  int _currentlySelected = 0;
+  bool _selectionActive = false;
 
   static void openConversation(
       BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
@@ -161,21 +163,61 @@ class MessagesState extends State<Messages> {
         headerSliverBuilder: (ctx, innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
+              leading: _selectionActive
+                  ? IconButton(
+                      onPressed: () {
+                        setState(() {
+                          _selectionActive = false;
+                        });
+                      },
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: Theme.of(context).colorScheme.onPrimary,
+                      ))
+                  : null,
+              backgroundColor: _selectionActive
+                  ? Theme.of(context).colorScheme.primary
+                  : Theme.of(context).colorScheme.background,
               actions: [
-                IconButton(
-                  icon: const Icon(Icons.search),
-                  onPressed: () {
-                    showSearch(
-                      context: context,
-                      delegate: MessagesSearchDelegate(),
-                    );
-                  },
-                ),
-                Global.popupMenuButton
+                if (_selectionActive)
+                  IconButton(
+                    onPressed: () async {
+                      //TODO show that progress is being made
+                      _selectionActive = false;
+                      setState(() {});
+                      await Global.client!.request(Action.deleteMessage,
+                          params: [_conversations[_currentlySelected].id.toString()]);
+                      _conversations.removeAt(_currentlySelected);
+                      setState(() {});
+                    },
+                    icon: Icon(
+                      Icons.delete,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
+                  ),
+                if (!_selectionActive)
+                  IconButton(
+                    icon: const Icon(Icons.search),
+                    onPressed: () {
+                      showSearch(
+                        context: context,
+                        delegate: MessagesSearchDelegate(),
+                      );
+                    },
+                  ),
+                if (!_selectionActive) Global.popupMenuButton
               ],
-              title: const Text('Messagerie'),
-              floating: true,
+              title: Text(
+                _selectionActive ? _conversations[_currentlySelected].subject : 'Messagerie',
+                style: TextStyle(
+                  color: _selectionActive
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : Theme.of(context).colorScheme.onBackground,
+                ),
+              ),
+              floating: false,
               forceElevated: innerBoxIsScrolled,
+              pinned: _selectionActive,
             )
           ];
         },
@@ -203,21 +245,62 @@ class MessagesState extends State<Messages> {
                   );
                 }
                 final parentKey = GlobalKey();
-                return Card(
-                  margin: EdgeInsets.fromLTRB(
-                      14, index == 0 ? 16 : 7, 14, index == _conversations.length - 1 ? 14 : 7),
-                  elevation: 1,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: InkWell(
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: MessagePreview(_conversations[index], parentKey),
+                return Column(
+                  children: [
+                    Stack(
+                      children: [
+                        Card(
+                          margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
+                              index == _conversations.length - 1 ? 14 : 7),
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: InkWell(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: MessagePreview(_conversations[index], parentKey),
+                            ),
+                            onTap: () {
+                              if (_selectionActive) {
+                                if (_currentlySelected == index && _selectionActive) {
+                                  _selectionActive = false;
+                                  setState(() {});
+                                  return;
+                                }
+                                _currentlySelected = index;
+                                setState(() {});
+                              } else {
+                                openConversation(context, parentKey, _conversations[index].id,
+                                    _conversations[index].subject);
+                              }
+                            },
+                            onLongPress: () {
+                              if (_currentlySelected == index && _selectionActive) {
+                                _selectionActive = false;
+                                setState(() {});
+                                return;
+                              }
+                              _currentlySelected = index;
+                              _selectionActive = true;
+                              setState(() {});
+                            },
+                          ),
+                        ),
+                        Positioned.fill(
+                          child: IgnorePointer(
+                            child: AnimatedOpacity(
+                              duration: const Duration(milliseconds: 300),
+                              opacity: (_selectionActive && (_currentlySelected == index)) ? .3 : 0,
+                              child: Container(
+                                color: Theme.of(context).colorScheme.primary,
+                              ),
+                            ),
+                          ),
+                        )
+                      ],
                     ),
-                    onTap: () => openConversation(context, parentKey, _conversations[index].id,
-                        _conversations[index].subject),
-                  ),
+                  ],
                 );
               },
             ),

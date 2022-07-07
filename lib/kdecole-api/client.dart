@@ -322,4 +322,6 @@ class Action {
   static final Action reply =
       Action('messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
   static final Action logout = Action('desactivation/');
+  static final Action deleteMessage =
+      Action('messagerie/communication/supprimer/', HTTPRequestMethod.delete);
 }
