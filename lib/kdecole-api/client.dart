@@ -37,8 +37,8 @@ class Request {
   final void Function() _onHttp400;
   final Map<String, String> _headers;
 
-  Request(this._url, this._onSuccess, this._headers, this._method,
-      this._onJsonErr, this._onHttp400);
+  Request(
+      this._url, this._onSuccess, this._headers, this._method, this._onJsonErr, this._onHttp400);
 
   process() async {
     http.Response? response;
@@ -74,8 +74,7 @@ class Request {
       }
     } while (!success);
 
-    if ((response.statusCode >= 200 && response.statusCode < 300) ||
-        response.statusCode == 204) {
+    if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 204) {
       var data = jsonDecode(response.body);
       if (response.body.startsWith('[')) {
         data = jsonDecode('{"errmsg":null,"articles":${response.body}}');
@@ -113,8 +112,7 @@ class Client {
         builder: (context) {
           return Theme(
             data: Theme.of(context).copyWith(
-              colorScheme:
-                  Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
+              colorScheme: Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
             ),
             child: AlertDialog(
               alignment: Alignment.center,
@@ -129,8 +127,7 @@ class Client {
                     },
                     child: Text(
                       'ANNULER',
-                      style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary),
+                      style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
                     )),
                 TextButton(
                     onPressed: () {
@@ -154,8 +151,7 @@ class Client {
     throw NetworkException403();
   }
 
-  addRequest(
-      Action action, void Function(Map<String, dynamic> result) onSuccess,
+  addRequest(Action action, void Function(Map<String, dynamic> result) onSuccess,
       {List<String>? params,
       void Function(Map<String, dynamic> result)? onJsonErr,
       void Function()? onHttpErr}) {
@@ -208,8 +204,7 @@ class Client {
   }
 
   /// Make a request to the API
-  Future<Map<String, dynamic>> request(Action action,
-      {List<String>? params, String? body}) async {
+  Future<Map<String, dynamic>> request(Action action, {List<String>? params, String? body}) async {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
@@ -237,16 +232,14 @@ class Client {
         response = await client.get(Uri.parse(url), headers: headers);
         break;
       case HTTPRequestMethod.put:
-        response =
-            await client.put(Uri.parse(url), headers: headers, body: body);
+        response = await client.put(Uri.parse(url), headers: headers, body: body);
         break;
       case HTTPRequestMethod.delete:
         response = await client.delete(Uri.parse(url), headers: headers);
         break;
     }
 
-    if ((response.statusCode >= 200 && response.statusCode < 300) ||
-        response.statusCode == 204) {
+    if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 204) {
       dynamic data;
       try {
         data = jsonDecode(response.body);
@@ -273,14 +266,13 @@ class Client {
   markConversationRead(Conversation conv) {
     conv.read = true;
     request(Action.markConversationRead, params: [conv.id.toString()]);
-    Global.db!.update('Conversations', {'Read': 1},
-        where: 'ID = ?', whereArgs: [conv.id.toString()]);
+    Global.db!
+        .update('Conversations', {'Read': 1}, where: 'ID = ?', whereArgs: [conv.id.toString()]);
   }
 
   /// Log in using username and activation code provided by the ENT
   static Future<Client> login(String username, String password) async {
-    final res =
-        await Client('').request(Action.activate, params: [username, password]);
+    final res = await Client('').request(Action.activate, params: [username, password]);
     if (res['success'] == true) {
       return Client(res['authtoken']);
     } else {
@@ -319,11 +311,9 @@ class Action {
   static final Action activate = Action('activation/');
   static final Action startup = Action('starting/');
   static final Action getConversations = Action('messagerie/boiteReception/');
-  static final Action getConversationDetail =
-      Action('messagerie/communication/');
+  static final Action getConversationDetail = Action('messagerie/communication/');
   static final Action getUserInfo = Action('infosutilisateur/');
-  static final Action getNewsArticlesEtablissement =
-      Action('actualites/idetablissement/');
+  static final Action getNewsArticlesEtablissement = Action('actualites/idetablissement/');
   static final Action getArticleDetails = Action('contenuArticle/article/');
   static final Action getTimeTableEleve = Action('calendrier/ideleve/');
 
@@ -334,6 +324,6 @@ class Action {
   static final Action markConversationRead =
       Action('messagerie/communication/lu/', HTTPRequestMethod.put);
   static final Action getGrades = Action('consulterNotes/idetablissement/');
-  static final Action reply = Action(
-      'messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
+  static final Action reply =
+      Action('messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
 }

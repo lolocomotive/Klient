@@ -74,8 +74,7 @@ class _SetupPageState extends State<SetupPage> {
         children: [
           Theme(
             data: Theme.of(context).copyWith(
-              colorScheme:
-                  Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
+              colorScheme: Theme.of(context).colorScheme.copyWith(primary: Colors.teal),
             ),
             child: Stepper(
               currentStep: currentStep,
@@ -92,8 +91,7 @@ class _SetupPageState extends State<SetupPage> {
                       const Text('Sélectionner quelle notifications activer'),
                       Text(
                         'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onTertiary),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
                       ),
                       const Padding(padding: EdgeInsets.all(16.0)),
                       SwitchListTile(
@@ -108,8 +106,8 @@ class _SetupPageState extends State<SetupPage> {
                           }),
                       SwitchListTile(
                         title: const Text('Emploi du temps'),
-                        subtitle: const Text(
-                            'Recevoir des notifications quand un cours est annulé'),
+                        subtitle:
+                            const Text('Recevoir des notifications quand un cours est annulé'),
                         activeColor: Colors.teal,
                         value: notifCalEnabled,
                         onChanged: (value) {
@@ -139,12 +137,10 @@ class _SetupPageState extends State<SetupPage> {
                   content: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      const Text(
-                          'Sélectionner combien de messages télécharger.'),
+                      const Text('Sélectionner combien de messages télécharger.'),
                       Text(
                         'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.onTertiary),
+                        style: TextStyle(color: Theme.of(context).colorScheme.onTertiary),
                       ),
                       Row(
                         children: [
@@ -185,9 +181,7 @@ class _SetupPageState extends State<SetupPage> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Téléchargement des dernières notes'),
-                            step1
-                                ? const Icon(Icons.done)
-                                : const CircularProgressIndicator(),
+                            step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
                       ),
@@ -197,11 +191,8 @@ class _SetupPageState extends State<SetupPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                  'Téléchargement de l\'emploi du temps'),
-                              step2
-                                  ? const Icon(Icons.done)
-                                  : const CircularProgressIndicator(),
+                              const Text('Téléchargement de l\'emploi du temps'),
+                              step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
@@ -212,9 +203,7 @@ class _SetupPageState extends State<SetupPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Text('Téléchargement des actualités'),
-                              step3
-                                  ? const Icon(Icons.done)
-                                  : const CircularProgressIndicator(),
+                              step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
@@ -224,11 +213,8 @@ class _SetupPageState extends State<SetupPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                  'Téléchargement de la liste des messages'),
-                              step4
-                                  ? const Icon(Icons.done)
-                                  : const CircularProgressIndicator(),
+                              const Text('Téléchargement de la liste des messages'),
+                              step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
@@ -238,8 +224,7 @@ class _SetupPageState extends State<SetupPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Text(
-                                  'Téléchargement du contenu des messages'),
+                              const Text('Téléchargement du contenu des messages'),
                               step5 ? const Icon(Icons.done) : Container(),
                             ],
                           ),
@@ -249,8 +234,7 @@ class _SetupPageState extends State<SetupPage> {
                           children: [
                             Padding(
                               padding: const EdgeInsets.all(8.0),
-                              child:
-                                  Text('Téléchargement $progress/$progressOf'),
+                              child: Text('Téléchargement $progress/$progressOf'),
                             ),
                             Padding(
                               padding: const EdgeInsets.all(8.0),

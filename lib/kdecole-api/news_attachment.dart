@@ -29,11 +29,10 @@ class NewsAttachment {
   NewsAttachment(this.parentUID, this.name);
 
   /// Get the attachments of a specific [NewsArticle]
-  static Future<List<NewsAttachment>> fromParentUID(
-      String parentUID, Database db) async {
+  static Future<List<NewsAttachment>> fromParentUID(String parentUID, Database db) async {
     final List<NewsAttachment> attachments = [];
-    final results = await db.query('NewsAttachments',
-        where: 'ParentUID = ?', whereArgs: [parentUID]);
+    final results =
+        await db.query('NewsAttachments', where: 'ParentUID = ?', whereArgs: [parentUID]);
     for (final result in results) {
       attachments.add(NewsAttachment(parentUID, result['Name'] as String));
     }

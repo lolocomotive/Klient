@@ -35,10 +35,8 @@ class _SettingsPageState extends State<SettingsPage> {
     _readPrefs();
   }
   _readPrefs() async {
-    notifMsgEnabled =
-        await Global.storage!.read(key: 'notifications.messages') == 'true';
-    notifCalEnabled =
-        await Global.storage!.read(key: 'notifications.calendar') == 'true';
+    notifMsgEnabled = await Global.storage!.read(key: 'notifications.messages') == 'true';
+    notifCalEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
     setState(() {});
   }
 
@@ -69,8 +67,7 @@ class _SettingsPageState extends State<SettingsPage> {
                             isExpanded: true,
                             items: Global.dropdownItems,
                             onChanged: (dynamic newValue) async {
-                              await Global.storage!
-                                  .write(key: 'apirul', value: newValue);
+                              await Global.storage!.write(key: 'apirul', value: newValue);
                               Global.apiurl = newValue;
                               setState(() {});
                             }),
@@ -96,8 +93,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       },
                       leading: const Icon(Icons.message_outlined),
                       title: const Text('Messagerie'),
-                      description: const Text(
-                          'Recevoir une notification quand il y a un nouveau message'),
+                      description:
+                          const Text('Recevoir une notification quand il y a un nouveau message'),
                     ),
                     SettingsTile.switchTile(
                       initialValue: notifCalEnabled,
@@ -110,8 +107,8 @@ class _SettingsPageState extends State<SettingsPage> {
                       },
                       leading: const Icon(Icons.calendar_today_outlined),
                       title: const Text('Emploi du temps'),
-                      description: const Text(
-                          'Recevoir une notification quand une séance est annulée'),
+                      description:
+                          const Text('Recevoir une notification quand une séance est annulée'),
                     ),
                   ],
                 ),

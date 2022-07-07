@@ -61,13 +61,10 @@ class _HomeState extends State<Home> {
       for (final exercise in exercises) {
         if (exercise.lessonFor == null) continue;
         if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-        _homework
-            .add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
+        _homework.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
       }
       _homework.sort(
-        (a, b) =>
-            a.key.dateFor!.millisecondsSinceEpoch -
-            b.key.dateFor!.millisecondsSinceEpoch,
+        (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
       );
       setState(() {});
     });
@@ -115,21 +112,17 @@ class _HomeState extends State<Home> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text('Rien à afficher',
-                                  style: TextStyle(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .secondary))),
+                                  style:
+                                      TextStyle(color: Theme.of(context).colorScheme.secondary))),
                         )
                       : SizedBox(
                           child: Column(
                             children: _grades
                                 .map((twoGrades) => Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
+                                      mainAxisAlignment: MainAxisAlignment.center,
                                       children: [
                                         SingleGradeView(twoGrades[0]),
-                                        if (twoGrades.length > 1)
-                                          SingleGradeView(twoGrades[1])
+                                        if (twoGrades.length > 1) SingleGradeView(twoGrades[1])
                                       ],
                                     ))
                                 .toList(),
@@ -147,9 +140,7 @@ class _HomeState extends State<Home> {
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
                               child: Text('Rien à afficher',
-                                  style: TextStyle(
-                                      color: Global
-                                          .theme!.colorScheme.secondary))),
+                                  style: TextStyle(color: Global.theme!.colorScheme.secondary))),
                         )
                       : Column(
                           children: _homework
@@ -177,9 +168,7 @@ class _HomeState extends State<Home> {
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _news
-                              .map((article) => ArticlePreview(article))
-                              .toList(),
+                          children: _news.map((article) => ArticlePreview(article)).toList(),
                         ),
                 ],
               ),
@@ -237,8 +226,8 @@ class ArticlePreview extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: (() {
-          Navigator.of(context).push(MorpheusPageRoute(
-              builder: (_) => ArticleView(_article), parentKey: _key));
+          Navigator.of(context)
+              .push(MorpheusPageRoute(builder: (_) => ArticleView(_article), parentKey: _key));
         }),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -308,8 +297,7 @@ class SingleGradeView extends StatelessWidget {
                         children: [
                           Text(
                             _grade.grade.toString().replaceAll('.', ','),
-                            style: const TextStyle(
-                                fontWeight: FontWeight.bold, fontSize: 15),
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           ),
                           const Divider(height: 10),
                           Text(_grade.of.toInt().toString())

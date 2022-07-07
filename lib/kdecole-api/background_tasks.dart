@@ -40,7 +40,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
     print('Setting up database');
     await Global.initDB();
     String? token = await Global.storage!.read(key: 'token');
-    if (token != null) {
+    if (token != null && token != '') {
       print('Logging in');
       Global.client = Client(token);
       print('Fetching data');
@@ -95,14 +95,10 @@ Future<void> showNotifications() async {
       importance: Importance.max,
       priority: Priority.high,
     );
-    const NotificationDetails msgDetails =
-        NotificationDetails(android: msgChannel);
+    const NotificationDetails msgDetails = NotificationDetails(android: msgChannel);
     List<Conversation> convs = (await Conversation.fetchAll());
 
-    convs = convs
-        .where((conv) => !conv.read)
-        .where((conv) => !conv.notificationShown)
-        .toList();
+    convs = convs.where((conv) => !conv.read).where((conv) => !conv.notificationShown).toList();
     if (convs.isEmpty) {
       print('Showing no message notifications');
     } else {
@@ -133,8 +129,7 @@ Future<void> showNotifications() async {
       importance: Importance.max,
       priority: Priority.high,
     );
-    const NotificationDetails lessonDetails =
-        NotificationDetails(android: lessonChannel);
+    const NotificationDetails lessonDetails = NotificationDetails(android: lessonChannel);
     List<Lesson> lessons = (await Lesson.fetchAll(true));
     lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
     if (lessons.isEmpty) {

@@ -43,12 +43,10 @@ class DatabaseManager {
         .replaceAll(RegExp('<p>\\s+<\\/p>'), '')
         .replaceAll(RegExp('<div>\\s+<\\/div>'), '')
         .replaceAll('<p class="notsupported"></p>', '')
-        .replaceAll(
-            '<div class="js-signature panel panel--full panel--margin-sm">', '')
+        .replaceAll('<div class="js-signature panel panel--full panel--margin-sm">', '')
         .replaceAll('</div>', '')
         .replaceAll('<div>', '<br>')
-        .replaceAll(
-            '<div class="detail-code" style="padding: 0; border: none;">', '');
+        .replaceAll('<div class="detail-code" style="padding: 0; border: none;">', '');
     return result;
   }
 
@@ -89,16 +87,13 @@ class DatabaseManager {
         final conv = await Conversation.byID(conversation['id']);
         if (conv != null) {
           if (conv.lastDate ==
-              DateTime.fromMillisecondsSinceEpoch(
-                  conversation['dateDernierMessage'])) {
+              DateTime.fromMillisecondsSinceEpoch(conversation['dateDernierMessage'])) {
             continue;
           }
-          Global.db!.delete('Conversations',
-              where: 'ID = ?', whereArgs: [conversation['id']]);
-          Global.db!.delete('Messages',
-              where: 'ParentID = ?', whereArgs: [conversation['id']]);
-          Global.db!.delete('MessageAttachments',
-              where: 'ParentID = ?', whereArgs: [conversation['id']]);
+          Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conversation['id']]);
+          Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conversation['id']]);
+          Global.db!
+              .delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [conversation['id']]);
         }
         modified = true;
         final batch = Global.db!.batch();
@@ -133,8 +128,7 @@ class DatabaseManager {
 
   static fetchSingleConversation(int id, Batch batch) async {
     String messageContents = '';
-    await Global.client!.addRequest(Action.getConversationDetail,
-        (messages) async {
+    await Global.client!.addRequest(Action.getConversationDetail, (messages) async {
       for (final message in messages['participations']) {
         batch.insert(
             'Messages',
@@ -148,17 +142,11 @@ class DatabaseManager {
         messageContents += ('${_cleanupHTML(message['corpsMessage'])}\n')
             .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
         for (final attachment in message['pjs'] ?? []) {
-          batch.insert(
-              'MessageAttachments',
-              {
-                'ParentID': message['id'],
-                'URL': attachment['url'],
-                'Name': attachment['name']
-              },
+          batch.insert('MessageAttachments',
+              {'ParentID': message['id'], 'URL': attachment['url'], 'Name': attachment['name']},
               conflictAlgorithm: ConflictAlgorithm.replace);
         }
-        batch.update('Conversations', {'FullMessageContents': messageContents},
-            where: 'ID = $id');
+        batch.update('Conversations', {'FullMessageContents': messageContents}, where: 'ID = $id');
       }
       await batch.commit();
     }, params: [(id).toString()]);
@@ -168,15 +156,14 @@ class DatabaseManager {
   static fetchGradesData([r = 3]) async {
     if (r == 0) return;
     try {
-      final result = await Global.client!.request(Action.getGrades,
-          params: [Global.client!.idEtablissement ?? '0']);
+      final result = await Global.client!
+          .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
       for (final grade in result['listeNotes']) {
         Global.db!.insert(
           'Grades',
           {
             'Subject': grade['matiere'] as String,
-            'Grade':
-                double.parse((grade['note'] as String).replaceAll(',', '.')),
+            'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
             'Of': (grade['bareme'] as int).toDouble(),
             'Date': grade['date'] as int,
             'UniqueID': (grade['date'] as int).toString() +
@@ -197,12 +184,10 @@ class DatabaseManager {
 
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
-    final result = await Global.client!.request(
-        Action.getNewsArticlesEtablissement,
+    final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
         params: [Global.client!.idEtablissement ?? '0']);
     for (final newsArticle in result['articles']) {
-      Global.client!.addRequest(Action.getArticleDetails,
-          (articleDetails) async {
+      Global.client!.addRequest(Action.getArticleDetails, (articleDetails) async {
         await Global.db!.insert(
           'NewsArticles',
           {
@@ -222,8 +207,7 @@ class DatabaseManager {
   }
 
   /// Returns the ID of the lesson that occurs at the timestamp, returns null if nothing is found
-  static int? _lessonIdByTimestamp(
-      int timestamp, Iterable<dynamic> listeJourCdt) {
+  static int? _lessonIdByTimestamp(int timestamp, Iterable<dynamic> listeJourCdt) {
     for (final day in listeJourCdt) {
       for (final lesson in day['listeSeances']) {
         if (lesson['hdeb'] == timestamp) {
@@ -237,8 +221,8 @@ class DatabaseManager {
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
     //TODO clean up this horrific code
-    final result = await Global.client!.request(Action.getTimeTableEleve,
-        params: [(Global.client!.idEleve ?? 0).toString()]);
+    final result = await Global.client!
+        .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
     for (final day in result['listeJourCdt']) {
       for (final lesson in day['listeSeances']) {
         //Check if this lesson is the same as the previous
@@ -267,16 +251,14 @@ class DatabaseManager {
         );
 
         for (final exercise in lesson['aFaire'] ?? []) {
-          Global.client!.addRequest(Action.getExerciseDetails,
-              (exerciseDetails) async {
+          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
             await Global.db!.insert(
               'Exercises',
               {
                 'Type': exercise['type'],
                 'Title': exerciseDetails['titre'],
                 'ID': exercise['uid'],
-                'LessonFor': _lessonIdByTimestamp(
-                    exercise['date'], result['listeJourCdt']),
+                'LessonFor': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
                 'DateFor': exercise['date'],
                 'ParentDate': lesson['hdeb'],
                 'ParentLesson': lesson['idSeance'],
@@ -304,8 +286,7 @@ class DatabaseManager {
           ]);
         }
         for (final exercise in lesson['enSeance'] ?? []) {
-          Global.client!.addRequest(Action.getExerciseDetails,
-              (exerciseDetails) async {
+          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
             await Global.db!.insert(
               'Exercises',
               {
@@ -338,13 +319,11 @@ class DatabaseManager {
           ]);
         }
         for (final exercise in lesson['aRendre'] ?? []) {
-          if ((await Global.db!.query('Exercises',
-                  where: 'ID = ?', whereArgs: [exercise['uid']]))
+          if ((await Global.db!.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
               .isNotEmpty) {
             continue;
           }
-          Global.client!.addRequest(Action.getExerciseDetails,
-              (exerciseDetails) async {
+          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
             await Global.db!.insert(
               'Exercises',
               {
@@ -354,8 +333,7 @@ class DatabaseManager {
                 'LessonFor': lesson['idSeance'],
                 'DateFor': exerciseDetails['date'],
                 'ParentDate': exercise['date'],
-                'ParentLesson': _lessonIdByTimestamp(
-                    exercise['date'], result['listeJourCdt']),
+                'ParentLesson': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
                 'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
                 'Done': exerciseDetails['flagRealise'] ? 1 : 0,
               },

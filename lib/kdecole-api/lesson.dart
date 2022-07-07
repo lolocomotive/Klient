@@ -48,22 +48,11 @@ class Lesson {
   late double startDouble;
   late Color color;
 
-  Lesson(
-      this.id,
-      this.date,
-      this.startTime,
-      this.endTime,
-      this.room,
-      this.title,
-      this.exercises,
-      this.isModified,
-      this.shouldNotify,
-      bool headless,
+  Lesson(this.id, this.date, this.startTime, this.endTime, this.room, this.title, this.exercises,
+      this.isModified, this.shouldNotify, bool headless,
       [this.modificationMessage]) {
-    startDouble = int.parse(startTime.substring(0, 2)) +
-        int.parse(startTime.substring(3)) / 60;
-    final e = int.parse(endTime.substring(0, 2)) +
-        int.parse(endTime.substring(3)) / 60;
+    startDouble = int.parse(startTime.substring(0, 2)) + int.parse(startTime.substring(3)) / 60;
+    final e = int.parse(endTime.substring(0, 2)) + int.parse(endTime.substring(3)) / 60;
 
     length = e - startDouble;
     if (headless) {
@@ -113,8 +102,7 @@ class Lesson {
   }
 
   static Future<Lesson?> byID(int id, [headless = false]) async {
-    final results =
-        await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
+    final results = await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
     if (results.isEmpty) return null;
     return _parse(results[0], headless);
   }

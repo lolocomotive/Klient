@@ -65,8 +65,8 @@ class DebugScreen extends StatelessWidget {
       priority: Priority.high,
     );
     const NotificationDetails details = NotificationDetails(android: channel);
-    Global.notifications!.show(
-        0, 'Example notification', 'This is an example notification', details);
+    Global.notifications!
+        .show(0, 'Example notification', 'This is an example notification', details);
   }
 
   @override
@@ -77,28 +77,18 @@ class DebugScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
-            ElevatedButton(
-                onPressed: _updateMessages,
-                child: const Text('Update messages')),
-            ElevatedButton(
-                onPressed: _updateNews, child: const Text('Update news')),
-            ElevatedButton(
-                onPressed: _updateTimetable,
-                child: const Text('Update Timetable')),
-            ElevatedButton(
-                onPressed: _updateGrades, child: const Text('Update grades')),
-            ElevatedButton(
-                onPressed: _clearDatabase, child: const Text('Clear database')),
-            ElevatedButton(
-                onPressed: _closeDB, child: const Text('Close database')),
+            ElevatedButton(onPressed: _updateMessages, child: const Text('Update messages')),
+            ElevatedButton(onPressed: _updateNews, child: const Text('Update news')),
+            ElevatedButton(onPressed: _updateTimetable, child: const Text('Update Timetable')),
+            ElevatedButton(onPressed: _updateGrades, child: const Text('Update grades')),
+            ElevatedButton(onPressed: _clearDatabase, child: const Text('Clear database')),
+            ElevatedButton(onPressed: _closeDB, child: const Text('Close database')),
             ElevatedButton(
                 onPressed: () {
                   Global.db!.execute('DROP TABLE GRADES');
                 },
                 child: const Text('drop grades')),
-            ElevatedButton(
-                onPressed: _showNotification,
-                child: const Text('Force notification'))
+            ElevatedButton(onPressed: _showNotification, child: const Text('Force notification'))
           ],
         ),
       ),

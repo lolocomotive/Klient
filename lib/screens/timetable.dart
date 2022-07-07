@@ -63,9 +63,7 @@ class _TimetableState extends State<Timetable> {
           day = [lesson];
           lastDate = lesson.date;
         }
-        if ((lesson.date.millisecondsSinceEpoch -
-                        DateTime.now().millisecondsSinceEpoch >=
-                    0 &&
+        if ((lesson.date.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch >= 0 &&
                 page == 0) ||
             lesson.date.isSameDay(DateTime.now())) {
           page = _calendar.length;
@@ -99,10 +97,7 @@ class _TimetableState extends State<Timetable> {
           },
           child: SingleChildScrollView(
             child: SizedBox(
-              height: (Global.heightPerHour *
-                      Global.maxLessonsPerDay *
-                      Global.lessonLength +
-                  32),
+              height: (Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength + 32),
               child: Stack(
                 children: [
                   PageView.builder(
@@ -123,10 +118,9 @@ class _TimetableState extends State<Timetable> {
                     itemCount: max(_calendar.length, 1),
                   ),
                   Container(
-                    color:
-                        Global.theme!.colorScheme.brightness == Brightness.dark
-                            ? Colors.black38
-                            : Colors.white60,
+                    color: Global.theme!.colorScheme.brightness == Brightness.dark
+                        ? Colors.black38
+                        : Colors.white60,
                     width: Global.timeWidth,
                     child: MediaQuery.removePadding(
                       removeTop: true,
@@ -163,15 +157,7 @@ class SingleDayCalendarView extends StatelessWidget {
 
   const SingleDayCalendarView(this._lessons, {Key? key}) : super(key: key);
 
-  static const _days = [
-    'Lundi',
-    'Mardi',
-    'Mercredi',
-    'Jeudi',
-    'Vendredi',
-    'Samedi',
-    'Dimanche'
-  ];
+  static const _days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -184,12 +170,9 @@ class SingleDayCalendarView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: Global.heightPerHour *
-              Global.maxLessonsPerDay *
-              Global.lessonLength,
+          height: Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength,
           child: Stack(
-            children:
-                _lessons.map((lesson) => SingleLessonView(lesson)).toList(),
+            children: _lessons.map((lesson) => SingleLessonView(lesson)).toList(),
           ),
         ),
       ],
@@ -249,8 +232,7 @@ class SingleLessonView extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      if (_lesson.isModified)
-                        Text(_lesson.modificationMessage!),
+                      if (_lesson.isModified) Text(_lesson.modificationMessage!),
                     ],
                   ),
                 ),
@@ -260,8 +242,7 @@ class SingleLessonView extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Padding(
-                          padding:
-                              const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
                           child: Text(
                             _lesson.room,
                             textAlign: TextAlign.center,
@@ -328,9 +309,7 @@ class DetailedLessonView extends StatelessWidget {
             _lesson,
           ),
           MultiExerciseView(
-            _lesson.exercises
-                .where((e) => e.type == ExerciseType.lessonContent)
-                .toList(),
+            _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
             'Contenu de la séance',
             _lesson,
           ),
@@ -339,8 +318,7 @@ class DetailedLessonView extends StatelessWidget {
                 .where((e) =>
                         e.type == ExerciseType.exercise &&
                         e.parentLesson == _lesson.id &&
-                        e.parentLesson !=
-                            e.lessonFor // don't display those twice
+                        e.parentLesson != e.lessonFor // don't display those twice
                     )
                 .toList(),
             'Travail donné lors de la séance',
@@ -357,9 +335,7 @@ class MultiExerciseView extends StatelessWidget {
   final String _title;
   final Lesson _lesson;
 
-  const MultiExerciseView(this._exercises, this._title, this._lesson,
-      {Key? key})
-      : super(key: key);
+  const MultiExerciseView(this._exercises, this._title, this._lesson, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -383,8 +359,7 @@ class MultiExerciseView extends StatelessWidget {
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: Text(
                   'Aucun contenu rensiegné',
-                  style:
-                      TextStyle(color: Theme.of(context).colorScheme.secondary),
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 ),
               ),
           ],
@@ -439,8 +414,7 @@ class ExerciceView extends StatelessWidget {
                 child: _exercise.htmlContent == ''
                     ? Text(
                         'Aucun contenu renseigné',
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.secondary),
+                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                         textAlign: TextAlign.center,
                       )
                     : Html(

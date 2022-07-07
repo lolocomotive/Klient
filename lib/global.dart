@@ -48,21 +48,16 @@ class Global {
     'Arsene 76': 'https://mobilite.arsene76.fr/mobilite/',
     'ENT27': 'https://mobilite.ent27.fr/mobilite/',
     'ENT Creuse': 'https://mobilite.entcreuse.fr/mobilite/',
-    'ENT Auvergne-Rhône-Alpes':
-        'https://mobilite.ent.auvergnerhonealpes.fr/mobilite/',
+    'ENT Auvergne-Rhône-Alpes': 'https://mobilite.ent.auvergnerhonealpes.fr/mobilite/',
     'Agora 06': 'https://mobilite.agora06.fr/mobilite/',
     'CyberCollèges 42': 'https://mobilite.cybercolleges42.fr/mobilite/',
-    'eCollège 31 Haute-Garonne':
-        'https://mobilite.ecollege.haute-garonne.fr/mobilite/',
-    "Mon collège en Val d'Oise":
-        'https://mobilite.moncollege.valdoise.fr/mobilite/',
-    'Webcollège Seine-Saint-Denis  ':
-        'https://mobilite.webcollege.seinesaintdenis.fr/mobilite/',
+    'eCollège 31 Haute-Garonne': 'https://mobilite.ecollege.haute-garonne.fr/mobilite/',
+    "Mon collège en Val d'Oise": 'https://mobilite.moncollege.valdoise.fr/mobilite/',
+    'Webcollège Seine-Saint-Denis  ': 'https://mobilite.webcollege.seinesaintdenis.fr/mobilite/',
     'Eclat-BFC': 'https://mobilite.eclat-bfc.fr/mobilite/',
     '@ucollège84': 'https://mobilite.aucollege84.vaucluse.fr/mobilite/',
     'Skolengo Demo': 'https://mobilite.demo.skolengo.com/mobilite/',
-    'Kosmos Éducation (aefe, etc.)':
-        'https://mobilite.kosmoseducation.com/mobilite/',
+    'Kosmos Éducation (aefe, etc.)': 'https://mobilite.kosmoseducation.com/mobilite/',
     'Skolengo formation': 'https://mobilite.formation.skolengo.com/mobilite/',
     'Schulportal Ostbelgien': 'https://mobilite.schulen.be/mobilite/'
   };
@@ -227,11 +222,8 @@ class Global {
         PopupMenuItemWithIcon('Paramètres', Icons.settings_outlined, context),
         //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
         //PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
-        if (kDebugMode)
-          PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
-        if (kDebugMode)
-          PopupMenuItemWithIcon(
-              'Initial setup', Icons.bug_report_outlined, context),
+        if (kDebugMode) PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
+        if (kDebugMode) PopupMenuItemWithIcon('Initial setup', Icons.bug_report_outlined, context),
       ];
     },
   );
@@ -268,9 +260,7 @@ class Global {
 
   static String dateToString(DateTime date) {
     final DateTime now = DateTime.now();
-    if (date.day == now.day &&
-        date.month == now.month &&
-        date.year == now.year) {
+    if (date.day == now.day && date.month == now.month && date.year == now.year) {
       return '${date.hour}:${date.second.toString().padLeft(2, '0')}';
     } else if (date.year == now.year) {
       return '${date.day} ${monthToString(date.month)}';
@@ -304,8 +294,7 @@ class Global {
   static Future<void> initNotifications() async {
     Global.notifications = FlutterLocalNotificationsPlugin();
     await Global.notifications!.initialize(
-        const InitializationSettings(
-            android: AndroidInitializationSettings('ic_stat_name')),
+        const InitializationSettings(android: AndroidInitializationSettings('ic_stat_name')),
         onSelectNotification: (_) {
       print(_);
     });

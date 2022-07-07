@@ -34,14 +34,12 @@ class Message {
   DateTime date;
   List<MessageAttachment> attachments;
 
-  Message(this.id, this.parentID, this.htmlContent, this.author, this.date,
-      this.attachments);
+  Message(this.id, this.parentID, this.htmlContent, this.author, this.date, this.attachments);
 
   /// Get the messages of a specific [Conversation]
   static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
-    final results =
-        await Global.db!.query('Messages', where: 'ParentID = $conversationID');
+    final results = await Global.db!.query('Messages', where: 'ParentID = $conversationID');
     for (final result in results) {
       messages.add(
         Message(

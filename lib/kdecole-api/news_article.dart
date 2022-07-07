@@ -30,8 +30,8 @@ class NewsArticle {
   String url;
   List<NewsAttachment> attachments;
 
-  NewsArticle(this.uid, this.type, this.author, this.title, this.date,
-      this.htmlContent, this.url, this.attachments);
+  NewsArticle(this.uid, this.type, this.author, this.title, this.date, this.htmlContent, this.url,
+      this.attachments);
 
   static Future<List<NewsArticle>> fetchAll() async {
     final List<NewsArticle> articles = [];

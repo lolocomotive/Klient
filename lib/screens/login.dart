@@ -41,8 +41,7 @@ class LoginState extends State<Login> {
   _login() async {
     if (_loginFormKey.currentState!.validate()) {
       try {
-        Global.client =
-            await Client.login(_unameController.text, _pwdController.text);
+        Global.client = await Client.login(_unameController.text, _pwdController.text);
         await Global.storage!.write(key: 'firstTime', value: 'true');
         await Global.db!.close();
         await deleteDatabase(Global.db!.path);
@@ -50,8 +49,8 @@ class LoginState extends State<Login> {
         Global.client!.clear();
         widget.onLogin();
       } on BadCredentialsException catch (_) {
-        ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
+        ScaffoldMessenger.of(context)
+            .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
       } catch (e, st) {
         Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
           return Scaffold(
@@ -103,14 +102,12 @@ class LoginState extends State<Login> {
                           value: Global.apiurl,
                           items: Global.dropdownItems,
                           onChanged: (dynamic newValue) async {
-                            await Global.storage!
-                                .write(key: 'apiurl', value: newValue);
+                            await Global.storage!.write(key: 'apiurl', value: newValue);
                             Global.apiurl = newValue;
                             setState(() {});
                           }),
                       TextFormField(
-                        decoration: const InputDecoration(
-                            hintText: 'Nom d\'utilisateur'),
+                        decoration: const InputDecoration(hintText: 'Nom d\'utilisateur'),
                         controller: _unameController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -123,8 +120,7 @@ class LoginState extends State<Login> {
                         autofocus: true,
                       ),
                       TextFormField(
-                        decoration: const InputDecoration(
-                            hintText: 'Code d\'activation'),
+                        decoration: const InputDecoration(hintText: 'Code d\'activation'),
                         controller: _pwdController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -138,9 +134,7 @@ class LoginState extends State<Login> {
                       ),
                       Padding(
                         padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                        child: ElevatedButton(
-                            onPressed: _login,
-                            child: const Text('Se connecter')),
+                        child: ElevatedButton(onPressed: _login, child: const Text('Se connecter')),
                       )
                     ],
                   ),

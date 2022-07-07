@@ -38,25 +38,14 @@ class Conversation {
   Widget? customPreview;
   Widget? customSubject;
 
-  Conversation(
-      this.id,
-      this.subject,
-      this.preview,
-      this.hasAttachment,
-      this.lastDate,
-      this.messages,
-      this.read,
-      this.notificationShown,
-      this.lastAuthor,
-      this.firstAuthor,
-      [this.customPreview,
-      this.customSubject]);
+  Conversation(this.id, this.subject, this.preview, this.hasAttachment, this.lastDate,
+      this.messages, this.read, this.notificationShown, this.lastAuthor, this.firstAuthor,
+      [this.customPreview, this.customSubject]);
 
   /// DOES NOT return messages
   static Future<List<Conversation>> fetchAll({int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
-    final results =
-        await Global.db!.query('Conversations', limit: limit, offset: offset);
+    final results = await Global.db!.query('Conversations', limit: limit, offset: offset);
     for (final result in results) {
       List<Message> messages = [];
       conversations.add(
@@ -84,16 +73,14 @@ class Conversation {
     //because dart doesn't allow to split ignoring case
     //Using <!-- REPLACE ME --> because all HTML has been removed
     const String magic = '<!-- REPLACE ME -->';
-    List<String> split = content
-        .replaceAll(RegExp(RegExp.escape(query), caseSensitive: false), magic)
-        .split(magic);
+    List<String> split =
+        content.replaceAll(RegExp(RegExp.escape(query), caseSensitive: false), magic).split(magic);
 
     //Can't use query here because we want to keep the original case
-    List<String> replaceWith =
-        RegExp(RegExp.escape(query), caseSensitive: false)
-            .allMatches(content)
-            .map((e) => e.group(0)!)
-            .toList();
+    List<String> replaceWith = RegExp(RegExp.escape(query), caseSensitive: false)
+        .allMatches(content)
+        .map((e) => e.group(0)!)
+        .toList();
     List<InlineSpan> children = [];
     for (int i = 0; i < split.length; i++) {
       if (i == split.length - 1) break;
@@ -105,9 +92,7 @@ class Conversation {
                   : ''));
       children.add(TextSpan(
           text: replaceWith[i],
-          style: TextStyle(
-              backgroundColor:
-                  background ?? const Color.fromARGB(70, 255, 255, 0))));
+          style: TextStyle(backgroundColor: background ?? const Color.fromARGB(70, 255, 255, 0))));
       children.add(TextSpan(
           text: split[i + 1].substring(0, min(75, split[i + 1].length)) +
               (split[i + 1].length > 75 ? '...\n' : '')));
@@ -120,8 +105,7 @@ class Conversation {
     );
   }
 
-  static Future<List<Conversation>> search(String query,
-      {int? offset, int? limit}) async {
+  static Future<List<Conversation>> search(String query, {int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
     String likeClause =
         "(upper(Subject) like upper('%$query%')) or (FullMessageContents like upper('%$query%'))";
@@ -148,12 +132,9 @@ class Conversation {
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
-              ? highlight(query, fullMessageContents,
-                  color: Global.theme!.colorScheme.secondary)
+              ? highlight(query, fullMessageContents, color: Global.theme!.colorScheme.secondary)
               : null,
-          (result['Subject'] as String)
-                  .toUpperCase()
-                  .contains(query.toUpperCase())
+          (result['Subject'] as String).toUpperCase().contains(query.toUpperCase())
               ? highlight(query, result['Subject'] as String,
                   color: Global.theme!.colorScheme.secondary, fontSize: 14)
               : null,
@@ -165,8 +146,7 @@ class Conversation {
   }
 
   static Future<Conversation?> byID(int id) async {
-    final results = await Global.db!
-        .query('Conversations', where: 'ID = ?', whereArgs: [id]);
+    final results = await Global.db!.query('Conversations', where: 'ID = ?', whereArgs: [id]);
     for (final result in results) {
       List<Message> messages = [];
       messages = await Message.fromConversationID(result['ID'] as int);

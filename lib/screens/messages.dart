@@ -32,8 +32,7 @@ class MessagePreview extends StatelessWidget {
   final Conversation _conversation;
   final GlobalKey? _parentKey;
 
-  const MessagePreview(this._conversation, this._parentKey, {Key? key})
-      : super(key: key);
+  const MessagePreview(this._conversation, this._parentKey, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -44,12 +43,10 @@ class MessagePreview extends StatelessWidget {
         Container(
           width: _conversation.read ? 0 : 8,
           height: _conversation.read ? 0 : 8,
-          margin: _conversation.read
-              ? const EdgeInsets.all(0)
-              : const EdgeInsets.fromLTRB(0, 5, 5, 0),
+          margin:
+              _conversation.read ? const EdgeInsets.all(0) : const EdgeInsets.fromLTRB(0, 5, 5, 0),
           decoration: BoxDecoration(
-              color: _conversation.read ? Colors.transparent : Colors.blue,
-              shape: BoxShape.circle),
+              color: _conversation.read ? Colors.transparent : Colors.blue, shape: BoxShape.circle),
         ),
         Expanded(
           child: Column(
@@ -67,9 +64,7 @@ class MessagePreview extends StatelessWidget {
                               : ''),
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: _conversation.read
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
                   ),
@@ -78,9 +73,7 @@ class MessagePreview extends StatelessWidget {
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontWeight: _conversation.read
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
                         fontSize: 14),
                   ),
                 ],
@@ -91,17 +84,13 @@ class MessagePreview extends StatelessWidget {
                     textAlign: TextAlign.left,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontWeight: _conversation.read
-                            ? FontWeight.normal
-                            : FontWeight.bold,
+                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
                         fontSize: 14),
                   ),
               _conversation.customPreview ??
                   Text(
                     HtmlUnescape().convert(_conversation.preview),
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Theme.of(context).colorScheme.secondary),
+                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.secondary),
                   ),
             ],
           ),
@@ -121,8 +110,8 @@ class Messages extends StatefulWidget {
 class MessagesState extends State<Messages> {
   final GlobalKey<MessagesState> key = GlobalKey();
 
-  static void openConversation(BuildContext context, GlobalKey? parentKey,
-      int conversationId, String conversationSubject) {
+  static void openConversation(
+      BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
     Global.currentConversation = conversationId;
     Global.currentConversationSubject = conversationSubject;
     Navigator.of(context).push(
@@ -201,8 +190,7 @@ class MessagesState extends State<Messages> {
                   : _conversations.length + (Global.loadingMessages ? 1 : 0),
               padding: const EdgeInsets.all(0),
               itemBuilder: (BuildContext context, int index) {
-                if (index == 0 && _conversations.isEmpty ||
-                    index == _conversations.length) {
+                if (index == 0 && _conversations.isEmpty || index == _conversations.length) {
                   return Padding(
                     padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
                     child: Column(
@@ -216,8 +204,8 @@ class MessagesState extends State<Messages> {
                 }
                 final parentKey = GlobalKey();
                 return Card(
-                  margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                      index == _conversations.length - 1 ? 14 : 7),
+                  margin: EdgeInsets.fromLTRB(
+                      14, index == 0 ? 16 : 7, 14, index == _conversations.length - 1 ? 14 : 7),
                   elevation: 1,
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(8),
@@ -227,10 +215,7 @@ class MessagesState extends State<Messages> {
                       padding: const EdgeInsets.all(8.0),
                       child: MessagePreview(_conversations[index], parentKey),
                     ),
-                    onTap: () => openConversation(
-                        context,
-                        parentKey,
-                        _conversations[index].id,
+                    onTap: () => openConversation(context, parentKey, _conversations[index].id,
                         _conversations[index].subject),
                   ),
                 );
@@ -279,8 +264,7 @@ class MessagesSearchDelegate extends SearchDelegate {
     if (query.length < 3) {
       return Center(
           child: Text('Entrez au moins 3 caractères',
-              style:
-                  TextStyle(color: Theme.of(context).colorScheme.secondary)));
+              style: TextStyle(color: Theme.of(context).colorScheme.secondary)));
     }
     Global.searchQuery = query;
     if (Global.messageSearchSuggestionState != null) {
@@ -322,8 +306,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
             ? Center(
                 child: Text(
                 'Aucun résultat trouvé.',
-                style:
-                    TextStyle(color: Theme.of(context).colorScheme.secondary),
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                 textAlign: TextAlign.center,
               ))
             : ListView.separated(
@@ -339,8 +322,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                       ),
                       onTap: () {
                         Global.currentConversation = _conversations![index].id;
-                        Global.currentConversationSubject =
-                            _conversations![index].subject;
+                        Global.currentConversationSubject = _conversations![index].subject;
                         Navigator.of(context).push(
                           MaterialPageRoute(
                             builder: (_) => const ConversationView(),
@@ -403,8 +385,7 @@ class _ConversationViewState extends State<ConversationView> {
                 },
                 body: ListView.builder(
                   itemBuilder: (BuildContext context, int index) {
-                    if (_conversation == null ||
-                        index >= _conversation!.messages.length) {
+                    if (_conversation == null || index >= _conversation!.messages.length) {
                       return Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: OutlinedButton(
@@ -439,20 +420,17 @@ class _ConversationViewState extends State<ConversationView> {
                                     style: const TextStyle(fontSize: 14),
                                   ),
                                 ),
-                                Text(Global.dateToString(
-                                    _conversation!.messages[index].date)),
+                                Text(Global.dateToString(_conversation!.messages[index].date)),
                               ],
                             ),
                             Html(
-                              data: HtmlUnescape().convert(
-                                  _conversation!.messages[index].htmlContent),
+                              data: HtmlUnescape()
+                                  .convert(_conversation!.messages[index].htmlContent),
                               style: {
                                 'blockquote': Style(
                                     border: const Border(
-                                        left: BorderSide(
-                                            color: Colors.black12, width: 2)),
-                                    padding:
-                                        const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                        left: BorderSide(color: Colors.black12, width: 2)),
+                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
                                     margin: EdgeInsets.zero)
                               },
                               onLinkTap: (url, context, map, element) {
@@ -464,9 +442,7 @@ class _ConversationViewState extends State<ConversationView> {
                       ),
                     );
                   },
-                  itemCount: (_conversation != null
-                          ? _conversation!.messages.length
-                          : 0) +
+                  itemCount: (_conversation != null ? _conversation!.messages.length : 0) +
                       (_showReply ? 0 : 1),
                 ),
               ),
@@ -478,8 +454,7 @@ class _ConversationViewState extends State<ConversationView> {
                   Card(
                     margin: const EdgeInsets.all(8.0),
                     elevation: 1,
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(8)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
@@ -514,22 +489,17 @@ class _ConversationViewState extends State<ConversationView> {
                                       : () async {
                                           _busy = true;
                                           setState(() {});
-                                          await Global.client!.request(
-                                              Action.reply,
-                                              params: [
-                                                _conversation!.id.toString()
-                                              ],
+                                          await Global.client!.request(Action.reply,
+                                              params: [_conversation!.id.toString()],
                                               body:
                                                   '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                           _textFieldController.clear();
                                           final batch = Global.db!.batch();
-                                          await DatabaseManager
-                                              .fetchSingleConversation(
-                                                  _conversation!.id, batch);
+                                          await DatabaseManager.fetchSingleConversation(
+                                              _conversation!.id, batch);
                                           await Global.client!.process();
                                           await batch.commit();
-                                          await Conversation.byID(
-                                                  _conversation!.id)
+                                          await Conversation.byID(_conversation!.id)
                                               .then((conversation) {
                                             if (!mounted) return;
                                             setState(() {
@@ -542,8 +512,7 @@ class _ConversationViewState extends State<ConversationView> {
                                   child: _busy
                                       ? Transform.scale(
                                           scale: .7,
-                                          child:
-                                              const CircularProgressIndicator(),
+                                          child: const CircularProgressIndicator(),
                                         )
                                       : const Text('Envoyer'),
                                 ),

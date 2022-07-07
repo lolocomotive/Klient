@@ -62,8 +62,8 @@ class Exercise {
   String htmlContent;
   bool done;
 
-  Exercise(this.uid, this.parentLesson, this.type, this.date, this.title,
-      this.htmlContent, this.done,
+  Exercise(
+      this.uid, this.parentLesson, this.type, this.date, this.title, this.htmlContent, this.done,
       [this.lessonFor, this.dateFor]);
 
   /// Construct an [Exercise] from the result of a database query
@@ -71,9 +71,7 @@ class Exercise {
     return Exercise(
         result['ID'] as int,
         result['ParentLesson'] as int?,
-        result['Type'] as String == 'Cours'
-            ? ExerciseType.lessonContent
-            : ExerciseType.exercise,
+        result['Type'] as String == 'Cours' ? ExerciseType.lessonContent : ExerciseType.exercise,
         DateTime.fromMillisecondsSinceEpoch(result['ParentDate'] as int),
         result['Title'] as String,
         result['HTMLContent'] as String,
@@ -85,8 +83,7 @@ class Exercise {
   }
 
   /// Get the [Exercise]s by the parent [Lesson] ID
-  static Future<List<Exercise>> fromParentLesson(
-      int parentLesson, Database db) async {
+  static Future<List<Exercise>> fromParentLesson(int parentLesson, Database db) async {
     final List<Exercise> exercises = [];
     final results = await db.query('Exercises',
         where: 'ParentLesson = ? OR LessonFor = ?',
