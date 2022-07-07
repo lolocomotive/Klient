@@ -50,6 +50,10 @@ class _SettingsPageState extends State<SettingsPage> {
         children: [
           Expanded(
             child: SettingsList(
+              darkTheme: SettingsThemeData(
+                  settingsListBackground: Theme.of(context).colorScheme.background),
+              lightTheme: SettingsThemeData(
+                  settingsListBackground: Theme.of(context).colorScheme.background),
               sections: [
                 SettingsSection(
                     title: Text(
