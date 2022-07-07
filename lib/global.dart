@@ -1,5 +1,5 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Action;
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
@@ -10,6 +10,7 @@ import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/multiview.dart';
 import 'package:kosmos_client/screens/settings.dart';
 import 'package:kosmos_client/screens/setup.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:sqflite/sqflite.dart';
 
 class Global {
@@ -28,6 +29,7 @@ class Global {
   static Widget? fab;
   static MainState? mainState;
   static ThemeData? theme;
+  static GlobalKey mainKey = GlobalKey();
   static const timeWidth = 32.0;
   static const heightPerHour = 120.0;
   static const lessonLength = 55.0 / 55.0;
@@ -198,7 +200,7 @@ class Global {
   ];
 
   static PopupMenuButton popupMenuButton = PopupMenuButton(
-    onSelected: (choice) {
+    onSelected: (choice) async {
       switch (choice) {
         case 'Paramètres':
           navigatorKey.currentState!.push(
@@ -209,6 +211,23 @@ class Global {
           navigatorKey.currentState!.push(
             MaterialPageRoute(builder: (_) => const DebugScreen()),
           );
+          break;
+        case 'Se déconnecter':
+          navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) {
+            return WillPopScope(
+              onWillPop: () async => false,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: const [CircularProgressIndicator()],
+              ),
+            );
+          }));
+          Global.client!.clear();
+          await Global.client!.request(Action.logout);
+          await Global.db!.close();
+          await deleteDatabase(Global.db!.path);
+          await Global.storage!.deleteAll();
+          Restart.restartApp();
           break;
         case 'Initial setup':
           navigatorKey.currentState!.push(
@@ -221,7 +240,7 @@ class Global {
       return [
         PopupMenuItemWithIcon('Paramètres', Icons.settings_outlined, context),
         //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
-        //PopupMenuItemWithIcon("Se déconnecter", Icons.logout_outlined, context),
+        PopupMenuItemWithIcon('Se déconnecter', Icons.logout_outlined, context),
         if (kDebugMode) PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
         if (kDebugMode) PopupMenuItemWithIcon('Initial setup', Icons.bug_report_outlined, context),
       ];

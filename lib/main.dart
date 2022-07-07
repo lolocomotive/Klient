@@ -18,8 +18,7 @@ void main() async {
 }
 
 class PopupMenuItemWithIcon extends PopupMenuItem {
-  PopupMenuItemWithIcon(String label, IconData icon, BuildContext context,
-      {Key? key})
+  PopupMenuItemWithIcon(String label, IconData icon, BuildContext context, {Key? key})
       : super(
           key: key,
           value: label,
@@ -90,6 +89,7 @@ class KosmosState extends State with WidgetsBindingObserver {
       useMaterial3: true,
     );
     return MaterialApp(
+      key: Global.mainKey,
       scaffoldMessengerKey: _messengerKey,
       navigatorKey: Global.navigatorKey,
       title: title,

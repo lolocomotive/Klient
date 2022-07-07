@@ -326,4 +326,5 @@ class Action {
   static final Action getGrades = Action('consulterNotes/idetablissement/');
   static final Action reply =
       Action('messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
+  static final Action logout = Action('desactivation/');
 }
