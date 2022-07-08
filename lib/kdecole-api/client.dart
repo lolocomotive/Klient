@@ -40,7 +40,7 @@ class Request {
   Request(
       this._url, this._onSuccess, this._headers, this._method, this._onJsonErr, this._onHttp400);
 
-  process() async {
+  Future<void> process() async {
     http.Response? response;
     final context = SecurityContext.defaultContext;
     //Including the ISRG root certificate for older devices (looking at you Gloria)
@@ -185,7 +185,12 @@ class Client {
         _requests[0].process().then((_) {
           _currentlyDownloading--;
           Global.progress++;
-        });
+        }).catchError(
+          (e, st) {
+            Global.onException(e, st);
+          },
+          test: (e) => e is Exception,
+        );
         _requests.removeAt(0);
       } else {
         await Future.delayed(const Duration(milliseconds: 10));
@@ -199,6 +204,7 @@ class Client {
   }
 
   /// Make a request to the API
+
   Future<Map<String, dynamic>> request(Action action, {List<String>? params, String? body}) async {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
@@ -280,7 +286,11 @@ class Client {
     Global.storage!.write(key: 'token', value: _token);
     Global.token = _token;
     if (token == '') return;
-    request(Action.startup);
+    try {
+      request(Action.startup);
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
+    }
   }
 
   void clear() {

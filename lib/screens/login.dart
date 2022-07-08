@@ -51,22 +51,8 @@ class LoginState extends State<Login> {
       } on BadCredentialsException catch (_) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
-      } catch (e, st) {
-        Navigator.of(context).push(MaterialPageRoute(builder: (ctx) {
-          return Scaffold(
-            appBar: AppBar(
-              title: const Text('Erreur'),
-            ),
-            body: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Text(e.toString()),
-                  Text(st.toString()),
-                ],
-              ),
-            ),
-          );
-        }));
+      } on Exception catch (e, st) {
+        Global.onException(e, st);
       }
     }
   }

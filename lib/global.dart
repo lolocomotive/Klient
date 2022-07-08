@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:flutter/services.dart';
@@ -65,6 +67,8 @@ class Global {
     'Schulportal Ostbelgien': 'https://mobilite.schulen.be/mobilite/'
   };
   static List<DropdownMenuItem> dropdownItems = [];
+
+  static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
 
   static initDB() async {
     final dbDir = await getDatabasesPath();
@@ -199,6 +203,101 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
+  static void onException(Exception e, StackTrace st) {
+    print(e);
+    String message = 'Erreur';
+    if (e is SocketException) {
+      message = 'Erreur de réseau';
+    }
+    Global.messengerKey.currentState?.showSnackBar(
+      SnackBar(
+        content: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(message),
+            TextButton(
+              onPressed: () {
+                Global.messengerKey.currentState?.hideCurrentSnackBar();
+                Global.navigatorKey.currentState!.push(
+                  MaterialPageRoute(builder: (context) {
+                    return Scaffold(
+                      body: NestedScrollView(
+                        floatHeaderSlivers: true,
+                        headerSliverBuilder: (context, innerBoxIsScrolled) {
+                          return [
+                            SliverAppBar(
+                              title: Text(message),
+                              floating: true,
+                              forceElevated: innerBoxIsScrolled,
+                            )
+                          ];
+                        },
+                        body: Scrollbar(
+                          child: SingleChildScrollView(
+                            child: Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Card(
+                                    margin: const EdgeInsets.all(8.0),
+                                    elevation: 1,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Descriptif de l\'erreur',
+                                              style: TextStyle(
+                                                  color: Global.theme!.colorScheme.primary,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(e.toString()),
+                                          ],
+                                        )),
+                                  ),
+                                  Card(
+                                    margin: const EdgeInsets.all(8.0),
+                                    elevation: 1,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    clipBehavior: Clip.antiAlias,
+                                    child: Padding(
+                                        padding: const EdgeInsets.all(16.0),
+                                        child: Column(
+                                          children: [
+                                            Text(
+                                              'Stack trace',
+                                              style: TextStyle(
+                                                  color: Global.theme!.colorScheme.primary,
+                                                  fontWeight: FontWeight.bold),
+                                            ),
+                                            Text(st.toString()),
+                                          ],
+                                        )),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    );
+                  }),
+                );
+              },
+              child: const Text("Plus d'infos"),
+            )
+          ],
+        ),
+      ),
+    );
+  }
 
   static PopupMenuButton popupMenuButton = PopupMenuButton(
     onSelected: (choice) async {

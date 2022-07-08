@@ -75,135 +75,152 @@ class DatabaseManager {
   static fetchMessageData() async {
     Global.loadingMessages = true;
     int pgNumber = 0;
-    while (true) {
-      final result = await Global.client!.request(
-        Action.getConversations,
-        params: [(pgNumber * 20).toString()],
-      );
-      pgNumber++;
-      var modified = false;
-      if (result['communications'].isEmpty) break;
-      for (final conversation in result['communications']) {
-        final conv = await Conversation.byID(conversation['id']);
-        if (conv != null) {
-          if (conv.lastDate ==
-              DateTime.fromMillisecondsSinceEpoch(conversation['dateDernierMessage'])) {
-            continue;
+    try {
+      while (true) {
+        final result = await Global.client!.request(
+          Action.getConversations,
+          params: [(pgNumber * 20).toString()],
+        );
+        pgNumber++;
+        var modified = false;
+        if (result['communications'].isEmpty) break;
+        for (final conversation in result['communications']) {
+          final conv = await Conversation.byID(conversation['id']);
+          if (conv != null) {
+            if (conv.lastDate ==
+                DateTime.fromMillisecondsSinceEpoch(conversation['dateDernierMessage'])) {
+              continue;
+            }
+            Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conversation['id']]);
+            Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conversation['id']]);
+            Global.db!.delete('MessageAttachments',
+                where: 'ParentID = ?', whereArgs: [conversation['id']]);
           }
-          Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conversation['id']]);
-          Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conversation['id']]);
-          Global.db!
-              .delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [conversation['id']]);
+          modified = true;
+          final batch = Global.db!.batch();
+          batch.insert(
+              'Conversations',
+              {
+                'ID': conversation['id'],
+                'Subject': conversation['objet'],
+                'Preview': conversation['premieresLignes'],
+                'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
+                'LastDate': (conversation['dateDernierMessage']),
+                'Read': conversation['etatLecture'] as bool ? 1 : 0,
+                'NotificationShown': 0,
+                'LastAuthor': conversation['expediteurActuel']['libelle'],
+                'FirstAuthor': conversation['expediteurInitial']['libelle'],
+                'FullMessageContents': '',
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace);
+          fetchSingleConversation(conversation['id'], batch);
         }
-        modified = true;
-        final batch = Global.db!.batch();
-        batch.insert(
-            'Conversations',
-            {
-              'ID': conversation['id'],
-              'Subject': conversation['objet'],
-              'Preview': conversation['premieresLignes'],
-              'HasAttachment': conversation['pieceJointe'] as bool ? 1 : 0,
-              'LastDate': (conversation['dateDernierMessage']),
-              'Read': conversation['etatLecture'] as bool ? 1 : 0,
-              'NotificationShown': 0,
-              'LastAuthor': conversation['expediteurActuel']['libelle'],
-              'FirstAuthor': conversation['expediteurInitial']['libelle'],
-              'FullMessageContents': '',
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace);
-        fetchSingleConversation(conversation['id'], batch);
+        if (!modified) {
+          break;
+        }
       }
-      if (!modified) {
-        break;
+      Global.step4 = true;
+      await Global.client!.process();
+      if (Global.messagesState != null) {
+        Global.messagesState!.reloadFromDB();
       }
+      Global.loadingMessages = false;
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
     }
-    Global.step4 = true;
-    await Global.client!.process();
-    if (Global.messagesState != null) {
-      Global.messagesState!.reloadFromDB();
-    }
-    Global.loadingMessages = false;
   }
 
   static fetchSingleConversation(int id, Batch batch) async {
-    String messageContents = '';
-    await Global.client!.addRequest(Action.getConversationDetail, (messages) async {
-      for (final message in messages['participations']) {
-        batch.insert(
-            'Messages',
-            {
-              'ParentID': id,
-              'HTMLContent': _cleanupHTML(message['corpsMessage']),
-              'Author': message['redacteur']['libelle'],
-              'DateSent': message['dateEnvoi'],
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace);
-        messageContents += ('${_cleanupHTML(message['corpsMessage'])}\n')
-            .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
-        for (final attachment in message['pjs'] ?? []) {
-          batch.insert('MessageAttachments',
-              {'ParentID': message['id'], 'URL': attachment['url'], 'Name': attachment['name']},
+    try {
+      String messageContents = '';
+      await Global.client!.addRequest(Action.getConversationDetail, (messages) async {
+        for (final message in messages['participations']) {
+          batch.insert(
+              'Messages',
+              {
+                'ParentID': id,
+                'HTMLContent': _cleanupHTML(message['corpsMessage']),
+                'Author': message['redacteur']['libelle'],
+                'DateSent': message['dateEnvoi'],
+              },
               conflictAlgorithm: ConflictAlgorithm.replace);
+          messageContents += ('${_cleanupHTML(message['corpsMessage'])}\n')
+              .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
+          for (final attachment in message['pjs'] ?? []) {
+            batch.insert('MessageAttachments',
+                {'ParentID': message['id'], 'URL': attachment['url'], 'Name': attachment['name']},
+                conflictAlgorithm: ConflictAlgorithm.replace);
+          }
+          batch.update('Conversations', {'FullMessageContents': messageContents},
+              where: 'ID = $id');
         }
-        batch.update('Conversations', {'FullMessageContents': messageContents}, where: 'ID = $id');
-      }
-      await batch.commit();
-    }, params: [(id).toString()]);
+        await batch.commit();
+      }, params: [(id).toString()]);
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
+    }
   }
 
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
-    if (r == 0) return;
     try {
-      final result = await Global.client!
-          .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
-      for (final grade in result['listeNotes']) {
-        Global.db!.insert(
-          'Grades',
-          {
-            'Subject': grade['matiere'] as String,
-            'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
-            'Of': (grade['bareme'] as int).toDouble(),
-            'Date': grade['date'] as int,
-            'UniqueID': (grade['date'] as int).toString() +
-                (grade['matiere'] as String) +
-                (grade['note'] as String) +
-                (grade['bareme'] as int).toString(),
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
+      if (r == 0) return;
+      try {
+        final result = await Global.client!
+            .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
+        for (final grade in result['listeNotes']) {
+          Global.db!.insert(
+            'Grades',
+            {
+              'Subject': grade['matiere'] as String,
+              'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
+              'Of': (grade['bareme'] as int).toDouble(),
+              'Date': grade['date'] as int,
+              'UniqueID': (grade['date'] as int).toString() +
+                  (grade['matiere'] as String) +
+                  (grade['note'] as String) +
+                  (grade['bareme'] as int).toString(),
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      } on NetworkException403 catch (_) {
+        rethrow;
+      } on Error catch (_) {
+        await Future.delayed(const Duration(seconds: 1));
+        fetchGradesData(r - 1);
       }
-    } on NetworkException403 catch (_) {
-      rethrow;
-    } on Error catch (_) {
-      await Future.delayed(const Duration(seconds: 1));
-      fetchGradesData(r - 1);
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
     }
   }
 
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
-    final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
-        params: [Global.client!.idEtablissement ?? '0']);
-    for (final newsArticle in result['articles']) {
-      Global.client!.addRequest(Action.getArticleDetails, (articleDetails) async {
-        await Global.db!.insert(
-          'NewsArticles',
-          {
-            'UID': newsArticle['uid'],
-            'Type': articleDetails['type'],
-            'Author': articleDetails['auteur'],
-            'Title': articleDetails['titre'],
-            'PublishingDate': articleDetails['date'],
-            'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
-            'URL': articleDetails['url'],
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-      }, params: [newsArticle['uid']]);
+    try {
+      final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
+          params: [Global.client!.idEtablissement ?? '0']);
+      for (final newsArticle in result['articles']) {
+        Global.client!.addRequest(Action.getArticleDetails, (articleDetails) async {
+          await Global.db!.insert(
+            'NewsArticles',
+            {
+              'UID': newsArticle['uid'],
+              'Type': articleDetails['type'],
+              'Author': articleDetails['auteur'],
+              'Title': articleDetails['titre'],
+              'PublishingDate': articleDetails['date'],
+              'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
+              'URL': articleDetails['url'],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }, params: [newsArticle['uid']]);
+      }
+      await Global.client!.process();
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
     }
-    await Global.client!.process();
   }
 
   /// Returns the ID of the lesson that occurs at the timestamp, returns null if nothing is found
@@ -220,145 +237,149 @@ class DatabaseManager {
 
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
-    //TODO clean up this horrific code
-    final result = await Global.client!
-        .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
-    for (final day in result['listeJourCdt']) {
-      for (final lesson in day['listeSeances']) {
-        //Check if this lesson is the same as the previous
+    try {
+      //TODO clean up this horrific code
+      final result = await Global.client!
+          .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
+      for (final day in result['listeJourCdt']) {
+        for (final lesson in day['listeSeances']) {
+          //Check if this lesson is the same as the previous
 
-        final oldLesson = await Lesson.byID(lesson['idSeance'], true);
-        var shouldNotify = false;
-        if (oldLesson != null) {
-          shouldNotify = oldLesson.isModified != lesson['flagModif'];
-        }
-
-        Global.db!.insert(
-          'Lessons',
-          {
-            'ID': lesson['idSeance'],
-            'LessonDate': lesson['hdeb'],
-            'StartTime': lesson['heureDebut'],
-            'EndTime': lesson['heureFin'],
-            'Room': lesson['salle'],
-            'Title': lesson['titre'],
-            'Subject': lesson['matiere'],
-            'IsModified': lesson['flagModif'] ? 1 : 0,
-            'ShouldNotify': shouldNotify ? 1 : 0,
-            'ModificationMessage': lesson['motifModif'],
-          },
-          conflictAlgorithm: ConflictAlgorithm.replace,
-        );
-
-        for (final exercise in lesson['aFaire'] ?? []) {
-          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-            await Global.db!.insert(
-              'Exercises',
-              {
-                'Type': exercise['type'],
-                'Title': exerciseDetails['titre'],
-                'ID': exercise['uid'],
-                'LessonFor': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
-                'DateFor': exercise['date'],
-                'ParentDate': lesson['hdeb'],
-                'ParentLesson': lesson['idSeance'],
-                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-            for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert(
-                'ExerciseAttachments',
-                {
-                  'ID': attachment['idRessource'],
-                  'ParentID': exercise['uid'],
-                  'URL': attachment['url'],
-                  'Name': attachment['name']
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-            }
-          }, params: [
-            (Global.client!.idEleve ?? 0).toString(),
-            (lesson['idSeance']).toString(),
-            (exercise['uid']).toString()
-          ]);
-        }
-        for (final exercise in lesson['enSeance'] ?? []) {
-          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-            await Global.db!.insert(
-              'Exercises',
-              {
-                'Type': 'Cours',
-                'Title': exerciseDetails['titre'],
-                'ID': exercise['uid'],
-                'ParentDate': exercise['date'],
-                'ParentLesson': lesson['idSeance'],
-                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-            for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert(
-                'ExerciseAttachments',
-                {
-                  'ID': attachment['idRessource'],
-                  'ParentID': exercise['uid'],
-                  'URL': attachment['url'],
-                  'Name': attachment['name']
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-            }
-          }, params: [
-            (Global.client!.idEleve ?? 0).toString(),
-            (lesson['idSeance']).toString(),
-            (exercise['uid']).toString()
-          ]);
-        }
-        for (final exercise in lesson['aRendre'] ?? []) {
-          if ((await Global.db!.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
-              .isNotEmpty) {
-            continue;
+          final oldLesson = await Lesson.byID(lesson['idSeance'], true);
+          var shouldNotify = false;
+          if (oldLesson != null) {
+            shouldNotify = oldLesson.isModified != lesson['flagModif'];
           }
-          Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-            await Global.db!.insert(
-              'Exercises',
-              {
-                'Type': exercise['type'],
-                'Title': exerciseDetails['titre'],
-                'ID': exercise['uid'],
-                'LessonFor': lesson['idSeance'],
-                'DateFor': exerciseDetails['date'],
-                'ParentDate': exercise['date'],
-                'ParentLesson': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
-                'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-              },
-              conflictAlgorithm: ConflictAlgorithm.replace,
-            );
-            for (final attachment in exerciseDetails['pjs'] ?? []) {
-              Global.db!.insert(
-                'ExerciseAttachments',
+
+          Global.db!.insert(
+            'Lessons',
+            {
+              'ID': lesson['idSeance'],
+              'LessonDate': lesson['hdeb'],
+              'StartTime': lesson['heureDebut'],
+              'EndTime': lesson['heureFin'],
+              'Room': lesson['salle'],
+              'Title': lesson['titre'],
+              'Subject': lesson['matiere'],
+              'IsModified': lesson['flagModif'] ? 1 : 0,
+              'ShouldNotify': shouldNotify ? 1 : 0,
+              'ModificationMessage': lesson['motifModif'],
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+
+          for (final exercise in lesson['aFaire'] ?? []) {
+            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await Global.db!.insert(
+                'Exercises',
                 {
-                  'ID': attachment['idRessource'],
-                  'ParentID': exercise['uid'],
-                  'URL': attachment['url'],
-                  'Name': attachment['name']
+                  'Type': exercise['type'],
+                  'Title': exerciseDetails['titre'],
+                  'ID': exercise['uid'],
+                  'LessonFor': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
+                  'DateFor': exercise['date'],
+                  'ParentDate': lesson['hdeb'],
+                  'ParentLesson': lesson['idSeance'],
+                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
+              for (final attachment in exerciseDetails['pjs'] ?? []) {
+                Global.db!.insert(
+                  'ExerciseAttachments',
+                  {
+                    'ID': attachment['idRessource'],
+                    'ParentID': exercise['uid'],
+                    'URL': attachment['url'],
+                    'Name': attachment['name']
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+              }
+            }, params: [
+              (Global.client!.idEleve ?? 0).toString(),
+              (lesson['idSeance']).toString(),
+              (exercise['uid']).toString()
+            ]);
+          }
+          for (final exercise in lesson['enSeance'] ?? []) {
+            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await Global.db!.insert(
+                'Exercises',
+                {
+                  'Type': 'Cours',
+                  'Title': exerciseDetails['titre'],
+                  'ID': exercise['uid'],
+                  'ParentDate': exercise['date'],
+                  'ParentLesson': lesson['idSeance'],
+                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              for (final attachment in exerciseDetails['pjs'] ?? []) {
+                Global.db!.insert(
+                  'ExerciseAttachments',
+                  {
+                    'ID': attachment['idRessource'],
+                    'ParentID': exercise['uid'],
+                    'URL': attachment['url'],
+                    'Name': attachment['name']
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+              }
+            }, params: [
+              (Global.client!.idEleve ?? 0).toString(),
+              (lesson['idSeance']).toString(),
+              (exercise['uid']).toString()
+            ]);
+          }
+          for (final exercise in lesson['aRendre'] ?? []) {
+            if ((await Global.db!.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
+                .isNotEmpty) {
+              continue;
             }
-          }, params: [
-            (Global.client!.idEleve ?? 0).toString(),
-            (lesson['idSeance']).toString(),
-            (exercise['uid']).toString()
-          ]);
+            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await Global.db!.insert(
+                'Exercises',
+                {
+                  'Type': exercise['type'],
+                  'Title': exerciseDetails['titre'],
+                  'ID': exercise['uid'],
+                  'LessonFor': lesson['idSeance'],
+                  'DateFor': exerciseDetails['date'],
+                  'ParentDate': exercise['date'],
+                  'ParentLesson': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
+                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+                },
+                conflictAlgorithm: ConflictAlgorithm.replace,
+              );
+              for (final attachment in exerciseDetails['pjs'] ?? []) {
+                Global.db!.insert(
+                  'ExerciseAttachments',
+                  {
+                    'ID': attachment['idRessource'],
+                    'ParentID': exercise['uid'],
+                    'URL': attachment['url'],
+                    'Name': attachment['name']
+                  },
+                  conflictAlgorithm: ConflictAlgorithm.replace,
+                );
+              }
+            }, params: [
+              (Global.client!.idEleve ?? 0).toString(),
+              (lesson['idSeance']).toString(),
+              (exercise['uid']).toString()
+            ]);
+          }
         }
       }
+      await Global.client!.process();
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
     }
-    await Global.client!.process();
   }
 }

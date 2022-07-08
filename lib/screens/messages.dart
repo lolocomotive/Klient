@@ -185,10 +185,14 @@ class MessagesState extends State<Messages> {
                       //TODO show that progress is being made
                       _selectionActive = false;
                       setState(() {});
-                      await Global.client!.request(Action.deleteMessage,
-                          params: [_conversations[_currentlySelected].id.toString()]);
-                      _conversations.removeAt(_currentlySelected);
-                      setState(() {});
+                      try {
+                        await Global.client!.request(Action.deleteMessage,
+                            params: [_conversations[_currentlySelected].id.toString()]);
+                        _conversations.removeAt(_currentlySelected);
+                        setState(() {});
+                      } on Exception catch (e, st) {
+                        Global.onException(e, st);
+                      }
                     },
                     icon: Icon(
                       Icons.delete,
@@ -572,25 +576,29 @@ class _ConversationViewState extends State<ConversationView> {
                                       : () async {
                                           _busy = true;
                                           setState(() {});
-                                          await Global.client!.request(Action.reply,
-                                              params: [_conversation!.id.toString()],
-                                              body:
-                                                  '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
-                                          _textFieldController.clear();
-                                          final batch = Global.db!.batch();
-                                          await DatabaseManager.fetchSingleConversation(
-                                              _conversation!.id, batch);
-                                          await Global.client!.process();
-                                          await batch.commit();
-                                          await Conversation.byID(_conversation!.id)
-                                              .then((conversation) {
-                                            if (!mounted) return;
-                                            setState(() {
-                                              _busy = false;
-                                              _showReply = false;
-                                              _conversation = conversation;
+                                          try {
+                                            await Global.client!.request(Action.reply,
+                                                params: [_conversation!.id.toString()],
+                                                body:
+                                                    '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
+                                            _textFieldController.clear();
+                                            final batch = Global.db!.batch();
+                                            await DatabaseManager.fetchSingleConversation(
+                                                _conversation!.id, batch);
+                                            await Global.client!.process();
+                                            await batch.commit();
+                                            await Conversation.byID(_conversation!.id)
+                                                .then((conversation) {
+                                              if (!mounted) return;
+                                              setState(() {
+                                                _busy = false;
+                                                _showReply = false;
+                                                _conversation = conversation;
+                                              });
                                             });
-                                          });
+                                          } on Exception catch (e, st) {
+                                            Global.onException(e, st);
+                                          }
                                         },
                                   child: _busy
                                       ? Transform.scale(

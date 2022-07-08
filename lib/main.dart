@@ -50,7 +50,6 @@ class KosmosApp extends StatefulWidget {
 
 class KosmosState extends State with WidgetsBindingObserver {
   final title = 'Kosmos client';
-  final _messengerKey = GlobalKey<ScaffoldMessengerState>();
 
   Widget? _mainWidget;
 
@@ -90,7 +89,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     );
     return MaterialApp(
       key: Global.mainKey,
-      scaffoldMessengerKey: _messengerKey,
+      scaffoldMessengerKey: Global.messengerKey,
       navigatorKey: Global.navigatorKey,
       title: title,
       theme: Global.theme!,
