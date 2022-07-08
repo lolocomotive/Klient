@@ -89,7 +89,7 @@ class LoginState extends State<Login> {
           children: [
             Card(
               elevation: 2,
-              margin: const EdgeInsets.all(32.0),
+              margin: const EdgeInsets.fromLTRB(32, 0, 32, 0),
               child: Container(
                 padding: const EdgeInsets.all(20.0),
                 child: Form(
@@ -97,21 +97,24 @@ class LoginState extends State<Login> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      Text('Portail de connexion:',
+                          style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
                       DropdownButton(
-                          isExpanded: true,
-                          value: Global.apiurl,
-                          items: Global.dropdownItems,
-                          onChanged: (dynamic newValue) async {
-                            await Global.storage!.write(key: 'apiurl', value: newValue);
-                            Global.apiurl = newValue;
-                            setState(() {});
-                          }),
+                        isExpanded: true,
+                        value: Global.apiurl,
+                        items: Global.dropdownItems,
+                        onChanged: (dynamic newValue) async {
+                          await Global.storage!.write(key: 'apiurl', value: newValue);
+                          Global.apiurl = newValue;
+                          setState(() {});
+                        },
+                      ),
                       TextFormField(
-                        decoration: const InputDecoration(hintText: 'Nom d\'utilisateur'),
+                        decoration: const InputDecoration(hintText: 'Identifiant mobile'),
                         controller: _unameController,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer un nom d\'utilisateur';
+                            return 'Veuillez entrer votre identifiant mobile';
                           }
                           return null;
                         },
@@ -128,7 +131,7 @@ class LoginState extends State<Login> {
                               controller: _pwdController,
                               validator: (value) {
                                 if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer un code d\'activation';
+                                  return 'Veuillez entrer votre code d\'activation';
                                 }
                                 return null;
                               },
