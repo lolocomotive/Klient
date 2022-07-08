@@ -39,7 +39,9 @@ class Home extends StatefulWidget {
 class _HomeState extends State<Home> {
   List<List<Grade>> _grades = [];
   List<MapEntry<Exercise, Lesson>> _homework = [];
-
+  bool _gradesReady = false;
+  bool _hwReady = false;
+  bool _newsReady = false;
   List<NewsArticle> _news = [];
   _HomeState() {
     _reload();
@@ -56,6 +58,7 @@ class _HomeState extends State<Home> {
               _grades[(i / 2).floor()].add(grades[i]);
             }
           }
+          _gradesReady = true;
         }));
     Exercise.fetchAll().then((exercises) async {
       for (final exercise in exercises) {
@@ -66,11 +69,15 @@ class _HomeState extends State<Home> {
       _homework.sort(
         (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
       );
-      setState(() {});
+      setState(() {
+        _hwReady = true;
+      });
     });
     NewsArticle.fetchAll().then((news) {
       _news = news;
-      setState(() {});
+      setState(() {
+        _newsReady = true;
+      });
     });
   }
 
@@ -111,9 +118,14 @@ class _HomeState extends State<Home> {
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
-                              child: Text('Rien à afficher',
-                                  style:
-                                      TextStyle(color: Theme.of(context).colorScheme.secondary))),
+                            child: _gradesReady
+                                ? Text(
+                                    'Rien à afficher',
+                                    style:
+                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                  )
+                                : const CircularProgressIndicator(),
+                          ),
                         )
                       : SizedBox(
                           child: Column(
@@ -139,8 +151,14 @@ class _HomeState extends State<Home> {
                       ? Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Center(
-                              child: Text('Rien à afficher',
-                                  style: TextStyle(color: Global.theme!.colorScheme.secondary))),
+                            child: _hwReady
+                                ? Text(
+                                    'Rien à afficher',
+                                    style:
+                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                  )
+                                : const CircularProgressIndicator(),
+                          ),
                         )
                       : Column(
                           children: _homework
@@ -162,9 +180,17 @@ class _HomeState extends State<Home> {
                     ),
                   ),
                   _news.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: Center(child: CircularProgressIndicator()),
+                      ? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Center(
+                            child: _newsReady
+                                ? Text(
+                                    'Rien à afficher',
+                                    style:
+                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                  )
+                                : const CircularProgressIndicator(),
+                          ),
                         )
                       : Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
