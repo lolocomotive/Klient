@@ -5,6 +5,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/kdecole-api/client.dart';
 import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/screens/about.dart';
 import 'package:kosmos_client/screens/debug.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/multiview.dart';
@@ -243,12 +244,16 @@ class Global {
             MaterialPageRoute(builder: (_) => SetupPage(() {})),
           );
           break;
+        case 'À propos':
+          navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const AboutScreen()));
+          break;
       }
     },
     itemBuilder: (context) {
       return [
         PopupMenuItemWithIcon('Paramètres', Icons.settings_outlined, context),
         //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
+        PopupMenuItemWithIcon('À propos', Icons.info_outline, context),
         PopupMenuItemWithIcon('Se déconnecter', Icons.logout_outlined, context),
         if (kDebugMode) PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
         if (kDebugMode) PopupMenuItemWithIcon('Initial setup', Icons.bug_report_outlined, context),

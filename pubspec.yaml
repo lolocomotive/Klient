@@ -47,6 +47,7 @@ dependencies:
   intl: ^0.17.0
   flutter_local_notifications: ^9.4.0
   restart_app: ^1.1.0+1
+  package_info_plus: ^1.4.2
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +73,9 @@ flutter:
 
   assets:
     - assets/isrgrootx1.pem
+    - .git/HEAD               # This file points out the current branch of the project.
+    - .git/ORIG_HEAD          # This file points to the commit id at origin (last commit id of the remote repository).
+    - .git/refs/heads/        # This directory includes files for each branch which points to the last commit id (local repo).
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
