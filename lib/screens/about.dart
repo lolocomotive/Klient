@@ -107,65 +107,71 @@ class AboutScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                           child: RichText(
-                            text: TextSpan(children: [
-                              const TextSpan(text: 'Code source disponible sur '),
-                              TextSpan(
-                                text: 'github',
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    launchUrl(
-                                        Uri.parse('https://github.com/lolocomotive/kosmos_client'));
-                                  },
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ]),
+                            text: TextSpan(
+                                style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+                                children: [
+                                  const TextSpan(text: 'Code source disponible sur '),
+                                  TextSpan(
+                                    text: 'github',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://github.com/lolocomotive/kosmos_client'));
+                                      },
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ]),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                           child: RichText(
-                            text: TextSpan(children: [
-                              const TextSpan(text: 'Codage/design: '),
-                              TextSpan(
-                                text: 'lolocomotive',
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    launchUrl(Uri.parse('https://github.com/lolocomotive'));
-                                  },
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                            ]),
+                            text: TextSpan(
+                                style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+                                children: [
+                                  const TextSpan(text: 'Codage/design: '),
+                                  TextSpan(
+                                    text: 'lolocomotive',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse('https://github.com/lolocomotive'));
+                                      },
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                ]),
                           ),
                         ),
                         Padding(
                           padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                           child: RichText(
-                            text: TextSpan(children: [
-                              const TextSpan(text: 'Merci à maelgangloff pour '),
-                              TextSpan(
-                                text: 'kdecole-api',
-                                recognizer: TapGestureRecognizer()
-                                  ..onTap = () {
-                                    launchUrl(
-                                        Uri.parse('https://github.com/maelgangloff/kdecole-api'));
-                                  },
-                                style: TextStyle(
-                                  color: Theme.of(context).colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                  decoration: TextDecoration.underline,
-                                ),
-                              ),
-                              const TextSpan(
-                                  text: ' sans quoi ce projet n\'aurait pas été possible.')
-                            ]),
+                            text: TextSpan(
+                                style: TextStyle(color: Theme.of(context).colorScheme.onBackground),
+                                children: [
+                                  const TextSpan(text: 'Merci à maelgangloff pour '),
+                                  TextSpan(
+                                    text: 'kdecole-api',
+                                    recognizer: TapGestureRecognizer()
+                                      ..onTap = () {
+                                        launchUrl(Uri.parse(
+                                            'https://github.com/maelgangloff/kdecole-api'));
+                                      },
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                      decoration: TextDecoration.underline,
+                                    ),
+                                  ),
+                                  const TextSpan(
+                                      text: ' sans quoi ce projet n\'aurait pas été possible.')
+                                ]),
                           ),
                         ),
                       ],
@@ -196,24 +202,27 @@ class AboutScreen extends StatelessWidget {
                           Padding(
                             padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                             child: RichText(
-                              text: TextSpan(children: [
-                                const TextSpan(
-                                    text:
-                                        'Cette application et son code source sont distribués sous licence '),
-                                TextSpan(
-                                  text: 'GPL-3.0',
-                                  recognizer: TapGestureRecognizer()
-                                    ..onTap = () {
-                                      launchUrl(
-                                          Uri.parse('https://www.gnu.org/licenses/gpl-3.0.html'));
-                                    },
-                                  style: TextStyle(
-                                    color: Theme.of(context).colorScheme.primary,
-                                    fontWeight: FontWeight.bold,
-                                    decoration: TextDecoration.underline,
-                                  ),
-                                ),
-                              ]),
+                              text: TextSpan(
+                                  style:
+                                      TextStyle(color: Theme.of(context).colorScheme.onBackground),
+                                  children: [
+                                    const TextSpan(
+                                        text:
+                                            'Cette application et son code source sont distribués sous licence '),
+                                    TextSpan(
+                                      text: 'GPL-3.0',
+                                      recognizer: TapGestureRecognizer()
+                                        ..onTap = () {
+                                          launchUrl(Uri.parse(
+                                              'https://www.gnu.org/licenses/gpl-3.0.html'));
+                                        },
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                        decoration: TextDecoration.underline,
+                                      ),
+                                    ),
+                                  ]),
                             ),
                           ),
                         ],
