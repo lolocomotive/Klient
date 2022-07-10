@@ -111,6 +111,8 @@ class MessagesState extends State<Messages> {
   final GlobalKey<MessagesState> key = GlobalKey();
   int _currentlySelected = 0;
   bool _selectionActive = false;
+  Exception? _e;
+  StackTrace? _st;
 
   static void openConversation(
       BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
@@ -149,6 +151,10 @@ class MessagesState extends State<Messages> {
       setState(() {
         _conversations = conversations;
       });
+    }).onError((e, st) {
+      _e = e as Exception;
+      _st = st;
+      setState(() {});
     });
   }
 
@@ -230,84 +236,92 @@ class MessagesState extends State<Messages> {
             await refresh();
           },
           child: Scrollbar(
-            child: ListView.builder(
-              itemCount: _conversations.isEmpty
-                  ? 1
-                  : _conversations.length + (Global.loadingMessages ? 1 : 0),
-              padding: const EdgeInsets.all(0),
-              itemBuilder: (BuildContext context, int index) {
-                if (index == 0 && _conversations.isEmpty || index == _conversations.length) {
-                  return Padding(
-                    padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: const [
-                        CircularProgressIndicator(),
-                      ],
-                    ),
-                  );
-                }
-                final parentKey = GlobalKey();
-                return Column(
-                  children: [
-                    Stack(
-                      children: [
-                        Card(
-                          margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                              index == _conversations.length - 1 ? 14 : 7),
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
+            child: _e != null
+                ? Column(
+                    children: [
+                      Global.defaultCard(child: Global.exceptionWidget(_e!, _st!)),
+                    ],
+                  )
+                : ListView.builder(
+                    itemCount: _conversations.isEmpty
+                        ? 1
+                        : _conversations.length + (Global.loadingMessages ? 1 : 0),
+                    padding: const EdgeInsets.all(0),
+                    itemBuilder: (BuildContext context, int index) {
+                      if (index == 0 && _conversations.isEmpty || index == _conversations.length) {
+                        return Padding(
+                          padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: const [
+                              CircularProgressIndicator(),
+                            ],
                           ),
-                          child: InkWell(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: MessagePreview(_conversations[index], parentKey),
-                            ),
-                            onTap: () {
-                              if (_selectionActive) {
-                                if (_currentlySelected == index && _selectionActive) {
-                                  _selectionActive = false;
-                                  setState(() {});
-                                  return;
-                                }
-                                _currentlySelected = index;
-                                setState(() {});
-                              } else {
-                                openConversation(context, parentKey, _conversations[index].id,
-                                    _conversations[index].subject);
-                              }
-                            },
-                            onLongPress: () {
-                              if (_currentlySelected == index && _selectionActive) {
-                                _selectionActive = false;
-                                setState(() {});
-                                return;
-                              }
-                              _currentlySelected = index;
-                              _selectionActive = true;
-                              setState(() {});
-                            },
-                          ),
-                        ),
-                        Positioned.fill(
-                          child: IgnorePointer(
-                            child: AnimatedOpacity(
-                              duration: const Duration(milliseconds: 300),
-                              opacity: (_selectionActive && (_currentlySelected == index)) ? .3 : 0,
-                              child: Container(
-                                color: Theme.of(context).colorScheme.primary,
+                        );
+                      }
+                      final parentKey = GlobalKey();
+                      return Column(
+                        children: [
+                          Stack(
+                            children: [
+                              Card(
+                                margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
+                                    index == _conversations.length - 1 ? 14 : 7),
+                                elevation: 1,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: InkWell(
+                                  child: Padding(
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: MessagePreview(_conversations[index], parentKey),
+                                  ),
+                                  onTap: () {
+                                    if (_selectionActive) {
+                                      if (_currentlySelected == index && _selectionActive) {
+                                        _selectionActive = false;
+                                        setState(() {});
+                                        return;
+                                      }
+                                      _currentlySelected = index;
+                                      setState(() {});
+                                    } else {
+                                      openConversation(context, parentKey, _conversations[index].id,
+                                          _conversations[index].subject);
+                                    }
+                                  },
+                                  onLongPress: () {
+                                    if (_currentlySelected == index && _selectionActive) {
+                                      _selectionActive = false;
+                                      setState(() {});
+                                      return;
+                                    }
+                                    _currentlySelected = index;
+                                    _selectionActive = true;
+                                    setState(() {});
+                                  },
+                                ),
                               ),
-                            ),
+                              Positioned.fill(
+                                child: IgnorePointer(
+                                  child: AnimatedOpacity(
+                                    duration: const Duration(milliseconds: 300),
+                                    opacity: (_selectionActive && (_currentlySelected == index))
+                                        ? .3
+                                        : 0,
+                                    child: Container(
+                                      color: Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                              )
+                            ],
                           ),
-                        )
-                      ],
-                    ),
-                  ],
-                );
-              },
-            ),
+                        ],
+                      );
+                    },
+                  ),
           ),
         ),
       ),

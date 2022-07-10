@@ -203,99 +203,123 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
-  static void onException(Exception e, StackTrace st) {
-    print(e);
+  static Widget defaultCard({Widget? child}) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      elevation: 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(padding: const EdgeInsets.all(16.0), child: child),
+    );
+  }
+
+  static Widget exceptionWidget(Exception e, StackTrace st) {
     String message = 'Erreur';
+    String? hint;
     if (e is SocketException) {
       message = 'Erreur de réseau';
+    } else if (e is DatabaseException) {
+      message = 'Erreur de base de données';
+      hint =
+          'Essayez de redémarrer l\'application. Si l\'erreur persiste effacez les données de l\'application et reconnectez-vous';
     }
-    Global.messengerKey.currentState?.showSnackBar(
-      SnackBar(
-        content: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(message),
-            TextButton(
-              onPressed: () {
-                Global.messengerKey.currentState?.hideCurrentSnackBar();
-                Global.navigatorKey.currentState!.push(
-                  MaterialPageRoute(builder: (context) {
-                    return Scaffold(
-                      body: NestedScrollView(
-                        floatHeaderSlivers: true,
-                        headerSliverBuilder: (context, innerBoxIsScrolled) {
-                          return [
-                            SliverAppBar(
-                              title: Text(message),
-                              floating: true,
-                              forceElevated: innerBoxIsScrolled,
-                            )
-                          ];
-                        },
-                        body: Scrollbar(
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Card(
-                                    margin: const EdgeInsets.all(8.0),
-                                    elevation: 1,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              if (hint != null)
+                Text(
+                  hint,
+                  style: TextStyle(
+                    color: Global.theme!.colorScheme.secondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Global.messengerKey.currentState?.hideCurrentSnackBar();
+            Global.navigatorKey.currentState!.push(
+              MaterialPageRoute(builder: (context) {
+                return Scaffold(
+                  body: NestedScrollView(
+                    floatHeaderSlivers: true,
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        SliverAppBar(
+                          title: Text(message),
+                          floating: true,
+                          forceElevated: innerBoxIsScrolled,
+                        )
+                      ];
+                    },
+                    body: Scrollbar(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              defaultCard(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Descriptif de l\'erreur',
+                                      style: TextStyle(
+                                          color: Global.theme!.colorScheme.primary,
+                                          fontWeight: FontWeight.bold),
                                     ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              'Descriptif de l\'erreur',
-                                              style: TextStyle(
-                                                  color: Global.theme!.colorScheme.primary,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(e.toString()),
-                                          ],
-                                        )),
-                                  ),
-                                  Card(
-                                    margin: const EdgeInsets.all(8.0),
-                                    elevation: 1,
-                                    shape: RoundedRectangleBorder(
-                                      borderRadius: BorderRadius.circular(8),
-                                    ),
-                                    clipBehavior: Clip.antiAlias,
-                                    child: Padding(
-                                        padding: const EdgeInsets.all(16.0),
-                                        child: Column(
-                                          children: [
-                                            Text(
-                                              'Stack trace',
-                                              style: TextStyle(
-                                                  color: Global.theme!.colorScheme.primary,
-                                                  fontWeight: FontWeight.bold),
-                                            ),
-                                            Text(st.toString()),
-                                          ],
-                                        )),
-                                  ),
-                                ],
+                                    Text(e.toString()),
+                                  ],
+                                ),
                               ),
-                            ),
+                              defaultCard(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Stack trace',
+                                      style: TextStyle(
+                                          color: Global.theme!.colorScheme.primary,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(st.toString()),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                    );
-                  }),
+                    ),
+                  ),
                 );
-              },
-              child: const Text("Plus d'infos"),
-            )
-          ],
-        ),
-      ),
+              }),
+            );
+          },
+          child: const Text("Plus d'infos"),
+        )
+      ],
+    );
+  }
+
+  static void onException(Exception e, StackTrace st) {
+    print(e);
+
+    Global.messengerKey.currentState?.showSnackBar(
+      SnackBar(
+          content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          exceptionWidget(e, st),
+        ],
+      )),
     );
   }
 

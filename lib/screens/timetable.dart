@@ -44,34 +44,30 @@ class Timetable extends StatefulWidget {
 }
 
 class _TimetableState extends State<Timetable> {
-  final List<List<Lesson>> _calendar = [];
   final _pageController = PageController(viewportFraction: 0.8);
-  _TimetableState() {
-    _reload();
-  }
-  void _reload() {
-    Lesson.fetchAll().then((lessons) {
-      List<Lesson> day = [];
-      DateTime lastDate = lessons[0].date;
-      var page = 0;
-      for (int i = 0; i < lessons.length; i++) {
-        final lesson = lessons[i];
-        if (lesson.date.isSameDay(lastDate)) {
-          day.add(lesson);
-        } else {
-          _calendar.add(day);
-          day = [lesson];
-          lastDate = lesson.date;
-        }
-        if ((lesson.date.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch >= 0 &&
-                page == 0) ||
-            lesson.date.isSameDay(DateTime.now())) {
-          page = _calendar.length;
-        }
+  int _page = 0;
+  Future<List<List<Lesson>>> _getCalendar() async {
+    List<List<Lesson>> r = [];
+    var lessons = await Lesson.fetchAll();
+    List<Lesson> day = [];
+    DateTime lastDate = lessons[0].date;
+    _page = 0;
+    for (int i = 0; i < lessons.length; i++) {
+      final lesson = lessons[i];
+      if (lesson.date.isSameDay(lastDate)) {
+        day.add(lesson);
+      } else {
+        r.add(day);
+        day = [lesson];
+        lastDate = lesson.date;
       }
-      setState(() {});
-      _pageController.jumpToPage(page);
-    });
+      if ((lesson.date.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch >= 0 &&
+              _page == 0) ||
+          lesson.date.isSameDay(DateTime.now())) {
+        _page = r.length;
+      }
+    }
+    return r;
   }
 
   @override
@@ -92,7 +88,6 @@ class _TimetableState extends State<Timetable> {
         child: RefreshIndicator(
           onRefresh: () async {
             await DatabaseManager.fetchTimetable();
-            _reload();
             setState(() {});
           },
           child: SingleChildScrollView(
@@ -100,23 +95,44 @@ class _TimetableState extends State<Timetable> {
               height: (Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength + 32),
               child: Stack(
                 children: [
-                  PageView.builder(
-                    controller: _pageController,
-                    itemBuilder: (ctx, index) {
-                      if (_calendar.isEmpty) {
-                        return Column(
-                          children: const [
-                            Padding(
-                              padding: EdgeInsets.all(8.0),
+                  FutureBuilder<List<List<Lesson>>>(
+                      future: _getCalendar()..then((value) => _pageController.jumpToPage(_page)),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
                               child: CircularProgressIndicator(),
                             ),
-                          ],
+                          );
+                        } else if (snapshot.hasError) {
+                          return Column(
+                            children: [
+                              Global.defaultCard(
+                                child: Global.exceptionWidget(
+                                    snapshot.error! as Exception, snapshot.stackTrace!),
+                              ),
+                            ],
+                          );
+                        }
+                        return PageView.builder(
+                          controller: _pageController,
+                          itemBuilder: (ctx, index) {
+                            if (snapshot.data!.isEmpty) {
+                              return Column(
+                                children: const [
+                                  Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ],
+                              );
+                            }
+                            return SingleDayCalendarView(snapshot.data![index]);
+                          },
+                          itemCount: max(snapshot.data!.length, 1),
                         );
-                      }
-                      return SingleDayCalendarView(_calendar[index]);
-                    },
-                    itemCount: max(_calendar.length, 1),
-                  ),
+                      }),
                   Container(
                     color: Global.theme!.colorScheme.brightness == Brightness.dark
                         ? Colors.black38
@@ -284,23 +300,18 @@ class DetailedLessonView extends StatelessWidget {
       ),
       body: ListView(
         children: [
-          Card(
-            margin: const EdgeInsets.all(8),
-            elevation: 2,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                children: [
-                  Text(
-                    'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
-                    textAlign: TextAlign.center,
-                  ),
-                  Text(
-                    'Salle ${_lesson.room}',
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
+          Global.defaultCard(
+            child: Column(
+              children: [
+                Text(
+                  'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
+                  textAlign: TextAlign.center,
+                ),
+                Text(
+                  'Salle ${_lesson.room}',
+                  textAlign: TextAlign.center,
+                ),
+              ],
             ),
           ),
           MultiExerciseView(
@@ -339,31 +350,23 @@ class MultiExerciseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-      ),
-      elevation: 2,
-      margin: const EdgeInsets.all(8.0),
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            Text(
-              _title,
-              style: const TextStyle(fontSize: 16),
-            ),
-            ..._exercises.map((e) => ExerciceView(e, _lesson)).toList(),
-            if (_exercises.isEmpty)
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-                child: Text(
-                  'Aucun contenu rensiegné',
-                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                ),
+    return Global.defaultCard(
+      child: Column(
+        children: [
+          Text(
+            _title,
+            style: const TextStyle(fontSize: 16),
+          ),
+          ..._exercises.map((e) => ExerciceView(e, _lesson)).toList(),
+          if (_exercises.isEmpty)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+              child: Text(
+                'Aucun contenu rensiegné',
+                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
               ),
-          ],
-        ),
+            ),
+        ],
       ),
     );
   }

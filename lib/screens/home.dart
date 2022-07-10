@@ -37,48 +37,32 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
-  List<List<Grade>> _grades = [];
-  List<MapEntry<Exercise, Lesson>> _homework = [];
-  bool _gradesReady = false;
-  bool _hwReady = false;
-  bool _newsReady = false;
-  List<NewsArticle> _news = [];
-  _HomeState() {
-    _reload();
-  }
-  _reload() {
-    _grades = [];
-    _homework = [];
-    _news = [];
-    Grade.fetchAll().then((grades) => setState(() {
-          for (int i = 0; i < grades.length; i++) {
-            if (i % 2 == 0) {
-              _grades.add([grades[i]]);
-            } else {
-              _grades[(i / 2).floor()].add(grades[i]);
-            }
-          }
-          _gradesReady = true;
-        }));
-    Exercise.fetchAll().then((exercises) async {
-      for (final exercise in exercises) {
-        if (exercise.lessonFor == null) continue;
-        if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-        _homework.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
+  Future<List<List<Grade>>> _fetchGrades() async {
+    final grades = await Grade.fetchAll();
+    List<List<Grade>> r = [];
+    for (int i = 0; i < grades.length; i++) {
+      if (i % 2 == 0) {
+        r.add([grades[i]]);
+      } else {
+        r[(i / 2).floor()].add(grades[i]);
       }
-      _homework.sort(
-        (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
-      );
-      setState(() {
-        _hwReady = true;
-      });
-    });
-    NewsArticle.fetchAll().then((news) {
-      _news = news;
-      setState(() {
-        _newsReady = true;
-      });
-    });
+    }
+    return r;
+  }
+
+  Future<List<MapEntry<Exercise, Lesson>>> _fetchHomework() async {
+    final exercises = await Exercise.fetchAll();
+    List<MapEntry<Exercise, Lesson>> r = [];
+    for (final exercise in exercises) {
+      if (exercise.lessonFor == null) continue;
+      if (exercise.dateFor!.isBefore(DateTime.now())) continue;
+      r.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
+    }
+    r.sort(
+      (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+    );
+
+    return r;
   }
 
   @override
@@ -100,7 +84,7 @@ class _HomeState extends State<Home> {
             await DatabaseManager.fetchGradesData();
             await DatabaseManager.fetchNewsData();
             await DatabaseManager.fetchTimetable();
-            _reload();
+            setState(() {});
           }),
           child: Scrollbar(
             child: SingleChildScrollView(
@@ -114,32 +98,45 @@ class _HomeState extends State<Home> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  _grades.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: _gradesReady
-                                ? Text(
-                                    'Rien à afficher',
-                                    style:
-                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                  )
-                                : const CircularProgressIndicator(),
-                          ),
-                        )
-                      : SizedBox(
-                          child: Column(
-                            children: _grades
-                                .map((twoGrades) => Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        SingleGradeView(twoGrades[0]),
-                                        if (twoGrades.length > 1) SingleGradeView(twoGrades[1])
-                                      ],
-                                    ))
-                                .toList(),
-                          ),
-                        ),
+                  FutureBuilder<List<List<Grade>>>(
+                      future: _fetchGrades(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Global.defaultCard(
+                              child: Global.exceptionWidget(
+                                  snapshot.error! as Exception, snapshot.stackTrace!));
+                        }
+                        return snapshot.data!.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text(
+                                  'Rien à afficher',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                )),
+                              )
+                            : SizedBox(
+                                child: Column(
+                                  children: snapshot.data!
+                                      .map((twoGrades) => Row(
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            children: [
+                                              SingleGradeView(twoGrades[0]),
+                                              if (twoGrades.length > 1)
+                                                SingleGradeView(twoGrades[1])
+                                            ],
+                                          ))
+                                      .toList(),
+                                ),
+                              );
+                      }),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
                     child: Text(
@@ -147,31 +144,44 @@ class _HomeState extends State<Home> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  _homework.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: _hwReady
-                                ? Text(
-                                    'Rien à afficher',
-                                    style:
-                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                  )
-                                : const CircularProgressIndicator(),
-                          ),
-                        )
-                      : Column(
-                          children: _homework
-                              .map(
-                                (homework) => ExerciceView(
-                                  homework.key,
-                                  homework.value,
-                                  showDate: true,
-                                  showSubject: true,
-                                ),
+                  FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
+                      future: _fetchHomework(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Global.defaultCard(
+                              child: Global.exceptionWidget(
+                                  snapshot.error! as Exception, snapshot.stackTrace!));
+                        }
+
+                        return snapshot.data!.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text(
+                                  'Rien à afficher',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                )),
                               )
-                              .toList(),
-                        ),
+                            : Column(
+                                children: snapshot.data!
+                                    .map(
+                                      (homework) => ExerciceView(
+                                        homework.key,
+                                        homework.value,
+                                        showDate: true,
+                                        showSubject: true,
+                                      ),
+                                    )
+                                    .toList(),
+                              );
+                      }),
                   const Padding(
                     padding: EdgeInsets.all(16.0),
                     child: Text(
@@ -179,23 +189,45 @@ class _HomeState extends State<Home> {
                       style: TextStyle(fontSize: 20),
                     ),
                   ),
-                  _news.isEmpty
-                      ? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Center(
-                            child: _newsReady
-                                ? Text(
+                  FutureBuilder<List<NewsArticle>>(
+                      future: NewsArticle.fetchAll(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Global.defaultCard(
+                                child: Global.exceptionWidget(
+                                    snapshot.error! as Exception, snapshot.stackTrace!),
+                              ),
+                            ),
+                          );
+                        }
+                        return snapshot.data!.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                  child: Text(
                                     'Rien à afficher',
                                     style:
                                         TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                  )
-                                : const CircularProgressIndicator(),
-                          ),
-                        )
-                      : Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: _news.map((article) => ArticlePreview(article)).toList(),
-                        ),
+                                  ),
+                                ),
+                              )
+                            : Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: snapshot.data!
+                                    .map((article) => ArticlePreview(article))
+                                    .toList(),
+                              );
+                      }),
                 ],
               ),
             ),
