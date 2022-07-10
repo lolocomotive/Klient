@@ -543,10 +543,14 @@ class _ConversationViewState extends State<ConversationView> {
                                   .convert(_conversation!.messages[index].htmlContent),
                               style: {
                                 'blockquote': Style(
-                                    border: const Border(
-                                        left: BorderSide(color: Colors.black12, width: 2)),
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                    margin: EdgeInsets.zero)
+                                  border: Border(
+                                      left: BorderSide(
+                                          color: Theme.of(context).colorScheme.secondary,
+                                          width: 2)),
+                                  padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                  margin: EdgeInsets.zero,
+                                  fontStyle: FontStyle.italic,
+                                )
                               },
                               onLinkTap: (url, context, map, element) {
                                 launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
