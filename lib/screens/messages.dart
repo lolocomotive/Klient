@@ -535,7 +535,7 @@ class _ConversationViewState extends State<ConversationView> {
                                     margin: EdgeInsets.zero)
                               },
                               onLinkTap: (url, context, map, element) {
-                                launchUrl(Uri.parse(url!));
+                                launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                               },
                             ),
                           ],

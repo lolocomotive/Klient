@@ -147,8 +147,13 @@ class DatabaseManager {
           messageContents += ('${_cleanupHTML(message['corpsMessage'])}\n')
               .replaceAll(RegExp(r'<[^>]*>|&[^;]+;'), '');
           for (final attachment in message['pjs'] ?? []) {
-            batch.insert('MessageAttachments',
-                {'ParentID': message['id'], 'URL': attachment['url'], 'Name': attachment['name']},
+            batch.insert(
+                'MessageAttachments',
+                {
+                  'ParentID': message['id'],
+                  'URL': attachment['url'],
+                  'Name': attachment['name'],
+                },
                 conflictAlgorithm: ConflictAlgorithm.replace);
           }
           batch.update('Conversations', {'FullMessageContents': messageContents},
@@ -215,6 +220,19 @@ class DatabaseManager {
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
+          for (final attachment in articleDetails['pjs'] ?? []) {
+            // Prevent duplicates since the given attachment UID is null we have to use
+            // auto-incremented IDs and delete all each time we update
+            await Global.db!.delete(
+              'NewsAttachments',
+              where: 'ParentUID = ?',
+              whereArgs: [newsArticle['uid']],
+            );
+            await Global.db!.insert('NewsAttachments', {
+              'Name': attachment['name'],
+              'ParentUID': newsArticle['uid'],
+            });
+          }
         }, params: [newsArticle['uid']]);
       }
       await Global.client!.process();

@@ -423,7 +423,7 @@ class ExerciceView extends StatelessWidget {
                     : Html(
                         data: _exercise.htmlContent,
                         onLinkTap: (url, context, map, element) {
-                          launchUrl(Uri.parse(url!));
+                          launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                         },
                       ),
               ),

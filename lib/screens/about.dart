@@ -99,8 +99,10 @@ class AboutScreen extends StatelessWidget {
                                   text: 'github',
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      launchUrl(Uri.parse(
-                                          'https://github.com/lolocomotive/kosmos_client'));
+                                      launchUrl(
+                                          Uri.parse(
+                                              'https://github.com/lolocomotive/kosmos_client'),
+                                          mode: LaunchMode.externalApplication);
                                     },
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.primary,
@@ -122,7 +124,8 @@ class AboutScreen extends StatelessWidget {
                                   text: 'lolocomotive',
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      launchUrl(Uri.parse('https://github.com/lolocomotive'));
+                                      launchUrl(Uri.parse('https://github.com/lolocomotive'),
+                                          mode: LaunchMode.externalApplication);
                                     },
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.primary,
@@ -145,7 +148,8 @@ class AboutScreen extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       launchUrl(
-                                          Uri.parse('https://github.com/maelgangloff/kdecole-api'));
+                                          Uri.parse('https://github.com/maelgangloff/kdecole-api'),
+                                          mode: LaunchMode.externalApplication);
                                     },
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.primary,
@@ -188,7 +192,8 @@ class AboutScreen extends StatelessWidget {
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
                                       launchUrl(
-                                          Uri.parse('https://www.gnu.org/licenses/gpl-3.0.html'));
+                                          Uri.parse('https://www.gnu.org/licenses/gpl-3.0.html'),
+                                          mode: LaunchMode.externalApplication);
                                     },
                                   style: TextStyle(
                                     color: Theme.of(context).colorScheme.primary,

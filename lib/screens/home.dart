@@ -26,6 +26,7 @@ import 'package:kosmos_client/kdecole-api/lesson.dart';
 import 'package:kosmos_client/kdecole-api/news_article.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../global.dart';
 
@@ -256,9 +257,52 @@ class ArticleView extends StatelessWidget {
         },
         body: Scrollbar(
           child: SingleChildScrollView(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Html(data: _article.htmlContent),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (_article.attachments.isNotEmpty)
+                  Global.defaultCard(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Text(
+                          'Pièces jointes',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        ..._article.attachments.map((attachment) => Row(
+                              children: [Text(attachment.name)],
+                            ))
+                      ],
+                    ),
+                  ),
+                Center(
+                  child: GestureDetector(
+                    onTap: () {
+                      launchUrl(Uri.parse(_article.url), mode: LaunchMode.externalApplication);
+                    },
+                    child: Text(
+                      'Consulter dans l\'ENT',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                        decoration: TextDecoration.underline,
+                      ),
+                    ),
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Html(
+                    data: _article.htmlContent,
+                    onLinkTap: (url, context, map, element) {
+                      launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+                    },
+                  ),
+                ),
+              ],
             ),
           ),
         ),

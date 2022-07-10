@@ -114,7 +114,7 @@ class Global {
       await Global.db!.execute('''
     CREATE TABLE IF NOT EXISTS NewsAttachments(
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      parentUID TEXT NOT NULL,
+      ParentUID TEXT NOT NULL,
       Name TEXT NOT NULL,
       foreign KEY(parentUID) REFERENCES NewsArticles(UID)
     );''');
