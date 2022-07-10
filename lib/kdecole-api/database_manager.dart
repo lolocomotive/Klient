@@ -111,6 +111,7 @@ class DatabaseManager {
                 'LastAuthor': conversation['expediteurActuel']['libelle'],
                 'FirstAuthor': conversation['expediteurInitial']['libelle'],
                 'FullMessageContents': '',
+                'CanReply': conversation['modeReponse'] == 'TOUS' ? 1 : 0,
               },
               conflictAlgorithm: ConflictAlgorithm.replace);
           fetchSingleConversation(conversation['id'], batch);

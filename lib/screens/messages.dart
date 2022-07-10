@@ -499,15 +499,17 @@ class _ConversationViewState extends State<ConversationView> {
                 body: ListView.builder(
                   itemBuilder: (BuildContext context, int index) {
                     if (_conversation == null || index >= _conversation!.messages.length) {
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: OutlinedButton(
-                            onPressed: () {
-                              _showReply = true;
-                              setState(() {});
-                            },
-                            child: const Text('Répondre à tous')),
-                      );
+                      return _conversation != null && _conversation!.canReply
+                          ? Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: OutlinedButton(
+                                  onPressed: () {
+                                    _showReply = true;
+                                    setState(() {});
+                                  },
+                                  child: const Text('Répondre à tous')),
+                            )
+                          : const Text('');
                     }
                     final parentKey = GlobalKey();
                     return Card(

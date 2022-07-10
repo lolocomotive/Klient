@@ -34,13 +34,26 @@ class Conversation {
   String lastAuthor;
   String firstAuthor;
   bool read;
+  bool canReply;
   bool notificationShown;
   Widget? customPreview;
   Widget? customSubject;
 
-  Conversation(this.id, this.subject, this.preview, this.hasAttachment, this.lastDate,
-      this.messages, this.read, this.notificationShown, this.lastAuthor, this.firstAuthor,
-      [this.customPreview, this.customSubject]);
+  Conversation(
+    this.id,
+    this.subject,
+    this.preview,
+    this.hasAttachment,
+    this.lastDate,
+    this.messages,
+    this.read,
+    this.notificationShown,
+    this.lastAuthor,
+    this.firstAuthor,
+    this.canReply, [
+    this.customPreview,
+    this.customSubject,
+  ]);
 
   /// DOES NOT return messages
   static Future<List<Conversation>> fetchAll({int? offset, int? limit}) async {
@@ -60,6 +73,7 @@ class Conversation {
           result['NotificationShown'] as int == 1,
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
+          result['CanReply'] as int == 1,
         ),
       );
     }
@@ -131,6 +145,7 @@ class Conversation {
           result['NotificationShown'] as int == 1,
           result['LastAuthor'] as String,
           result['FirstAuthor'] as String,
+          result['CanReply'] as int == 1,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
               ? highlight(query, fullMessageContents, color: Global.theme!.colorScheme.secondary)
               : null,
@@ -161,6 +176,7 @@ class Conversation {
         result['NotificationShown'] as int == 1,
         result['LastAuthor'] as String,
         result['FirstAuthor'] as String,
+        result['CanReply'] as int == 1,
       );
     }
     return null;
