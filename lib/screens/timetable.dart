@@ -396,7 +396,7 @@ class ExerciceView extends StatelessWidget {
         Card(
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
-          elevation: 1,
+          elevation: 3,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
@@ -414,18 +414,42 @@ class ExerciceView extends StatelessWidget {
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: _exercise.htmlContent == ''
-                    ? Text(
-                        'Aucun contenu renseigné',
-                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                        textAlign: TextAlign.center,
-                      )
-                    : Html(
-                        data: _exercise.htmlContent,
-                        onLinkTap: (url, context, map, element) {
-                          launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                        },
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    _exercise.htmlContent == ''
+                        ? Text(
+                            'Aucun contenu renseigné',
+                            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                            textAlign: TextAlign.center,
+                          )
+                        : Html(
+                            data: _exercise.htmlContent,
+                            onLinkTap: (url, context, map, element) {
+                              launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+                            },
+                          ),
+                    if (_exercise.attachments.isNotEmpty)
+                      Global.defaultCard(
+                        elevation: 6,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Pièces jointes',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ..._exercise.attachments.map((attachment) => Row(
+                                  children: [Text(attachment.name)],
+                                ))
+                          ],
+                        ),
                       ),
+                  ],
+                ),
               ),
             ],
           ),

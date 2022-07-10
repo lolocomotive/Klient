@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/kdecole-api/exercise_attachment.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';
@@ -61,13 +62,14 @@ class Exercise {
   String title;
   String htmlContent;
   bool done;
+  List<ExerciseAttachment> attachments;
 
-  Exercise(
-      this.uid, this.parentLesson, this.type, this.date, this.title, this.htmlContent, this.done,
+  Exercise(this.uid, this.parentLesson, this.type, this.date, this.title, this.htmlContent,
+      this.done, this.attachments,
       [this.lessonFor, this.dateFor]);
 
   /// Construct an [Exercise] from the result of a database query
-  static Exercise _parse(Map<String, Object?> result) {
+  static Future<Exercise> _parse(Map<String, Object?> result) async {
     return Exercise(
         result['ID'] as int,
         result['ParentLesson'] as int?,
@@ -76,6 +78,7 @@ class Exercise {
         result['Title'] as String,
         result['HTMLContent'] as String,
         result['Done'] == 1,
+        await ExerciseAttachment.fromMessageID(result['ID'] as int),
         result['LessonFor'] as int?,
         (result['DateFor'] as int?) == null
             ? null
@@ -89,7 +92,7 @@ class Exercise {
         where: 'ParentLesson = ? OR LessonFor = ?',
         whereArgs: [parentLesson.toString(), parentLesson.toString()]);
     for (final result in results) {
-      exercises.add(_parse(result));
+      exercises.add(await _parse(result));
     }
     return exercises;
   }
@@ -99,7 +102,7 @@ class Exercise {
     final List<Exercise> exercises = [];
     final results = await Global.db!.query('Exercises');
     for (final result in results) {
-      exercises.add(_parse(result));
+      exercises.add(await _parse(result));
     }
     return exercises;
   }

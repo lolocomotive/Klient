@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/kdecole-api/exercise.dart';
-import 'package:sqflite/sqflite.dart';
 
 /// An attachment that is linked to a [Exercise] (only it's id to avoid circular
 /// references though)
@@ -32,10 +32,10 @@ class ExerciseAttachment {
 
   ExerciseAttachment(this.id, this.parentID, this.url, this.name);
 
-  static Future<List<ExerciseAttachment>> fromMessageID(int messageID, Database db) async {
+  static Future<List<ExerciseAttachment>> fromMessageID(int messageID) async {
     final List<ExerciseAttachment> attachments = [];
     final results =
-        await db.query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
+        await Global.db!.query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
     for (final result in results) {
       attachments.add(ExerciseAttachment(
           result['ID'] as int, messageID, result['URL'] as String, result['Name'] as String));
