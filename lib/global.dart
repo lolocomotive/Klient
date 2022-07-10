@@ -74,7 +74,7 @@ class Global {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
     if (kDebugMode) {
-      await deleteDatabase(dbPath);
+      //await deleteDatabase(dbPath);
     }
     print('Database URL: $dbPath');
     Global.db = await openDatabase(dbPath);

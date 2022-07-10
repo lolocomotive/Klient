@@ -263,8 +263,6 @@ class ArticleView extends StatelessWidget {
               children: [
                 if (_article.attachments.isNotEmpty)
                   Global.defaultCard(
-                    elevation: 0,
-                    outlined: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

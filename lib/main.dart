@@ -86,20 +86,14 @@ class KosmosState extends State with WidgetsBindingObserver {
         brightness: SchedulerBinding.instance.window.platformBrightness,
       ),
       useMaterial3: true,
-    );
+    ).copyWith(highlightColor: Colors.deepPurpleAccent.shade100.withAlpha(80));
     return MaterialApp(
       key: Global.mainKey,
       scaffoldMessengerKey: Global.messengerKey,
       navigatorKey: Global.navigatorKey,
       title: title,
       theme: Global.theme!,
-      darkTheme: ThemeData.from(
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.deepPurple,
-          brightness: Brightness.dark,
-        ),
-        useMaterial3: true,
-      ),
+      darkTheme: Global.theme!,
       home: _mainWidget,
     );
   }
