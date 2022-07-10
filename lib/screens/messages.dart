@@ -78,15 +78,27 @@ class MessagePreview extends StatelessWidget {
                   ),
                 ],
               ),
-              _conversation.customSubject ??
-                  Text(
-                    _conversation.subject,
-                    textAlign: TextAlign.left,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
-                        fontSize: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Flexible(
+                    child: _conversation.customSubject ??
+                        Text(
+                          _conversation.subject,
+                          textAlign: TextAlign.left,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                              fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
+                              fontSize: 14),
+                        ),
                   ),
+                  if (_conversation.hasAttachment)
+                    Transform.scale(
+                      scale: .7,
+                      child: const Icon(Icons.attach_file),
+                    ),
+                ],
+              ),
               _conversation.customPreview ??
                   Text(
                     HtmlUnescape().convert(_conversation.preview),
@@ -538,6 +550,27 @@ class _ConversationViewState extends State<ConversationView> {
                                 launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                               },
                             ),
+                            if (_conversation!.messages[index].attachments.isNotEmpty)
+                              Global.defaultCard(
+                                elevation: 3,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Text(
+                                      'Pièces jointes',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.primary,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                    ..._conversation!.messages[index].attachments.map(
+                                      (attachment) => Row(
+                                        children: [Text(attachment.name)],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                           ],
                         ),
                       ),

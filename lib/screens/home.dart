@@ -126,14 +126,15 @@ class _HomeState extends State<Home> {
                             : SizedBox(
                                 child: Column(
                                   children: snapshot.data!
-                                      .map((twoGrades) => Row(
-                                            mainAxisAlignment: MainAxisAlignment.center,
-                                            children: [
-                                              SingleGradeView(twoGrades[0]),
-                                              if (twoGrades.length > 1)
-                                                SingleGradeView(twoGrades[1])
-                                            ],
-                                          ))
+                                      .map(
+                                        (twoGrades) => Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            SingleGradeView(twoGrades[0]),
+                                            if (twoGrades.length > 1) SingleGradeView(twoGrades[1])
+                                          ],
+                                        ),
+                                      )
                                       .toList(),
                                 ),
                               );
@@ -262,6 +263,8 @@ class ArticleView extends StatelessWidget {
               children: [
                 if (_article.attachments.isNotEmpty)
                   Global.defaultCard(
+                    elevation: 0,
+                    outlined: true,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

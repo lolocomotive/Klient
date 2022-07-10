@@ -203,14 +203,15 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
-  static Widget defaultCard({Widget? child}) {
+  static Widget defaultCard({Widget? child, double? elevation, bool outlined = false}) {
     return Card(
       margin: const EdgeInsets.all(8.0),
-      elevation: 1,
+      elevation: elevation ?? 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
+        side: outlined ? BorderSide(color: Global.theme!.colorScheme.outline) : BorderSide.none,
       ),
-      clipBehavior: Clip.antiAlias,
+      //clipBehavior: Clip.antiAlias,
       child: Padding(padding: const EdgeInsets.all(16.0), child: child),
     );
   }
