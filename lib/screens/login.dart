@@ -36,9 +36,14 @@ class LoginState extends State<Login> {
   final _loginFormKey = GlobalKey<FormState>();
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
+
+  bool _processing = false;
   LoginState();
 
   _login() async {
+    setState(() {
+      _processing = true;
+    });
     if (_loginFormKey.currentState!.validate()) {
       try {
         Global.client = await Client.login(_unameController.text, _pwdController.text);
@@ -53,6 +58,10 @@ class LoginState extends State<Login> {
             .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
       } on Exception catch (e, st) {
         Global.onException(e, st);
+      } finally {
+        setState(() {
+          _processing = false;
+        });
       }
     }
   }
@@ -161,7 +170,16 @@ class LoginState extends State<Login> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.end,
                           children: [
-                            OutlinedButton(onPressed: _login, child: const Text('Se connecter')),
+                            if (_processing)
+                              Expanded(
+                                child: Center(
+                                    child: Transform.scale(
+                                        scale: .7, child: const CircularProgressIndicator())),
+                              ),
+                            OutlinedButton(
+                              onPressed: _processing ? null : _login,
+                              child: const Text('Se connecter'),
+                            ),
                           ],
                         ),
                       )
