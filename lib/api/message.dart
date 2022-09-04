@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/kdecole-api/conversation.dart';
 
 import 'message_attachment.dart';
 

@@ -18,11 +18,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:sqflite/sqflite.dart';
-
-import '../global.dart';
-import '../kdecole-api/client.dart';
 
 class Login extends StatefulWidget {
   const Login(this.onLogin, {Key? key}) : super(key: key);
@@ -84,7 +83,7 @@ class LoginState extends State<Login> {
           IconButton(
             onPressed: () {
               Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => const AboutScreen()));
+                  .push(MaterialPageRoute(builder: (context) => const AboutPage()));
             },
             icon: const Icon(
               Icons.info_outline_rounded,

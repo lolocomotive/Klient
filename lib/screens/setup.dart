@@ -20,8 +20,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/kdecole-api/database_manager.dart';
 
 class SetupPage extends StatefulWidget {
   final Function() _callback;

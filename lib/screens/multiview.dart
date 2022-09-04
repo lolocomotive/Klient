@@ -58,18 +58,18 @@ class MainState extends State<Main> {
     final Widget currentWidget;
     switch (_currentIndex) {
       case 0:
-        currentWidget = Home(
+        currentWidget = HomePage(
           key: GlobalKey(),
         );
         break;
       case 1:
-        currentWidget = Messages(key: GlobalKey());
+        currentWidget = MessagesPage(key: GlobalKey());
         break;
       default:
-        currentWidget = Timetable(key: GlobalKey());
+        currentWidget = TimetablePage(key: GlobalKey());
     }
 
-    if (currentWidget is! Messages) {
+    if (currentWidget is! MessagesPage) {
       Global.fab = null;
     }
     return Scaffold(

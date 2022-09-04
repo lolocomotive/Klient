@@ -1,3 +1,22 @@
+/*
+ * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ *
+ * Copyright (C) 2022 lolocomotive
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <https://www.gnu.org/licenses/>.
+ */
+
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -5,10 +24,11 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:kosmos_client/kdecole-api/client.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:kosmos_client/screens/debug.dart';
+import 'package:kosmos_client/screens/message_search.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/multiview.dart';
 import 'package:kosmos_client/screens/settings.dart';
@@ -25,7 +45,7 @@ class Global {
   static Client? client;
   static int? currentConversation;
   static String? currentConversationSubject;
-  static MessagesState? messagesState;
+  static MessagesPageState? messagesState;
   static bool loadingMessages = false;
   static String? searchQuery;
   static MessageSearchResultsState? messageSearchSuggestionState;
@@ -370,7 +390,7 @@ class Global {
           );
           break;
         case 'À propos':
-          navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const AboutScreen()));
+          navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) => const AboutPage()));
           break;
       }
     },

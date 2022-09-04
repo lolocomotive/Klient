@@ -20,11 +20,11 @@
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:html_unescape/html_unescape.dart';
+import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/conversation.dart';
+import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/kdecole-api/client.dart';
-import 'package:kosmos_client/kdecole-api/conversation.dart';
-import 'package:kosmos_client/kdecole-api/database_manager.dart';
-import 'package:kosmos_client/kdecole-api/lesson.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;

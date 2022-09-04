@@ -17,26 +17,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/global.dart';
 
-class UserInfo extends StatelessWidget {
-  const UserInfo({Key? key}) : super(key: key);
+/// An attachment that is linked to a [Exercise] (only it's id to avoid circular
+/// references though)
+class ExerciseAttachment {
+  int id;
 
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            padding: const EdgeInsets.fromLTRB(10.0, 50.0, 10.0, 20.0),
-            decoration: BoxDecoration(color: Global.theme!.colorScheme.primary),
-            child: const Text(
-              'Username',
-              style: TextStyle(fontSize: 30.0),
-            ),
-          )
-        ]);
+  /// The ID of the [Exercise] this attachment belongs to
+  int parentID;
+  String url;
+  String name;
+
+  ExerciseAttachment(this.id, this.parentID, this.url, this.name);
+
+  static Future<List<ExerciseAttachment>> fromMessageID(int messageID) async {
+    final List<ExerciseAttachment> attachments = [];
+    final results =
+        await Global.db!.query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
+    for (final result in results) {
+      attachments.add(ExerciseAttachment(
+          result['ID'] as int, messageID, result['URL'] as String, result['Name'] as String));
+    }
+    return attachments;
   }
 }

@@ -20,13 +20,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
-import 'package:intl/intl.dart';
-import 'package:kosmos_client/kdecole-api/database_manager.dart';
-import 'package:kosmos_client/kdecole-api/exercise.dart';
-import 'package:kosmos_client/kdecole-api/lesson.dart';
-import 'package:morpheus/morpheus.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/widgets/day_view.dart';
 
 import '../global.dart';
 
@@ -36,14 +32,14 @@ extension DateOnlyCompare on DateTime {
   }
 }
 
-class Timetable extends StatefulWidget {
-  const Timetable({Key? key}) : super(key: key);
+class TimetablePage extends StatefulWidget {
+  const TimetablePage({Key? key}) : super(key: key);
 
   @override
-  State<Timetable> createState() => _TimetableState();
+  State<TimetablePage> createState() => _TimetablePageState();
 }
 
-class _TimetableState extends State<Timetable> {
+class _TimetablePageState extends State<TimetablePage> {
   final _pageController = PageController(viewportFraction: 0.8);
   int _page = 0;
   Future<List<List<Lesson>>> _getCalendar() async {
@@ -128,7 +124,7 @@ class _TimetableState extends State<Timetable> {
                                 ],
                               );
                             }
-                            return SingleDayCalendarView(snapshot.data![index]);
+                            return DayView(snapshot.data![index]);
                           },
                           itemCount: max(snapshot.data!.length, 1),
                         );
@@ -164,297 +160,6 @@ class _TimetableState extends State<Timetable> {
           ),
         ),
       ),
-    );
-  }
-}
-
-class SingleDayCalendarView extends StatelessWidget {
-  final List<Lesson> _lessons;
-
-  const SingleDayCalendarView(this._lessons, {Key? key}) : super(key: key);
-
-  static const _days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Text(
-            '${_days[_lessons[0].date.weekday - 1]} ${_lessons[0].date.day}/${_lessons[0].date.month}',
-            style: const TextStyle(fontWeight: FontWeight.bold),
-          ),
-        ),
-        SizedBox(
-          height: Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength,
-          child: Stack(
-            children: _lessons.map((lesson) => SingleLessonView(lesson)).toList(),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class SingleLessonView extends StatelessWidget {
-  final Lesson _lesson;
-  final GlobalKey _key = GlobalKey();
-
-  SingleLessonView(this._lesson, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      top: (_lesson.startDouble - Global.startTime) * Global.heightPerHour,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: _lesson.length * Global.heightPerHour,
-        child: Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          color: _lesson.isModified
-              ? Global.theme!.brightness == Brightness.dark
-                  ? const Color.fromARGB(255, 90, 77, 0)
-                  : Colors.yellow.shade100
-              : null,
-          clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MorpheusPageRoute(
-                  builder: (_) => DetailedLessonView(_lesson),
-                  parentKey: _key,
-                ),
-              );
-            },
-            key: _key,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  color: _lesson.color,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        _lesson.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      if (_lesson.isModified) Text(_lesson.modificationMessage!),
-                    ],
-                  ),
-                ),
-                Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
-                          child: Text(
-                            _lesson.room,
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-                          child: Text(
-                            '${_lesson.startTime} - ${_lesson.endTime}',
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class DetailedLessonView extends StatelessWidget {
-  final Lesson _lesson;
-  const DetailedLessonView(this._lesson, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Global.theme!.colorScheme.background,
-      appBar: AppBar(
-        title: Text(
-          _lesson.title,
-        ),
-        backgroundColor: _lesson.color,
-      ),
-      body: ListView(
-        children: [
-          Global.defaultCard(
-            child: Column(
-              children: [
-                Text(
-                  'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  'Salle ${_lesson.room}',
-                  textAlign: TextAlign.center,
-                ),
-              ],
-            ),
-          ),
-          MultiExerciseView(
-            _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
-            'Travail à faire pour cette séance',
-            _lesson,
-          ),
-          MultiExerciseView(
-            _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
-            'Contenu de la séance',
-            _lesson,
-          ),
-          MultiExerciseView(
-            _lesson.exercises
-                .where((e) =>
-                        e.type == ExerciseType.exercise &&
-                        e.parentLesson == _lesson.id &&
-                        e.parentLesson != e.lessonFor // don't display those twice
-                    )
-                .toList(),
-            'Travail donné lors de la séance',
-            _lesson,
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class MultiExerciseView extends StatelessWidget {
-  final List<Exercise> _exercises;
-  final String _title;
-  final Lesson _lesson;
-
-  const MultiExerciseView(this._exercises, this._title, this._lesson, {Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Global.defaultCard(
-      child: Column(
-        children: [
-          Text(
-            _title,
-            style: const TextStyle(fontSize: 16),
-          ),
-          ..._exercises.map((e) => ExerciceView(e, _lesson)).toList(),
-          if (_exercises.isEmpty)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
-              child: Text(
-                'Aucun contenu rensiegné',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class ExerciceView extends StatelessWidget {
-  const ExerciceView(this._exercise, this._lesson,
-      {Key? key, this.showDate = false, this.showSubject = false})
-      : super(key: key);
-  final bool showDate;
-  final bool showSubject;
-  final Exercise _exercise;
-  final Lesson _lesson;
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
-      children: [
-        if (showDate)
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-            child: Text(
-              '${showSubject ? '${_lesson.title}: ' : ''}À faire pour le ${DateFormat('dd/MM - HH:mm').format(_exercise.dateFor!)}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-            ),
-          ),
-        Card(
-          margin: const EdgeInsets.all(8.0),
-          clipBehavior: Clip.antiAlias,
-          elevation: 3,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                color: _lesson.color,
-                padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  _exercise.title,
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    _exercise.htmlContent == ''
-                        ? Text(
-                            'Aucun contenu renseigné',
-                            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                            textAlign: TextAlign.center,
-                          )
-                        : Html(
-                            data: _exercise.htmlContent,
-                            onLinkTap: (url, context, map, element) {
-                              launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                            },
-                          ),
-                    if (_exercise.attachments.isNotEmpty)
-                      Global.defaultCard(
-                        elevation: 6,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Pièces jointes',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ..._exercise.attachments.map((attachment) => Row(
-                                  children: [Text(attachment.name)],
-                                ))
-                          ],
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }

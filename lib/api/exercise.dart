@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:kosmos_client/kdecole-api/exercise_attachment.dart';
+import 'package:kosmos_client/api/exercise_attachment.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';

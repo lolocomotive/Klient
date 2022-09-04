@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/message.dart';
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/kdecole-api/message.dart';
 
 /// An attachment that is linked to a [Message] (only it's id to avoid circular
 /// references though)

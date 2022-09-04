@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:kosmos_client/kdecole-api/news_article.dart';
+import 'package:kosmos_client/api/news_article.dart';
 import 'package:sqflite/sqflite.dart';
 
 /// An attachment that is linked to a [NewsArticle] (only it's uid to avoid circular references though)

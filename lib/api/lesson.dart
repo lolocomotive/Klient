@@ -21,7 +21,7 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/kdecole-api/exercise.dart';
+import 'package:kosmos_client/api/exercise.dart';
 
 import '../global.dart';
 

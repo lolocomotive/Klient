@@ -19,9 +19,9 @@
 
 import 'dart:async';
 
-import 'package:kosmos_client/kdecole-api/client.dart';
-import 'package:kosmos_client/kdecole-api/exercise.dart';
-import 'package:kosmos_client/kdecole-api/lesson.dart';
+import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/exercise.dart';
+import 'package:kosmos_client/api/lesson.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';

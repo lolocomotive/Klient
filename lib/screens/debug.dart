@@ -19,8 +19,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/global.dart';
-import 'package:kosmos_client/kdecole-api/database_manager.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);
