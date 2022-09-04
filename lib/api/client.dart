@@ -32,9 +32,9 @@ import 'conversation.dart';
 class Request {
   final String _url;
   final HTTPRequestMethod _method;
-  final void Function(Map<String, dynamic> result) _onSuccess;
-  final void Function(Map<String, dynamic> result) _onJsonErr;
-  final void Function() _onHttp400;
+  final dynamic Function(Map<String, dynamic> result) _onSuccess;
+  final dynamic Function(Map<String, dynamic> result) _onJsonErr;
+  final dynamic Function() _onHttp400;
   final Map<String, String> _headers;
 
   Request(
@@ -80,12 +80,12 @@ class Request {
         data = jsonDecode('{"errmsg":null,"articles":${response.body}}');
       }
       if (data['errmsg'] != null) {
-        _onJsonErr(data);
+        await _onJsonErr(data);
       }
-      _onSuccess(data);
+      await _onSuccess(data);
     } else {
       if (response.statusCode >= 400) {
-        _onHttp400();
+        await _onHttp400();
       }
       throw Error();
     }

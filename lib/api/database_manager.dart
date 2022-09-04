@@ -91,10 +91,7 @@ class DatabaseManager {
                 DateTime.fromMillisecondsSinceEpoch(conversation['dateDernierMessage'])) {
               continue;
             }
-            Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conversation['id']]);
-            Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conversation['id']]);
-            Global.db!.delete('MessageAttachments',
-                where: 'ParentID = ?', whereArgs: [conversation['id']]);
+            await deleteConversation(conversation['id']);
           }
           modified = true;
           final batch = Global.db!.batch();
@@ -131,11 +128,21 @@ class DatabaseManager {
     }
   }
 
+  static deleteConversation(int id) async {
+    await Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [id]);
+    clearConversation(id);
+  }
+
+  static clearConversation(int id) async {
+    await Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [id]);
+    await Global.db!.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [id]);
+  }
+
   static fetchSingleConversation(int id, Batch batch) async {
     try {
-      String messageContents = '';
-      await Global.client!.addRequest(Action.getConversationDetail, (messages) async {
-        for (final message in messages['participations']) {
+      await Global.client!.addRequest(Action.getConversationDetail, (conversation) async {
+        String messageContents = '';
+        for (final message in conversation['participations']) {
           batch.insert(
               'Messages',
               {
@@ -157,7 +164,8 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace);
           }
-          batch.update('Conversations', {'FullMessageContents': messageContents},
+          batch.update('Conversations',
+              {'FullMessageContents': messageContents, 'Preview': conversation['premieresLignes']},
               where: 'ID = $id');
         }
         await batch.commit();

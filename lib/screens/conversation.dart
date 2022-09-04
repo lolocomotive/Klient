@@ -211,11 +211,18 @@ class _ConversationPageState extends State<ConversationPage> {
                                                 body:
                                                     '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                             _textFieldController.clear();
+
                                             final batch = Global.db!.batch();
+
+                                            await DatabaseManager.clearConversation(
+                                                _conversation!.id);
                                             await DatabaseManager.fetchSingleConversation(
                                                 _conversation!.id, batch);
+
                                             await Global.client!.process();
-                                            await batch.commit();
+                                            //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.
+                                            //Committing the batch twice would duplicate all the messages.
+
                                             await Conversation.byID(_conversation!.id)
                                                 .then((conversation) {
                                               if (!mounted) return;
@@ -225,7 +232,11 @@ class _ConversationPageState extends State<ConversationPage> {
                                                 _conversation = conversation;
                                               });
                                             });
+                                            Global.messagesState!.reloadFromDB();
                                           } on Exception catch (e, st) {
+                                            setState(() {
+                                              _busy = false;
+                                            });
                                             Global.onException(e, st);
                                           }
                                         },
