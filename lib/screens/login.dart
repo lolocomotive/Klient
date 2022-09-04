@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/screens/about.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../global.dart';
@@ -77,7 +78,20 @@ class LoginState extends State<Login> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Connexion')),
+      appBar: AppBar(
+        title: const Text('Connexion'),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (context) => const AboutScreen()));
+            },
+            icon: const Icon(
+              Icons.info_outline_rounded,
+            ),
+          )
+        ],
+      ),
       body: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
