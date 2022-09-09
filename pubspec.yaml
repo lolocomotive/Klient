@@ -48,6 +48,7 @@ dependencies:
   flutter_local_notifications: ^9.4.0
   restart_app: ^1.1.0+1
   package_info_plus: ^1.4.2
+  expandable: ^5.0.1
 
 dev_dependencies:
   flutter_test:
