@@ -164,8 +164,15 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace);
           }
-          batch.update('Conversations',
-              {'FullMessageContents': messageContents, 'Preview': conversation['premieresLignes']},
+          // Preview and LastDate are redundant in some cases, but we need to update them
+          // when the user replies.
+          batch.update(
+              'Conversations',
+              {
+                'FullMessageContents': messageContents,
+                'Preview': conversation['premieresLignes'],
+                'LastDate': conversation['dateDernierMessage'],
+              },
               where: 'ID = $id');
         }
         await batch.commit();
