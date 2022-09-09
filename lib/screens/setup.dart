@@ -161,7 +161,7 @@ class _SetupPageState extends State<SetupPage> {
               ),
               Step(
                 isActive: currentStep == 2,
-                title: const Text('Téléchergement des données'),
+                title: const Flexible(child: Text('Téléchergement des données')),
                 content: Column(
                   children: [
                     Padding(
@@ -169,7 +169,7 @@ class _SetupPageState extends State<SetupPage> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('Téléchargement des dernières notes'),
+                          const Flexible(child: Text('Téléchargement des dernières notes')),
                           step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                         ],
                       ),
@@ -180,7 +180,7 @@ class _SetupPageState extends State<SetupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Téléchargement de l\'emploi du temps'),
+                            const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
                             step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
@@ -191,7 +191,7 @@ class _SetupPageState extends State<SetupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Téléchargement des actualités'),
+                            const Flexible(child: Text('Téléchargement des actualités')),
                             step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
@@ -202,7 +202,7 @@ class _SetupPageState extends State<SetupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Téléchargement de la liste des messages'),
+                            const Flexible(child: Text('Téléchargement de la liste des messages')),
                             step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
@@ -213,7 +213,7 @@ class _SetupPageState extends State<SetupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Text('Téléchargement du contenu des messages'),
+                            const Flexible(child: Text('Téléchargement du contenu des messages')),
                             step5 ? const Icon(Icons.done) : Container(),
                           ],
                         ),

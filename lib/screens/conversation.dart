@@ -147,7 +147,13 @@ class _ConversationPageState extends State<ConversationPage> {
                                     ),
                                     ..._conversation!.messages[index].attachments.map(
                                       (attachment) => Row(
-                                        children: [Text(attachment.name)],
+                                        children: [
+                                          Flexible(
+                                            child: Text(
+                                              attachment.name,
+                                            ),
+                                          )
+                                        ],
                                       ),
                                     ),
                                   ],
