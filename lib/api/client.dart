@@ -331,6 +331,10 @@ class Action {
   static final Action getGrades = Action('consulterNotes/idetablissement/');
   static final Action reply =
       Action('messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
+  //param {idetablissement}/{seance}/{travail}/
+  //body {"flagRealise":true|false}
+  static final Action markExerciseDone =
+      Action('contenuActivite/idetablissement/', HTTPRequestMethod.put);
   static final Action logout = Action('desactivation/');
   static final Action deleteMessage =
       Action('messagerie/communication/supprimer/', HTTPRequestMethod.delete);

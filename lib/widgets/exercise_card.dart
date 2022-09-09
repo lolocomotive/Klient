@@ -20,9 +20,10 @@
 import 'dart:math';
 
 import 'package:expandable/expandable.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -67,26 +68,48 @@ class _ExerciceCardState extends State<ExerciceCard> {
           ),
           child: ExpandableNotifier(
             child: Expandable(
-              collapsed: _CardContents(widget: widget),
-              expanded: _CardContents(widget: widget, expanded: true),
+              collapsed: _CardContents(
+                widget: widget,
+                onMarkedDone: onMarkedDone,
+              ),
+              expanded: _CardContents(
+                widget: widget,
+                expanded: true,
+                onMarkedDone: onMarkedDone,
+              ),
             ),
           ),
         ),
       ],
     );
   }
+
+  onMarkedDone(bool done) {
+    widget._exercise.done = done;
+    setState(() {});
+  }
 }
 
-class _CardContents extends StatelessWidget {
+class _CardContents extends StatefulWidget {
   final bool expanded;
   static const cutLength = 100;
   const _CardContents({
     Key? key,
     required this.widget,
     this.expanded = false,
+    required this.onMarkedDone,
   }) : super(key: key);
 
   final ExerciceCard widget;
+
+  @override
+  State<_CardContents> createState() => _CardContentsState();
+
+  final Function onMarkedDone;
+}
+
+class _CardContentsState extends State<_CardContents> {
+  bool _busy = false;
 
   @override
   Widget build(BuildContext context) {
@@ -96,7 +119,7 @@ class _CardContents extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            color: widget._lesson.color,
+            color: widget.widget._lesson.color,
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -107,18 +130,18 @@ class _CardContents extends StatelessWidget {
                     children: [
                       Flexible(
                         child: Text(
-                          widget._exercise.title,
+                          widget.widget._exercise.title,
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(widget._exercise.done ? 'Fait' : 'À faire'),
+                      Text(widget.widget._exercise.done ? 'Fait' : 'À faire'),
                     ],
                   ),
                 ),
-                if (widget._exercise.type == ExerciseType.exercise ||
-                    widget._exercise.htmlContent.length > cutLength ||
-                    widget._exercise.attachments.isNotEmpty)
-                  Icon(expanded ? Icons.expand_less : Icons.expand_more)
+                if (widget.widget._exercise.type == ExerciseType.exercise ||
+                    widget.widget._exercise.htmlContent.length > _CardContents.cutLength ||
+                    widget.widget._exercise.attachments.isNotEmpty)
+                  Icon(widget.expanded ? Icons.expand_less : Icons.expand_more)
               ],
             ),
           ),
@@ -127,26 +150,29 @@ class _CardContents extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                widget._exercise.htmlContent == ''
+                widget.widget._exercise.htmlContent == ''
                     ? Text(
                         'Aucun contenu renseigné',
                         style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                         textAlign: TextAlign.center,
                       )
                     : Html(
-                        data: widget._exercise.htmlContent.substringWords(expanded
-                                ? widget._exercise.htmlContent.length
-                                : min(cutLength, widget._exercise.htmlContent.length)) +
-                            (expanded || widget._exercise.htmlContent.length <= cutLength
+                        data: widget.widget._exercise.htmlContent.substringWords(widget.expanded
+                                ? widget.widget._exercise.htmlContent.length
+                                : min(_CardContents.cutLength,
+                                    widget.widget._exercise.htmlContent.length)) +
+                            (widget.expanded ||
+                                    widget.widget._exercise.htmlContent.length <=
+                                        _CardContents.cutLength
                                 ? ''
                                 : '...'),
                         onLinkTap: (url, context, map, element) {
                           launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                         },
                       ),
-                if (widget._exercise.attachments.isNotEmpty && expanded)
+                if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
                   Global.defaultCard(
-                    elevation: widget.elevation * 2,
+                    elevation: widget.widget.elevation * 2,
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
@@ -159,15 +185,15 @@ class _CardContents extends StatelessWidget {
                             ),
                           ),
                         ),
-                        ...widget._exercise.attachments.map((attachment) => Row(
+                        ...widget.widget._exercise.attachments.map((attachment) => Row(
                               children: [Text(attachment.name)],
                             ))
                       ],
                     ),
                   ),
-                if (!expanded &&
-                    (widget._exercise.attachments.isNotEmpty ||
-                        widget._exercise.htmlContent.length > cutLength))
+                if (!widget.expanded &&
+                    (widget.widget._exercise.attachments.isNotEmpty ||
+                        widget.widget._exercise.htmlContent.length > _CardContents.cutLength))
                   ExpandableButton(
                     theme: const ExpandableThemeData(useInkWell: false),
                     child: Padding(
@@ -181,15 +207,37 @@ class _CardContents extends StatelessWidget {
                       ),
                     ),
                   ),
-                if (expanded && widget._exercise.type == ExerciseType.exercise)
+                if (widget.expanded && widget.widget._exercise.type == ExerciseType.exercise)
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       TextButton(
-                        onPressed: () {
-                          //TODO
+                        onPressed: () async {
+                          setState(() {
+                            _busy = true;
+                          });
+                          final response = await Global.client!.request(Action.markExerciseDone,
+                              body: '{"flagRealise":${!widget.widget._exercise.done}}',
+                              params: [
+                                '0',
+                                widget.widget._lesson.id.toString(),
+                                widget.widget._exercise.uid.toString()
+                              ]);
+                          await Global.db!.update(
+                            'Exercises',
+                            {'Done': response['flagRealise'] ? 1 : 0},
+                            where: 'ID = ?',
+                            whereArgs: [widget.widget._exercise.uid],
+                          );
+
+                          setState(() {
+                            widget.widget._exercise.done = response['flagRealise'];
+                            widget.onMarkedDone(response['flagRealise']);
+                            _busy = false;
+                          });
                         },
-                        child: const Text('Marquer comme fait'),
+                        child: Text(
+                            'Marquer comme ${widget.widget._exercise.done ? "à faire" : "fait"}'),
                       ),
                     ],
                   )
