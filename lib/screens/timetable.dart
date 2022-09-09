@@ -40,7 +40,7 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
-  final _pageController = PageController(viewportFraction: 0.8);
+  PageController _pageController = PageController(viewportFraction: 0.8);
   int _page = 0;
   Future<List<List<Lesson>>> _getCalendar() async {
     List<List<Lesson>> r = [];
@@ -92,7 +92,11 @@ class _TimetablePageState extends State<TimetablePage> {
               child: Stack(
                 children: [
                   FutureBuilder<List<List<Lesson>>>(
-                      future: _getCalendar()..then((value) => _pageController.jumpToPage(_page)),
+                      future: _getCalendar()
+                        ..then((value) {
+                          _pageController =
+                              PageController(viewportFraction: .8, initialPage: _page);
+                        }),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState == ConnectionState.waiting) {
                           return const Padding(
