@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:kosmos_client/api/background_tasks.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/screens/login.dart';
@@ -28,7 +29,7 @@ import 'screens/multiview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await initializeDateFormatting('FR_fr');
   await Global.initNotifications();
   await Global.readPrefs();
   await Global.initDB();
