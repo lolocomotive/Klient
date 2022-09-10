@@ -37,8 +37,7 @@ class MessagesPage extends StatefulWidget {
 
 class MessagesPageState extends State<MessagesPage> {
   final GlobalKey<MessagesPageState> key = GlobalKey();
-  int _currentlySelected = 0;
-  bool _selectionActive = false;
+  final List<int> _selection = [];
   Exception? _e;
   StackTrace? _st;
 
@@ -99,11 +98,13 @@ class MessagesPageState extends State<MessagesPage> {
         headerSliverBuilder: (ctx, innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              leading: _selectionActive
+              leading: _selection.isNotEmpty
                   ? IconButton(
                       onPressed: () {
                         setState(() {
-                          _selectionActive = false;
+                          while (_selection.isNotEmpty) {
+                            _selection.removeLast();
+                          }
                         });
                       },
                       icon: Icon(
@@ -111,24 +112,27 @@ class MessagesPageState extends State<MessagesPage> {
                         color: Theme.of(context).colorScheme.onPrimary,
                       ))
                   : null,
-              backgroundColor: _selectionActive
+              backgroundColor: _selection.isNotEmpty
                   ? Theme.of(context).colorScheme.primary
                   : Theme.of(context).colorScheme.background,
               actions: [
-                if (_selectionActive)
+                if (_selection.isNotEmpty)
                   IconButton(
                     onPressed: () async {
                       //TODO show that progress is being made
-                      _selectionActive = false;
+
+                      deleteSelection(_selection);
+                      while (_selection.isNotEmpty) {
+                        _selection.removeLast();
+                      }
                       setState(() {});
-                      deleteConversationFromList(_conversations[_currentlySelected]);
                     },
                     icon: Icon(
                       Icons.delete,
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
                   ),
-                if (!_selectionActive)
+                if (!_selection.isNotEmpty)
                   IconButton(
                     icon: const Icon(Icons.search),
                     onPressed: () {
@@ -138,19 +142,23 @@ class MessagesPageState extends State<MessagesPage> {
                       );
                     },
                   ),
-                if (!_selectionActive) Global.popupMenuButton
+                if (!_selection.isNotEmpty) Global.popupMenuButton
               ],
               title: Text(
-                _selectionActive ? _conversations[_currentlySelected].subject : 'Messagerie',
+                _selection.isNotEmpty
+                    ? _selection.length == 1
+                        ? _conversations[_selection[0]].subject
+                        : '${_selection.length} messages sélectionnés'
+                    : 'Messagerie',
                 style: TextStyle(
-                  color: _selectionActive
+                  color: _selection.isNotEmpty
                       ? Theme.of(context).colorScheme.onPrimary
                       : Theme.of(context).colorScheme.onBackground,
                 ),
               ),
               floating: false,
               forceElevated: innerBoxIsScrolled,
-              pinned: _selectionActive,
+              pinned: _selection.isNotEmpty,
             )
           ];
         },
@@ -201,13 +209,14 @@ class MessagesPageState extends State<MessagesPage> {
                                     child: MessageCard(_conversations[index], parentKey),
                                   ),
                                   onTap: () {
-                                    if (_selectionActive) {
-                                      if (_currentlySelected == index && _selectionActive) {
-                                        _selectionActive = false;
-                                        setState(() {});
+                                    if (_selection.isNotEmpty) {
+                                      if (_selection.contains(index)) {
+                                        setState(() {
+                                          _selection.remove(index);
+                                        });
                                         return;
                                       }
-                                      _currentlySelected = index;
+                                      _selection.add(index);
                                       setState(() {});
                                     } else {
                                       openConversation(context, parentKey, _conversations[index].id,
@@ -215,13 +224,13 @@ class MessagesPageState extends State<MessagesPage> {
                                     }
                                   },
                                   onLongPress: () {
-                                    if (_currentlySelected == index && _selectionActive) {
-                                      _selectionActive = false;
-                                      setState(() {});
+                                    if (_selection.contains(index)) {
+                                      setState(() {
+                                        _selection.remove(index);
+                                      });
                                       return;
                                     }
-                                    _currentlySelected = index;
-                                    _selectionActive = true;
+                                    _selection.add(index);
                                     setState(() {});
                                   },
                                 ),
@@ -230,9 +239,7 @@ class MessagesPageState extends State<MessagesPage> {
                                 child: IgnorePointer(
                                   child: AnimatedOpacity(
                                     duration: const Duration(milliseconds: 300),
-                                    opacity: (_selectionActive && (_currentlySelected == index))
-                                        ? .3
-                                        : 0,
+                                    opacity: (_selection.contains(index)) ? .3 : 0,
                                     child: Container(
                                       color: Theme.of(context).colorScheme.primary,
                                     ),
@@ -259,6 +266,12 @@ class MessagesPageState extends State<MessagesPage> {
       reloadFromDB();
     }
     setState(() {});
+  }
+
+  void deleteSelection(List<int> selection) {
+    for (var index in selection) {
+      deleteConversationFromList(_conversations[index]);
+    }
   }
 }
 
