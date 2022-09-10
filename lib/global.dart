@@ -233,7 +233,7 @@ class Global {
         side: outlined ? BorderSide(color: Global.theme!.colorScheme.outline) : BorderSide.none,
       ),
       //clipBehavior: Clip.antiAlias,
-      child: Padding(padding: const EdgeInsets.all(16.0), child: child),
+      child: Padding(padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 16.0), child: child),
     );
   }
 

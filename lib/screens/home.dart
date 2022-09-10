@@ -272,18 +272,24 @@ class _HomeworkListState extends State<HomeworkList> {
         }
         return Opacity(
           opacity: homework.key.done ? .6 : 1,
-          child: ExerciceCard(homework.key, homework.value, showDate: true, showSubject: true,
-              onMarkedDone: (bool done) {
-            mutableData!.remove(homework);
-            MapEntry<Exercise, Lesson> modified =
-                MapEntry(homework.key..done = done, homework.value);
-            mutableData!.add(modified);
-            mutableData!.sort(
-              (a, b) =>
-                  a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
-            );
-            setState(() {});
-          }),
+          child: ExerciceCard(
+            homework.key,
+            homework.value,
+            elevation: 1,
+            showDate: true,
+            showSubject: true,
+            onMarkedDone: (bool done) {
+              mutableData!.remove(homework);
+              MapEntry<Exercise, Lesson> modified =
+                  MapEntry(homework.key..done = done, homework.value);
+              mutableData!.add(modified);
+              mutableData!.sort(
+                (a, b) =>
+                    a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+              );
+              setState(() {});
+            },
+          ),
         );
       }).toList(),
     ]);

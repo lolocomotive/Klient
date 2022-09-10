@@ -75,6 +75,7 @@ class LessonPage extends StatelessWidget {
                 .toList(),
             'Travail donné lors de la séance',
             _lesson,
+            showDate: true,
           ),
         ],
       ),

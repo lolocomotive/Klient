@@ -28,8 +28,12 @@ class MultiExerciseView extends StatelessWidget {
   final List<Exercise> _exercises;
   final String _title;
   final Lesson _lesson;
+  final bool showDate;
+  final bool showSubject;
 
-  const MultiExerciseView(this._exercises, this._title, this._lesson, {Key? key}) : super(key: key);
+  const MultiExerciseView(this._exercises, this._title, this._lesson,
+      {Key? key, this.showDate = false, this.showSubject = false})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +44,14 @@ class MultiExerciseView extends StatelessWidget {
             _title,
             style: const TextStyle(fontSize: 16),
           ),
-          ..._exercises.map((e) => ExerciceCard(e, _lesson)).toList(),
+          ..._exercises
+              .map((e) => ExerciceCard(
+                    e,
+                    _lesson,
+                    showDate: showDate,
+                    showSubject: showSubject,
+                  ))
+              .toList(),
           if (_exercises.isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
