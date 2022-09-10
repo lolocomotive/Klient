@@ -94,6 +94,8 @@ class Global {
 
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
 
+  static AppLifecycleState? currentState;
+
   static initDB() async {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
@@ -337,16 +339,17 @@ class Global {
 
   static void onException(Exception e, StackTrace st) {
     print(e);
-
-    Global.messengerKey.currentState?.showSnackBar(
-      SnackBar(
-          content: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          exceptionWidget(e, st),
-        ],
-      )),
-    );
+    if (Global.currentState == AppLifecycleState.resumed) {
+      Global.messengerKey.currentState?.showSnackBar(
+        SnackBar(
+            content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            exceptionWidget(e, st),
+          ],
+        )),
+      );
+    }
   }
 
   static PopupMenuButton popupMenuButton = PopupMenuButton(

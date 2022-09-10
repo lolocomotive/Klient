@@ -105,6 +105,7 @@ class KosmosState extends State with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {}
+    Global.currentState = state;
   }
 
   @override
