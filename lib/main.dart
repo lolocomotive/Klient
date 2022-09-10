@@ -86,6 +86,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     super.initState();
     initPlatformState();
     _checkNotifications();
+    Global.notifications!.cancelAll();
   }
 
   KosmosState() {
