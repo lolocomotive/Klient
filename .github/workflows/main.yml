@@ -28,6 +28,8 @@ jobs:
       with:
         channel: 'stable'
     - run: flutter pub get
+    # This is required due to the way github checks out the repository.
+    - run: cp .git/HEAD .git/ORIG_HEAD
     - run: flutter build apk --split-per-abi 
     - run: flutter build apk
     - run: echo "commit=$(git rev-parse HEAD | head -c 6)" >> $GITHUB_ENV
