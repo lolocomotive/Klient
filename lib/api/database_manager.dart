@@ -319,6 +319,8 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
+              await Global.db!.delete('ExerciseAttachments',
+                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
                 Global.db!.insert(
                   'ExerciseAttachments',
@@ -352,6 +354,8 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
+              await Global.db!.delete('ExerciseAttachments',
+                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
                 Global.db!.insert(
                   'ExerciseAttachments',
@@ -391,6 +395,8 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
+              await Global.db!.delete('ExerciseAttachments',
+                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
                 Global.db!.insert(
                   'ExerciseAttachments',

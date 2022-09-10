@@ -32,13 +32,13 @@ class ExerciseAttachment {
 
   ExerciseAttachment(this.id, this.parentID, this.url, this.name);
 
-  static Future<List<ExerciseAttachment>> fromMessageID(int messageID) async {
+  static Future<List<ExerciseAttachment>> fromParentID(int parentID) async {
     final List<ExerciseAttachment> attachments = [];
     final results =
-        await Global.db!.query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
+        await Global.db!.query('ExerciseAttachments', where: 'ParentID = ?', whereArgs: [parentID]);
     for (final result in results) {
       attachments.add(ExerciseAttachment(
-          result['ID'] as int, messageID, result['URL'] as String, result['Name'] as String));
+          result['ID'] as int, parentID, result['URL'] as String, result['Name'] as String));
     }
     return attachments;
   }

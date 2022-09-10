@@ -230,7 +230,11 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
-  static Widget defaultCard({Widget? child, double? elevation, bool outlined = false}) {
+  static Widget defaultCard(
+      {Widget? child,
+      double? elevation,
+      bool outlined = false,
+      EdgeInsets padding = const EdgeInsets.all(16)}) {
     return Card(
       margin: const EdgeInsets.all(8.0),
       elevation: elevation ?? 1,
@@ -239,7 +243,7 @@ class Global {
         side: outlined ? BorderSide(color: Global.theme!.colorScheme.outline) : BorderSide.none,
       ),
       //clipBehavior: Clip.antiAlias,
-      child: Padding(padding: const EdgeInsets.fromLTRB(0, 16.0, 0, 16.0), child: child),
+      child: Padding(padding: padding, child: child),
     );
   }
 

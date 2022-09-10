@@ -181,25 +181,24 @@ class _CardContentsState extends State<_CardContents> {
                       ),
                 if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
                   Global.defaultCard(
-                    elevation: widget.widget.elevation * 2,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Flexible(
-                          child: Text(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          Text(
                             'Pièces jointes',
                             style: TextStyle(
                               color: Theme.of(context).colorScheme.primary,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ),
-                        ...widget.widget._exercise.attachments.map((attachment) => Row(
-                              children: [Text(attachment.name)],
-                            ))
-                      ],
-                    ),
-                  ),
+                          ...widget.widget._exercise.attachments.map(
+                            (attachment) => Row(
+                              children: [Flexible(child: Text(attachment.name))],
+                            ),
+                          ),
+                        ],
+                      ),
+                      elevation: widget.widget.elevation * 2),
                 if (!widget.expanded &&
                     (widget.widget._exercise.attachments.isNotEmpty ||
                         widget.widget._exercise.htmlContent.length > _CardContents.cutLength))

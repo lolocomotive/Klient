@@ -78,7 +78,7 @@ class Exercise {
         result['Title'] as String,
         result['HTMLContent'] as String,
         result['Done'] == 1,
-        await ExerciseAttachment.fromMessageID(result['ID'] as int),
+        await ExerciseAttachment.fromParentID(result['ID'] as int),
         result['LessonFor'] as int?,
         (result['DateFor'] as int?) == null
             ? null
