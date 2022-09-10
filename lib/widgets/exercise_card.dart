@@ -60,7 +60,9 @@ class _ExerciceCardState extends State<ExerciceCard> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
             child: Text(
-              '${widget.showSubject ? '${widget._lesson.title}: ' : ''}À faire pour le ${DateFormat('dd/MM - HH:mm').format(widget._exercise.dateFor!)}',
+              '${widget.showSubject ? '${widget._lesson.title}: ' : ''}'
+              'À faire pour ${DateFormat('EEEE${widget._exercise.dateFor!.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
+                  ' - HH:mm', 'FR_fr').format(widget._exercise.dateFor!)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
