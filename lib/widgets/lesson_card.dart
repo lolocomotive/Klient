@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/screens/lesson.dart';
 import 'package:morpheus/morpheus.dart';
@@ -81,26 +82,62 @@ class LessonCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
-                          child: Text(
-                            _lesson.room,
-                            textAlign: TextAlign.center,
-                          ),
+                  child: Stack(
+                    children: [
+                      Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                              child: Text(
+                                _lesson.room,
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+                              child: Text(
+                                '${_lesson.startTime} - ${_lesson.endTime}',
+                                textAlign: TextAlign.center,
+                              ),
+                            ),
+                          ],
                         ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-                          child: Text(
-                            '${_lesson.startTime} - ${_lesson.endTime}',
-                            textAlign: TextAlign.center,
-                          ),
+                      ),
+                      Opacity(
+                        opacity: .5,
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                children: [
+                                  if (_lesson.exercises
+                                      .where((e) => e.lessonFor == _lesson.id)
+                                      .isNotEmpty)
+                                    const Icon(Icons.event_outlined),
+                                  if (_lesson.exercises
+                                      .where((e) => e.type == ExerciseType.lessonContent)
+                                      .isNotEmpty)
+                                    const Icon(Icons.event_note_outlined),
+                                  if (_lesson.exercises
+                                      .where((e) =>
+                                              e.type == ExerciseType.exercise &&
+                                              e.parentLesson == _lesson.id &&
+                                              e.parentLesson !=
+                                                  e.lessonFor // don't display those twice
+                                          )
+                                      .isNotEmpty)
+                                    const Icon(Icons.update)
+                                ],
+                              ),
+                            ),
+                          ],
                         ),
-                      ],
-                    ),
+                      )
+                    ],
                   ),
                 ),
               ],
