@@ -138,11 +138,16 @@ class _HomePageState extends State<HomePage> {
                                 ),
                               );
                       }),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16.0, 16, 16, 20),
-                    child: Text(
-                      'Travail à faire',
-                      style: TextStyle(fontSize: 20),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 20),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          'Travail à faire',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
                     ),
                   ),
                   FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
@@ -170,18 +175,7 @@ class _HomePageState extends State<HomePage> {
                                   style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                                 )),
                               )
-                            : Column(
-                                children: snapshot.data!
-                                    .map(
-                                      (homework) => ExerciceCard(
-                                        homework.key,
-                                        homework.value,
-                                        showDate: true,
-                                        showSubject: true,
-                                      ),
-                                    )
-                                    .toList(),
-                              );
+                            : HomeworkList(data: snapshot.data!);
                       }),
                   const Padding(
                     padding: EdgeInsets.all(16.0),
@@ -233,5 +227,65 @@ class _HomePageState extends State<HomePage> {
             ),
           ),
         ));
+  }
+}
+
+class HomeworkList extends StatefulWidget {
+  const HomeworkList({
+    Key? key,
+    required List<MapEntry<Exercise, Lesson>> data,
+  })  : _data = data,
+        super(key: key);
+
+  final List<MapEntry<Exercise, Lesson>> _data;
+
+  @override
+  State<HomeworkList> createState() => _HomeworkListState();
+}
+
+class _HomeworkListState extends State<HomeworkList> {
+  bool _showDone = false;
+
+  List<MapEntry<Exercise, Lesson>>? mutableData;
+  @override
+  Widget build(BuildContext context) {
+    mutableData ??= widget._data;
+    return Column(children: [
+      Padding(
+        padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+        child: Row(
+          children: [
+            const Text('Afficher le travail fait'),
+            Switch(
+                value: _showDone,
+                onChanged: (value) {
+                  setState(() {
+                    _showDone = value;
+                  });
+                }),
+          ],
+        ),
+      ),
+      ...mutableData!.map((homework) {
+        if (!_showDone && homework.key.done) {
+          return Container();
+        }
+        return Opacity(
+          opacity: homework.key.done ? .6 : 1,
+          child: ExerciceCard(homework.key, homework.value, showDate: true, showSubject: true,
+              onMarkedDone: (bool done) {
+            mutableData!.remove(homework);
+            MapEntry<Exercise, Lesson> modified =
+                MapEntry(homework.key..done = done, homework.value);
+            mutableData!.add(modified);
+            mutableData!.sort(
+              (a, b) =>
+                  a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+            );
+            setState(() {});
+          }),
+        );
+      }).toList(),
+    ]);
   }
 }
