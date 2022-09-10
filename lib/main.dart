@@ -37,6 +37,14 @@ void main() async {
   runApp(const KosmosApp());
 }
 
+_checkNotifications() async {
+  var details = await Global.notifications!.getNotificationAppLaunchDetails();
+  if (details == null) return;
+  if (!details.didNotificationLaunchApp) return;
+  if (details.payload == null) return;
+  Global.notificationCallback(details.payload);
+}
+
 class PopupMenuItemWithIcon extends PopupMenuItem {
   PopupMenuItemWithIcon(String label, IconData icon, BuildContext context, {Key? key})
       : super(
@@ -77,6 +85,7 @@ class KosmosState extends State with WidgetsBindingObserver {
   void initState() {
     super.initState();
     initPlatformState();
+    _checkNotifications();
   }
 
   KosmosState() {

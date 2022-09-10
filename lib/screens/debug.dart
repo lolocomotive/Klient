@@ -57,16 +57,29 @@ class DebugScreen extends StatelessWidget {
   }
 
   void _showNotification() {
-    const AndroidNotificationDetails channel = AndroidNotificationDetails(
+    const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
       'channel-lessons',
       'channel-lessons',
       channelDescription: 'The channel for displaying lesson modifications',
       importance: Importance.max,
       priority: Priority.high,
     );
-    const NotificationDetails details = NotificationDetails(android: channel);
-    Global.notifications!
-        .show(0, 'Example notification', 'This is an example notification', details);
+    const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
+      'channel-msg',
+      'channel-msg',
+      channelDescription: 'The channel for displaying message modifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails details = NotificationDetails(android: lessonChannel);
+    Global.notifications!.show(
+        0, 'Example lesson notification', 'This is an example notification', details,
+        payload: 'lesson-4232582');
+    const NotificationDetails details2 = NotificationDetails(android: msgChannel);
+
+    Global.notifications!.show(
+        1, 'Example Conversation notification', 'This is an example notification', details2,
+        payload: 'conv-135794');
   }
 
   @override

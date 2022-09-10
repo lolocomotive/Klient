@@ -25,9 +25,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/conversation.dart';
+import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/about.dart';
+import 'package:kosmos_client/screens/conversation.dart';
 import 'package:kosmos_client/screens/debug.dart';
+import 'package:kosmos_client/screens/lesson.dart';
 import 'package:kosmos_client/screens/message_search.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/multiview.dart';
@@ -481,8 +485,34 @@ class Global {
     Global.notifications = FlutterLocalNotificationsPlugin();
     await Global.notifications!.initialize(
         const InitializationSettings(android: AndroidInitializationSettings('ic_stat_name')),
-        onSelectNotification: (_) {
-      print(_);
-    });
+        onSelectNotification: notificationCallback);
+  }
+
+  static void notificationCallback(String? payload) {
+    if (payload == null) return;
+    if (payload.startsWith('conv-')) {
+      final id = payload.substring(5, payload.length);
+      Conversation.byID(int.parse(id)).then((conv) {
+        if (conv == null) return;
+        currentConversation = conv.id;
+        currentConversationSubject = conv.subject;
+        navigatorKey.currentState?.push(MaterialPageRoute(
+          builder: (context) {
+            return const ConversationPage();
+          },
+        ));
+      });
+    }
+    if (payload.startsWith('lesson-')) {
+      final id = payload.substring(7, payload.length);
+      Lesson.byID(int.parse(id)).then((lesson) {
+        if (lesson == null) return;
+        navigatorKey.currentState?.push(MaterialPageRoute(
+          builder: (context) {
+            return LessonPage(lesson);
+          },
+        ));
+      });
+    }
   }
 }
