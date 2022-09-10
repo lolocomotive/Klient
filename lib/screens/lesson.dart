@@ -39,45 +39,47 @@ class LessonPage extends StatelessWidget {
         ),
         backgroundColor: _lesson.color,
       ),
-      body: ListView(
-        children: [
-          Global.defaultCard(
-            child: Column(
-              children: [
-                Text(
-                  'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
-                  textAlign: TextAlign.center,
-                ),
-                Text(
-                  'Salle ${_lesson.room}',
-                  textAlign: TextAlign.center,
-                ),
-              ],
+      body: Scrollbar(
+        child: ListView(
+          children: [
+            Global.defaultCard(
+              child: Column(
+                children: [
+                  Text(
+                    'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
+                    textAlign: TextAlign.center,
+                  ),
+                  Text(
+                    'Salle ${_lesson.room}',
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
             ),
-          ),
-          MultiExerciseView(
-            _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
-            'Travail à faire pour cette séance',
-            _lesson,
-          ),
-          MultiExerciseView(
-            _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
-            'Contenu de la séance',
-            _lesson,
-          ),
-          MultiExerciseView(
-            _lesson.exercises
-                .where((e) =>
-                        e.type == ExerciseType.exercise &&
-                        e.parentLesson == _lesson.id &&
-                        e.parentLesson != e.lessonFor // don't display those twice
-                    )
-                .toList(),
-            'Travail donné lors de la séance',
-            _lesson,
-            showDate: true,
-          ),
-        ],
+            MultiExerciseView(
+              _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
+              'Travail à faire pour cette séance',
+              _lesson,
+            ),
+            MultiExerciseView(
+              _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
+              'Contenu de la séance',
+              _lesson,
+            ),
+            MultiExerciseView(
+              _lesson.exercises
+                  .where((e) =>
+                          e.type == ExerciseType.exercise &&
+                          e.parentLesson == _lesson.id &&
+                          e.parentLesson != e.lessonFor // don't display those twice
+                      )
+                  .toList(),
+              'Travail donné lors de la séance',
+              _lesson,
+              showDate: true,
+            ),
+          ],
+        ),
       ),
     );
   }
