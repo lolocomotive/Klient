@@ -140,7 +140,8 @@ class _CardContentsState extends State<_CardContents> {
                           style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
-                      Text(widget.widget._exercise.done ? 'Fait' : 'À faire'),
+                      if (widget.widget._exercise.type == ExerciseType.exercise)
+                        Text(widget.widget._exercise.done ? 'Fait' : 'À faire'),
                     ],
                   ),
                 ),
