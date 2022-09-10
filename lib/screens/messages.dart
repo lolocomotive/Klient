@@ -42,13 +42,15 @@ class MessagesPageState extends State<MessagesPage> {
   Exception? _e;
   StackTrace? _st;
 
-  static void openConversation(
+  void openConversation(
       BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
     Global.currentConversation = conversationId;
     Global.currentConversationSubject = conversationSubject;
     Navigator.of(context).push(
       MorpheusPageRoute(
-        builder: (_) => const ConversationPage(),
+        builder: (_) => ConversationPage(
+          onDelete: deleteConversationFromList,
+        ),
         parentKey: parentKey,
       ),
     );
@@ -119,14 +121,7 @@ class MessagesPageState extends State<MessagesPage> {
                       //TODO show that progress is being made
                       _selectionActive = false;
                       setState(() {});
-                      try {
-                        await Global.client!.request(Action.deleteMessage,
-                            params: [_conversations[_currentlySelected].id.toString()]);
-                        _conversations.removeAt(_currentlySelected);
-                        setState(() {});
-                      } on Exception catch (e, st) {
-                        Global.onException(e, st);
-                      }
+                      deleteConversationFromList(_conversations[_currentlySelected]);
                     },
                     icon: Icon(
                       Icons.delete,
@@ -254,5 +249,28 @@ class MessagesPageState extends State<MessagesPage> {
         ),
       ),
     );
+  }
+
+  deleteConversationFromList(Conversation conv) async {
+    await deleteConversation(conv);
+    try {
+      _conversations.removeAt(_conversations.indexOf(conv));
+    } catch (_) {
+      reloadFromDB();
+    }
+    setState(() {});
+  }
+}
+
+deleteConversation(Conversation conv) async {
+  try {
+    await Global.client!.request(Action.deleteMessage, params: [conv.id.toString()]);
+    Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conv.id]);
+    Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conv.id]);
+    for (var message in conv.messages) {
+      Global.db!.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [message.id]);
+    }
+  } on Exception catch (e, st) {
+    Global.onException(e, st);
   }
 }

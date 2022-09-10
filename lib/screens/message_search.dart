@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart' hide Action;
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/screens/conversation.dart';
+import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
 
 import '../global.dart';
@@ -121,7 +122,9 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                         Global.currentConversationSubject = _conversations![index].subject;
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const ConversationPage(),
+                            builder: (_) => const ConversationPage(
+                              onDelete: deleteConversation,
+                            ),
                           ),
                         );
                       });

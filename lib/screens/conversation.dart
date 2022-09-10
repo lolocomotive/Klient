@@ -27,10 +27,12 @@ import 'package:kosmos_client/global.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConversationPage extends StatefulWidget {
-  const ConversationPage({Key? key}) : super(key: key);
+  const ConversationPage({Key? key, required this.onDelete}) : super(key: key);
 
   @override
   State<ConversationPage> createState() => _ConversationPageState();
+
+  final Function onDelete;
 }
 
 class _ConversationPageState extends State<ConversationPage> {
@@ -65,6 +67,14 @@ class _ConversationPageState extends State<ConversationPage> {
                 headerSliverBuilder: (context, innerBoxIsScrolled) {
                   return <Widget>[
                     SliverAppBar(
+                      actions: [
+                        IconButton(
+                            onPressed: () async {
+                              Navigator.of(context).pop();
+                              await widget.onDelete(_conversation);
+                            },
+                            icon: const Icon(Icons.delete))
+                      ],
                       title: Text(_conversation != null
                           ? _conversation!.subject
                           : Global.currentConversationSubject!),
@@ -217,18 +227,14 @@ class _ConversationPageState extends State<ConversationPage> {
                                                 body:
                                                     '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                             _textFieldController.clear();
-
                                             final batch = Global.db!.batch();
-
                                             await DatabaseManager.clearConversation(
                                                 _conversation!.id);
                                             await DatabaseManager.fetchSingleConversation(
                                                 _conversation!.id, batch);
-
                                             await Global.client!.process();
                                             //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.
                                             //Committing the batch twice would duplicate all the messages.
-
                                             await Conversation.byID(_conversation!.id)
                                                 .then((conversation) {
                                               if (!mounted) return;

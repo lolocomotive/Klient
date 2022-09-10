@@ -501,7 +501,9 @@ class Global {
         currentConversationSubject = conv.subject;
         navigatorKey.currentState?.push(MaterialPageRoute(
           builder: (context) {
-            return const ConversationPage();
+            return const ConversationPage(
+              onDelete: deleteConversation,
+            );
           },
         ));
       });
