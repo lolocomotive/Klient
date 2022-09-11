@@ -320,7 +320,11 @@ class Action {
   static final Action getUserInfo = Action('infosutilisateur/');
   static final Action getNewsArticlesEtablissement = Action('actualites/idetablissement/');
   static final Action getArticleDetails = Action('contenuArticle/article/');
+  static final Action getGrades = Action('consulterNotes/idetablissement/');
   static final Action getTimeTableEleve = Action('calendrier/ideleve/');
+
+  //params ideleve noteBeforeDate
+  static final Action getHomework = Action('travailAFaire/ideleve/');
 
   //params ideleve/idseance/idexercise/
   static final Action getExerciseDetails = Action('contenuActivite/ideleve/');
@@ -328,7 +332,6 @@ class Action {
   //param idconversations
   static final Action markConversationRead =
       Action('messagerie/communication/lu/', HTTPRequestMethod.put);
-  static final Action getGrades = Action('consulterNotes/idetablissement/');
   static final Action reply =
       Action('messagerie/communication/nouvelleParticipation/', HTTPRequestMethod.put);
   //param {idetablissement}/{seance}/{travail}/

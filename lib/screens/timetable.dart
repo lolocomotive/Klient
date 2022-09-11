@@ -46,7 +46,11 @@ class _TimetablePageState extends State<TimetablePage> {
     List<List<Lesson>> r = [];
     var lessons = await Lesson.fetchAll();
     List<Lesson> day = [];
-    DateTime lastDate = lessons[0].date;
+    DateTime lastDate = DateTime.utc(0);
+    if (lessons.isNotEmpty) {
+      lastDate = lessons[0].date;
+    }
+
     _page = 0;
     for (int i = 0; i < lessons.length; i++) {
       final lesson = lessons[i];
@@ -120,10 +124,14 @@ class _TimetablePageState extends State<TimetablePage> {
                           itemBuilder: (ctx, index) {
                             if (snapshot.data!.isEmpty) {
                               return Column(
-                                children: const [
+                                children: [
                                   Padding(
-                                    padding: EdgeInsets.all(8.0),
-                                    child: CircularProgressIndicator(),
+                                    padding: const EdgeInsets.all(8.0),
+                                    child: Text(
+                                      'Rien à afficher',
+                                      style:
+                                          TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                    ),
                                   ),
                                 ],
                               );
