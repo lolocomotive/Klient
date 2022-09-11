@@ -474,7 +474,6 @@ class Global {
       print('Reading prefernces');
       var data = await Global.storage!.readAll();
       data.forEach((key, value) {
-        print('$key: $value');
         if (key.startsWith('color.')) {
           ColorProvider.addColor(key.substring(6), int.parse(value));
         }
