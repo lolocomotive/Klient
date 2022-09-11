@@ -95,6 +95,8 @@ class Global {
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
   static AppLifecycleState? currentState;
 
+  static bool retryNetworkRequests = false;
+
   static initDB() async {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
@@ -342,6 +344,8 @@ class Global {
 
   static void onException(Exception e, StackTrace st) {
     print(e);
+    print(st);
+    print('AppDtate: ${Global.currentState}');
     if (Global.currentState == AppLifecycleState.resumed) {
       Global.messengerKey.currentState?.showSnackBar(
         SnackBar(

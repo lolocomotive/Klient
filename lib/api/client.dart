@@ -67,13 +67,17 @@ class Request {
             break;
         }
         success = true;
-      } catch (_) {
-        rethrow;
-        //success = false;
-        //sleep(const Duration(milliseconds: 1000));
+      } on Exception catch (_) {
+        print('Retrying network request...');
+        if (Global.retryNetworkRequests) {
+          success = false;
+          sleep(const Duration(milliseconds: 1000));
+        } else {
+          rethrow;
+        }
       }
     } while (!success);
-
+    if (response == null) throw Error();
     if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 204) {
       var data = jsonDecode(response.body);
       if (response.body.startsWith('[')) {
@@ -216,7 +220,7 @@ class Client {
       url += param + '/';
     }
 
-    http.Response response;
+    http.Response? response;
     final context = SecurityContext.defaultContext;
     //Including the ISRG root certificate for older devices (looking at you Gloria)
     ByteData data = await rootBundle.load('assets/isrgrootx1.pem');
@@ -227,19 +231,33 @@ class Client {
     }
     final httpClient = HttpClient(context: context);
     final client = IOClient(httpClient);
+    bool success = false;
+    do {
+      try {
+        switch (action.method) {
+          case HTTPRequestMethod.get:
+            response = await client.get(Uri.parse(url), headers: headers);
+            break;
+          case HTTPRequestMethod.put:
+            response = await client.put(Uri.parse(url), headers: headers, body: body);
+            break;
+          case HTTPRequestMethod.delete:
+            response = await client.delete(Uri.parse(url), headers: headers);
+            break;
+        }
+        success = true;
+      } on Exception catch (_) {
+        print('Retrying network request...');
 
-    switch (action.method) {
-      case HTTPRequestMethod.get:
-        response = await client.get(Uri.parse(url), headers: headers);
-        break;
-      case HTTPRequestMethod.put:
-        response = await client.put(Uri.parse(url), headers: headers, body: body);
-        break;
-      case HTTPRequestMethod.delete:
-        response = await client.delete(Uri.parse(url), headers: headers);
-        break;
-    }
-
+        if (Global.retryNetworkRequests) {
+          success = false;
+          await Future.delayed(const Duration(seconds: 1));
+        } else {
+          rethrow;
+        }
+      }
+    } while (!success);
+    if (response == null) throw Error();
     if ((response.statusCode >= 200 && response.statusCode < 300) || response.statusCode == 204) {
       dynamic data;
       try {

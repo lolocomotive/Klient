@@ -51,24 +51,28 @@ class DatabaseManager {
   }
 
   static downloadAll() async {
-    Global.step1 = false;
-    Global.step2 = false;
-    Global.step3 = false;
-    Global.step4 = false;
-    Global.step5 = false;
-    print('Downloading grades');
-    await fetchGradesData();
-    Global.step1 = true;
-    print('Downloading timetable');
-    await fetchTimetable();
-    Global.step2 = true;
-    print('Downloading News');
-    await fetchNewsData();
-    Global.step3 = true;
-    print('Downloading Messages');
-    await fetchMessageData();
-    Global.step5 = true;
-    print('Finished downloading');
+    try {
+      Global.step1 = false;
+      Global.step2 = false;
+      Global.step3 = false;
+      Global.step4 = false;
+      Global.step5 = false;
+      print('Downloading grades');
+      await fetchGradesData();
+      Global.step1 = true;
+      print('Downloading timetable');
+      await fetchTimetable();
+      Global.step2 = true;
+      print('Downloading News');
+      await fetchNewsData();
+      Global.step3 = true;
+      print('Downloading Messages');
+      await fetchMessageData();
+      Global.step5 = true;
+      print('Finished downloading');
+    } catch (_) {
+      print('EEEE $_');
+    }
   }
 
   /// Download/update, the associated messages and their attachments

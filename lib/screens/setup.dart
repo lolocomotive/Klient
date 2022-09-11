@@ -53,6 +53,7 @@ class _SetupPageState extends State<SetupPage> {
     step3 = Global.step3;
     step4 = Global.step4;
     step5 = Global.step5;
+
     progress = Global.progress;
     progressOf = Global.progressOf;
     try {
@@ -111,7 +112,6 @@ class _SetupPageState extends State<SetupPage> {
                       children: [
                         TextButton(
                             onPressed: () {
-                              update();
                               currentStep++;
                               Global.storage!.write(
                                   key: 'notifications.messages',
@@ -119,7 +119,12 @@ class _SetupPageState extends State<SetupPage> {
                               Global.storage!.write(
                                   key: 'notifications.calendar',
                                   value: notifCalEnabled ? 'true' : 'false');
-                              DatabaseManager.downloadAll();
+                              Global.retryNetworkRequests = true;
+                              DatabaseManager.downloadAll().then((_) {
+                                Global.retryNetworkRequests = false;
+                              });
+
+                              update();
                               setState(() {});
                             },
                             child: const Text(
