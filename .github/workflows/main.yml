@@ -32,7 +32,7 @@ jobs:
     - run: cp .git/$(cat .git/HEAD | cut -c6- ) .git/ORIG_HEAD
     - run: flutter build apk --split-per-abi 
     - run: flutter build apk
-    - run: echo "commit=$(git rev-parse HEAD | head -c 6)"" >> $GITHUB_ENV
+    - run: echo "commit=$(git rev-parse HEAD | head -c 6)" >> $GITHUB_ENV
     - run: bash .github/workflows/move.bash
     - uses: actions/upload-artifact@v3
       with:
