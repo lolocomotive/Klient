@@ -139,7 +139,7 @@ class _HomePageState extends State<HomePage> {
                               );
                       }),
                   Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 20),
+                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
@@ -252,18 +252,29 @@ class _HomeworkListState extends State<HomeworkList> {
     mutableData ??= widget._data;
     return Column(children: [
       Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-        child: Row(
-          children: [
-            const Text('Afficher le travail fait'),
-            Switch(
-                value: _showDone,
-                onChanged: (value) {
-                  setState(() {
-                    _showDone = value;
-                  });
-                }),
-          ],
+        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8),
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _showDone = !_showDone;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text('Afficher le travail fait'),
+                Switch(
+                    value: _showDone,
+                    onChanged: (value) {
+                      setState(() {
+                        _showDone = value;
+                      });
+                    }),
+              ],
+            ),
+          ),
         ),
       ),
       ...mutableData!.map((homework) {
