@@ -87,12 +87,21 @@ class KosmosState extends State with WidgetsBindingObserver {
     initPlatformState();
     _checkNotifications();
     Global.notifications!.cancelAll();
+    WidgetsBinding.instance.addObserver(this);
+    Global.currentState = AppLifecycleState.resumed;
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   KosmosState() {
     Global.onLogin = () {
       setState(() {
         _mainWidget = const Main();
+        Global.currentState = AppLifecycleState.resumed;
       });
     };
     _mainWidget = const Main();

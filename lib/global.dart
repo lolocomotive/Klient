@@ -345,7 +345,7 @@ class Global {
   static void onException(Exception e, StackTrace st) {
     print(e);
     print(st);
-    print('AppDtate: ${Global.currentState}');
+    print('Current state: ${Global.currentState}');
     if (Global.currentState == AppLifecycleState.resumed) {
       Global.messengerKey.currentState?.showSnackBar(
         SnackBar(
