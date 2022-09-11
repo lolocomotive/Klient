@@ -127,7 +127,7 @@ class _CardContentsState extends State<_CardContents> {
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Container(
-            color: widget.widget._lesson.color,
+            color: widget.widget._lesson.color.shade200,
             padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -139,18 +139,27 @@ class _CardContentsState extends State<_CardContents> {
                       Flexible(
                         child: Text(
                           widget.widget._exercise.title,
-                          style: const TextStyle(fontWeight: FontWeight.bold),
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
                       ),
                       if (widget.widget._exercise.type == ExerciseType.exercise)
-                        Text(widget.widget._exercise.done ? 'Fait' : 'À faire'),
+                        Text(widget.widget._exercise.done ? 'Fait' : 'À faire',
+                            style: const TextStyle(
+                              color: Colors.black,
+                            )),
                     ],
                   ),
                 ),
                 if (widget.widget._exercise.type == ExerciseType.exercise ||
                     widget.widget._exercise.htmlContent.length > _CardContents.cutLength ||
                     widget.widget._exercise.attachments.isNotEmpty)
-                  Icon(widget.expanded ? Icons.expand_less : Icons.expand_more)
+                  Icon(
+                    widget.expanded ? Icons.expand_less : Icons.expand_more,
+                    color: Colors.black,
+                  )
               ],
             ),
           ),

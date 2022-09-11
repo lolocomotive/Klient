@@ -25,6 +25,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/main.dart';
@@ -91,9 +92,7 @@ class Global {
     'Schulportal Ostbelgien': 'https://mobilite.schulen.be/mobilite/'
   };
   static List<DropdownMenuItem> dropdownItems = [];
-
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
-
   static AppLifecycleState? currentState;
 
   static initDB() async {
@@ -476,6 +475,9 @@ class Global {
       var data = await Global.storage!.readAll();
       data.forEach((key, value) {
         print('$key: $value');
+        if (key.startsWith('color.')) {
+          ColorProvider.addColor(key.substring(6), int.parse(value));
+        }
       });
       Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
           'https://mobilite.kosmoseducation.com/mobilite/';

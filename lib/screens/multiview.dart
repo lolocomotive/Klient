@@ -74,7 +74,6 @@ class MainState extends State<Main> {
     }
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
         destinations: const [
           NavigationDestination(
             icon: Icon(Icons.home_outlined),

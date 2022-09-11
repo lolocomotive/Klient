@@ -66,7 +66,7 @@ class LessonCard extends StatelessWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(8.0),
-                  color: _lesson.color,
+                  color: _lesson.color.shade200,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
@@ -75,6 +75,7 @@ class LessonCard extends StatelessWidget {
                         textAlign: TextAlign.center,
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
+                          color: Colors.black,
                         ),
                       ),
                       if (_lesson.isModified) Text(_lesson.modificationMessage!),

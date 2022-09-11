@@ -17,10 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:convert';
-import 'dart:math';
-
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/exercise.dart';
 
 import '../global.dart';
@@ -46,7 +44,7 @@ class Lesson {
   ///1 = 1 hour
   late double length;
   late double startDouble;
-  late Color color;
+  late MaterialColor color;
 
   Lesson(this.id, this.date, this.startTime, this.endTime, this.room, this.title, this.exercises,
       this.isModified, this.shouldNotify, bool headless,
@@ -56,24 +54,10 @@ class Lesson {
 
     length = e - startDouble;
     if (headless) {
-      color = Colors.black;
+      color = Colors.blue;
     } else {
-      color = fromSubject(title);
+      color = ColorProvider.getColor(title);
     }
-  }
-
-  static Color fromSubject(String subject) {
-    int seed = 0;
-    List<int> encoded = utf8.encode(subject);
-    for (int i = 0; i < encoded.length; i++) {
-      seed += encoded[i] * i * 256;
-    }
-    return HSLColor.fromAHSL(
-      1,
-      Random(seed).nextDouble() * 360,
-      .7,
-      Global.theme!.colorScheme.brightness == Brightness.dark ? .15 : .85,
-    ).toColor();
   }
 
   static Future<Lesson> _parse(result, bool headless) async {

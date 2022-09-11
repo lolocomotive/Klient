@@ -34,10 +34,12 @@ class LessonPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Global.theme!.colorScheme.background,
       appBar: AppBar(
+        foregroundColor: Colors.black,
+        leading: const BackButton(color: Colors.black),
         title: Text(
           _lesson.title,
         ),
-        backgroundColor: _lesson.color,
+        backgroundColor: _lesson.color.shade200,
       ),
       body: Scrollbar(
         child: ListView(

@@ -18,8 +18,8 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/grade.dart';
-import 'package:kosmos_client/api/lesson.dart';
 
 import '../global.dart';
 
@@ -40,13 +40,16 @@ class GradeCard extends StatelessWidget {
             children: [
               Container(
                 padding: const EdgeInsets.all(8.0),
-                color: Lesson.fromSubject(_grade.subject),
+                color: ColorProvider.getColor(_grade.subject).shade200,
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     Text(
                       _grade.subject,
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                     Text(
                       Global.dateToString(_grade.date),
