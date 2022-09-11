@@ -39,11 +39,14 @@ class MainState extends State<Main> {
       Global.storage!.write(key: 'firstTime', value: 'false');
       Navigator.of(context).push(
         MaterialPageRoute(
-          builder: (_) => SetupPage(() {
-            setState(() {
-              _currentIndex = 0;
-            });
-          }),
+          builder: (_) => WillPopScope(
+            onWillPop: () async => false,
+            child: SetupPage(() {
+              setState(() {
+                _currentIndex = 0;
+              });
+            }),
+          ),
         ),
       );
     }

@@ -68,6 +68,8 @@ class _SetupPageState extends State<SetupPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: Container(),
+        leadingWidth: 0,
         title: const Text('Premiers pas'),
       ),
       body: Column(
@@ -109,7 +111,15 @@ class _SetupPageState extends State<SetupPage> {
                       children: [
                         TextButton(
                             onPressed: () {
+                              update();
                               currentStep++;
+                              Global.storage!.write(
+                                  key: 'notifications.messages',
+                                  value: notifMsgEnabled ? 'true' : 'false');
+                              Global.storage!.write(
+                                  key: 'notifications.calendar',
+                                  value: notifCalEnabled ? 'true' : 'false');
+                              DatabaseManager.downloadAll();
                               setState(() {});
                             },
                             child: const Text(
@@ -122,45 +132,6 @@ class _SetupPageState extends State<SetupPage> {
               ),
               Step(
                 isActive: currentStep == 1,
-                title: const Text('Messagerie'),
-                content: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    const Text('Sélectionner combien de messages télécharger.'),
-                    Text(
-                      'Télécharger tous les messages risque de prendre un certain temps selon la quantité de messages dans votre boite de réception',
-                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                    ),
-                    Row(
-                      children: [
-                        TextButton(
-                            onPressed: () {
-                              currentStep++;
-                              update();
-                              Global.storage!.write(
-                                  key: 'notifications.messages',
-                                  value: notifMsgEnabled ? 'true' : 'false');
-                              Global.storage!.write(
-                                  key: 'notifications.calendar',
-                                  value: notifCalEnabled ? 'true' : 'false');
-                              DatabaseManager.downloadAll();
-                              setState(() {});
-                            },
-                            child: const Text(
-                              'TOUS',
-                            )),
-                        const TextButton(
-                            onPressed: null,
-                            child: Text(
-                              'LES 20 PREMIERS',
-                            )),
-                      ],
-                    )
-                  ],
-                ),
-              ),
-              Step(
-                isActive: currentStep == 2,
                 title: const Flexible(child: Text('Téléchergement des données')),
                 content: Column(
                   children: [
