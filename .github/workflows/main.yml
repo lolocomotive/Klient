@@ -29,23 +29,18 @@ jobs:
         channel: 'stable'
     - run: flutter pub get
     # This is required due to the way github checks out the repository.
-    - run: cp .git/HEAD .git/ORIG_HEAD
+    - run: cp .git/$(cat .git/HEAD | cut -c6- ) .git/ORIG_HEAD
     - run: flutter build apk --split-per-abi 
     - run: flutter build apk
-    - run: echo "commit=$(git rev-parse HEAD | head -c 6)" >> $GITHUB_ENV
+    - run: commit=$(git rev-parse HEAD | head -c 6)
+    - run: echo commit=$commit >> $GITHUB_ENV
+    - run: mkdir output
+    - run: mv build/app/outputs/flutter-apk/app-arm64-v8a-release.apk output/kosmos-client-$commit-arm64-v8a.apk
+    - run: mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/kosmos-client-$commit-armeabi-v7a.apk
+    - run: mv build/app/outputs/flutter-apk/app-x86_64-release.apk output/kosmos-client-$commit-x86_64.apk
+    - run: mv build/app/outputs/flutter-apk/app-release.apk output/kosmos-client-$commit.apk
     - uses: actions/upload-artifact@v3
       with:
-        name: kosmos-client-${{ env.commit }}-arm64-v8a.apk
-        path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
-    - uses: actions/upload-artifact@v3
-      with:
-        name: kosmos-client-${{ env.commit }}-armeabi-v7a.apk
-        path: build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
-    - uses: actions/upload-artifact@v3
-      with:
-        name: kosmos-client-${{ env.commit }}-x86_64.apk
-        path: build/app/outputs/flutter-apk/app-x86_64-release.apk
-    - uses: actions/upload-artifact@v3
-      with:
-        name: kosmos-client-${{ env.commit }}.apk
-        path: build/app/outputs/flutter-apk/app-release.apk
+        name: kosmos-client-${{ env.commit }}
+        path: output/
+
