@@ -115,7 +115,7 @@ class Client {
             actionsAlignment: MainAxisAlignment.end,
             title: const Text('Erreur 403'),
             content: const Text(
-                'Cette erreur se produit en général quand le jeton d\'authentification n\'est plus valide auquel cas il faut se reconnecter.'),
+                'Cette erreur se produit en général quand le jeton d\'authentification n\'est plus valide auquel cas il faut se reconnecter, ou quand le mauvais portail de connexion est sélectionné, auquel cas il faut le changer dans les paramètres.'),
             actions: [
               TextButton(
                   onPressed: () {
