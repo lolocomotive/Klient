@@ -41,7 +41,9 @@ class MessageCard extends StatelessWidget {
           margin:
               _conversation.read ? const EdgeInsets.all(0) : const EdgeInsets.fromLTRB(0, 5, 5, 0),
           decoration: BoxDecoration(
-              color: _conversation.read ? Colors.transparent : Colors.blue, shape: BoxShape.circle),
+              color:
+                  _conversation.read ? Colors.transparent : Theme.of(context).colorScheme.primary,
+              shape: BoxShape.circle),
         ),
         Expanded(
           child: Column(
