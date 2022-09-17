@@ -112,9 +112,9 @@ class _TimetablePageState extends State<TimetablePage> {
                         } else if (snapshot.hasError) {
                           return Column(
                             children: [
-                              Global.defaultCard(
-                                child: Global.exceptionWidget(
-                                    snapshot.error! as Exception, snapshot.stackTrace!),
+                              DefaultCard(
+                                child: ExceptionWidget(
+                                    e: snapshot.error! as Exception, st: snapshot.stackTrace!),
                               ),
                             ],
                           );

@@ -56,7 +56,6 @@ class Global {
   static MessageSearchResultsState? messageSearchSuggestionState;
   static Widget? fab;
   static MainState? mainState;
-  static ThemeData? theme;
   static GlobalKey mainKey = GlobalKey();
   static const timeWidth = 32.0;
   static const heightPerHour = 120.0;
@@ -96,6 +95,8 @@ class Global {
   static AppLifecycleState? currentState;
 
   static bool retryNetworkRequests = false;
+
+  static ThemeData? theme;
 
   static initDB() async {
     final dbDir = await getDatabasesPath();
@@ -231,116 +232,6 @@ class Global {
       offset: Offset(0, 4),
     )
   ];
-  static Widget defaultCard(
-      {Widget? child,
-      double? elevation,
-      bool outlined = false,
-      EdgeInsets padding = const EdgeInsets.all(16)}) {
-    return Card(
-      margin: const EdgeInsets.all(8.0),
-      elevation: elevation ?? 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
-        side: outlined ? BorderSide(color: Global.theme!.colorScheme.outline) : BorderSide.none,
-      ),
-      //clipBehavior: Clip.antiAlias,
-      child: Padding(padding: padding, child: child),
-    );
-  }
-
-  static Widget exceptionWidget(Exception e, StackTrace st) {
-    String message = 'Erreur';
-    String? hint;
-    if (e is SocketException) {
-      message = 'Erreur de réseau';
-    } else if (e is DatabaseException) {
-      message = 'Erreur de base de données';
-      hint =
-          'Essayez de redémarrer l\'application. Si l\'erreur persiste effacez les données de l\'application et reconnectez-vous';
-    }
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Flexible(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Text(message),
-              if (hint != null)
-                Text(
-                  hint,
-                  style: TextStyle(
-                    color: Global.theme!.colorScheme.secondary,
-                  ),
-                ),
-            ],
-          ),
-        ),
-        TextButton(
-          onPressed: () {
-            Global.messengerKey.currentState?.hideCurrentSnackBar();
-            Global.navigatorKey.currentState!.push(
-              MaterialPageRoute(builder: (context) {
-                return Scaffold(
-                  body: NestedScrollView(
-                    floatHeaderSlivers: true,
-                    headerSliverBuilder: (context, innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
-                          title: Text(message),
-                          floating: true,
-                          forceElevated: innerBoxIsScrolled,
-                        )
-                      ];
-                    },
-                    body: Scrollbar(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              defaultCard(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Descriptif de l\'erreur',
-                                      style: TextStyle(
-                                          color: Global.theme!.colorScheme.primary,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(e.toString()),
-                                  ],
-                                ),
-                              ),
-                              defaultCard(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Stack trace',
-                                      style: TextStyle(
-                                          color: Global.theme!.colorScheme.primary,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(st.toString()),
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                );
-              }),
-            );
-          },
-          child: const Text("Plus d'infos"),
-        )
-      ],
-    );
-  }
 
   static void onException(Exception e, StackTrace st) {
     print(e);
@@ -352,7 +243,7 @@ class Global {
             content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            exceptionWidget(e, st),
+            ExceptionWidget(e: e, st: st),
           ],
         )),
       );
@@ -528,5 +419,143 @@ class Global {
         ));
       });
     }
+  }
+}
+
+class ExceptionWidget extends StatelessWidget {
+  final Exception e;
+  final StackTrace st;
+
+  const ExceptionWidget({
+    required this.e,
+    required this.st,
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    String message = 'Erreur';
+    String? hint;
+    if (e is SocketException) {
+      message = 'Erreur de réseau';
+    } else if (e is DatabaseException) {
+      message = 'Erreur de base de données';
+      hint =
+          'Essayez de redémarrer l\'application. Si l\'erreur persiste effacez les données de l\'application et reconnectez-vous';
+    }
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Flexible(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(message),
+              if (hint != null)
+                Text(
+                  hint,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+            ],
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Global.messengerKey.currentState?.hideCurrentSnackBar();
+            Global.navigatorKey.currentState!.push(
+              MaterialPageRoute(builder: (context) {
+                return Scaffold(
+                  body: NestedScrollView(
+                    floatHeaderSlivers: true,
+                    headerSliverBuilder: (context, innerBoxIsScrolled) {
+                      return [
+                        SliverAppBar(
+                          title: Text(message),
+                          floating: true,
+                          forceElevated: innerBoxIsScrolled,
+                        )
+                      ];
+                    },
+                    body: Scrollbar(
+                      child: SingleChildScrollView(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              DefaultCard(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Descriptif de l\'erreur',
+                                      style: TextStyle(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(e.toString()),
+                                  ],
+                                ),
+                              ),
+                              DefaultCard(
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      'Stack trace',
+                                      style: TextStyle(
+                                          color: Theme.of(context).colorScheme.primary,
+                                          fontWeight: FontWeight.bold),
+                                    ),
+                                    Text(st.toString()),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            );
+          },
+          child: const Text("Plus d'infos"),
+        )
+      ],
+    );
+  }
+}
+
+class DefaultCard extends StatelessWidget {
+  final double? elevation;
+
+  final bool outlined;
+
+  final Widget? child;
+
+  final EdgeInsets padding;
+
+  const DefaultCard(
+      {Key? key,
+      this.elevation,
+      this.outlined = false,
+      this.child,
+      this.padding = const EdgeInsets.all(16)})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: const EdgeInsets.all(8.0),
+      elevation: elevation ?? 1,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(8),
+        side: outlined ? BorderSide(color: Theme.of(context).colorScheme.outline) : BorderSide.none,
+      ),
+      //clipBehavior: Clip.antiAlias,
+      child: Padding(padding: padding, child: child),
+    );
   }
 }

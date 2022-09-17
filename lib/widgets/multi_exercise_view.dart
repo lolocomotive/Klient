@@ -37,7 +37,7 @@ class MultiExerciseView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Global.defaultCard(
+    return DefaultCard(
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
       child: Column(
         children: [

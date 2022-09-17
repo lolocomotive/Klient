@@ -56,7 +56,7 @@ class _ConversationPageState extends State<ConversationPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Global.theme!.colorScheme.background,
+      backgroundColor: Theme.of(context).colorScheme.background,
       body: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Column(
@@ -144,7 +144,7 @@ class _ConversationPageState extends State<ConversationPage> {
                                 },
                               ),
                               if (_conversation!.messages[index].attachments.isNotEmpty)
-                                Global.defaultCard(
+                                DefaultCard(
                                   elevation: 3,
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.stretch,

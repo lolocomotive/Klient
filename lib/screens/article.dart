@@ -48,7 +48,7 @@ class ArticlePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (_article.attachments.isNotEmpty)
-                  Global.defaultCard(
+                  DefaultCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [

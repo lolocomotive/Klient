@@ -109,9 +109,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           );
                         } else if (snapshot.hasError) {
-                          return Global.defaultCard(
-                              child: Global.exceptionWidget(
-                                  snapshot.error! as Exception, snapshot.stackTrace!));
+                          return DefaultCard(
+                              child: ExceptionWidget(
+                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
                         }
                         return snapshot.data!.isEmpty
                             ? Padding(
@@ -161,9 +161,9 @@ class _HomePageState extends State<HomePage> {
                             ),
                           );
                         } else if (snapshot.hasError) {
-                          return Global.defaultCard(
-                              child: Global.exceptionWidget(
-                                  snapshot.error! as Exception, snapshot.stackTrace!));
+                          return DefaultCard(
+                              child: ExceptionWidget(
+                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
                         }
 
                         return snapshot.data!.isEmpty
@@ -198,9 +198,9 @@ class _HomePageState extends State<HomePage> {
                           return Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Center(
-                              child: Global.defaultCard(
-                                child: Global.exceptionWidget(
-                                    snapshot.error! as Exception, snapshot.stackTrace!),
+                              child: DefaultCard(
+                                child: ExceptionWidget(
+                                    e: snapshot.error! as Exception, st: snapshot.stackTrace!),
                               ),
                             ),
                           );

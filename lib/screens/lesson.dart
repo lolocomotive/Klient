@@ -44,7 +44,7 @@ class LessonPage extends StatelessWidget {
       body: Scrollbar(
         child: ListView(
           children: [
-            Global.defaultCard(
+            DefaultCard(
               child: Column(
                 children: [
                   Text(

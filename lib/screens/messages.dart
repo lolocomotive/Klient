@@ -182,7 +182,7 @@ class MessagesPageState extends State<MessagesPage> {
               child: _e != null
                   ? Column(
                       children: [
-                        Global.defaultCard(child: Global.exceptionWidget(_e!, _st!)),
+                        DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
                       ],
                     )
                   : ListView.builder(

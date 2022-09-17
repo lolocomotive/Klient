@@ -189,7 +189,8 @@ class _CardContentsState extends State<_CardContents> {
                         },
                       ),
                 if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
-                  Global.defaultCard(
+                  DefaultCard(
+                      elevation: widget.widget.elevation * 2,
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
@@ -206,8 +207,7 @@ class _CardContentsState extends State<_CardContents> {
                             ),
                           ),
                         ],
-                      ),
-                      elevation: widget.widget.elevation * 2),
+                      )),
                 if (!widget.expanded &&
                     (widget.widget._exercise.attachments.isNotEmpty ||
                         widget.widget._exercise.htmlContent.length > _CardContents.cutLength))

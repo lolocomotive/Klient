@@ -60,7 +60,7 @@ class AboutPage extends StatelessWidget {
                   child: Text(
                       'Un client alternatif pour l\'ENT (kdecole/skolengo/kosmos education/mon bureau numérique etc...)'),
                 ),
-                Global.defaultCard(
+                DefaultCard(
                   child: FutureBuilder<AppInfo>(
                     future: getGitInfo(),
                     builder: ((context, snapshot) {
@@ -94,7 +94,7 @@ class AboutPage extends StatelessWidget {
                     }),
                   ),
                 ),
-                Global.defaultCard(
+                DefaultCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
@@ -184,7 +184,7 @@ class AboutPage extends StatelessWidget {
                     ],
                   ),
                 ),
-                Global.defaultCard(
+                DefaultCard(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
