@@ -123,8 +123,7 @@ class Conversation {
     final List<Conversation> conversations = [];
     String likeClause =
         "(upper(Subject) like upper('%$query%')) or (FullMessageContents like upper('%$query%'))";
-    String orderClause =
-        "(upper(Subject) like upper('%$query%')) + (upper(FullMessageContents) like upper('%$query%'))";
+    String orderClause = 'LastDate desc';
     final results = await Global.db!.query('Conversations',
         where: likeClause, orderBy: orderClause, limit: limit, offset: offset);
     for (final result in results) {
