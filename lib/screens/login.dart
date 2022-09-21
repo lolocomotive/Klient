@@ -41,10 +41,10 @@ class LoginState extends State<Login> {
   LoginState();
 
   _login() async {
-    setState(() {
-      _processing = true;
-    });
     if (_loginFormKey.currentState!.validate()) {
+      setState(() {
+        _processing = true;
+      });
       try {
         Global.client = await Client.login(_unameController.text, _pwdController.text);
         await Global.storage!.write(key: 'firstTime', value: 'true');
