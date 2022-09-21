@@ -91,6 +91,45 @@ class _HomePageState extends State<HomePage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text(
+                          'Travail à faire',
+                          style: TextStyle(fontSize: 20),
+                        ),
+                      ],
+                    ),
+                  ),
+                  FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
+                      future: _fetchHomework(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const Padding(
+                            padding: EdgeInsets.all(8.0),
+                            child: Center(
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
+                        } else if (snapshot.hasError) {
+                          return DefaultCard(
+                              child: ExceptionWidget(
+                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
+                        }
+
+                        return snapshot.data!.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text(
+                                  'Rien à afficher',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                )),
+                              )
+                            : HomeworkList(data: snapshot.data!);
+                      }),
                   const Padding(
                     padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
                     child: Text(
@@ -137,45 +176,6 @@ class _HomePageState extends State<HomePage> {
                                       .toList(),
                                 ),
                               );
-                      }),
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          'Travail à faire',
-                          style: TextStyle(fontSize: 20),
-                        ),
-                      ],
-                    ),
-                  ),
-                  FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
-                      future: _fetchHomework(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return DefaultCard(
-                              child: ExceptionWidget(
-                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
-                        }
-
-                        return snapshot.data!.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                  'Rien à afficher',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                )),
-                              )
-                            : HomeworkList(data: snapshot.data!);
                       }),
                   const Padding(
                     padding: EdgeInsets.all(16.0),
