@@ -216,6 +216,7 @@ class MessagesPageState extends State<MessagesPage> {
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(8),
                                   ),
+                                  clipBehavior: Clip.antiAlias,
                                   child: InkWell(
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
