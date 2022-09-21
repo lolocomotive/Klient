@@ -197,6 +197,7 @@ class DatabaseManager {
       try {
         final result = await Global.client!
             .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
+        Global.db!.delete('Grades');
         for (final grade in result['listeNotes']) {
           Global.db!.insert(
             'Grades',
