@@ -178,7 +178,9 @@ class _SetupPageState extends State<SetupPage> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            const Flexible(child: Text('Téléchargement de la liste des messages')),
+                            const Flexible(
+                                child: Text(
+                                    'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
                             step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                           ],
                         ),
