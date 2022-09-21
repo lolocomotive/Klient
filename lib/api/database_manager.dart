@@ -18,6 +18,7 @@
  */
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
@@ -147,9 +148,12 @@ class DatabaseManager {
       await Global.client!.addRequest(Action.getConversationDetail, (conversation) async {
         String messageContents = '';
         for (final message in conversation['participations']) {
+          //Generate a random message ID because the API returns the conversationID
+          final messageID = Random().nextInt(4294967296 /*2^32*/);
           batch.insert(
               'Messages',
               {
+                'ID': messageID,
                 'ParentID': id,
                 'HTMLContent': _cleanupHTML(message['corpsMessage']),
                 'Author': message['redacteur']['libelle'],
@@ -162,7 +166,7 @@ class DatabaseManager {
             batch.insert(
                 'MessageAttachments',
                 {
-                  'ParentID': message['id'],
+                  'ParentID': messageID,
                   'URL': attachment['url'],
                   'Name': attachment['name'],
                 },

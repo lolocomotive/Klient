@@ -48,7 +48,7 @@ class Message {
           result['HTMLContent'] as String,
           result['Author'] as String,
           DateTime.fromMillisecondsSinceEpoch(result['DateSent'] as int),
-          await MessageAttachment.fromMessageID(conversationID),
+          await MessageAttachment.fromMessageID(result['ID'] as int),
         ),
       );
     }
