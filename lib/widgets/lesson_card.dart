@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
@@ -44,112 +46,131 @@ class LessonCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          color: _lesson.isModified
-              ? Global.theme!.brightness == Brightness.dark
-                  ? const Color.fromARGB(255, 90, 77, 0)
-                  : Colors.yellow.shade100
-              : null,
           clipBehavior: Clip.antiAlias,
-          child: InkWell(
-            onTap: () {
-              Navigator.of(context).push(
-                MorpheusPageRoute(
-                  builder: (_) => LessonPage(_lesson),
-                  parentKey: _key,
-                ),
-              );
-            },
-            key: _key,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(8.0),
-                  color: _lesson.color.shade200,
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Text(
-                        _lesson.title,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      if (_lesson.isModified)
+          child: CustomPaint(
+            painter: _lesson.isModified ? StripesPainter() : null,
+            child: InkWell(
+              onTap: () {
+                Navigator.of(context).push(
+                  MorpheusPageRoute(
+                    builder: (_) => LessonPage(_lesson),
+                    parentKey: _key,
+                  ),
+                );
+              },
+              key: _key,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    color: _lesson.color.shade200,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                      children: [
                         Text(
-                          _lesson.modificationMessage!,
-                          style: const TextStyle(color: Colors.black),
+                          _lesson.title,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
                         ),
-                    ],
+                        if (_lesson.isModified)
+                          Text(
+                            _lesson.modificationMessage!,
+                            style: const TextStyle(color: Colors.black),
+                          ),
+                      ],
+                    ),
                   ),
-                ),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
-                              child: Text(
-                                _lesson.room,
-                                textAlign: TextAlign.center,
+                  Expanded(
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                                child: Text(
+                                  _lesson.room,
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-                              child: Text(
-                                '${_lesson.startTime} - ${_lesson.endTime}',
-                                textAlign: TextAlign.center,
+                              Padding(
+                                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+                                child: Text(
+                                  '${_lesson.startTime} - ${_lesson.endTime}',
+                                  textAlign: TextAlign.center,
+                                ),
                               ),
-                            ),
-                          ],
+                            ],
+                          ),
                         ),
-                      ),
-                      Opacity(
-                        opacity: .5,
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Row(
-                                children: [
-                                  if (_lesson.exercises
-                                      .where((e) => e.lessonFor == _lesson.id)
-                                      .isNotEmpty)
-                                    const Icon(Icons.event_outlined),
-                                  if (_lesson.exercises
-                                      .where((e) => e.type == ExerciseType.lessonContent)
-                                      .isNotEmpty)
-                                    const Icon(Icons.event_note_outlined),
-                                  if (_lesson.exercises
-                                      .where((e) =>
-                                              e.type == ExerciseType.exercise &&
-                                              e.parentLesson == _lesson.id &&
-                                              e.parentLesson !=
-                                                  e.lessonFor // don't display those twice
-                                          )
-                                      .isNotEmpty)
-                                    const Icon(Icons.update)
-                                ],
+                        Opacity(
+                          opacity: .5,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Row(
+                                  children: [
+                                    if (_lesson.exercises
+                                        .where((e) => e.lessonFor == _lesson.id)
+                                        .isNotEmpty)
+                                      const Icon(Icons.event_outlined),
+                                    if (_lesson.exercises
+                                        .where((e) => e.type == ExerciseType.lessonContent)
+                                        .isNotEmpty)
+                                      const Icon(Icons.event_note_outlined),
+                                    if (_lesson.exercises
+                                        .where((e) =>
+                                                e.type == ExerciseType.exercise &&
+                                                e.parentLesson == _lesson.id &&
+                                                e.parentLesson !=
+                                                    e.lessonFor // don't display those twice
+                                            )
+                                        .isNotEmpty)
+                                      const Icon(Icons.update)
+                                  ],
+                                ),
                               ),
-                            ),
-                          ],
-                        ),
-                      )
-                    ],
+                            ],
+                          ),
+                        )
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),
       ),
     );
+  }
+}
+
+class StripesPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final Paint foreground = Paint();
+    foreground.color =
+        Global.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
+    foreground.strokeWidth = 15;
+    const step = 45.0;
+
+    for (var i = 0; i < max(size.width, size.height) / (step / 2); i++) {
+      canvas.drawLine(Offset(-foreground.strokeWidth, step * i),
+          Offset(step * i, -foreground.strokeWidth), foreground);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) {
+    return true;
   }
 }
