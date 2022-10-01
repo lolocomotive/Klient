@@ -54,6 +54,7 @@ class GradeCard extends StatelessWidget {
                     Text(
                       Global.dateToString(_grade.date),
                       textAlign: TextAlign.center,
+                      style: const TextStyle(color: Colors.black),
                     ),
                   ],
                 ),

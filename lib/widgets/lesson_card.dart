@@ -78,7 +78,11 @@ class LessonCard extends StatelessWidget {
                           color: Colors.black,
                         ),
                       ),
-                      if (_lesson.isModified) Text(_lesson.modificationMessage!),
+                      if (_lesson.isModified)
+                        Text(
+                          _lesson.modificationMessage!,
+                          style: const TextStyle(color: Colors.black),
+                        ),
                     ],
                   ),
                 ),
