@@ -111,14 +111,15 @@ class Global {
 
     final password = await storage!.read(key: 'dbPassword') ??
         base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
-    //FIXME REMOVE THAT!
-    print('Databse password: $password');
     print('Database URL: $dbPath');
     storage!.write(key: 'dbPassword', value: password);
     try {
       Global.db = await openDatabase(dbPath, password: password);
-    } on DatabaseException catch (_) {
+    } on DatabaseException catch (e, st) {
       // Delete database if password is wrong
+      print(e);
+      print(st);
+      print('Deleting database');
       await deleteDatabase(dbPath);
       Global.db = await openDatabase(dbPath, password: password);
     }
