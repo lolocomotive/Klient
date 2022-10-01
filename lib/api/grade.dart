@@ -24,13 +24,9 @@ class Grade {
   num grade;
   num of;
   DateTime date;
+  String? gradeText;
 
-  Grade(
-    this.subject,
-    this.grade,
-    this.of,
-    this.date,
-  );
+  Grade(this.subject, this.grade, this.of, this.date, this.gradeText);
 
   static Future<List<Grade>> fetchAll() async {
     final List<Grade> grades = [];
@@ -41,6 +37,7 @@ class Grade {
         result['Grade'] as num,
         result['Of'] as num,
         DateTime.fromMillisecondsSinceEpoch(result['Date'] as int),
+        result['GradeText'] as String?,
       ));
     }
     return grades;

@@ -199,11 +199,14 @@ class DatabaseManager {
             .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
         Global.db!.delete('Grades');
         for (final grade in result['listeNotes']) {
+          final double value =
+              double.tryParse((grade['note'] as String).replaceAll(',', '.')) ?? -1;
           Global.db!.insert(
             'Grades',
             {
               'Subject': grade['matiere'] as String,
-              'Grade': double.parse((grade['note'] as String).replaceAll(',', '.')),
+              'Grade': value,
+              'GradeString': value == -1 ? grade['note'] : null,
               'Of': (grade['bareme'] as int).toDouble(),
               'Date': grade['date'] as int,
               'UniqueID': (grade['date'] as int).toString() +

@@ -190,6 +190,7 @@ class Global {
       ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
       Subject TEXT NOT NULL,
       Grade REAL NOT NULL,
+      GradeString TEXT,
       Of REAL NOT NULL,
       Date INT NOT NULL,
       UniqueID TEXT NOT NULL UNIQUE

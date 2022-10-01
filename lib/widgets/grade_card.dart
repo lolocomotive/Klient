@@ -68,7 +68,9 @@ class GradeCard extends StatelessWidget {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Text(
-                            _grade.grade.toString().replaceAll('.', ','),
+                            _grade.grade == -1
+                                ? _grade.gradeText!
+                                : _grade.grade.toString().replaceAll('.', ','),
                             style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                           ),
                           const Divider(height: 10),
