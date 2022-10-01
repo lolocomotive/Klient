@@ -23,7 +23,7 @@ import 'dart:math';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../global.dart';
 import 'conversation.dart';

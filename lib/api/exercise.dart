@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/api/exercise_attachment.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import '../global.dart';
 

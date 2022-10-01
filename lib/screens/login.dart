@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/screens/about.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Login extends StatefulWidget {
   const Login(this.onLogin, {Key? key}) : super(key: key);

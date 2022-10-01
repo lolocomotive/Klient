@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/api/news_article.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 /// An attachment that is linked to a [NewsArticle] (only it's uid to avoid circular references though)
 class NewsAttachment {

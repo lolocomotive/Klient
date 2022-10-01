@@ -17,7 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
@@ -39,7 +41,7 @@ import 'package:kosmos_client/screens/multiview.dart';
 import 'package:kosmos_client/screens/settings.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:restart_app/restart_app.dart';
-import 'package:sqflite/sqflite.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Global {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -98,14 +100,20 @@ class Global {
 
   static ThemeData? theme;
 
+  /// Shared preferences need to be initialized first
   static initDB() async {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
     if (kDebugMode) {
       //await deleteDatabase(dbPath);
     }
+    if (storage == null) throw Exception('Shared preferences need to be initialized first!');
+
+    final password = await storage!.read(key: 'database') ??
+        base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
+
     print('Database URL: $dbPath');
-    Global.db = await openDatabase(dbPath);
+    Global.db = await openDatabase(dbPath, password: password);
     final queryResult = await Global.db!.query('sqlite_master');
     final tables = [
       'NewsArticles',
@@ -285,8 +293,8 @@ class Global {
             print('$key:$value');
           });
           await Global.storage!.deleteAll();
-          await Global.initDB();
           await Global.readPrefs();
+          await Global.initDB();
           await Restart.restartApp();
           break;
         case 'Initial setup':

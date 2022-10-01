@@ -30,7 +30,7 @@ dependencies:
   flutter:
     sdk: flutter
   http: ^0.13.4
-  sqflite: ^2.0.1
+  sqflite_sqlcipher: ^2.1.1
   path_provider: ^2.0.8
   flutter_secure_storage: ^5.0.2
   html_unescape: ^2.0.0
