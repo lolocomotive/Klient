@@ -109,11 +109,19 @@ class Global {
     }
     if (storage == null) throw Exception('Shared preferences need to be initialized first!');
 
-    final password = await storage!.read(key: 'database') ??
+    final password = await storage!.read(key: 'dbPassword') ??
         base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
-
+    //FIXME REMOVE THAT!
+    print('Databse password: $password');
     print('Database URL: $dbPath');
-    Global.db = await openDatabase(dbPath, password: password);
+    storage!.write(key: 'dbPassword', value: password);
+    try {
+      Global.db = await openDatabase(dbPath, password: password);
+    } on DatabaseException catch (_) {
+      // Delete database if password is wrong
+      await deleteDatabase(dbPath);
+      Global.db = await openDatabase(dbPath, password: password);
+    }
     final queryResult = await Global.db!.query('sqlite_master');
     final tables = [
       'NewsArticles',
