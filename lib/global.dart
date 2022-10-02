@@ -141,7 +141,7 @@ class Global {
     }
     if (tables.isNotEmpty) {
       await deleteDatabase(dbPath);
-      Global.db = await openDatabase(dbPath);
+      Global.db = await openDatabase(dbPath, password: password);
 
       print('Initializing database');
       await Global.db!.execute('''
