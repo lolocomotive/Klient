@@ -13,9 +13,10 @@ Any contributions (Pull requests, feature requests and bug reports) are very wel
 It's just a normal flutter project (refer to the flutter documentation on how to build). You may encouter issues if you are trying to build without the git repository.
 
 ## Screenshots
-![Home](./screenshots/Phone_Home.png)
-![Messages](./screenshots/Phone_Messages.png)
-![Home](./screenshots/Phone_Timetable.png)
+
+| Home                                  | Messages                                      | Timetable                                       |
+| ------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
+| ![Home](./screenshots/Phone_Home.png) | ![Messages](./screenshots/Phone_Messages.png) | ![Timetable](./screenshots/Phone_Timetable.png) |
 
 ## To do
 
