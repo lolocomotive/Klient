@@ -210,6 +210,7 @@ class MessagesPageState extends State<MessagesPage> {
                             Stack(
                               children: [
                                 Card(
+                                  key: parentKey,
                                   margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
                                       index == _conversations.length - 1 ? 14 : 7),
                                   elevation: 1,
@@ -220,7 +221,7 @@ class MessagesPageState extends State<MessagesPage> {
                                   child: InkWell(
                                     child: Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: MessageCard(_conversations[index], parentKey),
+                                      child: MessageCard(_conversations[index]),
                                     ),
                                     onTap: () {
                                       if (_selection.isNotEmpty) {

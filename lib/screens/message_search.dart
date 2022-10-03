@@ -108,13 +108,11 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
               ))
             : ListView.separated(
                 itemBuilder: (context, index) {
-                  const parentKey = null; //FIXME fix transition //GlobalKey();
                   return InkWell(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: MessageCard(
                           _conversations![index],
-                          parentKey,
                         ),
                       ),
                       onTap: () {

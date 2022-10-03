@@ -25,9 +25,8 @@ import '../global.dart';
 
 class MessageCard extends StatelessWidget {
   final Conversation _conversation;
-  final GlobalKey? _parentKey;
 
-  const MessageCard(this._conversation, this._parentKey, {Key? key}) : super(key: key);
+  const MessageCard(this._conversation, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +46,6 @@ class MessageCard extends StatelessWidget {
         ),
         Expanded(
           child: Column(
-            key: _parentKey,
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
