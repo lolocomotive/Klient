@@ -277,32 +277,42 @@ class _HomeworkListState extends State<HomeworkList> {
           ),
         ),
       ),
-      ...mutableData!.map((homework) {
-        if (!_showDone && homework.key.done) {
-          return Container();
-        }
-        return Opacity(
-          opacity: homework.key.done ? .6 : 1,
-          child: ExerciceCard(
-            homework.key,
-            homework.value,
-            elevation: 1,
-            showDate: true,
-            showSubject: true,
-            onMarkedDone: (bool done) {
-              mutableData!.remove(homework);
-              MapEntry<Exercise, Lesson> modified =
-                  MapEntry(homework.key..done = done, homework.value);
-              mutableData!.add(modified);
-              mutableData!.sort(
-                (a, b) =>
-                    a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
-              );
-              setState(() {});
-            },
-          ),
-        );
-      }).toList(),
+      if (widget._data.where((element) => element.key.done == false).isEmpty && !_showDone)
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Center(
+              child: Text(
+            'Tout a été fait :)',
+            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+          )),
+        )
+      else
+        ...mutableData!.map((homework) {
+          if (!_showDone && homework.key.done) {
+            return Container();
+          }
+          return Opacity(
+            opacity: homework.key.done ? .6 : 1,
+            child: ExerciceCard(
+              homework.key,
+              homework.value,
+              elevation: 1,
+              showDate: true,
+              showSubject: true,
+              onMarkedDone: (bool done) {
+                mutableData!.remove(homework);
+                MapEntry<Exercise, Lesson> modified =
+                    MapEntry(homework.key..done = done, homework.value);
+                mutableData!.add(modified);
+                mutableData!.sort(
+                  (a, b) =>
+                      a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+                );
+                setState(() {});
+              },
+            ),
+          );
+        }).toList(),
     ]);
   }
 }
