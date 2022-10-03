@@ -127,9 +127,9 @@ class Client {
                   },
                   child: Text(
                     'ANNULER',
-                    style: TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                    style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                   )),
-              TextButton(
+              ElevatedButton(
                   onPressed: () {
                     Global.storage!.delete(key: 'token');
                     Global.navigatorKey.currentState!
