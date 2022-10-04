@@ -106,7 +106,7 @@ class Conversation {
                   : ''));
       children.add(TextSpan(
           text: replaceWith[i],
-          style: TextStyle(backgroundColor: background ?? const Color.fromARGB(70, 255, 255, 0))));
+          style: TextStyle(backgroundColor: background ?? Global.theme!.highlightColor)));
       children.add(TextSpan(
           text: split[i + 1].substring(0, min(75, split[i + 1].length)) +
               (split[i + 1].length > 75 ? '...\n' : '')));
