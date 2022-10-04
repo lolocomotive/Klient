@@ -34,15 +34,19 @@ class MessageCard extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Container(
-          width: _conversation.read ? 0 : 8,
-          height: _conversation.read ? 0 : 8,
-          margin:
-              _conversation.read ? const EdgeInsets.all(0) : const EdgeInsets.fromLTRB(0, 5, 5, 0),
-          decoration: BoxDecoration(
-              color:
-                  _conversation.read ? Colors.transparent : Theme.of(context).colorScheme.primary,
-              shape: BoxShape.circle),
+        Transform.translate(
+          offset: const Offset(0, 3),
+          child: Container(
+            width: _conversation.read ? 0 : 8,
+            height: _conversation.read ? 0 : 8,
+            margin: _conversation.read
+                ? const EdgeInsets.all(0)
+                : const EdgeInsets.fromLTRB(0, 5, 5, 0),
+            decoration: BoxDecoration(
+                color:
+                    _conversation.read ? Colors.transparent : Theme.of(context).colorScheme.primary,
+                shape: BoxShape.circle),
+          ),
         ),
         Expanded(
           child: Column(
