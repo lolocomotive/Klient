@@ -142,9 +142,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         );
                       }),
                   Container(
-                    color: Global.theme!.colorScheme.brightness == Brightness.dark
-                        ? Colors.black38
-                        : Colors.white60,
+                    color: Theme.of(context).colorScheme.background.withAlpha(150),
                     width: Global.timeWidth,
                     child: MediaQuery.removePadding(
                       removeTop: true,
