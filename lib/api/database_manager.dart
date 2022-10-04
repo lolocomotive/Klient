@@ -287,6 +287,11 @@ class DatabaseManager {
       //TODO clean up this horrific code
       final result = await Global.client!
           .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
+
+      await Global.db!.delete('Lessons');
+      await Global.db!.delete('Exercises');
+      await Global.db!.delete('ExerciseAttachments');
+
       for (final day in result['listeJourCdt']) {
         for (final lesson in day['listeSeances']) {
           //Check if this lesson is the same as the previous
