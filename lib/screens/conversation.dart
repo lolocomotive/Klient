@@ -27,12 +27,19 @@ import 'package:kosmos_client/global.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConversationPage extends StatefulWidget {
-  const ConversationPage({Key? key, required this.onDelete}) : super(key: key);
+  const ConversationPage(
+      {Key? key, required this.onDelete, required this.id, required this.subject})
+      : super(key: key);
 
   @override
-  State<ConversationPage> createState() => _ConversationPageState();
+  // Ignore here because I haven't found a way to do it in another way.
+  // Using widget.id will not work because _ConversationPageState needs to access id from the constructor.
+  // ignore: no_logic_in_create_state
+  State<ConversationPage> createState() => _ConversationPageState(id);
 
   final Function onDelete;
+  final int id;
+  final String subject;
 }
 
 class _ConversationPageState extends State<ConversationPage> {
@@ -40,8 +47,8 @@ class _ConversationPageState extends State<ConversationPage> {
   final TextEditingController _textFieldController = TextEditingController();
   bool _busy = false;
   bool _showReply = false;
-  _ConversationPageState() {
-    Conversation.byID(Global.currentConversation!).then((conversation) {
+  _ConversationPageState(id) {
+    Conversation.byID(id).then((conversation) {
       if (!conversation!.read) {
         Global.client!.markConversationRead(conversation);
         Global.messagesState!.reloadFromDB();
@@ -75,9 +82,7 @@ class _ConversationPageState extends State<ConversationPage> {
                             },
                             icon: const Icon(Icons.delete))
                       ],
-                      title: Text(_conversation != null
-                          ? _conversation!.subject
-                          : Global.currentConversationSubject!),
+                      title: Text(_conversation != null ? _conversation!.subject : widget.subject),
                       floating: true,
                     ),
                   ];

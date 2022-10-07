@@ -40,19 +40,28 @@ class MessagesPageState extends State<MessagesPage> {
   final List<int> _selection = [];
   Exception? _e;
   StackTrace? _st;
+  bool _sideBySide = false;
+  String? currentSubject;
+  int? currentId;
 
   void openConversation(
       BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
-    Global.currentConversation = conversationId;
-    Global.currentConversationSubject = conversationSubject;
-    Navigator.of(context).push(
-      MorpheusPageRoute(
-        builder: (_) => ConversationPage(
-          onDelete: deleteConversationFromList,
+    if (_sideBySide) {
+      setState(() {
+        currentId = conversationId;
+        currentSubject = conversationSubject;
+      });
+    } else {
+      Navigator.of(context).push(
+        MorpheusPageRoute(
+          builder: (_) => ConversationPage(
+              onDelete: deleteConversationFromList,
+              subject: conversationSubject,
+              id: conversationId),
+          parentKey: parentKey,
         ),
-        parentKey: parentKey,
-      ),
-    );
+      );
+    }
   }
 
   reloadFromDB() {
@@ -71,6 +80,8 @@ class MessagesPageState extends State<MessagesPage> {
 
   MessagesPageState() {
     Global.messagesState = this;
+    currentId = null;
+    currentSubject = null;
     Conversation.fetchAll().then((conversations) {
       if (conversations.isEmpty) {
         refresh();
@@ -105,174 +116,202 @@ class MessagesPageState extends State<MessagesPage> {
       },
       child: Container(
         key: key,
-        child: NestedScrollView(
-          floatHeaderSlivers: true,
-          headerSliverBuilder: (ctx, innerBoxIsScrolled) {
-            return <Widget>[
-              SliverAppBar(
-                leading: _selection.isNotEmpty
-                    ? IconButton(
-                        onPressed: () {
-                          setState(() {
-                            while (_selection.isNotEmpty) {
-                              _selection.removeLast();
-                            }
-                          });
-                        },
-                        icon: Icon(
-                          Icons.arrow_back,
-                          color: Theme.of(context).colorScheme.onPrimary,
-                        ))
-                    : null,
-                backgroundColor: _selection.isNotEmpty
-                    ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.background,
-                actions: [
-                  if (_selection.isNotEmpty)
-                    IconButton(
-                      onPressed: () async {
-                        //TODO show that progress is being made
-
-                        deleteSelection(_selection);
-                        while (_selection.isNotEmpty) {
-                          _selection.removeLast();
-                        }
-                        setState(() {});
-                      },
-                      icon: Icon(
-                        Icons.delete,
-                        color: Theme.of(context).colorScheme.onPrimary,
-                      ),
-                    ),
-                  if (!_selection.isNotEmpty)
-                    IconButton(
-                      icon: const Icon(Icons.search),
-                      onPressed: () {
-                        showSearch(
-                          context: context,
-                          delegate: MessagesSearchDelegate(),
-                        );
-                      },
-                    ),
-                  if (!_selection.isNotEmpty) Global.popupMenuButton
-                ],
-                title: Text(
-                  _selection.isNotEmpty
-                      ? _selection.length == 1
-                          ? _conversations[_selection[0]].subject
-                          : '${_selection.length} conversations'
-                      : 'Messagerie',
-                  style: TextStyle(
-                    color: _selection.isNotEmpty
-                        ? Theme.of(context).colorScheme.onPrimary
-                        : Theme.of(context).colorScheme.onBackground,
-                  ),
-                ),
-                floating: false,
-                forceElevated: innerBoxIsScrolled,
-                pinned: _selection.isNotEmpty,
-              )
-            ];
-          },
-          body: RefreshIndicator(
-            onRefresh: () async {
-              await refresh();
-            },
-            child: Scrollbar(
-              child: _e != null
-                  ? Column(
-                      children: [
-                        DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
-                      ],
-                    )
-                  : ListView.builder(
-                      itemCount: _conversations.isEmpty
-                          ? 1
-                          : _conversations.length + (Global.loadingMessages ? 1 : 0),
-                      padding: const EdgeInsets.all(0),
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0 && _conversations.isEmpty ||
-                            index == _conversations.length) {
-                          return Padding(
-                            padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: const [
-                                CircularProgressIndicator(),
-                              ],
-                            ),
-                          );
-                        }
-                        final parentKey = GlobalKey();
-                        return Column(
-                          children: [
-                            Stack(
-                              children: [
-                                Card(
-                                  key: parentKey,
-                                  margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7, 14,
-                                      index == _conversations.length - 1 ? 14 : 7),
-                                  elevation: 1,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  clipBehavior: Clip.antiAlias,
-                                  child: InkWell(
-                                    child: Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: MessageCard(_conversations[index]),
-                                    ),
-                                    onTap: () {
-                                      if (_selection.isNotEmpty) {
-                                        if (_selection.contains(index)) {
-                                          setState(() {
-                                            _selection.remove(index);
-                                          });
-                                          return;
+        child: LayoutBuilder(builder: (context, constraints) {
+          _sideBySide = constraints.maxWidth > 1200;
+          return Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1400),
+              child: Row(
+                children: [
+                  Flexible(
+                    flex: 1,
+                    child: NestedScrollView(
+                      floatHeaderSlivers: true,
+                      headerSliverBuilder: (ctx, innerBoxIsScrolled) {
+                        return <Widget>[
+                          SliverAppBar(
+                            leading: _selection.isNotEmpty
+                                ? IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        while (_selection.isNotEmpty) {
+                                          _selection.removeLast();
                                         }
-                                        _selection.add(index);
-                                        setState(() {});
-                                      } else {
-                                        openConversation(
-                                            context,
-                                            parentKey,
-                                            _conversations[index].id,
-                                            _conversations[index].subject);
-                                      }
+                                      });
                                     },
-                                    onLongPress: () {
-                                      if (_selection.contains(index)) {
-                                        setState(() {
-                                          _selection.remove(index);
-                                        });
-                                        return;
-                                      }
-                                      _selection.add(index);
-                                      setState(() {});
-                                    },
+                                    icon: Icon(
+                                      Icons.arrow_back,
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                    ))
+                                : null,
+                            backgroundColor: _selection.isNotEmpty
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.background,
+                            actions: [
+                              if (_selection.isNotEmpty)
+                                IconButton(
+                                  onPressed: () async {
+                                    //TODO show that progress is being made
+
+                                    deleteSelection(_selection);
+                                    while (_selection.isNotEmpty) {
+                                      _selection.removeLast();
+                                    }
+                                    setState(() {});
+                                  },
+                                  icon: Icon(
+                                    Icons.delete,
+                                    color: Theme.of(context).colorScheme.onPrimary,
                                   ),
                                 ),
-                                Positioned.fill(
-                                  child: IgnorePointer(
-                                    child: AnimatedOpacity(
-                                      duration: const Duration(milliseconds: 300),
-                                      opacity: (_selection.contains(index)) ? .3 : 0,
-                                      child: Container(
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                              ],
+                              if (!_selection.isNotEmpty)
+                                IconButton(
+                                  icon: const Icon(Icons.search),
+                                  onPressed: () {
+                                    showSearch(
+                                      context: context,
+                                      delegate: MessagesSearchDelegate(),
+                                    );
+                                  },
+                                ),
+                              if (!_selection.isNotEmpty) Global.popupMenuButton
+                            ],
+                            title: Text(
+                              _selection.isNotEmpty
+                                  ? _selection.length == 1
+                                      ? _conversations[_selection[0]].subject
+                                      : '${_selection.length} conversations'
+                                  : 'Messagerie',
+                              style: TextStyle(
+                                color: _selection.isNotEmpty
+                                    ? Theme.of(context).colorScheme.onPrimary
+                                    : Theme.of(context).colorScheme.onBackground,
+                              ),
                             ),
-                          ],
-                        );
+                            floating: false,
+                            forceElevated: innerBoxIsScrolled,
+                            pinned: _selection.isNotEmpty,
+                          )
+                        ];
                       },
+                      body: RefreshIndicator(
+                        onRefresh: () async {
+                          await refresh();
+                        },
+                        child: Scrollbar(
+                          child: _e != null
+                              ? Column(
+                                  children: [
+                                    DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
+                                  ],
+                                )
+                              : ListView.builder(
+                                  itemCount: _conversations.isEmpty
+                                      ? 1
+                                      : _conversations.length + (Global.loadingMessages ? 1 : 0),
+                                  padding: const EdgeInsets.all(0),
+                                  itemBuilder: (BuildContext context, int index) {
+                                    if (index == 0 && _conversations.isEmpty ||
+                                        index == _conversations.length) {
+                                      return Padding(
+                                        padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
+                                        child: Column(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          crossAxisAlignment: CrossAxisAlignment.center,
+                                          children: const [
+                                            CircularProgressIndicator(),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                    final parentKey = GlobalKey();
+                                    return Column(
+                                      children: [
+                                        Stack(
+                                          children: [
+                                            Card(
+                                              key: parentKey,
+                                              margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7,
+                                                  14, index == _conversations.length - 1 ? 14 : 7),
+                                              elevation: 1,
+                                              shape: RoundedRectangleBorder(
+                                                borderRadius: BorderRadius.circular(8),
+                                              ),
+                                              clipBehavior: Clip.antiAlias,
+                                              child: InkWell(
+                                                child: Padding(
+                                                  padding: const EdgeInsets.all(8.0),
+                                                  child: MessageCard(_conversations[index]),
+                                                ),
+                                                onTap: () {
+                                                  if (_selection.isNotEmpty) {
+                                                    if (_selection.contains(index)) {
+                                                      setState(() {
+                                                        _selection.remove(index);
+                                                      });
+                                                      return;
+                                                    }
+                                                    _selection.add(index);
+                                                    setState(() {});
+                                                  } else {
+                                                    openConversation(
+                                                        context,
+                                                        parentKey,
+                                                        _conversations[index].id,
+                                                        _conversations[index].subject);
+                                                  }
+                                                },
+                                                onLongPress: () {
+                                                  if (_selection.contains(index)) {
+                                                    setState(() {
+                                                      _selection.remove(index);
+                                                    });
+                                                    return;
+                                                  }
+                                                  _selection.add(index);
+                                                  setState(() {});
+                                                },
+                                              ),
+                                            ),
+                                            Positioned.fill(
+                                              child: IgnorePointer(
+                                                child: AnimatedOpacity(
+                                                  duration: const Duration(milliseconds: 300),
+                                                  opacity: (_selection.contains(index)) ? .3 : 0,
+                                                  child: Container(
+                                                    color: Theme.of(context).colorScheme.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                            )
+                                          ],
+                                        ),
+                                      ],
+                                    );
+                                  },
+                                ),
+                        ),
+                      ),
                     ),
+                  ),
+                  if (_sideBySide)
+                    Flexible(
+                      flex: 2,
+                      child: currentId == null
+                          ? const Center(
+                              child: Text('Cliquer sur une conversation pour l\'afficher ici'))
+                          : ConversationPage(
+                              key: Key(currentId.toString()),
+                              id: currentId!,
+                              subject: currentSubject!,
+                              onDelete: deleteConversationFromList,
+                            ),
+                    )
+                ],
+              ),
             ),
-          ),
-        ),
+          );
+        }),
       ),
     );
   }
@@ -291,6 +330,17 @@ class MessagesPageState extends State<MessagesPage> {
     for (var index in selection) {
       deleteConversationFromList(_conversations[index]);
     }
+  }
+}
+
+class SideConversationView extends StatelessWidget {
+  const SideConversationView({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Cliquer sur un message pour l\'afficher ici'));
   }
 }
 

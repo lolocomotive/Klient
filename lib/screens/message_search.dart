@@ -116,12 +116,12 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                         ),
                       ),
                       onTap: () {
-                        Global.currentConversation = _conversations![index].id;
-                        Global.currentConversationSubject = _conversations![index].subject;
                         Navigator.of(context).push(
                           MaterialPageRoute(
-                            builder: (_) => const ConversationPage(
+                            builder: (_) => ConversationPage(
                               onDelete: deleteConversation,
+                              id: _conversations![index].id,
+                              subject: _conversations![index].subject,
                             ),
                           ),
                         );

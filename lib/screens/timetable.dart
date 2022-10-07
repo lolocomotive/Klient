@@ -40,7 +40,7 @@ class TimetablePage extends StatefulWidget {
 }
 
 class _TimetablePageState extends State<TimetablePage> {
-  PageController _pageController = PageController(viewportFraction: 0.8);
+  PageController _pageController = PageController();
   int _page = 0;
   Future<List<List<Lesson>>> _getCalendar() async {
     List<List<Lesson>> r = [];
@@ -119,27 +119,48 @@ class _TimetablePageState extends State<TimetablePage> {
                             ],
                           );
                         }
-                        return PageView.builder(
-                          controller: _pageController,
-                          itemBuilder: (ctx, index) {
-                            if (snapshot.data!.isEmpty) {
-                              return Column(
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: Text(
-                                      'Rien à afficher',
-                                      style:
-                                          TextStyle(color: Theme.of(context).colorScheme.secondary),
+                        return LayoutBuilder(builder: (context, constraints) {
+                          var fraction = 0.8;
+                          if (constraints.maxWidth > 700) {
+                            fraction = 0.4;
+                          }
+                          if (constraints.maxWidth > 1200) {
+                            fraction = 0.9;
+                          }
+                          _pageController = PageController(
+                              viewportFraction: fraction,
+                              initialPage: constraints.maxWidth > 1200
+                                  ? dayToWeek(_pageController.initialPage, snapshot.data!)
+                                  : _pageController.initialPage);
+                          return PageView.builder(
+                            pageSnapping: fraction != 0.4,
+                            controller: _pageController,
+                            itemBuilder: (ctx, index) {
+                              if (snapshot.data!.isEmpty) {
+                                return Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Rien à afficher',
+                                        style: TextStyle(
+                                            color: Theme.of(context).colorScheme.secondary),
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              );
-                            }
-                            return DayView(snapshot.data![index]);
-                          },
-                          itemCount: max(snapshot.data!.length, 1),
-                        );
+                                  ],
+                                );
+                              }
+                              return constraints.maxWidth > 1200
+                                  ? WeekView(snapshot.data!, index)
+                                  : DayView(snapshot.data![index]);
+                            },
+                            itemCount: max(
+                                constraints.maxWidth > 1200
+                                    ? getWeekCount(snapshot.data!)
+                                    : snapshot.data!.length,
+                                1),
+                          );
+                        });
                       }),
                   Container(
                     color: Theme.of(context).colorScheme.background.withAlpha(150),
@@ -171,5 +192,73 @@ class _TimetablePageState extends State<TimetablePage> {
         ),
       ),
     );
+  }
+}
+
+int getWeekCount(List<List<Lesson>> data) {
+  var weeks = 1;
+  for (final day in data) {
+    if (day[0].date.weekday == DateTime.monday) {
+      weeks++;
+    }
+  }
+  return weeks;
+}
+
+int dayToWeek(int d, List<List<Lesson>> data) {
+  var week = 1;
+  int i = 0;
+  for (final day in data) {
+    if (day[0].date.weekday == DateTime.monday) {
+      week++;
+    }
+    i++;
+    if (d == i) return week;
+  }
+  return 0;
+}
+
+class WeekView extends StatelessWidget {
+  WeekView(List<List<Lesson>> data, index, {Key? key}) : super(key: key) {
+    _week = [];
+    var currentWeek = 0;
+    for (final day in data) {
+      if (day[0].date.weekday == DateTime.monday) {
+        currentWeek++;
+      }
+      if (currentWeek == index) {
+        if (_week.isEmpty && day[0].date.weekday > 1) {
+          for (var i = 1; i < day[0].date.weekday; i++) {
+            _week.add([]);
+          }
+        }
+        _week.add(day);
+      }
+    }
+    while (_week.length < 5) {
+      _week.add([]);
+    }
+  }
+  late final List<List<Lesson>> _week;
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+        child: Row(
+      children: [
+        ..._week.map((e) {
+          if (e.isEmpty) {
+            return Expanded(
+                child: Container(
+              color: Theme.of(context).colorScheme.onBackground.withAlpha(30),
+              child: const Center(
+                child: Text('Journée vide'),
+              ),
+            ));
+          }
+          return Expanded(child: DayView(e));
+        }).toList()
+      ],
+    ));
   }
 }

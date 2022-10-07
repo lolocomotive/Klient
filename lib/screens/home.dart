@@ -37,34 +37,6 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  Future<List<List<Grade>>> _fetchGrades() async {
-    final grades = await Grade.fetchAll();
-    List<List<Grade>> r = [];
-    for (int i = 0; i < grades.length; i++) {
-      if (i % 2 == 0) {
-        r.add([grades[i]]);
-      } else {
-        r[(i / 2).floor()].add(grades[i]);
-      }
-    }
-    return r;
-  }
-
-  Future<List<MapEntry<Exercise, Lesson>>> _fetchHomework() async {
-    final exercises = await Exercise.fetchAll();
-    List<MapEntry<Exercise, Lesson>> r = [];
-    for (final exercise in exercises) {
-      if (exercise.lessonFor == null) continue;
-      if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-      r.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
-    }
-    r.sort(
-      (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
-    );
-
-    return r;
-  }
-
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
@@ -88,145 +60,261 @@ class _HomePageState extends State<HomePage> {
           }),
           child: Scrollbar(
             child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Padding(
-                    padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text(
-                          'Travail à faire',
-                          style: TextStyle(fontSize: 20),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1400),
+                  child: LayoutBuilder(builder: (context, constraints) {
+                    if (constraints.maxWidth > 1200) {
+                      return Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: const [
+                                SectionTitle('Travail à faire'),
+                                HomeworkListWrapper(),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: const [
+                                SectionTitle('Dernières notes'),
+                                GradeList(),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                              child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: const [
+                              SectionTitle('Actualités'),
+                              ArticleList(),
+                            ],
+                          ))
+                        ],
+                      );
+                    }
+                    if (constraints.maxWidth < 700) {
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: const [
+                          SectionTitle('Travail à faire'),
+                          HomeworkListWrapper(),
+                          SectionTitle('Dernières notes'),
+                          GradeList(),
+                          SectionTitle('Actualités'),
+                          ArticleList(),
+                        ],
+                      );
+                    }
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: const [
+                              SectionTitle('Travail à faire'),
+                              HomeworkListWrapper(),
+                              SectionTitle('Dernières notes'),
+                              GradeList(),
+                            ],
+                          ),
                         ),
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: const [
+                            SectionTitle('Actualités'),
+                            ArticleList(),
+                          ],
+                        ))
                       ],
-                    ),
-                  ),
-                  FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
-                      future: _fetchHomework(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return DefaultCard(
-                              child: ExceptionWidget(
-                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
-                        }
-
-                        return snapshot.data!.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                  'Rien à afficher',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                )),
-                              )
-                            : HomeworkList(data: snapshot.data!);
-                      }),
-                  const Padding(
-                    padding: EdgeInsets.fromLTRB(16.0, 24, 16, 8),
-                    child: Text(
-                      'Dernières notes',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                  FutureBuilder<List<List<Grade>>>(
-                      future: _fetchGrades(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return DefaultCard(
-                              child: ExceptionWidget(
-                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!));
-                        }
-                        return snapshot.data!.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                    child: Text(
-                                  'Rien à afficher',
-                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                )),
-                              )
-                            : SizedBox(
-                                child: Column(
-                                  children: snapshot.data!
-                                      .map(
-                                        (twoGrades) => Row(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          children: [
-                                            GradeCard(twoGrades[0]),
-                                            if (twoGrades.length > 1) GradeCard(twoGrades[1])
-                                          ],
-                                        ),
-                                      )
-                                      .toList(),
-                                ),
-                              );
-                      }),
-                  const Padding(
-                    padding: EdgeInsets.all(16.0),
-                    child: Text(
-                      'Actualités',
-                      style: TextStyle(fontSize: 20),
-                    ),
-                  ),
-                  FutureBuilder<List<NewsArticle>>(
-                      future: NewsArticle.fetchAll(),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
-                          );
-                        } else if (snapshot.hasError) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: DefaultCard(
-                                child: ExceptionWidget(
-                                    e: snapshot.error! as Exception, st: snapshot.stackTrace!),
-                              ),
-                            ),
-                          );
-                        }
-                        return snapshot.data!.isEmpty
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Center(
-                                  child: Text(
-                                    'Rien à afficher',
-                                    style:
-                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                  ),
-                                ),
-                              )
-                            : Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children:
-                                    snapshot.data!.map((article) => ArticleCard(article)).toList(),
-                              );
-                      }),
-                ],
+                    );
+                  }),
+                ),
               ),
             ),
           ),
         ));
+  }
+}
+
+class HomeworkListWrapper extends StatelessWidget {
+  const HomeworkListWrapper({
+    Key? key,
+  }) : super(key: key);
+  Future<List<MapEntry<Exercise, Lesson>>> _fetchHomework() async {
+    final exercises = await Exercise.fetchAll();
+    List<MapEntry<Exercise, Lesson>> r = [];
+    for (final exercise in exercises) {
+      if (exercise.lessonFor == null) continue;
+      if (exercise.dateFor!.isBefore(DateTime.now())) continue;
+      r.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
+    }
+    r.sort(
+      (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+    );
+
+    return r;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
+        future: _fetchHomework(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return DefaultCard(
+                child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
+          }
+
+          return snapshot.data!.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                      child: Text(
+                    'Rien à afficher',
+                    style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                  )),
+                )
+              : HomeworkList(data: snapshot.data!);
+        });
+  }
+}
+
+class GradeList extends StatelessWidget {
+  const GradeList({
+    Key? key,
+  }) : super(key: key);
+  Future<List<List<Grade>>> _fetchGrades() async {
+    final grades = await Grade.fetchAll();
+    List<List<Grade>> r = [];
+    for (int i = 0; i < grades.length; i++) {
+      if (i % 2 == 0) {
+        r.add([grades[i]]);
+      } else {
+        r[(i / 2).floor()].add(grades[i]);
+      }
+    }
+    return r;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<List<Grade>>>(
+        future: _fetchGrades(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return DefaultCard(
+                child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
+          }
+          return snapshot.data!.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                      child: Text(
+                    'Rien à afficher',
+                    style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                  )),
+                )
+              : SizedBox(
+                  child: Column(
+                    children: snapshot.data!
+                        .map(
+                          (twoGrades) => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              GradeCard(twoGrades[0]),
+                              if (twoGrades.length > 1) GradeCard(twoGrades[1])
+                            ],
+                          ),
+                        )
+                        .toList(),
+                  ),
+                );
+        });
+  }
+}
+
+class ArticleList extends StatelessWidget {
+  const ArticleList({
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<List<NewsArticle>>(
+        future: NewsArticle.fetchAll(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Padding(
+              padding: EdgeInsets.all(8.0),
+              child: Center(
+                child: CircularProgressIndicator(),
+              ),
+            );
+          } else if (snapshot.hasError) {
+            return Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(
+                child: DefaultCard(
+                  child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!),
+                ),
+              ),
+            );
+          }
+          return snapshot.data!.isEmpty
+              ? Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Center(
+                    child: Text(
+                      'Rien à afficher',
+                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                    ),
+                  ),
+                )
+              : Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: snapshot.data!.map((article) => ArticleCard(article)).toList(),
+                );
+        });
+  }
+}
+
+class SectionTitle extends StatelessWidget {
+  final String _title;
+  const SectionTitle(
+    this._title, {
+    Key? key,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
+      child: Text(
+        _title,
+        style: const TextStyle(fontSize: 20),
+      ),
+    );
   }
 }
 

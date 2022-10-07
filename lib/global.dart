@@ -50,8 +50,6 @@ class Global {
   static Database? db;
   static String? token;
   static Client? client;
-  static int? currentConversation;
-  static String? currentConversationSubject;
   static MessagesPageState? messagesState;
   static bool loadingMessages = false;
   static String? searchQuery;
@@ -415,12 +413,13 @@ class Global {
       final id = payload.substring(5, payload.length);
       Conversation.byID(int.parse(id)).then((conv) {
         if (conv == null) return;
-        currentConversation = conv.id;
-        currentConversationSubject = conv.subject;
+
         navigatorKey.currentState?.push(MaterialPageRoute(
           builder: (context) {
-            return const ConversationPage(
+            return ConversationPage(
               onDelete: deleteConversation,
+              id: int.parse(id),
+              subject: conv.subject,
             );
           },
         ));
