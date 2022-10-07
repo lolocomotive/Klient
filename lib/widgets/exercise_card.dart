@@ -30,10 +30,10 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../global.dart';
 
-class ExerciceCard extends StatefulWidget {
+class ExerciseCard extends StatefulWidget {
   final Function? onMarkedDone;
 
-  const ExerciceCard(this._exercise, this._lesson,
+  const ExerciseCard(this._exercise, this._lesson,
       {Key? key,
       this.showDate = false,
       this.showSubject = false,
@@ -47,10 +47,10 @@ class ExerciceCard extends StatefulWidget {
   final double elevation;
 
   @override
-  State<ExerciceCard> createState() => _ExerciceCardState();
+  State<ExerciseCard> createState() => _ExerciseCardState();
 }
 
-class _ExerciceCardState extends State<ExerciceCard> {
+class _ExerciseCardState extends State<ExerciseCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -100,7 +100,11 @@ class _ExerciceCardState extends State<ExerciceCard> {
 
 class _CardContents extends StatefulWidget {
   final bool expanded;
-  static const cutLength = 100;
+  //The length of a string after being cut
+  static const cutLength = 150;
+  //The minimum length starting which strings are going to be cut
+  static const cutThreshold = cutLength + 50;
+
   const _CardContents({
     Key? key,
     required this.widget,
@@ -108,7 +112,7 @@ class _CardContents extends StatefulWidget {
     required this.onMarkedDone,
   }) : super(key: key);
 
-  final ExerciceCard widget;
+  final ExerciseCard widget;
 
   @override
   State<_CardContents> createState() => _CardContentsState();
@@ -139,6 +143,7 @@ class _CardContentsState extends State<_CardContents> {
                       Flexible(
                         child: Text(
                           widget.widget._exercise.title,
+                          overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
@@ -154,7 +159,7 @@ class _CardContentsState extends State<_CardContents> {
                   ),
                 ),
                 if (widget.widget._exercise.type == ExerciseType.exercise ||
-                    widget.widget._exercise.htmlContent.length > _CardContents.cutLength ||
+                    widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
                     widget.widget._exercise.attachments.isNotEmpty)
                   Icon(
                     widget.expanded ? Icons.expand_less : Icons.expand_more,
@@ -175,13 +180,15 @@ class _CardContentsState extends State<_CardContents> {
                         textAlign: TextAlign.center,
                       )
                     : Html(
-                        data: widget.widget._exercise.htmlContent.substringWords(widget.expanded
-                                ? widget.widget._exercise.htmlContent.length
-                                : min(_CardContents.cutLength,
-                                    widget.widget._exercise.htmlContent.length)) +
+                        data: widget.widget._exercise.htmlContent.substringWords(
+                                widget.expanded
+                                    ? widget.widget._exercise.htmlContent.length
+                                    : min(_CardContents.cutLength,
+                                        widget.widget._exercise.htmlContent.length),
+                                _CardContents.cutThreshold) +
                             (widget.expanded ||
                                     widget.widget._exercise.htmlContent.length <=
-                                        _CardContents.cutLength
+                                        _CardContents.cutThreshold
                                 ? ''
                                 : '...'),
                         onLinkTap: (url, context, map, element) {
@@ -210,7 +217,7 @@ class _CardContentsState extends State<_CardContents> {
                       )),
                 if (!widget.expanded &&
                     (widget.widget._exercise.attachments.isNotEmpty ||
-                        widget.widget._exercise.htmlContent.length > _CardContents.cutLength))
+                        widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold))
                   ExpandableButton(
                     theme: const ExpandableThemeData(useInkWell: false),
                     child: Padding(
@@ -271,7 +278,8 @@ class _CardContentsState extends State<_CardContents> {
 }
 
 extension WordSubstring on String {
-  String substringWords(int maxLetters) {
+  String substringWords(int maxLetters, int threshold) {
+    if (length < threshold) return this;
     String r = '';
     int count = 0;
     for (String word in split(' ')) {

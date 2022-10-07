@@ -381,7 +381,7 @@ class _HomeworkListState extends State<HomeworkList> {
           }
           return Opacity(
             opacity: homework.key.done ? .6 : 1,
-            child: ExerciceCard(
+            child: ExerciseCard(
               homework.key,
               homework.value,
               elevation: 1,

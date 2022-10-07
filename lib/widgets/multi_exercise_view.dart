@@ -46,7 +46,7 @@ class MultiExerciseView extends StatelessWidget {
             style: const TextStyle(fontSize: 16),
           ),
           ..._exercises
-              .map((e) => ExerciceCard(
+              .map((e) => ExerciseCard(
                     e,
                     _lesson,
                     showDate: showDate,
