@@ -52,17 +52,15 @@ class ArticlePage extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        Flexible(
-                          child: Text(
-                            'Pièces jointes',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
+                        Text(
+                          'Pièces jointes',
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         ..._article.attachments.map((attachment) => Row(
-                              children: [Text(attachment.name)],
+                              children: [Flexible(child: Text(attachment.name))],
                             ))
                       ],
                     ),
