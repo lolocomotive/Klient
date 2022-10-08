@@ -22,6 +22,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/screens/settings.dart';
 
 class SetupPage extends StatefulWidget {
   final Function() _callback;
@@ -34,9 +35,6 @@ class SetupPage extends StatefulWidget {
 
 class _SetupPageState extends State<SetupPage> {
   int currentStep = 0;
-
-  bool notifMsgEnabled = false;
-  bool notifCalEnabled = false;
 
   bool step1 = false;
   bool step2 = false;
@@ -67,6 +65,9 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
+    Global.notifCalEnabled = Global.notifCalEnabled ?? false;
+    Global.notifMsgEnabled = Global.notifMsgEnabled ?? false;
+
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
@@ -96,18 +97,18 @@ class _SetupPageState extends State<SetupPage> {
                             title: const Text('Messagerie'),
                             subtitle: const Text(
                                 'Recevoir des notifications quand il y a un nouveau message'),
-                            value: notifMsgEnabled,
+                            value: Global.notifMsgEnabled!,
                             onChanged: (value) {
-                              notifMsgEnabled = !notifMsgEnabled;
+                              Global.notifMsgEnabled = !Global.notifMsgEnabled!;
                               setState(() {});
                             }),
                         SwitchListTile(
                           title: const Text('Emploi du temps'),
                           subtitle:
                               const Text('Recevoir des notifications quand un cours est annulé'),
-                          value: notifCalEnabled,
+                          value: Global.notifCalEnabled!,
                           onChanged: (value) {
-                            notifCalEnabled = !notifCalEnabled;
+                            Global.notifCalEnabled = !Global.notifCalEnabled!;
                             setState(() {});
                           },
                         ),
@@ -119,10 +120,10 @@ class _SetupPageState extends State<SetupPage> {
                                   currentStep++;
                                   Global.storage!.write(
                                       key: 'notifications.messages',
-                                      value: notifMsgEnabled ? 'true' : 'false');
+                                      value: Global.notifMsgEnabled! ? 'true' : 'false');
                                   Global.storage!.write(
                                       key: 'notifications.calendar',
-                                      value: notifCalEnabled ? 'true' : 'false');
+                                      value: Global.notifCalEnabled! ? 'true' : 'false');
                                   Global.retryNetworkRequests = true;
                                   DatabaseManager.downloadAll().then((_) {
                                     Global.retryNetworkRequests = false;
@@ -140,7 +141,16 @@ class _SetupPageState extends State<SetupPage> {
                     ),
                   ),
                   Step(
+                    title: const Flexible(child: Text('Affichage')),
+                    content: Column(
+                      children: const [
+                        CompactSelector(),
+                      ],
+                    ),
                     isActive: currentStep == 1,
+                  ),
+                  Step(
+                    isActive: currentStep == 2,
                     title: const Flexible(child: Text('Téléchergement des données')),
                     content: Column(
                       children: [
