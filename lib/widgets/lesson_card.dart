@@ -31,38 +31,59 @@ class LessonCard extends StatelessWidget {
   final Lesson _lesson;
   final GlobalKey _key = GlobalKey();
 
-  LessonCard(this._lesson, {Key? key}) : super(key: key);
+  final bool compact;
+  final bool positionned;
+
+  LessonCard(this._lesson, {Key? key, this.compact = false, this.positionned = true})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      top: (_lesson.startDouble - Global.startTime) * Global.heightPerHour,
-      left: 0,
-      right: 0,
-      child: SizedBox(
-        height: _lesson.length * Global.heightPerHour,
-        child: Card(
-          elevation: 1,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
-          clipBehavior: Clip.antiAlias,
-          child: CustomPaint(
-            painter: _lesson.isModified ? StripesPainter() : null,
-            child: InkWell(
-              onTap: () {
-                Navigator.of(context).push(
-                  MorpheusPageRoute(
-                    builder: (_) => LessonPage(_lesson),
-                    parentKey: _key,
-                  ),
-                );
-              },
-              key: _key,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+    final iconsRow = Opacity(
+      opacity: 0.5,
+      child: Row(
+        children: [
+          if (_lesson.exercises.where((e) => e.lessonFor == _lesson.id).isNotEmpty)
+            const Icon(Icons.event_outlined),
+          if (_lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).isNotEmpty)
+            const Icon(Icons.event_note_outlined),
+          if (_lesson.exercises
+              .where((e) =>
+                      e.type == ExerciseType.exercise &&
+                      e.parentLesson == _lesson.id &&
+                      e.parentLesson != e.lessonFor // don't display those twice
+                  )
+              .isNotEmpty)
+            const Icon(Icons.update)
+        ],
+      ),
+    );
+    final content = SizedBox(
+      height: _lesson.length * (compact ? Global.compactHeightPerHour : Global.heightPerHour),
+      child: Card(
+        elevation: 1,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: CustomPaint(
+          painter: _lesson.isModified ? StripesPainter() : null,
+          child: InkWell(
+            onTap: () {
+              if (!positionned) return;
+              Navigator.of(context).push(
+                MorpheusPageRoute(
+                  builder: (_) => LessonPage(_lesson),
+                  parentKey: _key,
+                ),
+              );
+            },
+            key: _key,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (!compact)
                   Container(
                     padding: const EdgeInsets.all(8.0),
                     color: _lesson.color.shade200,
@@ -88,6 +109,31 @@ class LessonCard extends StatelessWidget {
                       ],
                     ),
                   ),
+                if (compact)
+                  Expanded(
+                      child: Container(
+                    decoration: BoxDecoration(
+                        border: Border(left: BorderSide(color: _lesson.color.shade200, width: 6))),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Row(
+                            children: [
+                              Text(
+                                '${_lesson.title} ',
+                                style: const TextStyle(fontWeight: FontWeight.bold),
+                              ),
+                              Text(_lesson.room),
+                            ],
+                          ),
+                          Flexible(child: iconsRow)
+                        ],
+                      ),
+                    ),
+                  ))
+                else
                   Expanded(
                     child: Stack(
                       children: [
@@ -112,48 +158,33 @@ class LessonCard extends StatelessWidget {
                             ],
                           ),
                         ),
-                        Opacity(
-                          opacity: .5,
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Row(
-                                  children: [
-                                    if (_lesson.exercises
-                                        .where((e) => e.lessonFor == _lesson.id)
-                                        .isNotEmpty)
-                                      const Icon(Icons.event_outlined),
-                                    if (_lesson.exercises
-                                        .where((e) => e.type == ExerciseType.lessonContent)
-                                        .isNotEmpty)
-                                      const Icon(Icons.event_note_outlined),
-                                    if (_lesson.exercises
-                                        .where((e) =>
-                                                e.type == ExerciseType.exercise &&
-                                                e.parentLesson == _lesson.id &&
-                                                e.parentLesson !=
-                                                    e.lessonFor // don't display those twice
-                                            )
-                                        .isNotEmpty)
-                                      const Icon(Icons.update)
-                                  ],
-                                ),
-                              ),
-                            ],
-                          ),
+                        Column(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: iconsRow,
+                            ),
+                          ],
                         )
                       ],
                     ),
-                  ),
-                ],
-              ),
+                  )
+              ],
             ),
           ),
         ),
       ),
     );
+    return positionned
+        ? Positioned(
+            top: (_lesson.startDouble - Global.startTime) *
+                (compact ? Global.compactHeightPerHour : Global.heightPerHour),
+            left: 0,
+            right: 0,
+            child: content,
+          )
+        : content;
   }
 }
 

@@ -87,7 +87,7 @@ Future<void> initPlatformState() async {
 }
 
 Future<void> showNotifications() async {
-  if (await Global.storage!.read(key: 'notifications.messages') == 'true') {
+  if (Global.notifMsgEnabled!) {
     const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
       'channel-msg',
       'channel-msg',
@@ -121,7 +121,7 @@ Future<void> showNotifications() async {
     print('Message notifications disabled');
   }
 
-  if (await Global.storage!.read(key: 'notifications.calendar') == 'true') {
+  if (Global.notifCalEnabled!) {
     const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
       'channel-lessons',
       'channel-lessons',

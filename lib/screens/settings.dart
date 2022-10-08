@@ -18,7 +18,9 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/widgets/lesson_card.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -29,19 +31,10 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-  bool notifMsgEnabled = false;
-  bool notifCalEnabled = false;
-  _SettingsPageState() {
-    _readPrefs();
-  }
-  _readPrefs() async {
-    notifMsgEnabled = await Global.storage!.read(key: 'notifications.messages') == 'true';
-    notifCalEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
-    setState(() {});
-  }
-
   @override
   Widget build(BuildContext context) {
+    final boldPrimary = TextStyle(
+        fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 14);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Paramètres'),
@@ -58,10 +51,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 SettingsSection(
                     title: Text(
                       'API URL',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                      style: boldPrimary,
                     ),
                     tiles: [
                       SettingsTile(
@@ -79,19 +69,16 @@ class _SettingsPageState extends State<SettingsPage> {
                 SettingsSection(
                   title: Text(
                     'Notifications',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      color: Theme.of(context).colorScheme.primary,
-                    ),
+                    style: boldPrimary,
                   ),
                   tiles: <SettingsTile>[
                     SettingsTile.switchTile(
-                      initialValue: notifMsgEnabled,
+                      initialValue: Global.notifMsgEnabled,
                       onToggle: (_) {
-                        notifMsgEnabled = !notifMsgEnabled;
+                        Global.notifMsgEnabled = !Global.notifMsgEnabled!;
                         Global.storage!.write(
                             key: 'notifications.messages',
-                            value: notifMsgEnabled ? 'true' : 'false');
+                            value: Global.notifMsgEnabled! ? 'true' : 'false');
                         setState(() {});
                       },
                       leading: const Icon(Icons.message_outlined),
@@ -100,12 +87,12 @@ class _SettingsPageState extends State<SettingsPage> {
                           const Text('Recevoir une notification quand il y a un nouveau message'),
                     ),
                     SettingsTile.switchTile(
-                      initialValue: notifCalEnabled,
+                      initialValue: Global.notifCalEnabled,
                       onToggle: (_) {
-                        notifCalEnabled = !notifCalEnabled;
+                        Global.notifCalEnabled = !Global.notifCalEnabled!;
                         Global.storage!.write(
                             key: 'notifications.calendar',
-                            value: notifCalEnabled ? 'true' : 'false');
+                            value: Global.notifCalEnabled! ? 'true' : 'false');
                         setState(() {});
                       },
                       leading: const Icon(Icons.calendar_today_outlined),
@@ -115,11 +102,168 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   ],
                 ),
+                SettingsSection(
+                    title: Text(
+                      'Affichage',
+                      style: boldPrimary,
+                    ),
+                    tiles: <SettingsTile>[
+                      SettingsTile(
+                        leading: const Icon(Icons.invert_colors),
+                        title: Row(
+                          children: [
+                            const Text('Thème'),
+                            Expanded(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                                child: DropdownButton(
+                                  isExpanded: true,
+                                  value: 'sysdefault',
+                                  items: const [
+                                    DropdownMenuItem(value: 'sysdefault', child: Text('Système')),
+                                    DropdownMenuItem(value: 'light', child: Text('Clair')),
+                                    DropdownMenuItem(value: 'dark', child: Text('Sombre')),
+                                  ],
+                                  onChanged: (dynamic value) {},
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SettingsTile(
+                        title: const CompactSelector(),
+                      )
+                    ])
               ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+class CompactSelector extends StatefulWidget {
+  const CompactSelector({Key? key}) : super(key: key);
+
+  @override
+  State<CompactSelector> createState() => _CompactSelectorState();
+}
+
+class _CompactSelectorState extends State<CompactSelector> {
+  @override
+  Widget build(BuildContext context) {
+    final boldPrimary = TextStyle(
+        fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 14);
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Padding(
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+          child: Text('Style de l\'emploi du temps'),
+        ),
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Flexible(
+              flex: 1,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    Global.storage!.write(key: 'display.compact', value: 'false');
+                    Global.compact = false;
+                  });
+                },
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Global.compact! ? null : Theme.of(context).highlightColor,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                        child: Text(
+                          'Normal',
+                          style: boldPrimary,
+                        ),
+                      ),
+                      IgnorePointer(
+                        child: LessonCard(
+                          Lesson(
+                            0,
+                            DateTime.now(),
+                            '13:45',
+                            '14:40',
+                            '404',
+                            'Exemple',
+                            [],
+                            false,
+                            false,
+                            false,
+                          ),
+                          positionned: false,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            Flexible(
+              flex: 1,
+              child: GestureDetector(
+                onTap: () {
+                  setState(() {
+                    Global.storage!.write(key: 'display.compact', value: 'true');
+                    Global.compact = true;
+                  });
+                },
+                child: Container(
+                  clipBehavior: Clip.antiAlias,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    color: Global.compact! ? Theme.of(context).highlightColor : null,
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                        child: Text(
+                          'Compact',
+                          style: boldPrimary,
+                        ),
+                      ),
+                      IgnorePointer(
+                        child: LessonCard(
+                          Lesson(
+                            0,
+                            DateTime.now(),
+                            '13:45',
+                            '14:40',
+                            '404',
+                            'Exemple',
+                            [],
+                            false,
+                            false,
+                            false,
+                          ),
+                          positionned: false,
+                          compact: true,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            )
+          ],
+        ),
+      ],
     );
   }
 }

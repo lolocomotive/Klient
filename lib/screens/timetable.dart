@@ -42,6 +42,8 @@ class TimetablePage extends StatefulWidget {
 class _TimetablePageState extends State<TimetablePage> {
   PageController _pageController = PageController();
   int _page = 0;
+
+  bool compact = Global.compact!;
   Future<List<List<Lesson>>> _getCalendar() async {
     List<List<Lesson>> r = [];
     var lessons = await Lesson.fetchAll();
@@ -92,7 +94,10 @@ class _TimetablePageState extends State<TimetablePage> {
           },
           child: SingleChildScrollView(
             child: SizedBox(
-              height: (Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength + 32),
+              height: (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+                      Global.maxLessonsPerDay *
+                      Global.lessonLength +
+                  32,
               child: Stack(
                 children: [
                   FutureBuilder<List<List<Lesson>>>(
@@ -173,7 +178,7 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: ListView.builder(
                           itemBuilder: (ctx, index) {
                             return SizedBox(
-                              height: Global.heightPerHour,
+                              height: compact ? Global.compactHeightPerHour : Global.heightPerHour,
                               child: Text(
                                 '${index + Global.startTime}h',
                                 textAlign: TextAlign.center,

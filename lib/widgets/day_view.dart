@@ -41,9 +41,13 @@ class DayView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: Global.heightPerHour * Global.maxLessonsPerDay * Global.lessonLength - 4,
+          height: (Global.compact! ? Global.compactHeightPerHour : Global.heightPerHour) *
+                  Global.maxLessonsPerDay *
+                  Global.lessonLength -
+              4,
           child: Stack(
-            children: _lessons.map((lesson) => LessonCard(lesson)).toList(),
+            children:
+                _lessons.map((lesson) => LessonCard(lesson, compact: Global.compact!)).toList(),
           ),
         ),
       ],

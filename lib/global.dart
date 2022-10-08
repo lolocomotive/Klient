@@ -59,6 +59,7 @@ class Global {
   static GlobalKey mainKey = GlobalKey();
   static const timeWidth = 32.0;
   static const heightPerHour = 120.0;
+  static double compactHeightPerHour = 70.0;
   static const lessonLength = 55.0 / 55.0;
   static const maxLessonsPerDay = 11;
   static const startTime = 8;
@@ -93,10 +94,11 @@ class Global {
   static List<DropdownMenuItem> dropdownItems = [];
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
   static AppLifecycleState? currentState;
-
   static bool retryNetworkRequests = false;
-
   static ThemeData? theme;
+  static bool? compact;
+  static bool? notifCalEnabled;
+  static bool? notifMsgEnabled;
 
   /// Shared preferences need to be initialized first
   static initDB() async {
@@ -392,6 +394,9 @@ class Global {
       Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
           'https://mobilite.kosmoseducation.com/mobilite/';
       Global.token = await Global.storage!.read(key: 'token');
+      Global.compact = await Global.storage!.read(key: 'display.compact') == 'true';
+      Global.notifCalEnabled = await Global.storage!.read(key: 'notifications.messages') == 'true';
+      Global.notifMsgEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
       await Global.storage!.deleteAll();
