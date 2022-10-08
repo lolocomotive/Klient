@@ -123,7 +123,8 @@ class KosmosState extends State with WidgetsBindingObserver {
     Global.theme = ThemeData.from(
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.deepPurple,
-        brightness: SchedulerBinding.instance.window.platformBrightness,
+        brightness:
+            Global.enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness,
       ),
       useMaterial3: true,
     ).copyWith(

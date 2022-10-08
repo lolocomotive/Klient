@@ -99,6 +99,7 @@ class Global {
   static bool? compact;
   static bool? notifCalEnabled;
   static bool? notifMsgEnabled;
+  static Brightness? enforcedBrightness;
 
   /// Shared preferences need to be initialized first
   static initDB() async {
@@ -395,6 +396,12 @@ class Global {
           'https://mobilite.kosmoseducation.com/mobilite/';
       Global.token = await Global.storage!.read(key: 'token');
       Global.compact = await Global.storage!.read(key: 'display.compact') == 'true';
+      final s = await Global.storage!.read(key: 'display.enforcedBrightness');
+      Global.enforcedBrightness = s == 'light'
+          ? Brightness.light
+          : s == 'dark'
+              ? Brightness.dark
+              : null;
       Global.notifCalEnabled = await Global.storage!.read(key: 'notifications.messages') == 'true';
       Global.notifMsgEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
     } on PlatformException catch (_) {

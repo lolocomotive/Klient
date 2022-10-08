@@ -118,13 +118,29 @@ class _SettingsPageState extends State<SettingsPage> {
                                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                                 child: DropdownButton(
                                   isExpanded: true,
-                                  value: 'sysdefault',
+                                  value: Global.enforcedBrightness == null
+                                      ? 'default'
+                                      : Global.enforcedBrightness == Brightness.light
+                                          ? 'light'
+                                          : 'dark',
                                   items: const [
-                                    DropdownMenuItem(value: 'sysdefault', child: Text('Système')),
+                                    DropdownMenuItem(value: 'default', child: Text('Système')),
                                     DropdownMenuItem(value: 'light', child: Text('Clair')),
                                     DropdownMenuItem(value: 'dark', child: Text('Sombre')),
                                   ],
-                                  onChanged: (dynamic value) {},
+                                  onChanged: (dynamic value) {
+                                    Global.storage!
+                                        .write(key: 'display.enforcedBrightness', value: value);
+                                    Global.enforcedBrightness = value == 'light'
+                                        ? Brightness.light
+                                        : value == 'dark'
+                                            ? Brightness.dark
+                                            : null;
+                                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                                        content: Text(
+                                            'Redémarrer l\'application pour que le changement apparaîsse')));
+                                    setState(() {});
+                                  },
                                 ),
                               ),
                             ),
