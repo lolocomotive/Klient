@@ -118,6 +118,7 @@ class LessonCard extends StatelessWidget {
                       padding: const EdgeInsets.all(8.0),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Row(
                             children: [
@@ -125,9 +126,15 @@ class LessonCard extends StatelessWidget {
                                 '${_lesson.title} ',
                                 style: const TextStyle(fontWeight: FontWeight.bold),
                               ),
-                              Text(_lesson.room),
+                              if (_lesson.length <= 1 && _lesson.exercises.isNotEmpty)
+                                Flexible(
+                                    child: Text(
+                                  _lesson.room,
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                             ],
                           ),
+                          if (_lesson.length > 1 || _lesson.exercises.isEmpty) Text(_lesson.room),
                           Flexible(child: iconsRow)
                         ],
                       ),
