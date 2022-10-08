@@ -59,7 +59,9 @@ class LessonCard extends StatelessWidget {
       ),
     );
     final content = SizedBox(
-      height: _lesson.length * (compact ? Global.compactHeightPerHour : Global.heightPerHour),
+      height: _lesson.length *
+          (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+          MediaQuery.of(context).textScaleFactor,
       child: Card(
         elevation: 1,
         shape: RoundedRectangleBorder(
@@ -186,6 +188,7 @@ class LessonCard extends StatelessWidget {
     return positionned
         ? Positioned(
             top: (_lesson.startDouble - Global.startTime) *
+                MediaQuery.of(context).textScaleFactor *
                 (compact ? Global.compactHeightPerHour : Global.heightPerHour),
             left: 0,
             right: 0,

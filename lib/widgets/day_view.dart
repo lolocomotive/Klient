@@ -42,6 +42,7 @@ class DayView extends StatelessWidget {
         ),
         SizedBox(
           height: (Global.compact! ? Global.compactHeightPerHour : Global.heightPerHour) *
+                  MediaQuery.of(context).textScaleFactor *
                   Global.maxLessonsPerDay *
                   Global.lessonLength -
               4,

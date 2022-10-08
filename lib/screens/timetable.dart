@@ -95,6 +95,7 @@ class _TimetablePageState extends State<TimetablePage> {
           child: SingleChildScrollView(
             child: SizedBox(
               height: (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+                      MediaQuery.of(context).textScaleFactor *
                       Global.maxLessonsPerDay *
                       Global.lessonLength +
                   32,
@@ -178,7 +179,9 @@ class _TimetablePageState extends State<TimetablePage> {
                         child: ListView.builder(
                           itemBuilder: (ctx, index) {
                             return SizedBox(
-                              height: compact ? Global.compactHeightPerHour : Global.heightPerHour,
+                              height:
+                                  (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+                                      MediaQuery.of(context).textScaleFactor,
                               child: Text(
                                 '${index + Global.startTime}h',
                                 textAlign: TextAlign.center,
