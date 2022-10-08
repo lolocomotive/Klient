@@ -124,12 +124,6 @@ class _SetupPageState extends State<SetupPage> {
                                   Global.storage!.write(
                                       key: 'notifications.calendar',
                                       value: Global.notifCalEnabled! ? 'true' : 'false');
-                                  Global.retryNetworkRequests = true;
-                                  DatabaseManager.downloadAll().then((_) {
-                                    Global.retryNetworkRequests = false;
-                                  });
-
-                                  update();
                                   setState(() {});
                                 },
                                 child: const Text(
@@ -143,8 +137,23 @@ class _SetupPageState extends State<SetupPage> {
                   Step(
                     title: const Flexible(child: Text('Affichage')),
                     content: Column(
-                      children: const [
-                        CompactSelector(),
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const CompactSelector(),
+                        TextButton(
+                            onPressed: () {
+                              currentStep++;
+                              Global.retryNetworkRequests = true;
+                              DatabaseManager.downloadAll().then((_) {
+                                Global.retryNetworkRequests = false;
+                              });
+                              update();
+                              setState(() {});
+                            },
+                            child: const Text(
+                              'CONTINUER',
+                            )),
                       ],
                     ),
                     isActive: currentStep == 1,
