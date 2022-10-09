@@ -78,11 +78,11 @@ class AboutPage extends StatelessWidget {
                                 children: [const Text('Branche'), Text(snapshot.data!.branch)]),
                             TableRow(children: [
                               const Text('Commit'),
-                              Text(snapshot.data!.commitID.substring(0, 6))
+                              Text(snapshot.data!.commitID.substring(0, 7))
                             ]),
                             TableRow(children: [
                               const Text('Commit origin'),
-                              Text(snapshot.data!.originCommitID.substring(0, 6))
+                              Text(snapshot.data!.originCommitID.substring(0, 7))
                             ]),
                           ],
                         );
