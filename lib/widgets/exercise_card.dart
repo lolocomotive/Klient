@@ -36,12 +36,14 @@ class ExerciseCard extends StatefulWidget {
   const ExerciseCard(this._exercise, this._lesson,
       {Key? key,
       this.showDate = false,
+      this.compact = false,
       this.showSubject = false,
       this.elevation = 3,
       this.onMarkedDone})
       : super(key: key);
   final bool showDate;
   final bool showSubject;
+  final bool compact;
   final Exercise _exercise;
   final Lesson _lesson;
   final double elevation;
@@ -100,6 +102,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
 
 class _CardContents extends StatefulWidget {
   final bool expanded;
+
   //The length of a string after being cut
   static const cutLength = 150;
   //The minimum length starting which strings are going to be cut
@@ -108,8 +111,8 @@ class _CardContents extends StatefulWidget {
   const _CardContents({
     Key? key,
     required this.widget,
-    this.expanded = false,
     required this.onMarkedDone,
+    this.expanded = false,
   }) : super(key: key);
 
   final ExerciseCard widget;
@@ -127,151 +130,167 @@ class _CardContentsState extends State<_CardContents> {
   Widget build(BuildContext context) {
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Container(
-            color: widget.widget._lesson.color.shade200,
-            padding: const EdgeInsets.all(8.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Expanded(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      Flexible(
-                        child: Text(
-                          widget.widget._exercise.title,
-                          overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black,
+      child: Container(
+        decoration: widget.widget.compact
+            ? BoxDecoration(
+                border: Border(
+                  left: BorderSide(color: widget.widget._lesson.color.shade200, width: 6),
+                ),
+              )
+            : null,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              color: widget.widget.compact ? null : widget.widget._lesson.color.shade200,
+              padding: widget.widget.compact
+                  ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
+                  : const EdgeInsets.all(8.0),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: widget.widget.compact
+                          ? MainAxisAlignment.start
+                          : MainAxisAlignment.spaceAround,
+                      children: [
+                        Flexible(
+                          child: Text(
+                            '${widget.widget._exercise.title} - ',
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: widget.widget.compact ? null : Colors.black,
+                            ),
                           ),
                         ),
-                      ),
-                      if (widget.widget._exercise.type == ExerciseType.exercise)
-                        Text(widget.widget._exercise.done ? 'Fait' : 'À faire',
-                            style: const TextStyle(
-                              color: Colors.black,
-                            )),
-                    ],
-                  ),
-                ),
-                if (widget.widget._exercise.type == ExerciseType.exercise ||
-                    widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
-                    widget.widget._exercise.attachments.isNotEmpty)
-                  Icon(
-                    widget.expanded ? Icons.expand_less : Icons.expand_more,
-                    color: Colors.black,
-                  )
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                widget.widget._exercise.htmlContent == ''
-                    ? Text(
-                        'Aucun contenu renseigné',
-                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                        textAlign: TextAlign.center,
-                      )
-                    : Html(
-                        data: widget.widget._exercise.htmlContent.substringWords(
-                                widget.expanded
-                                    ? widget.widget._exercise.htmlContent.length
-                                    : min(_CardContents.cutLength,
-                                        widget.widget._exercise.htmlContent.length),
-                                _CardContents.cutThreshold) +
-                            (widget.expanded ||
-                                    widget.widget._exercise.htmlContent.length <=
-                                        _CardContents.cutThreshold
-                                ? ''
-                                : '...'),
-                        onLinkTap: (url, context, map, element) {
-                          launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                        },
-                      ),
-                if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
-                  DefaultCard(
-                      elevation: widget.widget.elevation * 2,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          Text(
-                            'Pièces jointes',
-                            style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                          ...widget.widget._exercise.attachments.map(
-                            (attachment) => Row(
-                              children: [Flexible(child: Text(attachment.name))],
-                            ),
-                          ),
-                        ],
-                      )),
-                if (!widget.expanded &&
-                    (widget.widget._exercise.attachments.isNotEmpty ||
-                        widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold))
-                  ExpandableButton(
-                    theme: const ExpandableThemeData(useInkWell: false),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Voir plus',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold),
-                      ),
+                        if (widget.widget._exercise.type == ExerciseType.exercise)
+                          Text(widget.widget._exercise.done ? 'Fait' : 'À faire',
+                              style: TextStyle(
+                                color: widget.widget.compact ? null : Colors.black,
+                              )),
+                      ],
                     ),
                   ),
-                if (widget.expanded && widget.widget._exercise.type == ExerciseType.exercise)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: _busy
-                            ? null
-                            : () async {
-                                setState(() {
-                                  _busy = true;
-                                });
-                                final response = await Global.client!.request(
-                                    Action.markExerciseDone,
-                                    body: '{"flagRealise":${!widget.widget._exercise.done}}',
-                                    params: [
-                                      '0',
-                                      widget.widget._lesson.id.toString(),
-                                      widget.widget._exercise.uid.toString()
-                                    ]);
-                                await Global.db!.update(
-                                  'Exercises',
-                                  {'Done': response['flagRealise'] ? 1 : 0},
-                                  where: 'ID = ?',
-                                  whereArgs: [widget.widget._exercise.uid],
-                                );
-
-                                setState(() {
-                                  widget.widget._exercise.done = response['flagRealise'];
-                                  widget.onMarkedDone(response['flagRealise']);
-                                  _busy = false;
-                                });
-                              },
-                        child: Text(
-                            'Marquer comme ${widget.widget._exercise.done ? "à faire" : "fait"}'),
-                      ),
-                    ],
-                  )
-              ],
+                  if (widget.widget._exercise.type == ExerciseType.exercise ||
+                      widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
+                      widget.widget._exercise.attachments.isNotEmpty)
+                    Icon(
+                      widget.expanded ? Icons.expand_less : Icons.expand_more,
+                      color: widget.widget.compact ? null : Colors.black,
+                    )
+                ],
+              ),
             ),
-          ),
-        ],
+            Padding(
+              padding: widget.widget.compact ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  widget.widget._exercise.htmlContent == ''
+                      ? Padding(
+                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                          child: Text(
+                            'Aucun contenu renseigné',
+                            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                            textAlign: TextAlign.center,
+                          ),
+                        )
+                      : Html(
+                          data: widget.widget._exercise.htmlContent.substringWords(
+                                  widget.expanded
+                                      ? widget.widget._exercise.htmlContent.length
+                                      : min(_CardContents.cutLength,
+                                          widget.widget._exercise.htmlContent.length),
+                                  _CardContents.cutThreshold) +
+                              (widget.expanded ||
+                                      widget.widget._exercise.htmlContent.length <=
+                                          _CardContents.cutThreshold
+                                  ? ''
+                                  : '...'),
+                          onLinkTap: (url, context, map, element) {
+                            launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+                          },
+                        ),
+                  if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
+                    DefaultCard(
+                        elevation: widget.widget.elevation * 2,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Text(
+                              'Pièces jointes',
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            ...widget.widget._exercise.attachments.map(
+                              (attachment) => Row(
+                                children: [Flexible(child: Text(attachment.name))],
+                              ),
+                            ),
+                          ],
+                        )),
+                  if (!widget.expanded &&
+                      (widget.widget._exercise.attachments.isNotEmpty ||
+                          widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold))
+                    ExpandableButton(
+                      theme: const ExpandableThemeData(useInkWell: false),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Voir plus',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                  if (widget.expanded && widget.widget._exercise.type == ExerciseType.exercise)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () async {
+                                  setState(() {
+                                    _busy = true;
+                                  });
+                                  final response = await Global.client!.request(
+                                      Action.markExerciseDone,
+                                      body: '{"flagRealise":${!widget.widget._exercise.done}}',
+                                      params: [
+                                        '0',
+                                        widget.widget._lesson.id.toString(),
+                                        widget.widget._exercise.uid.toString()
+                                      ]);
+                                  await Global.db!.update(
+                                    'Exercises',
+                                    {'Done': response['flagRealise'] ? 1 : 0},
+                                    where: 'ID = ?',
+                                    whereArgs: [widget.widget._exercise.uid],
+                                  );
+
+                                  setState(() {
+                                    widget.widget._exercise.done = response['flagRealise'];
+                                    widget.onMarkedDone(response['flagRealise']);
+                                    _busy = false;
+                                  });
+                                },
+                          child: Text(
+                              'Marquer comme ${widget.widget._exercise.done ? "à faire" : "fait"}'),
+                        ),
+                      ],
+                    )
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

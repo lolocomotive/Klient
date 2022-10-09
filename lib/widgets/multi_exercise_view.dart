@@ -49,6 +49,7 @@ class MultiExerciseView extends StatelessWidget {
               .map((e) => ExerciseCard(
                     e,
                     _lesson,
+                    compact: Global.compact!,
                     showDate: showDate,
                     showSubject: showSubject,
                   ))

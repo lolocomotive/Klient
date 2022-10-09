@@ -25,64 +25,93 @@ import '../global.dart';
 
 class GradeCard extends StatelessWidget {
   final Grade _grade;
+  final bool compact;
 
-  const GradeCard(this._grade, {Key? key}) : super(key: key);
+  const GradeCard(this._grade, {Key? key, this.compact = true}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final titleRow = Row(
+      mainAxisAlignment: compact ? MainAxisAlignment.start : MainAxisAlignment.spaceAround,
+      children: [
+        Flexible(
+          child: Text(
+            '${_grade.subject} ',
+            overflow: TextOverflow.ellipsis,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              color: compact ? null : Colors.black,
+            ),
+          ),
+        ),
+        Text(
+          Global.dateToString(_grade.date),
+          textAlign: TextAlign.center,
+          style: TextStyle(color: compact ? null : Colors.black),
+        ),
+      ],
+    );
     return Flexible(
       child: Card(
           margin: const EdgeInsets.all(8.0),
           elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
           clipBehavior: Clip.antiAlias,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Container(
-                padding: const EdgeInsets.all(8.0),
-                color: ColorProvider.getColor(_grade.subject).shade200,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    Flexible(
-                      child: Text(
-                        _grade.subject,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
+          child: Container(
+            decoration: compact
+                ? BoxDecoration(
+                    border: Border(
+                      left: BorderSide(
+                          color: ColorProvider.getColor(_grade.subject).shade200, width: 6),
+                    ),
+                  )
+                : null,
+            padding: EdgeInsets.all(compact ? 8 : 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                if (compact)
+                  titleRow
+                else
+                  Container(
+                    padding: const EdgeInsets.all(8.0),
+                    color: ColorProvider.getColor(_grade.subject).shade200,
+                    child: titleRow,
+                  ),
+                if (compact)
+                  Row(
+                    children: [
+                      Text(
+                        _grade.grade == -1
+                            ? _grade.gradeText!
+                            : _grade.grade.toString().replaceAll('.', ','),
+                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                    ),
-                    Text(
-                      Global.dateToString(_grade.date),
-                      textAlign: TextAlign.center,
-                      style: const TextStyle(color: Colors.black),
-                    ),
-                  ],
-                ),
-              ),
-              Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: SizedBox(
-                      width: 50,
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            _grade.grade == -1
-                                ? _grade.gradeText!
-                                : _grade.grade.toString().replaceAll('.', ','),
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                      if (_grade.of != 20) Text('/${_grade.of}')
+                    ],
+                  )
+                else
+                  Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: SizedBox(
+                          width: 50,
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                _grade.grade == -1
+                                    ? _grade.gradeText!
+                                    : _grade.grade.toString().replaceAll('.', ','),
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
+                              ),
+                              const Divider(height: 10),
+                              Text(_grade.of.toInt().toString())
+                            ],
                           ),
-                          const Divider(height: 10),
-                          Text(_grade.of.toInt().toString())
-                        ],
-                      ),
-                    ),
-                  )),
-            ],
+                        ),
+                      )),
+              ],
+            ),
           )),
     );
   }

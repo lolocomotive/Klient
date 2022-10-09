@@ -113,35 +113,37 @@ class LessonCard extends StatelessWidget {
                   ),
                 if (compact)
                   Expanded(
-                      child: Container(
-                    decoration: BoxDecoration(
-                        border: Border(left: BorderSide(color: _lesson.color.shade200, width: 6))),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                '${_lesson.title} ',
-                                style: const TextStyle(fontWeight: FontWeight.bold),
-                              ),
-                              if (_lesson.length <= 1 && _lesson.exercises.isNotEmpty)
-                                Flexible(
-                                    child: Text(
-                                  _lesson.room,
-                                  overflow: TextOverflow.ellipsis,
-                                )),
-                            ],
-                          ),
-                          if (_lesson.length > 1 || _lesson.exercises.isEmpty) Text(_lesson.room),
-                          Flexible(child: iconsRow)
-                        ],
+                    child: Container(
+                      decoration: BoxDecoration(
+                          border:
+                              Border(left: BorderSide(color: _lesson.color.shade200, width: 6))),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                Text(
+                                  '${_lesson.title} ',
+                                  style: const TextStyle(fontWeight: FontWeight.bold),
+                                ),
+                                if (_lesson.length <= 1 && _lesson.exercises.isNotEmpty)
+                                  Flexible(
+                                      child: Text(
+                                    _lesson.room,
+                                    overflow: TextOverflow.ellipsis,
+                                  )),
+                              ],
+                            ),
+                            if (_lesson.length > 1 || _lesson.exercises.isEmpty) Text(_lesson.room),
+                            Flexible(child: iconsRow)
+                          ],
+                        ),
                       ),
                     ),
-                  ))
+                  )
                 else
                   Expanded(
                     child: Stack(

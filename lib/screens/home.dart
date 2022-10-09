@@ -242,8 +242,15 @@ class GradeList extends StatelessWidget {
                           (twoGrades) => Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              GradeCard(twoGrades[0]),
-                              if (twoGrades.length > 1) GradeCard(twoGrades[1])
+                              GradeCard(
+                                twoGrades[0],
+                                compact: Global.compact!,
+                              ),
+                              if (twoGrades.length > 1)
+                                GradeCard(
+                                  twoGrades[1],
+                                  compact: Global.compact!,
+                                )
                             ],
                           ),
                         )
@@ -384,6 +391,7 @@ class _HomeworkListState extends State<HomeworkList> {
             child: ExerciseCard(
               homework.key,
               homework.value,
+              compact: Global.compact!,
               elevation: 1,
               showDate: true,
               showSubject: true,

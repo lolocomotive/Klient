@@ -188,8 +188,8 @@ class _CompactSelectorState extends State<CompactSelector> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const Padding(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 8.0),
-          child: Text('Style de l\'emploi du temps'),
+          padding: EdgeInsets.fromLTRB(0, 0, 0, 16.0),
+          child: Text('Style d\'affichage'),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
