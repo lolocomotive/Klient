@@ -157,7 +157,7 @@ class _CardContentsState extends State<_CardContents> {
                       children: [
                         Flexible(
                           child: Text(
-                            '${widget.widget._exercise.title} - ',
+                            widget.widget._exercise.title + (widget.widget.compact ? ' - ' : ''),
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
