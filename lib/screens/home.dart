@@ -356,18 +356,21 @@ class _HomeworkListState extends State<HomeworkList> {
           },
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 0, 0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text('Afficher le travail fait'),
-                Switch(
-                    value: _showDone,
-                    onChanged: (value) {
-                      setState(() {
-                        _showDone = value;
-                      });
-                    }),
-              ],
+            child: Semantics(
+              checked: _showDone,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Afficher le travail fait'),
+                  Switch(
+                      value: _showDone,
+                      onChanged: (value) {
+                        setState(() {
+                          _showDone = value;
+                        });
+                      }),
+                ],
+              ),
             ),
           ),
         ),

@@ -132,6 +132,7 @@ class MessagesPageState extends State<MessagesPage> {
                           SliverAppBar(
                             leading: _selection.isNotEmpty
                                 ? IconButton(
+                                    tooltip: 'Désactiver la sélection',
                                     onPressed: () {
                                       setState(() {
                                         while (_selection.isNotEmpty) {
@@ -150,6 +151,7 @@ class MessagesPageState extends State<MessagesPage> {
                             actions: [
                               if (_selection.isNotEmpty)
                                 IconButton(
+                                  tooltip: 'Supprimer les messages sélectionnés',
                                   onPressed: () async {
                                     //TODO show that progress is being made
 
@@ -166,6 +168,7 @@ class MessagesPageState extends State<MessagesPage> {
                                 ),
                               if (!_selection.isNotEmpty)
                                 IconButton(
+                                  tooltip: 'Rechercher dans les messages',
                                   icon: const Icon(Icons.search),
                                   onPressed: () {
                                     showSearch(

@@ -33,6 +33,7 @@ class MessagesSearchDelegate extends SearchDelegate {
   List<Widget> buildActions(BuildContext context) {
     return [
       IconButton(
+        tooltip: 'Vider',
         icon: const Icon(Icons.clear),
         onPressed: () {
           query = '';
@@ -44,6 +45,7 @@ class MessagesSearchDelegate extends SearchDelegate {
   @override
   Widget buildLeading(BuildContext context) {
     return IconButton(
+      tooltip: 'Retour',
       icon: const Icon(Icons.arrow_back),
       onPressed: () {
         close(context, null);

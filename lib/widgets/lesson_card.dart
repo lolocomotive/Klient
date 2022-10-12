@@ -44,9 +44,12 @@ class LessonCard extends StatelessWidget {
       child: Row(
         children: [
           if (_lesson.exercises.where((e) => e.lessonFor == _lesson.id).isNotEmpty)
-            const Icon(Icons.event_outlined),
+            const Tooltip(
+                message: 'Travail à faire pour cette séance donné',
+                child: Icon(Icons.event_outlined)),
           if (_lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).isNotEmpty)
-            const Icon(Icons.event_note_outlined),
+            const Tooltip(
+                message: 'Contenu de séance donné', child: Icon(Icons.event_note_outlined)),
           if (_lesson.exercises
               .where((e) =>
                       e.type == ExerciseType.exercise &&
@@ -54,7 +57,8 @@ class LessonCard extends StatelessWidget {
                       e.parentLesson != e.lessonFor // don't display those twice
                   )
               .isNotEmpty)
-            const Icon(Icons.update)
+            const Tooltip(
+                message: 'Travail à faire à l\'issue de la séance donné', child: Icon(Icons.update))
         ],
       ),
     );

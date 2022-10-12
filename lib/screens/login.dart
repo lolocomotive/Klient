@@ -81,6 +81,7 @@ class LoginState extends State<Login> {
         title: const Text('Connexion'),
         actions: [
           IconButton(
+            tooltip: 'À propos',
             onPressed: () {
               Navigator.of(context)
                   .push(MaterialPageRoute(builder: (context) => const AboutPage()));
@@ -150,6 +151,7 @@ class LoginState extends State<Login> {
                               ),
                             ),
                             IconButton(
+                              tooltip: 'Où trouver ce code?',
                               alignment: Alignment.bottomCenter,
                               onPressed: () {
                                 showDialog(

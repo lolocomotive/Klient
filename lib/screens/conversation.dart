@@ -76,6 +76,7 @@ class _ConversationPageState extends State<ConversationPage> {
                     SliverAppBar(
                       actions: [
                         IconButton(
+                            tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();
                               await widget.onDelete(_conversation);
