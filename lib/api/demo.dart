@@ -88,6 +88,13 @@ generate() async {
   ];
   final exerciceContents = [
     'Tous les exercices du Manuel',
+    'Tous les exercices du chapitre 2',
+    'Activité 3 p.102',
+    'Lire le dossier sur Kant (page 256)',
+    'Résumé ',
+    'feur',
+    'ECD p.52 + EDD p.65',
+    'Lire tout le cours puis le relire et en suite faire les exercices du chapitre 3. Ensuite faire un DS. Puis un autre. Sans oublier le DM ni le parcours sacado',
     'Pages 35 à 65',
     'Ex21p3',
     'HT1 C1 Résumé + ADD p.25',
