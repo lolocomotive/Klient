@@ -105,6 +105,10 @@ class KosmosState extends State with WidgetsBindingObserver {
       });
     };
     _mainWidget = const Main();
+    if (Global.demo) {
+      Global.client = Client.demo();
+      return;
+    }
     if (Global.token == null || Global.token == '') {
       _mainWidget = Login(Global.onLogin!);
     } else {

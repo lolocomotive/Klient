@@ -319,7 +319,7 @@ class Client {
     }
   }
 
-  Client.debug();
+  Client.demo();
 }
 
 class NetworkException403 implements Exception {}

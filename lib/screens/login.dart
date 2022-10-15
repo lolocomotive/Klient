@@ -50,7 +50,7 @@ class LoginState extends State<Login> {
       await Global.initDB();
       generate();
       Global.demo = true;
-      Global.client = Client.debug();
+      Global.client = Client.demo();
       widget.onLogin();
       return;
     }
