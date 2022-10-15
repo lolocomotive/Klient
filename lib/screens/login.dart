@@ -54,6 +54,8 @@ class LoginState extends State<Login> {
       widget.onLogin();
       return;
     }
+    Global.demo = false;
+    Global.storage!.write(key: 'demoMode', value: 'false');
     if (_loginFormKey.currentState!.validate()) {
       setState(() {
         _processing = true;
