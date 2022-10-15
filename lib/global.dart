@@ -100,6 +100,7 @@ class Global {
   static bool? notifCalEnabled;
   static bool? notifMsgEnabled;
   static Brightness? enforcedBrightness;
+  static bool demo = false;
 
   /// Shared preferences need to be initialized first
   static initDB() async {
@@ -383,7 +384,6 @@ class Global {
     if (kDebugMode) {
       //Global.storage!.deleteAll();
     }
-
     try {
       print('Reading prefernces');
       var data = await Global.storage!.readAll();
@@ -395,6 +395,7 @@ class Global {
       Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
           'https://mobilite.kosmoseducation.com/mobilite/';
       Global.token = await Global.storage!.read(key: 'token');
+      Global.demo = await Global.storage!.read(key: 'demoMode') == 'true';
       Global.compact = await Global.storage!.read(key: 'display.compact') == 'true';
       final s = await Global.storage!.read(key: 'display.enforcedBrightness');
       Global.enforcedBrightness = s == 'light'

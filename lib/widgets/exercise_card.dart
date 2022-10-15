@@ -260,26 +260,41 @@ class _CardContentsState extends State<_CardContents> {
                                   setState(() {
                                     _busy = true;
                                   });
-                                  final response = await Global.client!.request(
-                                      Action.markExerciseDone,
-                                      body: '{"flagRealise":${!widget.widget._exercise.done}}',
-                                      params: [
-                                        '0',
-                                        widget.widget._lesson.id.toString(),
-                                        widget.widget._exercise.uid.toString()
-                                      ]);
-                                  await Global.db!.update(
-                                    'Exercises',
-                                    {'Done': response['flagRealise'] ? 1 : 0},
-                                    where: 'ID = ?',
-                                    whereArgs: [widget.widget._exercise.uid],
-                                  );
+                                  if (Global.demo) {
+                                    await Global.db!.update(
+                                      'Exercises',
+                                      {'Done': !widget.widget._exercise.done ? 1 : 0},
+                                      where: 'ID = ?',
+                                      whereArgs: [widget.widget._exercise.uid],
+                                    );
 
-                                  setState(() {
-                                    widget.widget._exercise.done = response['flagRealise'];
-                                    widget.onMarkedDone(response['flagRealise']);
-                                    _busy = false;
-                                  });
+                                    setState(() {
+                                      widget.widget._exercise.done = !widget.widget._exercise.done;
+                                      widget.onMarkedDone(widget.widget._exercise.done);
+                                      _busy = false;
+                                    });
+                                  } else {
+                                    final response = await Global.client!.request(
+                                        Action.markExerciseDone,
+                                        body: '{"flagRealise":${!widget.widget._exercise.done}}',
+                                        params: [
+                                          '0',
+                                          widget.widget._lesson.id.toString(),
+                                          widget.widget._exercise.uid.toString()
+                                        ]);
+                                    await Global.db!.update(
+                                      'Exercises',
+                                      {'Done': response['flagRealise'] ? 1 : 0},
+                                      where: 'ID = ?',
+                                      whereArgs: [widget.widget._exercise.uid],
+                                    );
+
+                                    setState(() {
+                                      widget.widget._exercise.done = response['flagRealise'];
+                                      widget.onMarkedDone(response['flagRealise']);
+                                      _busy = false;
+                                    });
+                                  }
                                 },
                           child: Text(
                               'Marquer comme ${widget.widget._exercise.done ? "à faire" : "fait"}'),

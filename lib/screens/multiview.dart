@@ -35,7 +35,7 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   int _currentIndex = 0;
   _openFirstSteps() async {
-    if (await Global.storage!.read(key: 'firstTime') != 'false') {
+    if (await Global.storage!.read(key: 'firstTime') != 'false' && !Global.demo) {
       Global.storage!.write(key: 'firstTime', value: 'false');
       Navigator.of(context).push(
         MaterialPageRoute(

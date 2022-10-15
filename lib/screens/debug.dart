@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/demo.dart';
 import 'package:kosmos_client/global.dart';
 
 class DebugScreen extends StatelessWidget {
@@ -101,7 +102,8 @@ class DebugScreen extends StatelessWidget {
                   Global.db!.execute('DROP TABLE GRADES');
                 },
                 child: const Text('drop grades')),
-            ElevatedButton(onPressed: _showNotification, child: const Text('Force notification'))
+            ElevatedButton(onPressed: _showNotification, child: const Text('Force notification')),
+            const ElevatedButton(onPressed: generate, child: Text('Force generate')),
           ],
         ),
       ),

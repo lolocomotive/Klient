@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/demo.dart';
 import 'package:kosmos_client/global.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -41,6 +42,18 @@ class LoginState extends State<Login> {
   LoginState();
 
   _login() async {
+    // The demo mode is activated like that instead of with an obvious button because it would just uselessly clutter the UI otherwise
+    if (_unameController.text == '__DEMO') {
+      await Global.storage!.write(key: 'demoMode', value: 'true');
+      await Global.db!.close();
+      await deleteDatabase(Global.db!.path);
+      await Global.initDB();
+      generate();
+      Global.demo = true;
+      Global.client = Client.debug();
+      widget.onLogin();
+      return;
+    }
     if (_loginFormKey.currentState!.validate()) {
       setState(() {
         _processing = true;

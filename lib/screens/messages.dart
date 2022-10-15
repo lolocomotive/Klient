@@ -349,7 +349,9 @@ class SideConversationView extends StatelessWidget {
 
 deleteConversation(Conversation conv) async {
   try {
-    await Global.client!.request(Action.deleteMessage, params: [conv.id.toString()]);
+    if (!Global.demo) {
+      await Global.client!.request(Action.deleteMessage, params: [conv.id.toString()]);
+    }
     Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conv.id]);
     Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conv.id]);
     for (var message in conv.messages) {

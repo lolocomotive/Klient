@@ -284,7 +284,9 @@ class Client {
 
   markConversationRead(Conversation conv) {
     conv.read = true;
-    request(Action.markConversationRead, params: [conv.id.toString()]);
+    if (!Global.demo) {
+      request(Action.markConversationRead, params: [conv.id.toString()]);
+    }
     Global.db!
         .update('Conversations', {'Read': 1}, where: 'ID = ?', whereArgs: [conv.id.toString()]);
   }
@@ -316,6 +318,8 @@ class Client {
       _requests.removeAt(0);
     }
   }
+
+  Client.debug();
 }
 
 class NetworkException403 implements Exception {}

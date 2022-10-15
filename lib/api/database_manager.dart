@@ -78,6 +78,7 @@ class DatabaseManager {
 
   /// Download/update, the associated messages and their attachments
   static fetchMessageData() async {
+    if (Global.demo) return;
     Global.loadingMessages = true;
     int pgNumber = 0;
     try {
@@ -144,6 +145,8 @@ class DatabaseManager {
   }
 
   static fetchSingleConversation(int id, Batch batch) async {
+    if (Global.demo) return;
+
     try {
       await Global.client!.addRequest(Action.getConversationDetail, (conversation) async {
         String messageContents = '';
@@ -192,6 +195,7 @@ class DatabaseManager {
 
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
+    if (Global.demo) return;
     try {
       if (r == 0) return;
       try {
@@ -230,6 +234,7 @@ class DatabaseManager {
 
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
+    if (Global.demo) return;
     try {
       final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
           params: [Global.client!.idEtablissement ?? '0']);
@@ -283,6 +288,7 @@ class DatabaseManager {
 
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
+    if (Global.demo) return;
     try {
       //TODO clean up this horrific code
       final result = await Global.client!
