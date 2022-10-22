@@ -23,7 +23,6 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/api/database_manager.dart';
-import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/global.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
@@ -119,40 +118,5 @@ Future<void> showNotifications() async {
     }
   } else {
     print('Message notifications disabled');
-  }
-
-  if (Global.notifCalEnabled!) {
-    const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
-      'channel-lessons',
-      'channel-lessons',
-      channelDescription: 'The channel for displaying lesson modifications',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails lessonDetails = NotificationDetails(android: lessonChannel);
-    List<Lesson> lessons = (await Lesson.fetchAll(true));
-    lessons = lessons.where((lessons) => lessons.shouldNotify).toList();
-    if (lessons.isEmpty) {
-      print('Showing no lesson update notifications');
-    } else {
-      print('Lesson update notifications to show:');
-      print(lessons.map((e) => e.title + (e.modificationMessage ?? '')));
-    }
-    for (var i = 0; i < lessons.length; i++) {
-      Lesson lesson = lessons[i];
-      Global.db!.update('Conversations', {'NotificationShown': 1},
-          where: 'ID = ?', whereArgs: [lesson.id.toString()]);
-      await Global.notifications!.show(
-        lesson.id,
-        '${lesson.title} - ${lesson.startTime}-${lesson.endTime}',
-        HtmlUnescape().convert(lesson.isModified
-            ? 'Cours modifié: ${lesson.modificationMessage!}'
-            : "Le cours n'est plus modifié"),
-        lessonDetails,
-        payload: 'lesson-${lesson.id}',
-      );
-    }
-  } else {
-    print('Calendar notifications disabled');
   }
 }

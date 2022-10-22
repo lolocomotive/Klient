@@ -87,20 +87,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       description:
                           const Text('Recevoir une notification quand il y a un nouveau message'),
                     ),
-                    SettingsTile.switchTile(
-                      initialValue: Global.notifCalEnabled,
-                      onToggle: (_) {
-                        Global.notifCalEnabled = !Global.notifCalEnabled!;
-                        Global.storage!.write(
-                            key: 'notifications.calendar',
-                            value: Global.notifCalEnabled! ? 'true' : 'false');
-                        setState(() {});
-                      },
-                      leading: const Icon(Icons.calendar_today_outlined),
-                      title: const Text('Emploi du temps'),
-                      description:
-                          const Text('Recevoir une notification quand une séance est annulée'),
-                    ),
                   ],
                 ),
                 SettingsSection(

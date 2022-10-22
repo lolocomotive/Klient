@@ -65,7 +65,6 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    Global.notifCalEnabled = Global.notifCalEnabled ?? false;
     Global.notifMsgEnabled = Global.notifMsgEnabled ?? false;
 
     return Scaffold(
@@ -102,16 +101,6 @@ class _SetupPageState extends State<SetupPage> {
                               Global.notifMsgEnabled = !Global.notifMsgEnabled!;
                               setState(() {});
                             }),
-                        SwitchListTile(
-                          title: const Text('Emploi du temps'),
-                          subtitle:
-                              const Text('Recevoir des notifications quand un cours est annulé'),
-                          value: Global.notifCalEnabled!,
-                          onChanged: (value) {
-                            Global.notifCalEnabled = !Global.notifCalEnabled!;
-                            setState(() {});
-                          },
-                        ),
                         const Padding(padding: EdgeInsets.all(8.0)),
                         Row(
                           children: [
@@ -121,9 +110,6 @@ class _SetupPageState extends State<SetupPage> {
                                   Global.storage!.write(
                                       key: 'notifications.messages',
                                       value: Global.notifMsgEnabled! ? 'true' : 'false');
-                                  Global.storage!.write(
-                                      key: 'notifications.calendar',
-                                      value: Global.notifCalEnabled! ? 'true' : 'false');
                                   setState(() {});
                                 },
                                 child: const Text(

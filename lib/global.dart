@@ -97,7 +97,6 @@ class Global {
   static bool retryNetworkRequests = false;
   static ThemeData? theme;
   static bool? compact;
-  static bool? notifCalEnabled;
   static bool? notifMsgEnabled;
   static Brightness? enforcedBrightness;
   static bool demo = false;
@@ -403,7 +402,6 @@ class Global {
           : s == 'dark'
               ? Brightness.dark
               : null;
-      Global.notifCalEnabled = await Global.storage!.read(key: 'notifications.messages') == 'true';
       Global.notifMsgEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
