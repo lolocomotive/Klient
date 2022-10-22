@@ -90,7 +90,6 @@ class _SetupPageState extends State<SetupPage> {
                     content: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        const Text('Sélectionner quelle notifications activer'),
                         const Padding(padding: EdgeInsets.all(16.0)),
                         SwitchListTile(
                             title: const Text('Messagerie'),
