@@ -62,7 +62,7 @@ class AboutPage extends StatelessWidget {
                 ),
                 DefaultCard(
                   child: FutureBuilder<AppInfo>(
-                    future: getGitInfo(),
+                    future: AppInfo.getAppInfo(),
                     builder: ((context, snapshot) {
                       if (snapshot.hasError) {
                         print(snapshot.error);
@@ -233,24 +233,6 @@ class AboutPage extends StatelessWidget {
       ),
     );
   }
-
-  Future<AppInfo> getGitInfo() async {
-    final head = await rootBundle.loadString('.git/HEAD');
-    final originCommitId = await rootBundle.loadString('.git/ORIG_HEAD');
-    final branch = head.split('/').last.replaceAll('\n', '');
-    final commitId = await rootBundle.loadString('.git/refs/heads/$branch');
-
-    final packageInfo = await PackageInfo.fromPlatform();
-    return AppInfo(
-      commitID: commitId,
-      originCommitID: originCommitId,
-      branch: branch,
-      name: packageInfo.appName,
-      signature: packageInfo.buildSignature,
-      build: packageInfo.buildNumber,
-      version: packageInfo.version,
-    );
-  }
 }
 
 class AppInfo {
@@ -270,4 +252,21 @@ class AppInfo {
     required this.signature,
     required this.build,
   });
+  static Future<AppInfo> getAppInfo() async {
+    final head = await rootBundle.loadString('.git/HEAD');
+    final originCommitId = await rootBundle.loadString('.git/ORIG_HEAD');
+    final branch = head.split('/').last.replaceAll('\n', '');
+    final commitId = await rootBundle.loadString('.git/refs/heads/$branch');
+
+    final packageInfo = await PackageInfo.fromPlatform();
+    return AppInfo(
+      commitID: commitId,
+      originCommitID: originCommitId,
+      branch: branch,
+      name: packageInfo.appName,
+      signature: packageInfo.buildSignature,
+      build: packageInfo.buildNumber,
+      version: packageInfo.version,
+    );
+  }
 }
