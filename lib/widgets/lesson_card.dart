@@ -141,6 +141,8 @@ class LessonCard extends StatelessWidget {
                                   )),
                               ],
                             ),
+                            if (_lesson.length > 1 && _lesson.isModified)
+                              Text(_lesson.modificationMessage!),
                             if (_lesson.length > 1 || _lesson.exercises.isEmpty) Text(_lesson.room),
                             Flexible(child: iconsRow)
                           ],

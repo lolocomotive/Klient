@@ -55,6 +55,7 @@ class LessonPage extends StatelessWidget {
                     'Salle ${_lesson.room}',
                     textAlign: TextAlign.center,
                   ),
+                  if (_lesson.isModified) Text(_lesson.modificationMessage!)
                 ],
               ),
             ),
