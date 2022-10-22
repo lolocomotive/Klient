@@ -298,11 +298,6 @@ class Global {
           } catch (_) {}
           await Global.db!.close();
           await deleteDatabase(Global.db!.path);
-          print('Storage before erase:');
-          var data = await Global.storage!.readAll();
-          data.forEach((key, value) {
-            print('$key:$value');
-          });
           await Global.storage!.deleteAll();
           await Global.readPrefs();
           await Global.initDB();
