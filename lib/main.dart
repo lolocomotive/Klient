@@ -132,13 +132,7 @@ class KosmosState extends State with WidgetsBindingObserver {
       ),
       useMaterial3: true,
     ).copyWith(
-      highlightColor: Colors.deepPurpleAccent.shade100.withAlpha(80),
-
-      //FIXME
-      // For now the splash appears green when using deepPurpleAccent as color, which is an error in the flutter SDK that will be fixed soon (https://github.com/flutter/flutter/pull/110552).
-      // Using this custom color there is just a workaround while the fix isn't stable yet. Colors.deepPurpleAccent.shade100.withAlpha(80) should be used here
-
-      splashColor: const HSVColor.fromAHSV(1, 80, .3, 1).toColor().withAlpha(80),
+      highlightColor: Colors.deepPurpleAccent.shade100.withAlpha(80)
     );
     return MaterialApp(
       key: Global.mainKey,
