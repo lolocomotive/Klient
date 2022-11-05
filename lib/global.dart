@@ -381,23 +381,36 @@ class Global {
     try {
       print('Reading preferences');
       var data = await Global.storage!.readAll();
+      apiurl = 'https://mobilite.kosmoseducation.com/mobilite/';
       data.forEach((key, value) {
         if (key.startsWith('color.')) {
           ColorProvider.addColor(key.substring(6), int.parse(value));
         }
+        switch (key) {
+          case 'apiurl':
+            apiurl = value;
+            break;
+          case 'token':
+            token = value;
+            break;
+          case 'demoMode':
+            demo = value == 'true';
+            break;
+          case 'display.compact':
+            compact = value == 'true';
+            break;
+          case 'display.enforcedBrightness':
+            enforcedBrightness = value == 'light'
+                ? Brightness.light
+                : value == 'dark'
+                    ? Brightness.dark
+                    : null;
+            break;
+          case 'notifications.messages':
+            notifMsgEnabled = value == 'true';
+            break;
+        }
       });
-      Global.apiurl = await Global.storage!.read(key: 'apiurl') ??
-          'https://mobilite.kosmoseducation.com/mobilite/';
-      Global.token = await Global.storage!.read(key: 'token');
-      Global.demo = await Global.storage!.read(key: 'demoMode') == 'true';
-      Global.compact = await Global.storage!.read(key: 'display.compact') == 'true';
-      final s = await Global.storage!.read(key: 'display.enforcedBrightness');
-      Global.enforcedBrightness = s == 'light'
-          ? Brightness.light
-          : s == 'dark'
-              ? Brightness.dark
-              : null;
-      Global.notifMsgEnabled = await Global.storage!.read(key: 'notifications.calendar') == 'true';
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
       await Global.storage!.deleteAll();
