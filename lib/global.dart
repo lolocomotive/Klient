@@ -379,7 +379,7 @@ class Global {
       //Global.storage!.deleteAll();
     }
     try {
-      print('Reading prefernces');
+      print('Reading preferences');
       var data = await Global.storage!.readAll();
       data.forEach((key, value) {
         if (key.startsWith('color.')) {
