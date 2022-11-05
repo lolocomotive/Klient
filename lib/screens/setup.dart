@@ -41,6 +41,7 @@ class _SetupPageState extends State<SetupPage> {
   bool step3 = false;
   bool step4 = false;
   bool step5 = false;
+  bool step6 = false;
 
   int progress = 0;
   int progressOf = 0;
@@ -51,6 +52,7 @@ class _SetupPageState extends State<SetupPage> {
     step3 = Global.step3;
     step4 = Global.step4;
     step5 = Global.step5;
+    step6 = Global.step6;
 
     progress = Global.progress;
     progressOf = Global.progressOf;
@@ -153,7 +155,7 @@ class _SetupPageState extends State<SetupPage> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              const Flexible(child: Text('Téléchargement des dernières notes')),
+                              const Flexible(child: Text('Téléchargement des donnés de l\'utilisateur')),
                               step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                             ],
                           ),
@@ -164,7 +166,7 @@ class _SetupPageState extends State<SetupPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
+                                const Flexible(child: Text('Téléchargement des dernières notes')),
                                 step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                               ],
                             ),
@@ -175,7 +177,7 @@ class _SetupPageState extends State<SetupPage> {
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
-                                const Flexible(child: Text('Téléchargement des actualités')),
+                                const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
                                 step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                               ],
                             ),
@@ -188,7 +190,7 @@ class _SetupPageState extends State<SetupPage> {
                               children: [
                                 const Flexible(
                                     child: Text(
-                                        'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
+                                        'Téléchargement des actualités')),
                                 step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                               ],
                             ),
@@ -200,8 +202,8 @@ class _SetupPageState extends State<SetupPage> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Flexible(
-                                    child: Text('Téléchargement du contenu des messages')),
-                                step5 ? const Icon(Icons.done) : Container(),
+                                    child: Text('Téléchargement de la liste des messages (peut prendre un certain temps)')),
+                                step5 ? const Icon(Icons.done) : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
@@ -225,7 +227,7 @@ class _SetupPageState extends State<SetupPage> {
                   )
                 ],
               ),
-              if (step5)
+              if (step6)
                 ElevatedButton(
                   onPressed: () {
                     widget._callback();

@@ -58,15 +58,19 @@ class DatabaseManager {
       Global.step3 = false;
       Global.step4 = false;
       Global.step5 = false;
+      Global.step6 = false;
+      print('Downloading user data');
+      await fetchUserData();
+      Global.step1 = true;
       print('Downloading grades');
       await fetchGradesData();
-      Global.step1 = true;
+      Global.step2 = true;
       print('Downloading timetable');
       await fetchTimetable();
-      Global.step2 = true;
+      Global.step3 = true;
       print('Downloading News');
       await fetchNewsData();
-      Global.step3 = true;
+      Global.step4 = true;
       print('Downloading Messages');
       await fetchMessageData();
       Global.step5 = true;
@@ -193,9 +197,28 @@ class DatabaseManager {
     }
   }
 
+  static fetchUserData([r = 3]) async {
+    if (Global.demo) return;
+    try {
+      if (r == 0) return;
+      try {
+        final result = await Global.client!.request(Action.getUserInfo);
+        Global.client!.idEtablissement = result['idEtablissementSelectionne'];
+        Global.client!.permissions = result['etabs'][0]['permissions'];
+
+      } on Error catch (_) {
+        await Future.delayed(const Duration(seconds: 1));
+        fetchUserData(r - 1);
+      }
+    } on Exception catch (e, st) {
+      Global.onException(e, st);
+    }
+  }
+
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
     if (Global.demo) return;
+    if(!Global.client!.permissions!.contains('vsc-notes-consulter')) return;
     try {
       if (r == 0) return;
       try {
@@ -235,6 +258,7 @@ class DatabaseManager {
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
     if (Global.demo) return;
+    if(!Global.client!.permissions!.contains('info-actus')) return;
     try {
       final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
           params: [Global.client!.idEtablissement ?? '0']);
@@ -289,10 +313,11 @@ class DatabaseManager {
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
     if (Global.demo) return;
+    if(!Global.client!.permissions!.contains('cdt-calendrier')) return;
     try {
-      //TODO clean up this horrific code
+      //TODO redo this part of the code, it does not work
       final result = await Global.client!
-          .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
+          .request(Action.getTimeTableEleve, params: [(Global.client!.idEtablissement ?? 0).toString()]);
 
       await Global.db!.delete('Lessons');
       await Global.db!.delete('Exercises');

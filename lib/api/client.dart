@@ -102,6 +102,7 @@ class Client {
   late String _token;
   String? idEtablissement;
   String? idEleve;
+  String? permissions;
   final List<Request> _requests = [];
   static const int _maxConcurrentDownloads = 4;
   int _currentlyDownloading = 0;
@@ -339,17 +340,17 @@ class Action {
   static final Action startup = Action('starting/');
   static final Action getConversations = Action('messagerie/boiteReception/');
   static final Action getConversationDetail = Action('messagerie/communication/');
-  static final Action getUserInfo = Action('infosutilisateur/');
+  static final Action getUserInfo = Action('infoutilisateur/');
   static final Action getNewsArticlesEtablissement = Action('actualites/idetablissement/');
   static final Action getArticleDetails = Action('contenuArticle/article/');
   static final Action getGrades = Action('consulterNotes/idetablissement/');
-  static final Action getTimeTableEleve = Action('calendrier/ideleve/');
+  static final Action getTimeTableEleve = Action('calendrier/idetablissement/');
 
   //params ideleve noteBeforeDate
-  static final Action getHomework = Action('travailAFaire/ideleve/');
+  static final Action getHomework = Action('travailAFaire/idetablissement/');
 
   //params ideleve/idseance/idexercise/
-  static final Action getExerciseDetails = Action('contenuActivite/ideleve/');
+  static final Action getExerciseDetails = Action('contenuActivite/idetablissement/');
 
   //param idconversations
   static final Action markConversationRead =

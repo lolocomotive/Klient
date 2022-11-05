@@ -68,6 +68,7 @@ class Global {
   static bool step3 = false;
   static bool step4 = false;
   static bool step5 = false;
+  static bool step6 = false;
   static int progress = 0;
   static int progressOf = 0;
   static void Function()? onLogin;

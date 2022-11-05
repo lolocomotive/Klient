@@ -21,10 +21,6 @@ import 'dart:math';
 
 import 'package:kosmos_client/global.dart';
 
-int? _lessonIdByTimestamp(timestamp, List<Map<String, Object?>> lessons) {
-  return null;
-}
-
 generate() async {
   List<Map<String, Object?>> newsArticles = [];
   List<Map<String, Object?>> newsAttachments = [];
