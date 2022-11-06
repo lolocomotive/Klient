@@ -17,7 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
@@ -77,18 +79,26 @@ class MainState extends State<Main> {
     }
     return Scaffold(
       bottomNavigationBar: NavigationBar(
-        destinations: const [
-          NavigationDestination(
+        destinations: [
+          const NavigationDestination(
             icon: Icon(Icons.home_outlined),
             selectedIcon: Icon(Icons.home),
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: Icon(Icons.message_outlined),
-            selectedIcon: Icon(Icons.message),
+            icon: FutureBuilder<bool>(
+                future: Conversation.existsUnread(),
+                builder: (context, snapshot) {
+                  return Badge(
+                    badgeColor: Theme.of(context).colorScheme.primary,
+                    showBadge: snapshot.data == true,
+                    child: const Icon(Icons.message_outlined),
+                  );
+                }),
+            selectedIcon: const Icon(Icons.message),
             label: 'Messagerie',
           ),
-          NavigationDestination(
+          const NavigationDestination(
             icon: Icon(Icons.calendar_today_outlined),
             selectedIcon: Icon(Icons.calendar_today),
             label: 'Emploi du temps',

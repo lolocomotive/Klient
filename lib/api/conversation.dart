@@ -180,4 +180,9 @@ class Conversation {
     }
     return null;
   }
+
+  static Future<bool> existsUnread() async {
+    final results = await Global.db!.query('Conversations', where: 'Read = 0');
+    return results.isNotEmpty;
+  }
 }
