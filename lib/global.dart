@@ -381,7 +381,11 @@ class Global {
     try {
       print('Reading preferences');
       var data = await Global.storage!.readAll();
+
+      //default values
       apiurl = 'https://mobilite.kosmoseducation.com/mobilite/';
+      compact = false;
+
       data.forEach((key, value) {
         if (key.startsWith('color.')) {
           ColorProvider.addColor(key.substring(6), int.parse(value));
