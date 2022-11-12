@@ -83,106 +83,121 @@ class _ConversationPageState extends State<ConversationPage> {
                             },
                             icon: const Icon(Icons.delete))
                       ],
-                      title: Text(_conversation != null ? _conversation!.subject : widget.subject),
                       floating: true,
                     ),
                   ];
                 },
                 body: Scrollbar(
-                  child: ListView.builder(
-                    itemBuilder: (BuildContext context, int index) {
-                      if (_conversation == null || index >= _conversation!.messages.length) {
-                        return _conversation != null && _conversation!.canReply
-                            ? Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: OutlinedButton(
-                                    onPressed: () {
-                                      _showReply = true;
-                                      setState(() {});
-                                    },
-                                    child: const Text('Répondre à tous')),
-                              )
-                            : const Text('');
-                      }
-                      final parentKey = GlobalKey();
-                      return Card(
-                        margin: const EdgeInsets.all(8.0),
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            key: parentKey,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      _conversation!.messages[index].author,
-                                      textAlign: TextAlign.left,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontSize: 14),
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: ListView.builder(
+                      itemCount: (_conversation != null ? _conversation!.messages.length : 0) +
+                          (_showReply ? 0 : 1) +
+                          1,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == 0) {
+                          return Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                            child: Text(
+                              _conversation != null ? _conversation!.subject : widget.subject,
+                              style: Theme.of(context).textTheme.headlineSmall,
+                            ),
+                          );
+                        }
+                        index -= 1;
+                        if (_conversation == null || index >= _conversation!.messages.length) {
+                          return _conversation != null && _conversation!.canReply
+                              ? Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: OutlinedButton(
+                                      onPressed: () {
+                                        _showReply = true;
+                                        setState(() {});
+                                      },
+                                      child: const Text('Répondre à tous')),
+                                )
+                              : const Text('');
+                        }
+                        final parentKey = GlobalKey();
+                        return Card(
+                          margin: const EdgeInsets.all(8.0),
+                          elevation: 1,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Column(
+                              key: parentKey,
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        _conversation!.messages[index].author,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(fontSize: 14),
+                                      ),
+                                    ),
+                                    Text(Global.dateToString(_conversation!.messages[index].date)),
+                                  ],
+                                ),
+                                Html(
+                                  data: HtmlUnescape()
+                                      .convert(_conversation!.messages[index].htmlContent),
+                                  style: {
+                                    'blockquote': Style(
+                                      border: Border(
+                                          left: BorderSide(
+                                              color: Theme.of(context).colorScheme.secondary,
+                                              width: 2)),
+                                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                      margin: EdgeInsets.zero,
+                                      fontStyle: FontStyle.italic,
+                                    )
+                                  },
+                                  onLinkTap: (url, context, map, element) {
+                                    launchUrl(Uri.parse(url!),
+                                        mode: LaunchMode.externalApplication);
+                                  },
+                                ),
+                                if (_conversation!.messages[index].attachments.isNotEmpty)
+                                  DefaultCard(
+                                    elevation: 3,
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: [
+                                        Text(
+                                          'Pièces jointes',
+                                          style: TextStyle(
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        ..._conversation!.messages[index].attachments.map(
+                                          (attachment) => Row(
+                                            children: [
+                                              Flexible(
+                                                child: Text(
+                                                  attachment.name,
+                                                ),
+                                              )
+                                            ],
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                  Text(Global.dateToString(_conversation!.messages[index].date)),
-                                ],
-                              ),
-                              Html(
-                                data: HtmlUnescape()
-                                    .convert(_conversation!.messages[index].htmlContent),
-                                style: {
-                                  'blockquote': Style(
-                                    border: Border(
-                                        left: BorderSide(
-                                            color: Theme.of(context).colorScheme.secondary,
-                                            width: 2)),
-                                    padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                    margin: EdgeInsets.zero,
-                                    fontStyle: FontStyle.italic,
-                                  )
-                                },
-                                onLinkTap: (url, context, map, element) {
-                                  launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                                },
-                              ),
-                              if (_conversation!.messages[index].attachments.isNotEmpty)
-                                DefaultCard(
-                                  elevation: 3,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                                    children: [
-                                      Text(
-                                        'Pièces jointes',
-                                        style: TextStyle(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.bold,
-                                        ),
-                                      ),
-                                      ..._conversation!.messages[index].attachments.map(
-                                        (attachment) => Row(
-                                          children: [
-                                            Flexible(
-                                              child: Text(
-                                                attachment.name,
-                                              ),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                      );
-                    },
-                    itemCount: (_conversation != null ? _conversation!.messages.length : 0) +
-                        (_showReply ? 0 : 1),
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
