@@ -127,7 +127,7 @@ class _ConversationPageState extends State<ConversationPage> {
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Padding(
-                            padding: const EdgeInsets.all(8.0),
+                            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
                             child: Column(
                               key: parentKey,
                               mainAxisAlignment: MainAxisAlignment.start,
@@ -140,16 +140,27 @@ class _ConversationPageState extends State<ConversationPage> {
                                         _conversation!.messages[index].author,
                                         textAlign: TextAlign.left,
                                         overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 14),
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            color: Theme.of(context).colorScheme.primary,
+                                            fontWeight: FontWeight.bold),
                                       ),
                                     ),
-                                    Text(Global.dateToString(_conversation!.messages[index].date)),
+                                    Text(
+                                      Global.dateToString(_conversation!.messages[index].date),
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        color: Theme.of(context).colorScheme.primary,
+                                      ),
+                                    ),
                                   ],
                                 ),
                                 Html(
                                   data: HtmlUnescape()
                                       .convert(_conversation!.messages[index].htmlContent),
                                   style: {
+                                    'body':
+                                        Style(margin: EdgeInsets.zero, padding: EdgeInsets.zero),
                                     'blockquote': Style(
                                       border: Border(
                                           left: BorderSide(

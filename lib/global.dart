@@ -319,7 +319,7 @@ class Global {
         //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
         PopupMenuItemWithIcon('À propos', Icons.info_outline, context),
         PopupMenuItemWithIcon('Se déconnecter', Icons.logout_outlined, context),
-        if (kDebugMode) PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
+        /*if (kDebugMode)*/ PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
         if (kDebugMode) PopupMenuItemWithIcon('Initial setup', Icons.bug_report_outlined, context),
       ];
     },
