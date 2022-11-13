@@ -139,39 +139,39 @@ class _SetupPageState extends State<SetupPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Flexible(child: Text('Téléchargement des dernières notes')),
-                              SetupPage.downloadStep == 1
+                              SetupPage.downloadStep >= 1
                                   ? const Icon(Icons.done)
                                   : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
-                        if (SetupPage.downloadStep == 1)
+                        if (SetupPage.downloadStep >= 1)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
-                                SetupPage.downloadStep == 2
+                                SetupPage.downloadStep >= 2
                                     ? const Icon(Icons.done)
                                     : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (SetupPage.downloadStep == 2)
+                        if (SetupPage.downloadStep >= 2)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Flexible(child: Text('Téléchargement des actualités')),
-                                SetupPage.downloadStep == 3
+                                SetupPage.downloadStep >= 3
                                     ? const Icon(Icons.done)
                                     : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (SetupPage.downloadStep == 3)
+                        if (SetupPage.downloadStep >= 3)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -180,13 +180,13 @@ class _SetupPageState extends State<SetupPage> {
                                 const Flexible(
                                     child: Text(
                                         'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
-                                SetupPage.downloadStep == 4
+                                SetupPage.downloadStep >= 4
                                     ? const Icon(Icons.done)
                                     : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (SetupPage.downloadStep == 4)
+                        if (SetupPage.downloadStep >= 4)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -194,7 +194,7 @@ class _SetupPageState extends State<SetupPage> {
                               children: [
                                 const Flexible(
                                     child: Text('Téléchargement du contenu des messages')),
-                                SetupPage.downloadStep == 5 ? const Icon(Icons.done) : Container(),
+                                SetupPage.downloadStep >= 5 ? const Icon(Icons.done) : Container(),
                               ],
                             ),
                           ),
@@ -204,7 +204,7 @@ class _SetupPageState extends State<SetupPage> {
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: Text(
-                                    'Téléchargement $SetupPage.progress/$SetupPage.progressOf'),
+                                    'Téléchargement ${SetupPage.progress}/${SetupPage.progressOf}'),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
@@ -219,7 +219,7 @@ class _SetupPageState extends State<SetupPage> {
                   )
                 ],
               ),
-              if (SetupPage.downloadStep == 5)
+              if (SetupPage.downloadStep >= 5)
                 ElevatedButton(
                   onPressed: () {
                     widget._callback();

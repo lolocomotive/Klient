@@ -125,7 +125,7 @@ class DatabaseManager {
           break;
         }
       }
-      SetupPage.downloadStep == 4;
+      SetupPage.downloadStep++;
       await Client.getClient().process();
       if (MessagesPageState.currentState != null) {
         MessagesPageState.currentState!.reloadFromDB();
