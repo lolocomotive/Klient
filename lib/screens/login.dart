@@ -64,7 +64,7 @@ class LoginState extends State<Login> {
         _processing = true;
       });
       try {
-        Client.login(_unameController.text, _pwdController.text);
+        await Client.login(_unameController.text, _pwdController.text);
         await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
         await db.close();
         await deleteDatabase(db.path);
