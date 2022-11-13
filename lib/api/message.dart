@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/database_provider.dart';
 
 import 'message_attachment.dart';
 
@@ -39,7 +39,8 @@ class Message {
   /// Get the messages of a specific [Conversation]
   static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
-    final results = await Global.db!.query('Messages', where: 'ParentID = $conversationID');
+    final results = await (await DatabaseProvider.getDB())
+        .query('Messages', where: 'ParentID = $conversationID');
     for (final result in results) {
       messages.add(
         Message(

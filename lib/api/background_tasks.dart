@@ -23,7 +23,9 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/api/database_manager.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/notifications_provider.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
@@ -34,18 +36,12 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
     return;
   }
   try {
-    print('Setting up shared preferences');
-    await Global.readPrefs();
-    print('Setting up database');
-    await Global.initDB();
-    String? token = await Global.storage!.read(key: 'token');
+    String? token = await ConfigProvider.getStorage().read(key: 'token');
     if (token != null && token != '') {
       print('Logging in');
-      Global.client = Client(token);
+      Client(token);
       print('Fetching data');
       await DatabaseManager.downloadAll();
-      print('Initializing notifications');
-      await Global.initNotifications();
       print('Showing notifications');
       await showNotifications();
     }
@@ -86,7 +82,7 @@ Future<void> initPlatformState() async {
 }
 
 Future<void> showNotifications() async {
-  if (Global.notifMsgEnabled!) {
+  if (ConfigProvider.notifMsgEnabled!) {
     const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
       'channel-msg',
       'channel-msg',
@@ -106,9 +102,9 @@ Future<void> showNotifications() async {
     }
     for (var i = 0; i < convs.length; i++) {
       Conversation conv = convs[i];
-      Global.db!.update('Conversations', {'NotificationShown': 1},
+      (await DatabaseProvider.getDB()).update('Conversations', {'NotificationShown': 1},
           where: 'ID = ?', whereArgs: [conv.id.toString()]);
-      await Global.notifications!.show(
+      await (await NotificationsProvider.getNotifications()).show(
         conv.id,
         '${conv.lastAuthor} - ${conv.subject}',
         HtmlUnescape().convert(conv.preview),

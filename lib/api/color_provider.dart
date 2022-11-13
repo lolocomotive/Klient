@@ -18,7 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
 
 class ColorProvider {
   static List<MaterialColor> colors = [
@@ -52,7 +52,8 @@ class ColorProvider {
 
   static save() async {
     _lessonColors.forEach((subject, color) {
-      Global.storage!.write(key: 'colors.$subject', value: colors.indexOf(color).toString());
+      ConfigProvider.getStorage()
+          .write(key: 'colors.$subject', value: colors.indexOf(color).toString());
     });
   }
 

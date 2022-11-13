@@ -20,9 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:kosmos_client/api/news_article.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../global.dart';
 
 class ArticlePage extends StatelessWidget {
   const ArticlePage(this._article, {Key? key}) : super(key: key);

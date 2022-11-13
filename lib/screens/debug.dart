@@ -21,7 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/api/demo.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/notifications_provider.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);
@@ -38,26 +39,27 @@ class DebugScreen extends StatelessWidget {
     DatabaseManager.fetchTimetable();
   }
 
-  _closeDB() {
-    Global.db!.close();
+  _closeDB() async {
+    (await DatabaseProvider.getDB()).close();
   }
 
   _updateGrades() {
     DatabaseManager.fetchGradesData();
   }
 
-  _clearDatabase() {
-    Global.db!.delete('NewsArticles');
-    Global.db!.delete('NewsAttachments');
-    Global.db!.delete('Conversations');
-    Global.db!.delete('Messages');
-    Global.db!.delete('MessageAttachments');
-    Global.db!.delete('Grades');
-    Global.db!.delete('Lessons');
-    Global.db!.delete('Exercises');
+  _clearDatabase() async {
+    final db = await DatabaseProvider.getDB();
+    db.delete('NewsArticles');
+    db.delete('NewsAttachments');
+    db.delete('Conversations');
+    db.delete('Messages');
+    db.delete('MessageAttachments');
+    db.delete('Grades');
+    db.delete('Lessons');
+    db.delete('Exercises');
   }
 
-  void _showNotification() {
+  void _showNotification() async {
     const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
       'channel-lessons',
       'channel-lessons',
@@ -72,13 +74,13 @@ class DebugScreen extends StatelessWidget {
       importance: Importance.max,
       priority: Priority.high,
     );
+    final notifications = await NotificationsProvider.getNotifications();
     const NotificationDetails details = NotificationDetails(android: lessonChannel);
-    Global.notifications!.show(
-        0, 'Example lesson notification', 'This is an example notification', details,
+    notifications.show(0, 'Example lesson notification', 'This is an example notification', details,
         payload: 'lesson-4232582');
     const NotificationDetails details2 = NotificationDetails(android: msgChannel);
 
-    Global.notifications!.show(
+    notifications.show(
         1, 'Example Conversation notification', 'This is an example notification', details2,
         payload: 'conv-135794');
   }
@@ -98,8 +100,8 @@ class DebugScreen extends StatelessWidget {
             ElevatedButton(onPressed: _clearDatabase, child: const Text('Clear database')),
             ElevatedButton(onPressed: _closeDB, child: const Text('Close database')),
             ElevatedButton(
-                onPressed: () {
-                  Global.db!.execute('DROP TABLE GRADES');
+                onPressed: () async {
+                  (await DatabaseProvider.getDB()).execute('DROP TABLE GRADES');
                 },
                 child: const Text('drop grades')),
             ElevatedButton(onPressed: _showNotification, child: const Text('Force notification')),

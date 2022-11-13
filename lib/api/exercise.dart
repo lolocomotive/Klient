@@ -18,9 +18,8 @@
  */
 
 import 'package:kosmos_client/api/exercise_attachment.dart';
+import 'package:kosmos_client/database_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
-
-import '../global.dart';
 
 enum ExerciseType {
   lessonContent,
@@ -100,7 +99,7 @@ class Exercise {
   /// Get all [Exercise]s
   static Future<List<Exercise>> fetchAll() async {
     final List<Exercise> exercises = [];
-    final results = await Global.db!.query('Exercises');
+    final results = await (await DatabaseProvider.getDB()).query('Exercises');
     for (final result in results) {
       exercises.add(await _parse(result));
     }

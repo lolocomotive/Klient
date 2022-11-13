@@ -26,9 +26,10 @@ import 'package:intl/intl.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:url_launcher/url_launcher.dart';
-
-import '../global.dart';
 
 class ExerciseCard extends StatefulWidget {
   final Function? onMarkedDone;
@@ -264,8 +265,8 @@ class _CardContentsState extends State<_CardContents> {
                                   setState(() {
                                     _busy = true;
                                   });
-                                  if (Global.demo) {
-                                    await Global.db!.update(
+                                  if (ConfigProvider.demo) {
+                                    await (await DatabaseProvider.getDB()).update(
                                       'Exercises',
                                       {'Done': !widget.widget._exercise.done ? 1 : 0},
                                       where: 'ID = ?',
@@ -278,7 +279,7 @@ class _CardContentsState extends State<_CardContents> {
                                       _busy = false;
                                     });
                                   } else {
-                                    final response = await Global.client!.request(
+                                    final response = await Client.getClient().request(
                                         Action.markExerciseDone,
                                         body: '{"flagRealise":${!widget.widget._exercise.done}}',
                                         params: [
@@ -286,7 +287,7 @@ class _CardContentsState extends State<_CardContents> {
                                           widget.widget._lesson.id.toString(),
                                           widget.widget._exercise.uid.toString()
                                         ]);
-                                    await Global.db!.update(
+                                    await (await DatabaseProvider.getDB()).update(
                                       'Exercises',
                                       {'Done': response['flagRealise'] ? 1 : 0},
                                       where: 'ID = ?',

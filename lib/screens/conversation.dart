@@ -23,7 +23,10 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/api/database_manager.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/screens/messages.dart';
+import 'package:kosmos_client/util.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConversationPage extends StatefulWidget {
@@ -50,8 +53,8 @@ class _ConversationPageState extends State<ConversationPage> {
   _ConversationPageState(id) {
     Conversation.byID(id).then((conversation) {
       if (!conversation!.read) {
-        Global.client!.markConversationRead(conversation);
-        Global.messagesState!.reloadFromDB();
+        Client.getClient().markConversationRead(conversation);
+        MessagesPageState.currentState!.reloadFromDB();
       }
       if (!mounted) return;
       setState(() {
@@ -147,7 +150,7 @@ class _ConversationPageState extends State<ConversationPage> {
                                       ),
                                     ),
                                     Text(
-                                      Global.dateToString(_conversation!.messages[index].date),
+                                      Util.dateToString(_conversation!.messages[index].date),
                                       style: TextStyle(
                                         fontSize: 14,
                                         color: Theme.of(context).colorScheme.primary,
@@ -256,17 +259,17 @@ class _ConversationPageState extends State<ConversationPage> {
                                           _busy = true;
                                           setState(() {});
                                           try {
-                                            await Global.client!.request(Action.reply,
+                                            await Client.getClient().request(Action.reply,
                                                 params: [_conversation!.id.toString()],
                                                 body:
                                                     '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                             _textFieldController.clear();
-                                            final batch = Global.db!.batch();
+                                            final batch = (await DatabaseProvider.getDB()).batch();
                                             await DatabaseManager.clearConversation(
                                                 _conversation!.id);
                                             await DatabaseManager.fetchSingleConversation(
                                                 _conversation!.id, batch);
-                                            await Global.client!.process();
+                                            await Client.getClient().process();
                                             //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.
                                             //Committing the batch twice would duplicate all the messages.
                                             await Conversation.byID(_conversation!.id)
@@ -278,12 +281,12 @@ class _ConversationPageState extends State<ConversationPage> {
                                                 _conversation = conversation;
                                               });
                                             });
-                                            Global.messagesState!.reloadFromDB();
+                                            MessagesPageState.currentState!.reloadFromDB();
                                           } on Exception catch (e, st) {
                                             setState(() {
                                               _busy = false;
                                             });
-                                            Global.onException(e, st);
+                                            Util.onException(e, st);
                                           }
                                         },
                                   child: _busy

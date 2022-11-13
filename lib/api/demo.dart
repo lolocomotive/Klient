@@ -19,7 +19,7 @@
 
 import 'dart:math';
 
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/database_provider.dart';
 
 int? _lessonIdByTimestamp(timestamp, List<Map<String, Object?>> lessons) {
   return null;
@@ -282,7 +282,7 @@ generate() async {
       if (random.nextInt(5) == 0) day = day.add(const Duration(minutes: 55));
     }
   }
-  final batch = Global.db!.batch();
+  final batch = (await DatabaseProvider.getDB()).batch();
   for (final article in newsArticles) {
     batch.insert('NewsArticles', article);
   }

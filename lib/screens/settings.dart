@@ -18,8 +18,10 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/widgets/lesson_card.dart';
 import 'package:restart_app/restart_app.dart';
 import 'package:settings_ui/settings_ui.dart';
@@ -57,12 +59,13 @@ class _SettingsPageState extends State<SettingsPage> {
                     tiles: [
                       SettingsTile(
                         title: DropdownButton(
-                            value: Global.apiurl,
+                            value: Client.apiurl,
                             isExpanded: true,
-                            items: Global.dropdownItems,
+                            items: KosmosApp.dropdownItems,
                             onChanged: (dynamic newValue) async {
-                              await Global.storage!.write(key: 'apiurl', value: newValue);
-                              Global.apiurl = newValue;
+                              await ConfigProvider.getStorage()
+                                  .write(key: 'apiurl', value: newValue);
+                              Client.apiurl = newValue;
                               setState(() {});
                             }),
                       ),
@@ -74,12 +77,12 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   tiles: <SettingsTile>[
                     SettingsTile.switchTile(
-                      initialValue: Global.notifMsgEnabled,
+                      initialValue: ConfigProvider.notifMsgEnabled,
                       onToggle: (_) {
-                        Global.notifMsgEnabled = !Global.notifMsgEnabled!;
-                        Global.storage!.write(
+                        ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
+                        ConfigProvider.getStorage().write(
                             key: 'notifications.messages',
-                            value: Global.notifMsgEnabled! ? 'true' : 'false');
+                            value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
                         setState(() {});
                       },
                       leading: const Icon(Icons.message_outlined),
@@ -105,9 +108,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                 padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
                                 child: DropdownButton(
                                   isExpanded: true,
-                                  value: Global.enforcedBrightness == null
+                                  value: ConfigProvider.enforcedBrightness == null
                                       ? 'default'
-                                      : Global.enforcedBrightness == Brightness.light
+                                      : ConfigProvider.enforcedBrightness == Brightness.light
                                           ? 'light'
                                           : 'dark',
                                   items: const [
@@ -116,9 +119,9 @@ class _SettingsPageState extends State<SettingsPage> {
                                     DropdownMenuItem(value: 'dark', child: Text('Sombre')),
                                   ],
                                   onChanged: (dynamic value) {
-                                    Global.storage!
+                                    ConfigProvider.getStorage()
                                         .write(key: 'display.enforcedBrightness', value: value);
-                                    Global.enforcedBrightness = value == 'light'
+                                    ConfigProvider.enforcedBrightness = value == 'light'
                                         ? Brightness.light
                                         : value == 'dark'
                                             ? Brightness.dark
@@ -185,15 +188,15 @@ class _CompactSelectorState extends State<CompactSelector> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    Global.storage!.write(key: 'display.compact', value: 'false');
-                    Global.compact = false;
+                    ConfigProvider.getStorage().write(key: 'display.compact', value: 'false');
+                    ConfigProvider.compact = false;
                   });
                 },
                 child: Container(
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
-                    color: Global.compact! ? null : Theme.of(context).highlightColor,
+                    color: ConfigProvider.compact! ? null : Theme.of(context).highlightColor,
                   ),
                   padding: const EdgeInsets.all(8),
                   child: Column(
@@ -232,15 +235,15 @@ class _CompactSelectorState extends State<CompactSelector> {
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    Global.storage!.write(key: 'display.compact', value: 'true');
-                    Global.compact = true;
+                    ConfigProvider.getStorage().write(key: 'display.compact', value: 'true');
+                    ConfigProvider.compact = true;
                   });
                 },
                 child: Container(
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
-                    color: Global.compact! ? Theme.of(context).highlightColor : null,
+                    color: ConfigProvider.compact! ? Theme.of(context).highlightColor : null,
                   ),
                   padding: const EdgeInsets.all(8),
                   child: Column(

@@ -23,9 +23,10 @@ import 'package:kosmos_client/screens/conversation.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
 
-import '../global.dart';
-
 class MessagesSearchDelegate extends SearchDelegate {
+  static MessageSearchResultsState? messageSearchSuggestionState;
+  static String? searchQuery;
+
   @override
   String get searchFieldLabel => 'Recherche';
 
@@ -65,9 +66,9 @@ class MessagesSearchDelegate extends SearchDelegate {
           child: Text('Entrez au moins 3 caractères',
               style: TextStyle(color: Theme.of(context).colorScheme.secondary)));
     }
-    Global.searchQuery = query;
-    if (Global.messageSearchSuggestionState != null) {
-      Global.messageSearchSuggestionState!.refresh();
+    searchQuery = query;
+    if (MessagesSearchDelegate.messageSearchSuggestionState != null) {
+      MessagesSearchDelegate.messageSearchSuggestionState!.refresh();
     }
     return const MessageSearchResults();
   }
@@ -84,12 +85,12 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
   List<Conversation>? _conversations;
 
   MessageSearchResultsState() {
-    Global.messageSearchSuggestionState = this;
+    MessagesSearchDelegate.messageSearchSuggestionState = this;
     refresh();
   }
 
   refresh() {
-    Conversation.search(Global.searchQuery!).then((conversations) {
+    Conversation.search(MessagesSearchDelegate.searchQuery!).then((conversations) {
       if (!mounted) return;
       setState(() {
         _conversations = conversations;

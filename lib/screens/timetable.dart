@@ -22,14 +22,25 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/day_view.dart';
-
-import '../global.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/exception_widget.dart';
 
 extension DateOnlyCompare on DateTime {
   bool isSameDay(DateTime other) {
     return year == other.year && month == other.month && day == other.day;
   }
+}
+
+class Values {
+  static const timeWidth = 32.0;
+  static const heightPerHour = 120.0;
+  static const compactHeightPerHour = 70.0;
+  static const lessonLength = 55.0 / 55.0;
+  static const maxLessonsPerDay = 11;
+  static const startTime = 8;
 }
 
 class TimetablePage extends StatefulWidget {
@@ -43,7 +54,7 @@ class _TimetablePageState extends State<TimetablePage> {
   PageController _pageController = PageController();
   int _page = 0;
 
-  bool compact = Global.compact!;
+  bool compact = ConfigProvider.compact!;
   Future<List<List<Lesson>>> _getCalendar() async {
     List<List<Lesson>> r = [];
     var lessons = await Lesson.fetchAll();
@@ -82,7 +93,7 @@ class _TimetablePageState extends State<TimetablePage> {
             floating: true,
             forceElevated: innerBoxIsScrolled,
             title: const Text('Emploi du temps'),
-            actions: [Global.popupMenuButton],
+            actions: [Util.popupMenuButton],
           )
         ];
       },
@@ -94,10 +105,10 @@ class _TimetablePageState extends State<TimetablePage> {
           },
           child: SingleChildScrollView(
             child: SizedBox(
-              height: (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+              height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
                       MediaQuery.of(context).textScaleFactor *
-                      Global.maxLessonsPerDay *
-                      Global.lessonLength +
+                      Values.maxLessonsPerDay *
+                      Values.lessonLength +
                   32,
               child: Stack(
                 children: [
@@ -170,7 +181,7 @@ class _TimetablePageState extends State<TimetablePage> {
                       }),
                   Container(
                     color: Theme.of(context).colorScheme.background.withAlpha(150),
-                    width: Global.timeWidth,
+                    width: Values.timeWidth,
                     child: MediaQuery.removePadding(
                       removeTop: true,
                       context: context,
@@ -180,15 +191,15 @@ class _TimetablePageState extends State<TimetablePage> {
                           itemBuilder: (ctx, index) {
                             return SizedBox(
                               height:
-                                  (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+                                  (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
                                       MediaQuery.of(context).textScaleFactor,
                               child: Text(
-                                '${index + Global.startTime}h',
+                                '${index + Values.startTime}h',
                                 textAlign: TextAlign.center,
                               ),
                             );
                           },
-                          itemCount: Global.maxLessonsPerDay,
+                          itemCount: Values.maxLessonsPerDay,
                         ),
                       ),
                     ),

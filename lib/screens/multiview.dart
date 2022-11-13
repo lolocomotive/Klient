@@ -20,10 +20,10 @@
 import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/conversation.dart';
+import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
-import '../global.dart';
 import 'home.dart';
 import 'messages.dart';
 
@@ -37,8 +37,9 @@ class Main extends StatefulWidget {
 class MainState extends State<Main> {
   int _currentIndex = 0;
   _openFirstSteps() async {
-    if (await Global.storage!.read(key: 'firstTime') != 'false' && !Global.demo) {
-      Global.storage!.write(key: 'firstTime', value: 'false');
+    if (await ConfigProvider.getStorage().read(key: 'firstTime') != 'false' &&
+        !ConfigProvider.demo) {
+      ConfigProvider.getStorage().write(key: 'firstTime', value: 'false');
       Navigator.of(context).push(
         MaterialPageRoute(
           builder: (_) => WillPopScope(
@@ -59,7 +60,6 @@ class MainState extends State<Main> {
   @override
   Widget build(BuildContext context) {
     _openFirstSteps();
-    Global.mainState = this;
     final Widget currentWidget;
     switch (_currentIndex) {
       case 0:
@@ -72,10 +72,6 @@ class MainState extends State<Main> {
         break;
       default:
         currentWidget = TimetablePage(key: GlobalKey());
-    }
-
-    if (currentWidget is! MessagesPage) {
-      Global.fab = null;
     }
     return Scaffold(
       bottomNavigationBar: NavigationBar(
@@ -112,7 +108,6 @@ class MainState extends State<Main> {
         },
       ),
       body: currentWidget,
-      floatingActionButton: Global.fab,
     );
   }
 }

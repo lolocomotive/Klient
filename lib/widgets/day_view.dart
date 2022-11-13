@@ -19,9 +19,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/screens/timetable.dart';
 import 'package:kosmos_client/widgets/lesson_card.dart';
-
-import '../global.dart';
 
 class DayView extends StatelessWidget {
   final List<Lesson> _lessons;
@@ -41,14 +41,15 @@ class DayView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: (Global.compact! ? Global.compactHeightPerHour : Global.heightPerHour) *
+          height: (ConfigProvider.compact! ? Values.compactHeightPerHour : Values.heightPerHour) *
                   MediaQuery.of(context).textScaleFactor *
-                  Global.maxLessonsPerDay *
-                  Global.lessonLength -
+                  Values.maxLessonsPerDay *
+                  Values.lessonLength -
               4,
           child: Stack(
-            children:
-                _lessons.map((lesson) => LessonCard(lesson, compact: Global.compact!)).toList(),
+            children: _lessons
+                .map((lesson) => LessonCard(lesson, compact: ConfigProvider.compact!))
+                .toList(),
           ),
         ),
       ],

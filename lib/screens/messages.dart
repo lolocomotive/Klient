@@ -21,12 +21,15 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/conversation.dart';
 import 'package:kosmos_client/screens/message_search.dart';
+import 'package:kosmos_client/util.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
 import 'package:morpheus/morpheus.dart';
-
-import '../global.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({Key? key}) : super(key: key);
@@ -78,8 +81,9 @@ class MessagesPageState extends State<MessagesPage> {
     await reloadFromDB();
   }
 
+  static MessagesPageState? currentState;
   MessagesPageState() {
-    Global.messagesState = this;
+    currentState = this;
     currentId = null;
     currentSubject = null;
     Conversation.fetchAll().then((conversations) {
@@ -177,7 +181,7 @@ class MessagesPageState extends State<MessagesPage> {
                                     );
                                   },
                                 ),
-                              if (!_selection.isNotEmpty) Global.popupMenuButton
+                              if (!_selection.isNotEmpty) Util.popupMenuButton
                             ],
                             title: Text(
                               _selection.isNotEmpty
@@ -211,7 +215,8 @@ class MessagesPageState extends State<MessagesPage> {
                               : ListView.builder(
                                   itemCount: _conversations.isEmpty
                                       ? 1
-                                      : _conversations.length + (Global.loadingMessages ? 1 : 0),
+                                      : _conversations.length +
+                                          (DatabaseManager.loadingMessages ? 1 : 0),
                                   padding: const EdgeInsets.all(0),
                                   itemBuilder: (BuildContext context, int index) {
                                     if (index == 0 && _conversations.isEmpty ||
@@ -348,16 +353,18 @@ class SideConversationView extends StatelessWidget {
 }
 
 deleteConversation(Conversation conv) async {
+  final db = await DatabaseProvider.getDB();
+
   try {
-    if (!Global.demo) {
-      await Global.client!.request(Action.deleteMessage, params: [conv.id.toString()]);
+    if (!ConfigProvider.demo) {
+      await Client.getClient().request(Action.deleteMessage, params: [conv.id.toString()]);
     }
-    Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [conv.id]);
-    Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [conv.id]);
+    db.delete('Conversations', where: 'ID = ?', whereArgs: [conv.id]);
+    db.delete('Messages', where: 'ParentID = ?', whereArgs: [conv.id]);
     for (var message in conv.messages) {
-      Global.db!.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [message.id]);
+      db.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [message.id]);
     }
   } on Exception catch (e, st) {
-    Global.onException(e, st);
+    Util.onException(e, st);
   }
 }

@@ -18,7 +18,7 @@
  */
 
 import 'package:kosmos_client/api/message.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/database_provider.dart';
 
 /// An attachment that is linked to a [Message] (only it's id to avoid circular
 /// references though)
@@ -39,8 +39,8 @@ class MessageAttachment {
   /// Get the attachments of a specific [Message]
   static Future<List<MessageAttachment>> fromMessageID(int messageID) async {
     final List<MessageAttachment> attachments = [];
-    final results =
-        await Global.db!.query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
+    final results = await (await DatabaseProvider.getDB())
+        .query('MessageAttachments', where: 'ParentID = ?', whereArgs: [messageID]);
     for (final result in results) {
       attachments.add(MessageAttachment(
           result['ID'] as int, messageID, result['URL'] as String?, result['Name'] as String));

@@ -21,9 +21,9 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/multi_exercise_view.dart';
-
-import '../global.dart';
 
 class LessonPage extends StatelessWidget {
   final Lesson _lesson;
@@ -32,7 +32,7 @@ class LessonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Global.theme!.colorScheme.background,
+      backgroundColor: KosmosApp.theme!.colorScheme.background,
       appBar: AppBar(
         foregroundColor: Colors.black,
         leading: const BackButton(color: Colors.black),

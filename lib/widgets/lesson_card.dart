@@ -22,10 +22,10 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/lesson.dart';
+import 'package:kosmos_client/screens/timetable.dart';
 import 'package:morpheus/morpheus.dart';
-
-import '../global.dart';
 
 class LessonCard extends StatelessWidget {
   final Lesson _lesson;
@@ -64,7 +64,7 @@ class LessonCard extends StatelessWidget {
     );
     final content = SizedBox(
       height: _lesson.length *
-          (compact ? Global.compactHeightPerHour : Global.heightPerHour) *
+          (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
           MediaQuery.of(context).textScaleFactor,
       child: Card(
         elevation: 1,
@@ -195,9 +195,9 @@ class LessonCard extends StatelessWidget {
     );
     return positionned
         ? Positioned(
-            top: (_lesson.startDouble - Global.startTime) *
+            top: (_lesson.startDouble - Values.startTime) *
                 MediaQuery.of(context).textScaleFactor *
-                (compact ? Global.compactHeightPerHour : Global.heightPerHour),
+                (compact ? Values.compactHeightPerHour : Values.heightPerHour),
             left: 0,
             right: 0,
             child: content,
@@ -211,7 +211,7 @@ class StripesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint foreground = Paint();
     foreground.color =
-        Global.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
+        KosmosApp.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
     foreground.strokeWidth = 15;
     const step = 45.0;
 

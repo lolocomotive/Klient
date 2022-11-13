@@ -17,7 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '../global.dart';
+import 'package:kosmos_client/database_provider.dart';
+
 import 'news_attachment.dart';
 
 class NewsArticle {
@@ -35,7 +36,7 @@ class NewsArticle {
 
   static Future<List<NewsArticle>> fetchAll() async {
     final List<NewsArticle> articles = [];
-    final results = await Global.db!.query('NewsArticles');
+    final results = await (await DatabaseProvider.getDB()).query('NewsArticles');
     for (final result in results) {
       articles.add(NewsArticle(
         result['UID'] as String,
@@ -45,7 +46,7 @@ class NewsArticle {
         DateTime.fromMillisecondsSinceEpoch((result['PublishingDate'] as int)),
         result['HTMLContent'] as String,
         result['URL'] as String,
-        await NewsAttachment.fromParentUID(result['UID'] as String, Global.db!),
+        await NewsAttachment.fromParentUID(result['UID'] as String, await DatabaseProvider.getDB()),
       ));
     }
     return articles;

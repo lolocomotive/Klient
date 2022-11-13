@@ -20,8 +20,7 @@
 import 'package:flutter/material.dart' hide Action;
 import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/conversation.dart';
-
-import '../global.dart';
+import 'package:kosmos_client/util.dart';
 
 class MessageCard extends StatelessWidget {
   final Conversation _conversation;
@@ -68,7 +67,7 @@ class MessageCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    Global.dateToString(_conversation.lastDate),
+                    Util.dateToString(_conversation.lastDate),
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(

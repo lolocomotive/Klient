@@ -20,9 +20,9 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/exercise_card.dart';
-
-import '../global.dart';
 
 class MultiExerciseView extends StatelessWidget {
   final List<Exercise> _exercises;
@@ -49,7 +49,7 @@ class MultiExerciseView extends StatelessWidget {
               .map((e) => ExerciseCard(
                     e,
                     _lesson,
-                    compact: Global.compact!,
+                    compact: ConfigProvider.compact!,
                     showDate: showDate,
                     showSubject: showSubject,
                   ))

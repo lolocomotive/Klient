@@ -20,8 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/exercise.dart';
-
-import '../global.dart';
+import 'package:kosmos_client/database_provider.dart';
 
 class Lesson {
   int id;
@@ -68,7 +67,7 @@ class Lesson {
       result['EndTime'] as String,
       result['Room'] as String,
       result['Subject'] as String,
-      await Exercise.fromParentLesson(result['ID'] as int, Global.db!),
+      await Exercise.fromParentLesson(result['ID'] as int, await DatabaseProvider.getDB()),
       result['IsModified'] as int == 1,
       result['ShouldNotify'] as int == 1,
       headless,
@@ -78,7 +77,7 @@ class Lesson {
 
   static Future<List<Lesson>> fetchAll([headless = false]) async {
     final List<Lesson> lessons = [];
-    final results = await Global.db!.query('Lessons', orderBy: 'LessonDate');
+    final results = await (await DatabaseProvider.getDB()).query('Lessons', orderBy: 'LessonDate');
     for (final result in results) {
       lessons.add(await _parse(result, headless));
     }
@@ -86,7 +85,8 @@ class Lesson {
   }
 
   static Future<Lesson?> byID(int id, [headless = false]) async {
-    final results = await Global.db!.query('Lessons', where: 'ID = ?', whereArgs: [id]);
+    final results =
+        await (await DatabaseProvider.getDB()).query('Lessons', where: 'ID = ?', whereArgs: [id]);
     if (results.isEmpty) return null;
     return _parse(results[0], headless);
   }

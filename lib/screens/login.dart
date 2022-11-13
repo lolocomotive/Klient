@@ -20,8 +20,11 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/demo.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/about.dart';
+import 'package:kosmos_client/util.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Login extends StatefulWidget {
@@ -43,36 +46,36 @@ class LoginState extends State<Login> {
 
   _login() async {
     // The demo mode is activated like that instead of with an obvious button because it would just uselessly clutter the UI otherwise
+    final db = await DatabaseProvider.getDB();
     if (_unameController.text == '__DEMO') {
-      await Global.storage!.write(key: 'demoMode', value: 'true');
-      await Global.db!.close();
-      await deleteDatabase(Global.db!.path);
-      await Global.initDB();
+      await ConfigProvider.getStorage().write(key: 'demoMode', value: 'true');
+      await db.close();
+      await deleteDatabase(db.path);
       generate();
-      Global.demo = true;
-      Global.client = Client.demo();
+      ConfigProvider.demo = true;
+      Client.demo();
       widget.onLogin();
       return;
     }
-    Global.demo = false;
-    Global.storage!.write(key: 'demoMode', value: 'false');
+    ConfigProvider.demo = false;
+    ConfigProvider.getStorage().write(key: 'demoMode', value: 'false');
     if (_loginFormKey.currentState!.validate()) {
       setState(() {
         _processing = true;
       });
       try {
-        Global.client = await Client.login(_unameController.text, _pwdController.text);
-        await Global.storage!.write(key: 'firstTime', value: 'true');
-        await Global.db!.close();
-        await deleteDatabase(Global.db!.path);
-        await Global.initDB();
-        Global.client!.clear();
+        Client.login(_unameController.text, _pwdController.text);
+        await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
+        await db.close();
+        await deleteDatabase(db.path);
+        await DatabaseProvider.initDB();
+        Client.getClient().clear();
         widget.onLogin();
       } on BadCredentialsException catch (_) {
         ScaffoldMessenger.of(context)
             .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
       } on Exception catch (e, st) {
-        Global.onException(e, st);
+        Util.onException(e, st);
       } finally {
         setState(() {
           _processing = false;
@@ -128,11 +131,12 @@ class LoginState extends State<Login> {
                                 style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
                             DropdownButton(
                               isExpanded: true,
-                              value: Global.apiurl,
-                              items: Global.dropdownItems,
+                              value: Client.apiurl,
+                              items: KosmosApp.dropdownItems,
                               onChanged: (dynamic newValue) async {
-                                await Global.storage!.write(key: 'apiurl', value: newValue);
-                                Global.apiurl = newValue;
+                                await ConfigProvider.getStorage()
+                                    .write(key: 'apiurl', value: newValue);
+                                Client.apiurl = newValue;
                                 setState(() {});
                               },
                             ),

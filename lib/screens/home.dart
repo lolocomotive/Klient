@@ -23,11 +23,13 @@ import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/grade.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/api/news_article.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/article_card.dart';
+import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/exercise_card.dart';
 import 'package:kosmos_client/widgets/grade_card.dart';
-
-import '../global.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -44,7 +46,7 @@ class _HomePageState extends State<HomePage> {
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return <Widget>[
             SliverAppBar(
-              actions: [Global.popupMenuButton],
+              actions: [Util.popupMenuButton],
               title: const Text('Accueil'),
               floating: true,
               forceElevated: innerBoxIsScrolled,
@@ -244,12 +246,12 @@ class GradeList extends StatelessWidget {
                             children: [
                               GradeCard(
                                 twoGrades[0],
-                                compact: Global.compact!,
+                                compact: ConfigProvider.compact!,
                               ),
                               if (twoGrades.length > 1)
                                 GradeCard(
                                   twoGrades[1],
-                                  compact: Global.compact!,
+                                  compact: ConfigProvider.compact!,
                                 )
                             ],
                           ),
@@ -394,7 +396,7 @@ class _HomeworkListState extends State<HomeworkList> {
             child: ExerciseCard(
               homework.key,
               homework.value,
-              compact: Global.compact!,
+              compact: ConfigProvider.compact!,
               elevation: 1,
               showDate: true,
               showSubject: true,

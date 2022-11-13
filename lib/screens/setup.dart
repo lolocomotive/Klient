@@ -20,13 +20,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/database_manager.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/screens/settings.dart';
 
 class SetupPage extends StatefulWidget {
   final Function() _callback;
-
+  static int downloadStep = 0;
+  static int progress = 0;
+  static int progressOf = 0;
   const SetupPage(this._callback, {Key? key}) : super(key: key);
 
   @override
@@ -36,24 +39,7 @@ class SetupPage extends StatefulWidget {
 class _SetupPageState extends State<SetupPage> {
   int currentStep = 0;
 
-  bool step1 = false;
-  bool step2 = false;
-  bool step3 = false;
-  bool step4 = false;
-  bool step5 = false;
-
-  int progress = 0;
-  int progressOf = 0;
-
   void update() {
-    step1 = Global.step1;
-    step2 = Global.step2;
-    step3 = Global.step3;
-    step4 = Global.step4;
-    step5 = Global.step5;
-
-    progress = Global.progress;
-    progressOf = Global.progressOf;
     try {
       setState(() {});
     } catch (_) {
@@ -65,8 +51,7 @@ class _SetupPageState extends State<SetupPage> {
 
   @override
   Widget build(BuildContext context) {
-    Global.notifMsgEnabled = Global.notifMsgEnabled ?? false;
-
+    ConfigProvider.notifMsgEnabled = ConfigProvider.notifMsgEnabled ?? false;
     return Scaffold(
       appBar: AppBar(
         leading: Container(),
@@ -95,9 +80,9 @@ class _SetupPageState extends State<SetupPage> {
                             title: const Text('Messagerie'),
                             subtitle: const Text(
                                 'Recevoir des notifications quand il y a un nouveau message'),
-                            value: Global.notifMsgEnabled!,
+                            value: ConfigProvider.notifMsgEnabled!,
                             onChanged: (value) {
-                              Global.notifMsgEnabled = !Global.notifMsgEnabled!;
+                              ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
                               setState(() {});
                             }),
                         const Padding(padding: EdgeInsets.all(8.0)),
@@ -106,9 +91,9 @@ class _SetupPageState extends State<SetupPage> {
                             TextButton(
                                 onPressed: () {
                                   currentStep++;
-                                  Global.storage!.write(
+                                  ConfigProvider.getStorage().write(
                                       key: 'notifications.messages',
-                                      value: Global.notifMsgEnabled! ? 'true' : 'false');
+                                      value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
                                   setState(() {});
                                 },
                                 child: const Text(
@@ -129,9 +114,9 @@ class _SetupPageState extends State<SetupPage> {
                         TextButton(
                             onPressed: () {
                               currentStep++;
-                              Global.retryNetworkRequests = true;
+                              Client.retryNetworkRequests = true;
                               DatabaseManager.downloadAll().then((_) {
-                                Global.retryNetworkRequests = false;
+                                Client.retryNetworkRequests = false;
                               });
                               update();
                               setState(() {});
@@ -154,33 +139,39 @@ class _SetupPageState extends State<SetupPage> {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               const Flexible(child: Text('Téléchargement des dernières notes')),
-                              step1 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                              SetupPage.downloadStep == 1
+                                  ? const Icon(Icons.done)
+                                  : const CircularProgressIndicator(),
                             ],
                           ),
                         ),
-                        if (step1)
+                        if (SetupPage.downloadStep == 1)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
-                                step2 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                                SetupPage.downloadStep == 2
+                                    ? const Icon(Icons.done)
+                                    : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (step2)
+                        if (SetupPage.downloadStep == 2)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 const Flexible(child: Text('Téléchargement des actualités')),
-                                step3 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                                SetupPage.downloadStep == 3
+                                    ? const Icon(Icons.done)
+                                    : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (step3)
+                        if (SetupPage.downloadStep == 3)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -189,11 +180,13 @@ class _SetupPageState extends State<SetupPage> {
                                 const Flexible(
                                     child: Text(
                                         'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
-                                step4 ? const Icon(Icons.done) : const CircularProgressIndicator(),
+                                SetupPage.downloadStep == 4
+                                    ? const Icon(Icons.done)
+                                    : const CircularProgressIndicator(),
                               ],
                             ),
                           ),
-                        if (step4)
+                        if (SetupPage.downloadStep == 4)
                           Padding(
                             padding: const EdgeInsets.all(8.0),
                             child: Row(
@@ -201,21 +194,22 @@ class _SetupPageState extends State<SetupPage> {
                               children: [
                                 const Flexible(
                                     child: Text('Téléchargement du contenu des messages')),
-                                step5 ? const Icon(Icons.done) : Container(),
+                                SetupPage.downloadStep == 5 ? const Icon(Icons.done) : Container(),
                               ],
                             ),
                           ),
-                        if (progressOf != 0)
+                        if (SetupPage.progressOf != 0)
                           Column(
                             children: [
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
-                                child: Text('Téléchargement $progress/$progressOf'),
+                                child: Text(
+                                    'Téléchargement $SetupPage.progress/$SetupPage.progressOf'),
                               ),
                               Padding(
                                 padding: const EdgeInsets.all(8.0),
                                 child: LinearProgressIndicator(
-                                  value: progress / progressOf,
+                                  value: SetupPage.progress / SetupPage.progressOf,
                                 ),
                               ),
                             ],
@@ -225,7 +219,7 @@ class _SetupPageState extends State<SetupPage> {
                   )
                 ],
               ),
-              if (step5)
+              if (SetupPage.downloadStep == 5)
                 ElevatedButton(
                   onPressed: () {
                     widget._callback();

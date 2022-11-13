@@ -23,13 +23,19 @@ import 'dart:math';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/screens/messages.dart';
+import 'package:kosmos_client/screens/setup.dart';
+import 'package:kosmos_client/util.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
-import '../global.dart';
 import 'conversation.dart';
 
 /// Utility class that fetches data from the API and stores it inside the database
 class DatabaseManager {
+  static bool loadingMessages = false;
+
   static String _cleanupHTML(String html) {
     //TODO add anchors to links
     String result = html
@@ -53,23 +59,19 @@ class DatabaseManager {
 
   static downloadAll() async {
     try {
-      Global.step1 = false;
-      Global.step2 = false;
-      Global.step3 = false;
-      Global.step4 = false;
-      Global.step5 = false;
+      SetupPage.downloadStep = 0;
       print('Downloading grades');
       await fetchGradesData();
-      Global.step1 = true;
+      SetupPage.downloadStep++;
       print('Downloading timetable');
       await fetchTimetable();
-      Global.step2 = true;
+      SetupPage.downloadStep++;
       print('Downloading News');
       await fetchNewsData();
-      Global.step3 = true;
+      SetupPage.downloadStep++;
       print('Downloading Messages');
       await fetchMessageData();
-      Global.step5 = true;
+      SetupPage.downloadStep++;
       print('Finished downloading');
     } catch (_) {
       print('EEEE $_');
@@ -78,12 +80,12 @@ class DatabaseManager {
 
   /// Download/update, the associated messages and their attachments
   static fetchMessageData() async {
-    if (Global.demo) return;
-    Global.loadingMessages = true;
+    if (ConfigProvider.demo) return;
+    loadingMessages = true;
     int pgNumber = 0;
     try {
       while (true) {
-        final result = await Global.client!.request(
+        final result = await Client.getClient().request(
           Action.getConversations,
           params: [(pgNumber * 20).toString()],
         );
@@ -100,7 +102,7 @@ class DatabaseManager {
             await deleteConversation(conversation['id']);
           }
           modified = true;
-          final batch = Global.db!.batch();
+          final batch = (await DatabaseProvider.getDB()).batch();
           batch.insert(
               'Conversations',
               {
@@ -123,32 +125,34 @@ class DatabaseManager {
           break;
         }
       }
-      Global.step4 = true;
-      await Global.client!.process();
-      if (Global.messagesState != null) {
-        Global.messagesState!.reloadFromDB();
+      SetupPage.downloadStep == 4;
+      await Client.getClient().process();
+      if (MessagesPageState.currentState != null) {
+        MessagesPageState.currentState!.reloadFromDB();
       }
-      Global.loadingMessages = false;
+      loadingMessages = false;
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 
   static deleteConversation(int id) async {
-    await Global.db!.delete('Conversations', where: 'ID = ?', whereArgs: [id]);
+    await (await DatabaseProvider.getDB())
+        .delete('Conversations', where: 'ID = ?', whereArgs: [id]);
     clearConversation(id);
   }
 
   static clearConversation(int id) async {
-    await Global.db!.delete('Messages', where: 'ParentID = ?', whereArgs: [id]);
-    await Global.db!.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [id]);
+    final db = await DatabaseProvider.getDB();
+    await db.delete('Messages', where: 'ParentID = ?', whereArgs: [id]);
+    await db.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [id]);
   }
 
   static fetchSingleConversation(int id, Batch batch) async {
-    if (Global.demo) return;
+    if (ConfigProvider.demo) return;
 
     try {
-      await Global.client!.addRequest(Action.getConversationDetail, (conversation) async {
+      await Client.getClient().addRequest(Action.getConversationDetail, (conversation) async {
         String messageContents = '';
         for (final message in conversation['participations']) {
           //Generate a random message ID because the API returns the conversationID
@@ -189,23 +193,24 @@ class DatabaseManager {
         await batch.commit();
       }, params: [(id).toString()]);
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
-    if (Global.demo) return;
+    final db = await DatabaseProvider.getDB();
+    if (ConfigProvider.demo) return;
     try {
       if (r == 0) return;
       try {
-        final result = await Global.client!
-            .request(Action.getGrades, params: [Global.client!.idEtablissement ?? '0']);
-        Global.db!.delete('Grades');
+        final result = await Client.getClient()
+            .request(Action.getGrades, params: [Client.getClient().idEtablissement ?? '0']);
+        db.delete('Grades');
         for (final grade in result['listeNotes']) {
           final double value =
               double.tryParse((grade['note'] as String).replaceAll(',', '.')) ?? -1;
-          Global.db!.insert(
+          db.insert(
             'Grades',
             {
               'Subject': grade['matiere'] as String,
@@ -228,19 +233,20 @@ class DatabaseManager {
         fetchGradesData(r - 1);
       }
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 
   /// Download all the available NewsArticles, and their associated attachments
   static fetchNewsData() async {
-    if (Global.demo) return;
+    final db = await DatabaseProvider.getDB();
+    if (ConfigProvider.demo) return;
     try {
-      final result = await Global.client!.request(Action.getNewsArticlesEtablissement,
-          params: [Global.client!.idEtablissement ?? '0']);
+      final result = await Client.getClient().request(Action.getNewsArticlesEtablissement,
+          params: [Client.getClient().idEtablissement ?? '0']);
       for (final newsArticle in result['articles']) {
-        Global.client!.addRequest(Action.getArticleDetails, (articleDetails) async {
-          await Global.db!.insert(
+        Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
+          await db.insert(
             'NewsArticles',
             {
               'UID': newsArticle['uid'],
@@ -256,21 +262,21 @@ class DatabaseManager {
           for (final attachment in articleDetails['pjs'] ?? []) {
             // Prevent duplicates since the given attachment UID is null we have to use
             // auto-incremented IDs and delete all each time we update
-            await Global.db!.delete(
+            await db.delete(
               'NewsAttachments',
               where: 'ParentUID = ?',
               whereArgs: [newsArticle['uid']],
             );
-            await Global.db!.insert('NewsAttachments', {
+            await db.insert('NewsAttachments', {
               'Name': attachment['name'],
               'ParentUID': newsArticle['uid'],
             });
           }
         }, params: [newsArticle['uid']]);
       }
-      await Global.client!.process();
+      await Client.getClient().process();
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 
@@ -288,15 +294,16 @@ class DatabaseManager {
 
   /// Download the timetable from D-7 to D+7 with the associated [Exercise]s and their attachments
   static fetchTimetable() async {
-    if (Global.demo) return;
+    final db = await DatabaseProvider.getDB();
+    if (ConfigProvider.demo) return;
     try {
       //TODO clean up this horrific code
-      final result = await Global.client!
-          .request(Action.getTimeTableEleve, params: [(Global.client!.idEleve ?? 0).toString()]);
+      final result = await Client.getClient().request(Action.getTimeTableEleve,
+          params: [(Client.getClient().idEleve ?? 0).toString()]);
 
-      await Global.db!.delete('Lessons');
-      await Global.db!.delete('Exercises');
-      await Global.db!.delete('ExerciseAttachments');
+      await db.delete('Lessons');
+      await db.delete('Exercises');
+      await db.delete('ExerciseAttachments');
 
       for (final day in result['listeJourCdt']) {
         for (final lesson in day['listeSeances']) {
@@ -308,7 +315,7 @@ class DatabaseManager {
             shouldNotify = oldLesson.isModified != lesson['flagModif'];
           }
 
-          Global.db!.insert(
+          db.insert(
             'Lessons',
             {
               'ID': lesson['idSeance'],
@@ -326,8 +333,8 @@ class DatabaseManager {
           );
 
           for (final exercise in lesson['aFaire'] ?? []) {
-            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await Global.db!.insert(
+            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await db.insert(
                 'Exercises',
                 {
                   'Type': exercise['type'],
@@ -342,10 +349,10 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
-              await Global.db!.delete('ExerciseAttachments',
+              await db.delete('ExerciseAttachments',
                   where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
-                Global.db!.insert(
+                db.insert(
                   'ExerciseAttachments',
                   {
                     'ID': attachment['idRessource'],
@@ -357,14 +364,14 @@ class DatabaseManager {
                 );
               }
             }, params: [
-              (Global.client!.idEleve ?? 0).toString(),
+              (Client.getClient().idEleve ?? 0).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);
           }
           for (final exercise in lesson['enSeance'] ?? []) {
-            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await Global.db!.insert(
+            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await db.insert(
                 'Exercises',
                 {
                   'Type': 'Cours',
@@ -377,10 +384,10 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
-              await Global.db!.delete('ExerciseAttachments',
+              await db.delete('ExerciseAttachments',
                   where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
-                Global.db!.insert(
+                db.insert(
                   'ExerciseAttachments',
                   {
                     'ID': attachment['idRessource'],
@@ -392,18 +399,18 @@ class DatabaseManager {
                 );
               }
             }, params: [
-              (Global.client!.idEleve ?? 0).toString(),
+              (Client.getClient().idEleve ?? 0).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);
           }
           for (final exercise in lesson['aRendre'] ?? []) {
-            if ((await Global.db!.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
+            if ((await db.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
                 .isNotEmpty) {
               continue;
             }
-            Global.client!.addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await Global.db!.insert(
+            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+              await db.insert(
                 'Exercises',
                 {
                   'Type': exercise['type'],
@@ -418,10 +425,10 @@ class DatabaseManager {
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
-              await Global.db!.delete('ExerciseAttachments',
+              await db.delete('ExerciseAttachments',
                   where: 'ParentID = ?', whereArgs: [exercise['uid']]);
               for (final attachment in exerciseDetails['pjs'] ?? []) {
-                Global.db!.insert(
+                db.insert(
                   'ExerciseAttachments',
                   {
                     'ID': attachment['idRessource'],
@@ -433,16 +440,16 @@ class DatabaseManager {
                 );
               }
             }, params: [
-              (Global.client!.idEleve ?? 0).toString(),
+              (Client.getClient().idEleve ?? 0).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);
           }
         }
       }
-      await Global.client!.process();
+      await Client.getClient().process();
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 }

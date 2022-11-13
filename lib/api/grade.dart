@@ -17,7 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import '../global.dart';
+import 'package:kosmos_client/database_provider.dart';
 
 class Grade {
   String subject;
@@ -30,7 +30,7 @@ class Grade {
 
   static Future<List<Grade>> fetchAll() async {
     final List<Grade> grades = [];
-    final results = await Global.db!.query('Grades');
+    final results = await (await DatabaseProvider.getDB()).query('Grades');
     for (final result in results) {
       grades.add(Grade(
         result['Subject'] as String,

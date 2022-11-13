@@ -24,8 +24,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:kosmos_client/global.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/login.dart';
+import 'package:kosmos_client/screens/setup.dart';
+import 'package:kosmos_client/util.dart';
 
 import 'conversation.dart';
 
@@ -69,7 +73,7 @@ class Request {
         success = true;
       } on Exception catch (_) {
         print('Retrying network request...');
-        if (Global.retryNetworkRequests) {
+        if (Client.retryNetworkRequests) {
           success = false;
           sleep(const Duration(milliseconds: 1000));
         } else {
@@ -98,7 +102,9 @@ class Request {
 
 /// Utility class making it easier to communicate with the API
 class Client {
+  static bool retryNetworkRequests = false;
   static const String _appVersion = '3.7.14';
+  static String apiurl = 'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
   String? idEtablissement;
   String? idEleve;
@@ -112,7 +118,7 @@ class Client {
       _requests.removeAt(0);
     }
     showDialog(
-        context: Global.navigatorKey.currentContext!,
+        context: KosmosApp.navigatorKey.currentContext!,
         builder: (context) {
           return AlertDialog(
             alignment: Alignment.center,
@@ -131,14 +137,14 @@ class Client {
                   )),
               ElevatedButton(
                   onPressed: () {
-                    Global.storage!.delete(key: 'token');
-                    Global.navigatorKey.currentState!
+                    ConfigProvider.getStorage().delete(key: 'token');
+                    KosmosApp.navigatorKey.currentState!
                       ..pop()
                       ..push(
                         MaterialPageRoute(
                           builder: (_) => Login(() {
-                            Global.navigatorKey.currentState!.pop();
-                            Global.onLogin!();
+                            KosmosApp.navigatorKey.currentState!.pop();
+                            KosmosApp.onLogin!();
                           }),
                         ),
                       );
@@ -158,7 +164,7 @@ class Client {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
     };
-    String url = Global.apiurl + action.url;
+    String url = apiurl + action.url;
     for (final param in params ?? []) {
       url += param + '/';
     }
@@ -181,17 +187,17 @@ class Client {
   }
 
   process() async {
-    Global.progress = 0;
-    Global.progressOf = _requests.length;
+    SetupPage.progress = 0;
+    SetupPage.progressOf = _requests.length;
     while (_requests.isNotEmpty) {
       if (_currentlyDownloading <= _maxConcurrentDownloads) {
         _currentlyDownloading++;
         _requests[0].process().then((_) {
           _currentlyDownloading--;
-          Global.progress++;
+          SetupPage.progress++;
         }).catchError(
           (e, st) {
-            Global.onException(e, st);
+            Util.onException(e, st);
           },
           test: (e) => e is Exception,
         );
@@ -203,8 +209,8 @@ class Client {
     while (_currentlyDownloading > 0) {
       await Future.delayed(const Duration(milliseconds: 10));
     }
-    Global.progress = 0;
-    Global.progressOf = 0;
+    SetupPage.progress = 0;
+    SetupPage.progressOf = 0;
   }
 
   /// Make a request to the API
@@ -215,7 +221,7 @@ class Client {
       'X-Kdecole-Auth': _token,
     };
 
-    String url = Global.apiurl + action.url;
+    String url = apiurl + action.url;
     for (final param in params ?? []) {
       url += param + '/';
     }
@@ -249,7 +255,7 @@ class Client {
       } on Exception catch (_) {
         print('Retrying network request...');
 
-        if (Global.retryNetworkRequests) {
+        if (retryNetworkRequests) {
           success = false;
           await Future.delayed(const Duration(seconds: 1));
         } else {
@@ -284,11 +290,14 @@ class Client {
 
   markConversationRead(Conversation conv) {
     conv.read = true;
-    if (!Global.demo) {
+    if (!ConfigProvider.demo) {
       request(Action.markConversationRead, params: [conv.id.toString()]);
     }
-    Global.db!
-        .update('Conversations', {'Read': 1}, where: 'ID = ?', whereArgs: [conv.id.toString()]);
+    DatabaseProvider.getDB().then(
+      (db) {
+        db.update('Conversations', {'Read': 1}, where: 'ID = ?', whereArgs: [conv.id.toString()]);
+      },
+    );
   }
 
   /// Log in using username and activation code provided by the ENT
@@ -303,13 +312,13 @@ class Client {
 
   Client(String token) {
     _token = token;
-    Global.storage!.write(key: 'token', value: _token);
-    Global.token = _token;
+    _client = this;
+    ConfigProvider.getStorage().write(key: 'token', value: _token);
     if (token == '') return;
     try {
       request(Action.startup);
     } on Exception catch (e, st) {
-      Global.onException(e, st);
+      Util.onException(e, st);
     }
   }
 
@@ -319,7 +328,15 @@ class Client {
     }
   }
 
-  Client.demo();
+  Client.demo() {
+    _client = this;
+  }
+
+  static Client getClient() {
+    return _client!;
+  }
+
+  static Client? _client;
 }
 
 class NetworkException403 implements Exception {}

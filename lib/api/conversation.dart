@@ -20,8 +20,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/main.dart';
 
-import '../global.dart';
 import 'message.dart';
 
 class Conversation {
@@ -58,7 +59,8 @@ class Conversation {
   /// DOES NOT return messages
   static Future<List<Conversation>> fetchAll({int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
-    final results = await Global.db!.query('Conversations', limit: limit, offset: offset);
+    final results =
+        await (await DatabaseProvider.getDB()).query('Conversations', limit: limit, offset: offset);
     for (final result in results) {
       List<Message> messages = [];
       conversations.add(
@@ -106,7 +108,7 @@ class Conversation {
                   : ''));
       children.add(TextSpan(
           text: replaceWith[i],
-          style: TextStyle(backgroundColor: background ?? Global.theme!.highlightColor)));
+          style: TextStyle(backgroundColor: background ?? KosmosApp.theme!.highlightColor)));
       children.add(TextSpan(
           text: split[i + 1].substring(0, min(75, split[i + 1].length)) +
               (split[i + 1].length > 75 ? '...\n' : '')));
@@ -124,7 +126,7 @@ class Conversation {
     String likeClause =
         "(upper(Subject) like upper('%$query%')) or (FullMessageContents like upper('%$query%'))";
     String orderClause = 'LastDate desc';
-    final results = await Global.db!.query('Conversations',
+    final results = await (await DatabaseProvider.getDB()).query('Conversations',
         where: likeClause, orderBy: orderClause, limit: limit, offset: offset);
     for (final result in results) {
       List<Message> messages = [];
@@ -146,11 +148,11 @@ class Conversation {
           result['FirstAuthor'] as String,
           result['CanReply'] as int == 1,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
-              ? highlight(query, fullMessageContents, color: Global.theme!.colorScheme.secondary)
+              ? highlight(query, fullMessageContents, color: KosmosApp.theme!.colorScheme.secondary)
               : null,
           (result['Subject'] as String).toUpperCase().contains(query.toUpperCase())
               ? highlight(query, result['Subject'] as String,
-                  color: Global.theme!.colorScheme.secondary, fontSize: 14)
+                  color: KosmosApp.theme!.colorScheme.secondary, fontSize: 14)
               : null,
         ),
       );
@@ -160,7 +162,8 @@ class Conversation {
   }
 
   static Future<Conversation?> byID(int id) async {
-    final results = await Global.db!.query('Conversations', where: 'ID = ?', whereArgs: [id]);
+    final results = await (await DatabaseProvider.getDB())
+        .query('Conversations', where: 'ID = ?', whereArgs: [id]);
     for (final result in results) {
       List<Message> messages = [];
       messages = await Message.fromConversationID(result['ID'] as int);
@@ -182,7 +185,8 @@ class Conversation {
   }
 
   static Future<bool> existsUnread() async {
-    final results = await Global.db!.query('Conversations', where: 'Read = 0');
+    final results =
+        await (await DatabaseProvider.getDB()).query('Conversations', where: 'Read = 0');
     return results.isNotEmpty;
   }
 }

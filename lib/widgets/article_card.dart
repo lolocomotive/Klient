@@ -20,9 +20,8 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/screens/article.dart';
+import 'package:kosmos_client/util.dart';
 import 'package:morpheus/morpheus.dart';
-
-import '../global.dart';
 
 class ArticleCard extends StatelessWidget {
   final NewsArticle _article;
@@ -56,7 +55,7 @@ class ArticleCard extends StatelessWidget {
                     _article.author,
                     style: const TextStyle(fontSize: 16),
                   ),
-                  Text(Global.dateToString(_article.date))
+                  Text(Util.dateToString(_article.date))
                 ],
               ),
               Text(

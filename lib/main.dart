@@ -22,27 +22,27 @@ import 'package:flutter/scheduler.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kosmos_client/api/background_tasks.dart';
 import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/notifications_provider.dart';
 import 'package:kosmos_client/screens/login.dart';
 
-import 'global.dart';
 import 'screens/multiview.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('FR_fr');
-  await Global.initNotifications();
-  await Global.readPrefs();
-  await Global.initDB();
+  await ConfigProvider.load();
   registerTasks();
   runApp(const KosmosApp());
 }
 
 _checkNotifications() async {
-  var details = await Global.notifications!.getNotificationAppLaunchDetails();
+  var details =
+      await (await NotificationsProvider.getNotifications()).getNotificationAppLaunchDetails();
   if (details == null) return;
   if (!details.didNotificationLaunchApp) return;
   if (details.payload == null) return;
-  Global.notificationCallback(details.payload);
+  NotificationsProvider.notificationCallback(details.payload);
 }
 
 class PopupMenuItemWithIcon extends PopupMenuItem {
@@ -56,7 +56,7 @@ class PopupMenuItemWithIcon extends PopupMenuItem {
                 padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
                 child: Icon(
                   icon,
-                  color: Global.theme!.colorScheme.brightness == Brightness.dark
+                  color: KosmosApp.theme!.colorScheme.brightness == Brightness.dark
                       ? Colors.white54
                       : Colors.black54,
                 ),
@@ -68,6 +68,13 @@ class PopupMenuItemWithIcon extends PopupMenuItem {
 }
 
 class KosmosApp extends StatefulWidget {
+  static ThemeData? theme;
+  static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+  static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
+  static List<DropdownMenuItem> dropdownItems = [];
+  static AppLifecycleState? currentState;
+  static void Function()? onLogin;
+
   const KosmosApp({Key? key}) : super(key: key);
 
   @override
@@ -82,13 +89,13 @@ class KosmosState extends State with WidgetsBindingObserver {
   Widget? _mainWidget;
 
   @override
-  void initState() {
+  void initState() async {
     super.initState();
     initPlatformState();
     _checkNotifications();
-    Global.notifications!.cancelAll();
+    (await NotificationsProvider.getNotifications()).cancelAll();
     WidgetsBinding.instance.addObserver(this);
-    Global.currentState = AppLifecycleState.resumed;
+    KosmosApp.currentState = AppLifecycleState.resumed;
   }
 
   @override
@@ -98,37 +105,37 @@ class KosmosState extends State with WidgetsBindingObserver {
   }
 
   KosmosState() {
-    Global.onLogin = () {
+    KosmosApp.onLogin = () {
       setState(() {
         _mainWidget = const Main();
-        Global.currentState = AppLifecycleState.resumed;
+        KosmosApp.currentState = AppLifecycleState.resumed;
       });
     };
     _mainWidget = const Main();
-    if (Global.demo) {
-      Global.client = Client.demo();
+    if (ConfigProvider.demo) {
+      Client.demo();
       return;
     }
-    if (Global.token == null || Global.token == '') {
-      _mainWidget = Login(Global.onLogin!);
+    if (ConfigProvider.token == null || ConfigProvider.token == '') {
+      _mainWidget = Login(KosmosApp.onLogin!);
     } else {
-      Global.client = Client(Global.token!);
+      Client(ConfigProvider.token!);
     }
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {}
-    Global.currentState = state;
+    KosmosApp.currentState = state;
   }
 
   @override
   Widget build(BuildContext context) {
-    Global.theme = ThemeData.from(
+    KosmosApp.theme = ThemeData.from(
       colorScheme: ColorScheme.fromSeed(
         seedColor: Colors.deepPurple,
-        brightness:
-            Global.enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness,
+        brightness: ConfigProvider.enforcedBrightness ??
+            SchedulerBinding.instance.window.platformBrightness,
       ),
       useMaterial3: true,
     ).copyWith(
@@ -141,12 +148,11 @@ class KosmosState extends State with WidgetsBindingObserver {
       splashColor: const HSVColor.fromAHSV(1, 80, .3, 1).toColor().withAlpha(80),
     );
     return MaterialApp(
-      key: Global.mainKey,
-      scaffoldMessengerKey: Global.messengerKey,
-      navigatorKey: Global.navigatorKey,
+      scaffoldMessengerKey: KosmosApp.messengerKey,
+      navigatorKey: KosmosApp.navigatorKey,
       title: title,
-      theme: Global.theme!,
-      darkTheme: Global.theme!,
+      theme: KosmosApp.theme!,
+      darkTheme: KosmosApp.theme!,
       home: _mainWidget,
     );
   }
