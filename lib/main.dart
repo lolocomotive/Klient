@@ -89,11 +89,11 @@ class KosmosState extends State with WidgetsBindingObserver {
   Widget? _mainWidget;
 
   @override
-  void initState() async {
+  void initState() {
     super.initState();
     initPlatformState();
     _checkNotifications();
-    (await NotificationsProvider.getNotifications()).cancelAll();
+    NotificationsProvider.getNotifications().then((notifications) => notifications.cancelAll());
     WidgetsBinding.instance.addObserver(this);
     KosmosApp.currentState = AppLifecycleState.resumed;
   }
