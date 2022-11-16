@@ -65,7 +65,10 @@ class _UserDialogState extends State<UserDialog> {
                     onTap: () {
                       Navigator.of(context)
                         ..pop()
-                        ..push(MaterialPageRoute(builder: (_) => const SettingsPage()));
+                        ..push(MaterialPageRoute(builder: (_) => const SettingsPage()))
+                            .then((value) {
+                          if (widget.onStudentChange != null) widget.onStudentChange!();
+                        });
                     },
                   ),
                   Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),

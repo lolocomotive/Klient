@@ -57,7 +57,9 @@ class _HomePageState extends State<HomePage> {
             actions: [
               UserAvatarAction(
                 onStudentChange: () {
-                  _gKey.currentState!.setState(() {});
+                  if (_gKey.currentState != null) {
+                    _gKey.currentState!.setState(() {});
+                  }
                   _aKey.currentState!.setState(() {});
                   _hKey.currentState!.setState(() {});
                 },
