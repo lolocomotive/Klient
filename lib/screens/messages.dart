@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart' hide Action;
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/conversation.dart';
@@ -29,6 +29,7 @@ import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
+import 'package:kosmos_client/widgets/user_avatar_action.dart';
 import 'package:morpheus/morpheus.dart';
 
 class MessagesPage extends StatefulWidget {
@@ -77,7 +78,7 @@ class MessagesPageState extends State<MessagesPage> {
   }
 
   refresh() async {
-    await DatabaseManager.fetchMessageData();
+    await Downloader.fetchMessageData();
     await reloadFromDB();
   }
 
@@ -181,7 +182,7 @@ class MessagesPageState extends State<MessagesPage> {
                                     );
                                   },
                                 ),
-                              if (!_selection.isNotEmpty) Util.popupMenuButton
+                              if (!_selection.isNotEmpty) const UserAvatarAction()
                             ],
                             title: Text(
                               _selection.isNotEmpty
@@ -216,7 +217,7 @@ class MessagesPageState extends State<MessagesPage> {
                                   itemCount: _conversations.isEmpty
                                       ? 1
                                       : _conversations.length +
-                                          (DatabaseManager.loadingMessages ? 1 : 0),
+                                          (Downloader.loadingMessages ? 1 : 0),
                                   padding: const EdgeInsets.all(0),
                                   itemBuilder: (BuildContext context, int index) {
                                     if (index == 0 && _conversations.isEmpty ||

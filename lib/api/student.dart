@@ -17,31 +17,29 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/database_provider.dart';
 
-class Grade {
-  String subject;
-  num grade;
-  num of;
-  DateTime date;
-  String? gradeText;
+class Student {
+  String uid;
+  String name;
+  String permissions;
 
-  Grade(this.subject, this.grade, this.of, this.date, this.gradeText);
+  Student(
+    this.uid,
+    this.name,
+    this.permissions,
+  );
 
-  static Future<List<Grade>> fetchAll() async {
-    final List<Grade> grades = [];
-    final results = await (await DatabaseProvider.getDB())
-        .query('Grades', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
+  static Future<List<Student>> fetchAll() async {
+    final List<Student> articles = [];
+    final results = await (await DatabaseProvider.getDB()).query('Students');
     for (final result in results) {
-      grades.add(Grade(
-        result['Subject'] as String,
-        result['Grade'] as num,
-        result['Of'] as num,
-        DateTime.fromMillisecondsSinceEpoch(result['Date'] as int),
-        result['GradeText'] as String?,
+      articles.add(Student(
+        result['UID'] as String,
+        result['Name'] as String,
+        result['Permissions'] as String,
       ));
     }
-    return grades;
+    return articles;
   }
 }

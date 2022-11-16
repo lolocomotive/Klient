@@ -26,6 +26,7 @@ import 'package:kosmos_client/main.dart';
 
 class ConfigProvider {
   static FlutterSecureStorage? _storage;
+  static String? username;
   static bool? compact;
   static String? token;
   static bool? notifMsgEnabled;
@@ -82,6 +83,9 @@ class ConfigProvider {
         switch (key) {
           case 'token':
             token = value;
+            break;
+          case 'username':
+            username = value;
             break;
           case 'demoMode':
             demo = value == 'true';

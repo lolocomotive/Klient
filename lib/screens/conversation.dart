@@ -22,7 +22,7 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/util.dart';
@@ -265,9 +265,8 @@ class _ConversationPageState extends State<ConversationPage> {
                                                     '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                             _textFieldController.clear();
                                             final batch = (await DatabaseProvider.getDB()).batch();
-                                            await DatabaseManager.clearConversation(
-                                                _conversation!.id);
-                                            await DatabaseManager.fetchSingleConversation(
+                                            await Downloader.clearConversation(_conversation!.id);
+                                            await Downloader.fetchSingleConversation(
                                                 _conversation!.id, batch);
                                             await Client.getClient().process();
                                             //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.

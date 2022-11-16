@@ -18,18 +18,18 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/grade.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/article_card.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/exercise_card.dart';
 import 'package:kosmos_client/widgets/grade_card.dart';
+import 'package:kosmos_client/widgets/user_avatar_action.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -46,67 +46,76 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
-        floatHeaderSlivers: true,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return <Widget>[
-            SliverAppBar(
-              actions: [Util.popupMenuButton],
-              title: const Text('Accueil'),
-              floating: true,
-              forceElevated: innerBoxIsScrolled,
-            )
-          ];
-        },
-        body: RefreshIndicator(
-          onRefresh: (() async {
+      floatHeaderSlivers: true,
+      headerSliverBuilder: (context, innerBoxIsScrolled) {
+        return <Widget>[
+          SliverAppBar(
+            title: const Text('Accueil'),
+            floating: true,
+            forceElevated: innerBoxIsScrolled,
+            actions: [
+              UserAvatarAction(
+                onStudentChange: () {
+                  _gKey.currentState!.setState(() {});
+                  _aKey.currentState!.setState(() {});
+                  _hKey.currentState!.setState(() {});
+                  setState(() {});
+                },
+              )
+            ],
+          )
+        ];
+      },
+      body: RefreshIndicator(
+        onRefresh: (() async {
           await Future.wait(<Future>[
-            DatabaseManager.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
-            DatabaseManager.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
-            DatabaseManager.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
+            Downloader.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
+            Downloader.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
+            Downloader.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
           ]);
-          }),
-          child: Scrollbar(
-            child: SingleChildScrollView(
-              child: Center(
-                child: ConstrainedBox(
-                  constraints: const BoxConstraints(maxWidth: 1400),
-                  child: LayoutBuilder(builder: (context, constraints) {
-                    if (constraints.maxWidth > 1200) {
-                      return Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+        }),
+        child: Scrollbar(
+          child: SingleChildScrollView(
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 1400),
+                child: LayoutBuilder(builder: (context, constraints) {
+                  if (constraints.maxWidth > 1200) {
+                    return Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SectionTitle('Travail à faire'),
                               HomeworkListWrapper(key: _hKey),
-                              ],
-                            ),
+                            ],
                           ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                        ),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
                               const SectionTitle('Dernières notes'),
                               GradeList(key: _gKey),
-                              ],
-                            ),
+                            ],
                           ),
-                          Expanded(
-                              child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                        ),
+                        Expanded(
+                            child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SectionTitle('Actualités'),
                             ArticleList(key: _aKey),
-                            ],
-                          ))
-                        ],
-                      );
-                    }
-                    if (constraints.maxWidth < 700) {
-                      return Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                          ],
+                        ))
+                      ],
+                    );
+                  }
+                  if (constraints.maxWidth < 700) {
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SectionTitle('Travail à faire'),
                         HomeworkListWrapper(key: _hKey),
@@ -114,38 +123,38 @@ class _HomePageState extends State<HomePage> {
                         GradeList(key: _gKey),
                         const SectionTitle('Actualités'),
                         ArticleList(key: _aKey),
-                        ],
-                      );
-                    }
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                      ],
+                    );
+                  }
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
                             const SectionTitle('Travail à faire'),
                             HomeworkListWrapper(key: _hKey),
                             const SectionTitle('Dernières notes'),
                             GradeList(key: _gKey),
-                            ],
-                          ),
+                          ],
                         ),
-                        Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                      ),
+                      Expanded(
+                          child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
                           const SectionTitle('Actualités'),
                           ArticleList(key: _aKey),
-                          ],
-                        ))
-                      ],
-                    );
-                  }),
-                ),
+                        ],
+                      ))
+                    ],
+                  );
+                }),
               ),
             ),
           ),
+        ),
       ),
     );
   }

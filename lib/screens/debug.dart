@@ -19,8 +19,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:kosmos_client/api/database_manager.dart';
 import 'package:kosmos_client/api/demo.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/notifications_provider.dart';
 
@@ -28,15 +28,15 @@ class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);
 
   _updateMessages() {
-    DatabaseManager.fetchMessageData();
+    Downloader.fetchMessageData();
   }
 
   _updateNews() {
-    DatabaseManager.fetchNewsData();
+    Downloader.fetchNewsData();
   }
 
   _updateTimetable() {
-    DatabaseManager.fetchTimetable();
+    Downloader.fetchTimetable();
   }
 
   _closeDB() async {
@@ -44,7 +44,7 @@ class DebugScreen extends StatelessWidget {
   }
 
   _updateGrades() {
-    DatabaseManager.fetchGradesData();
+    Downloader.fetchGradesData();
   }
 
   _clearDatabase() async {
@@ -99,6 +99,8 @@ class DebugScreen extends StatelessWidget {
             ElevatedButton(onPressed: _updateGrades, child: const Text('Update grades')),
             ElevatedButton(onPressed: _clearDatabase, child: const Text('Clear database')),
             ElevatedButton(onPressed: _closeDB, child: const Text('Close database')),
+            const ElevatedButton(
+                onPressed: Downloader.fetchUserInfo, child: Text('Fetch user info')),
             ElevatedButton(
                 onPressed: () async {
                   (await DatabaseProvider.getDB()).execute('DROP TABLE GRADES');

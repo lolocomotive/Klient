@@ -22,7 +22,7 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/notifications_provider.dart';
@@ -41,7 +41,7 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
       print('Logging in');
       Client(token);
       print('Fetching data');
-      await DatabaseManager.downloadAll();
+      await Downloader.downloadAll();
       print('Showing notifications');
       await showNotifications();
     }
@@ -71,7 +71,7 @@ Future<void> initPlatformState() async {
         requiredNetworkType: NetworkType.NONE,
       ), (String taskId) async {
     print('[BackgroundFetch] Event received $taskId');
-    await DatabaseManager.downloadAll();
+    await Downloader.downloadAll();
     await showNotifications();
     BackgroundFetch.finish(taskId);
   }, (String taskId) async {

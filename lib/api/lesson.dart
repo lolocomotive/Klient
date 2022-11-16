@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/database_provider.dart';
@@ -77,7 +78,8 @@ class Lesson {
 
   static Future<List<Lesson>> fetchAll([headless = false]) async {
     final List<Lesson> lessons = [];
-    final results = await (await DatabaseProvider.getDB()).query('Lessons', orderBy: 'LessonDate');
+    final results = await (await DatabaseProvider.getDB()).query('Lessons',
+        orderBy: 'LessonDate', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
     for (final result in results) {
       lessons.add(await _parse(result, headless));
     }

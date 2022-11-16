@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
+import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/main.dart';
@@ -102,12 +103,19 @@ class Request {
 
 /// Utility class making it easier to communicate with the API
 class Client {
+  static Future<Student> getCurrentlySelected() async {
+    if (currentlySelected != null) return currentlySelected!;
+    students = await Student.fetchAll();
+    currentlySelected = students[0];
+    return currentlySelected!;
+  }
+
+  static Student? currentlySelected;
+  static List<Student> students = [];
   static bool retryNetworkRequests = false;
   static const String _appVersion = '3.7.14';
   static String apiurl = 'https://mobilite.kosmoseducation.com/mobilite/';
   late String _token;
-  String? idEtablissement;
-  String? idEleve;
   final List<Request> _requests = [];
   static const int _maxConcurrentDownloads = 4;
   int _currentlyDownloading = 0;
@@ -320,6 +328,10 @@ class Client {
     } on Exception catch (e, st) {
       Util.onException(e, st);
     }
+    Student.fetchAll().then((value) {
+      students = value;
+      currentlySelected = students[0];
+    });
   }
 
   void clear() {
@@ -356,10 +368,10 @@ class Action {
   static final Action startup = Action('starting/');
   static final Action getConversations = Action('messagerie/boiteReception/');
   static final Action getConversationDetail = Action('messagerie/communication/');
-  static final Action getUserInfo = Action('infosutilisateur/');
-  static final Action getNewsArticlesEtablissement = Action('actualites/idetablissement/');
+  static final Action getUserInfo = Action('infoutilisateur/');
+  static final Action getNewsArticles = Action('actualites/ideleve/');
   static final Action getArticleDetails = Action('contenuArticle/article/');
-  static final Action getGrades = Action('consulterNotes/idetablissement/');
+  static final Action getGrades = Action('consulterNotes/ideleve/');
   static final Action getTimeTableEleve = Action('calendrier/ideleve/');
 
   //params ideleve noteBeforeDate

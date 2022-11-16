@@ -20,13 +20,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/day_view.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
+import 'package:kosmos_client/widgets/user_avatar_action.dart';
 
 extension DateOnlyCompare on DateTime {
   bool isSameDay(DateTime other) {
@@ -93,14 +93,20 @@ class _TimetablePageState extends State<TimetablePage> {
             floating: true,
             forceElevated: innerBoxIsScrolled,
             title: const Text('Emploi du temps'),
-            actions: [Util.popupMenuButton],
+            actions: [
+              UserAvatarAction(
+                onStudentChange: () {
+                  setState(() {});
+                },
+              )
+            ],
           )
         ];
       },
       body: Scrollbar(
         child: RefreshIndicator(
           onRefresh: () async {
-            await DatabaseManager.fetchTimetable();
+            await Downloader.fetchTimetable();
             setState(() {});
           },
           child: SingleChildScrollView(

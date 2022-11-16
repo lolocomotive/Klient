@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise_attachment.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -99,7 +100,8 @@ class Exercise {
   /// Get all [Exercise]s
   static Future<List<Exercise>> fetchAll() async {
     final List<Exercise> exercises = [];
-    final results = await (await DatabaseProvider.getDB()).query('Exercises');
+    final results = await (await DatabaseProvider.getDB())
+        .query('Exercises', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
     for (final result in results) {
       exercises.add(await _parse(result));
     }

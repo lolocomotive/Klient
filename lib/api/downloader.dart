@@ -33,8 +33,35 @@ import 'package:sqflite_sqlcipher/sqflite.dart';
 import 'conversation.dart';
 
 /// Utility class that fetches data from the API and stores it inside the database
-class DatabaseManager {
+class Downloader {
   static bool loadingMessages = false;
+
+  static fetchUserInfo() async {
+    final userInfo = await Client.getClient().request(Action.getUserInfo);
+    ConfigProvider.getStorage().write(key: 'username', value: userInfo['nom']);
+    ConfigProvider.username = userInfo['nom'];
+    for (final student in userInfo['eleves']) {
+      //In order to get the permissions for each student we have to make one request per student. Otherwise Null is returned as permission.
+      final studentSpecificInfo = await Client.getClient()
+          .request(Action.getUserInfo, params: ['ideleve/${student['uid']}']);
+      for (final student2 in studentSpecificInfo['eleves']) {
+        if (student2['uid'] == student['uid']) {
+          print(student2['nom']);
+          print(student2['uid']);
+          print(student2['permissions']);
+          (await DatabaseProvider.getDB()).insert(
+            'Students',
+            {
+              'UID': student2['uid'],
+              'Name': student2['nom'],
+              'Permissions': student2['permissions']
+            },
+            conflictAlgorithm: ConflictAlgorithm.replace,
+          );
+        }
+      }
+    }
+  }
 
   static String _cleanupHTML(String html) {
     //TODO add anchors to links
@@ -60,6 +87,8 @@ class DatabaseManager {
   static downloadAll() async {
     try {
       SetupPage.downloadStep = 0;
+      print('Downloading user info');
+      await fetchUserInfo();
       print('Downloading grades');
       await fetchGradesData();
       SetupPage.downloadStep++;
@@ -199,14 +228,15 @@ class DatabaseManager {
 
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
+    print(Client.currentlySelected);
     final db = await DatabaseProvider.getDB();
     if (ConfigProvider.demo) return;
     try {
       if (r == 0) return;
       try {
         final result = await Client.getClient()
-            .request(Action.getGrades, params: [Client.getClient().idEtablissement ?? '0']);
-        db.delete('Grades');
+            .request(Action.getGrades, params: [Client.currentlySelected!.uid]);
+        db.delete('Grades', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
         for (final grade in result['listeNotes']) {
           final double value =
               double.tryParse((grade['note'] as String).replaceAll(',', '.')) ?? -1;
@@ -222,6 +252,7 @@ class DatabaseManager {
                   (grade['matiere'] as String) +
                   (grade['note'] as String) +
                   (grade['bareme'] as int).toString(),
+              'StudentUID': Client.currentlySelected!.uid
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -242,8 +273,8 @@ class DatabaseManager {
     final db = await DatabaseProvider.getDB();
     if (ConfigProvider.demo) return;
     try {
-      final result = await Client.getClient().request(Action.getNewsArticlesEtablissement,
-          params: [Client.getClient().idEtablissement ?? '0']);
+      final result = await Client.getClient()
+          .request(Action.getNewsArticles, params: [Client.currentlySelected!.uid]);
       for (final newsArticle in result['articles']) {
         Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
           await db.insert(
@@ -256,6 +287,7 @@ class DatabaseManager {
               'PublishingDate': articleDetails['date'],
               'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
               'URL': articleDetails['url'],
+              'StudentUID': Client.currentlySelected!.uid,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -270,6 +302,7 @@ class DatabaseManager {
             await db.insert('NewsAttachments', {
               'Name': attachment['name'],
               'ParentUID': newsArticle['uid'],
+              'StudentUID': Client.currentlySelected!.uid,
             });
           }
         }, params: [newsArticle['uid']]);
@@ -298,12 +331,24 @@ class DatabaseManager {
     if (ConfigProvider.demo) return;
     try {
       //TODO clean up this horrific code
-      final result = await Client.getClient().request(Action.getTimeTableEleve,
-          params: [(Client.getClient().idEleve ?? 0).toString()]);
+      final result = await Client.getClient()
+          .request(Action.getTimeTableEleve, params: [(Client.currentlySelected!.uid).toString()]);
 
-      await db.delete('Lessons');
-      await db.delete('Exercises');
-      await db.delete('ExerciseAttachments');
+      await db.delete(
+        'Lessons',
+        where: 'StudentUID = ?',
+        whereArgs: [Client.currentlySelected!.uid],
+      );
+      await db.delete(
+        'Exercises',
+        where: 'StudentUID = ?',
+        whereArgs: [Client.currentlySelected!.uid],
+      );
+      await db.delete(
+        'ExerciseAttachments',
+        where: 'StudentUID = ?',
+        whereArgs: [Client.currentlySelected!.uid],
+      );
 
       for (final day in result['listeJourCdt']) {
         for (final lesson in day['listeSeances']) {
@@ -328,6 +373,7 @@ class DatabaseManager {
               'IsModified': lesson['flagModif'] ? 1 : 0,
               'ShouldNotify': shouldNotify ? 1 : 0,
               'ModificationMessage': lesson['motifModif'],
+              'StudentUID': Client.currentlySelected!.uid,
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
@@ -346,6 +392,7 @@ class DatabaseManager {
                   'ParentLesson': lesson['idSeance'],
                   'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
                   'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+                  'StudentUID': Client.currentlySelected!.uid,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
@@ -358,13 +405,14 @@ class DatabaseManager {
                     'ID': attachment['idRessource'],
                     'ParentID': exercise['uid'],
                     'URL': attachment['url'],
-                    'Name': attachment['name']
+                    'Name': attachment['name'],
+                    'StudentUID': Client.currentlySelected!.uid,
                   },
                   conflictAlgorithm: ConflictAlgorithm.replace,
                 );
               }
             }, params: [
-              (Client.getClient().idEleve ?? 0).toString(),
+              (Client.currentlySelected!.uid).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);
@@ -381,6 +429,7 @@ class DatabaseManager {
                   'ParentLesson': lesson['idSeance'],
                   'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
                   'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+                  'StudentUID': Client.currentlySelected!.uid,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
@@ -393,13 +442,14 @@ class DatabaseManager {
                     'ID': attachment['idRessource'],
                     'ParentID': exercise['uid'],
                     'URL': attachment['url'],
-                    'Name': attachment['name']
+                    'Name': attachment['name'],
+                    'StudentUID': Client.currentlySelected!.uid,
                   },
                   conflictAlgorithm: ConflictAlgorithm.replace,
                 );
               }
             }, params: [
-              (Client.getClient().idEleve ?? 0).toString(),
+              (Client.currentlySelected!.uid).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);
@@ -422,6 +472,7 @@ class DatabaseManager {
                   'ParentLesson': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
                   'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
                   'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+                  'StudentUID': Client.currentlySelected!.uid,
                 },
                 conflictAlgorithm: ConflictAlgorithm.replace,
               );
@@ -434,13 +485,14 @@ class DatabaseManager {
                     'ID': attachment['idRessource'],
                     'ParentID': exercise['uid'],
                     'URL': attachment['url'],
-                    'Name': attachment['name']
+                    'Name': attachment['name'],
+                    'StudentUID': Client.currentlySelected!.uid,
                   },
                   conflictAlgorithm: ConflictAlgorithm.replace,
                 );
               }
             }, params: [
-              (Client.getClient().idEleve ?? 0).toString(),
+              (Client.currentlySelected!.uid).toString(),
               (lesson['idSeance']).toString(),
               (exercise['uid']).toString()
             ]);

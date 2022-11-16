@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/database_provider.dart';
 
 import 'news_attachment.dart';
@@ -36,7 +37,8 @@ class NewsArticle {
 
   static Future<List<NewsArticle>> fetchAll() async {
     final List<NewsArticle> articles = [];
-    final results = await (await DatabaseProvider.getDB()).query('NewsArticles');
+    final results = await (await DatabaseProvider.getDB())
+        .query('NewsArticles', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
     for (final result in results) {
       articles.add(NewsArticle(
         result['UID'] as String,

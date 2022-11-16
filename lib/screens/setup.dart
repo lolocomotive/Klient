@@ -21,7 +21,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/database_manager.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/screens/settings.dart';
 
@@ -115,7 +115,7 @@ class _SetupPageState extends State<SetupPage> {
                             onPressed: () {
                               currentStep++;
                               Client.retryNetworkRequests = true;
-                              DatabaseManager.downloadAll().then((_) {
+                              Downloader.downloadAll().then((_) {
                                 Client.retryNetworkRequests = false;
                               });
                               update();

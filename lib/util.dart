@@ -17,19 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/screens/about.dart';
-import 'package:kosmos_client/screens/debug.dart';
-import 'package:kosmos_client/screens/settings.dart';
-import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
-import 'package:restart_app/restart_app.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Util {
   static const standardShadow = [
@@ -57,62 +47,6 @@ class Util {
     }
   }
 
-  static PopupMenuButton popupMenuButton = PopupMenuButton(
-    onSelected: (choice) async {
-      switch (choice) {
-        case 'Paramètres':
-          KosmosApp.navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => const SettingsPage()),
-          );
-          break;
-        case 'Debug':
-          KosmosApp.navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => const DebugScreen()),
-          );
-          break;
-        case 'Se déconnecter':
-          KosmosApp.navigatorKey.currentState!.push(MaterialPageRoute(builder: (_) {
-            return WillPopScope(
-              onWillPop: () async => false,
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: const [CircularProgressIndicator()],
-              ),
-            );
-          }));
-          Client.getClient().clear();
-          try {
-            await Client.getClient().request(Action.logout);
-          } catch (_) {}
-          await (await DatabaseProvider.getDB()).close();
-          await deleteDatabase((await DatabaseProvider.getDB()).path);
-          await ConfigProvider.getStorage().deleteAll();
-          await ConfigProvider.load();
-          await DatabaseProvider.initDB();
-          await Restart.restartApp();
-          break;
-        case 'Initial setup':
-          KosmosApp.navigatorKey.currentState!.push(
-            MaterialPageRoute(builder: (_) => SetupPage(() {})),
-          );
-          break;
-        case 'À propos':
-          KosmosApp.navigatorKey.currentState!
-              .push(MaterialPageRoute(builder: (_) => const AboutPage()));
-          break;
-      }
-    },
-    itemBuilder: (context) {
-      return [
-        PopupMenuItemWithIcon('Paramètres', Icons.settings_outlined, context),
-        //PopupMenuItemWithIcon("Aide", Icons.help_outline, context),
-        PopupMenuItemWithIcon('À propos', Icons.info_outline, context),
-        PopupMenuItemWithIcon('Se déconnecter', Icons.logout_outlined, context),
-        if (kDebugMode) PopupMenuItemWithIcon('Debug', Icons.bug_report_outlined, context),
-        if (kDebugMode) PopupMenuItemWithIcon('Initial setup', Icons.bug_report_outlined, context),
-      ];
-    },
-  );
   static String monthToString(int month) {
     switch (month) {
       case 1:
