@@ -60,7 +60,6 @@ class _HomePageState extends State<HomePage> {
                   _gKey.currentState!.setState(() {});
                   _aKey.currentState!.setState(() {});
                   _hKey.currentState!.setState(() {});
-                  setState(() {});
                 },
               )
             ],

@@ -70,7 +70,7 @@ Future<void> initPlatformState() async {
         forceAlarmManager: false,
         requiredNetworkType: NetworkType.NONE,
       ), (String taskId) async {
-    print('[BackgroundFetch] Event received $taskId');
+    print('[BackgroundFetch] Event #received $taskId');
     await Downloader.downloadAll();
     await showNotifications();
     BackgroundFetch.finish(taskId);

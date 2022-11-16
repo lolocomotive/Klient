@@ -90,13 +90,22 @@ class Downloader {
       print('Downloading user info');
       await fetchUserInfo();
       print('Downloading grades');
-      await fetchGradesData();
+      for (final student in Client.students) {
+        Client.currentlySelected = student;
+        await fetchGradesData();
+      }
       SetupPage.downloadStep++;
       print('Downloading timetable');
-      await fetchTimetable();
+      for (final student in Client.students) {
+        Client.currentlySelected = student;
+        await fetchTimetable();
+      }
       SetupPage.downloadStep++;
       print('Downloading News');
-      await fetchNewsData();
+      for (final student in Client.students) {
+        Client.currentlySelected = student;
+        await fetchNewsData();
+      }
       SetupPage.downloadStep++;
       print('Downloading Messages');
       await fetchMessageData();
