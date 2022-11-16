@@ -228,6 +228,7 @@ class Downloader {
 
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
+    if (!Client.currentlySelected!.permissions.contains('vsc-notes-consulter')) return;
     print(Client.currentlySelected);
     final db = await DatabaseProvider.getDB();
     if (ConfigProvider.demo) return;

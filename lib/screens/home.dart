@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/grade.dart';
@@ -97,8 +98,12 @@ class _HomePageState extends State<HomePage> {
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: [
-                              const SectionTitle('Dernières notes'),
-                              GradeList(key: _gKey),
+                              if (Client.currentlySelected!.permissions
+                                  .contains('vsc-notes-consulter'))
+                                const SectionTitle('Dernières notes'),
+                              if (Client.currentlySelected!.permissions
+                                  .contains('vsc-notes-consulter'))
+                                GradeList(key: _gKey),
                             ],
                           ),
                         ),
@@ -119,8 +124,10 @@ class _HomePageState extends State<HomePage> {
                       children: [
                         const SectionTitle('Travail à faire'),
                         HomeworkListWrapper(key: _hKey),
-                        const SectionTitle('Dernières notes'),
-                        GradeList(key: _gKey),
+                        if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                          const SectionTitle('Dernières notes'),
+                        if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                          GradeList(key: _gKey),
                         const SectionTitle('Actualités'),
                         ArticleList(key: _aKey),
                       ],
@@ -135,8 +142,12 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             const SectionTitle('Travail à faire'),
                             HomeworkListWrapper(key: _hKey),
-                            const SectionTitle('Dernières notes'),
-                            GradeList(key: _gKey),
+                            if (Client.currentlySelected!.permissions
+                                .contains('vsc-notes-consulter'))
+                              const SectionTitle('Dernières notes'),
+                            if (Client.currentlySelected!.permissions
+                                .contains('vsc-notes-consulter'))
+                              GradeList(key: _gKey),
                           ],
                         ),
                       ),
