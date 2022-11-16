@@ -185,14 +185,16 @@ class _CompactSelectorState extends State<CompactSelector> {
           children: [
             Flexible(
               flex: 1,
-              child: GestureDetector(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   setState(() {
                     ConfigProvider.getStorage().write(key: 'display.compact', value: 'false');
                     ConfigProvider.compact = false;
                   });
                 },
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
@@ -232,14 +234,16 @@ class _CompactSelectorState extends State<CompactSelector> {
             ),
             Flexible(
               flex: 1,
-              child: GestureDetector(
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   setState(() {
                     ConfigProvider.getStorage().write(key: 'display.compact', value: 'true');
                     ConfigProvider.compact = true;
                   });
                 },
-                child: Container(
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
                   clipBehavior: Clip.antiAlias,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(8.0),
