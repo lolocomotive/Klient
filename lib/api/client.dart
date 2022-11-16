@@ -328,10 +328,6 @@ class Client {
     } on Exception catch (e, st) {
       Util.onException(e, st);
     }
-    Student.fetchAll().then((value) {
-      students = value;
-      currentlySelected = students[0];
-    });
   }
 
   void clear() {

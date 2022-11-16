@@ -32,6 +32,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('FR_fr');
   await ConfigProvider.load();
+  await Client.getCurrentlySelected();
   registerTasks();
   runApp(const KosmosApp());
 }
