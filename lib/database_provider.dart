@@ -43,7 +43,7 @@ class DatabaseProvider {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
     if (kDebugMode) {
-      //await deleteDatabase(dbPath);
+      await deleteDatabase(dbPath);
     }
 
     final password = await ConfigProvider.getStorage().read(key: 'dbPassword') ??
@@ -66,7 +66,7 @@ class DatabaseProvider {
     return openDatabase(
       dbPath,
       password: password,
-      version: 1,
+      version: 2,
       onUpgrade: (db, oldVersion, newVersion) async {
         print('Upgrading DB $oldVersion -> $newVersion');
         if (oldVersion < 1) {
@@ -90,7 +90,22 @@ class DatabaseProvider {
             ALTER TABLE ExerciseAttachments
               ADD StudentUID TEXT;
           ''');
-          //TODO fill studentUID
+          print('Upgraded to v1');
+        }
+        if (oldVersion < 2) {
+          //Drop constraint is not implemented in sqlite,
+          //We have to recreate the table to drop the NOT NULL constraint
+          await db.execute('''CREATE TABLE temp ( 
+              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              UID TEXT UNIQUE,
+              Name TEXT NOT NULL,
+              Permissions TEXT NOT NULL
+            );
+            INSERT INTO temp (UID, Name, Permissions)
+              SELECT UID, Name, Permissions FROM Students;
+            DROP TABLE Students;
+            ALTER TABLE temp RENAME TO Students;''');
+          print('Upgraded to v2');
         }
       },
       onCreate: (db, version) async {
@@ -200,7 +215,7 @@ class DatabaseProvider {
         batch.execute('''
         CREATE TABLE IF NOT EXISTS Students(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          UID TEXT NOT NULL UNIQUE,
+          UID TEXT UNIQUE,
           Name TEXT NOT NULL,
           Permissions TEXT NOT NULL
         )''');

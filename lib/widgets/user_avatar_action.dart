@@ -26,7 +26,9 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         );
       },
       borderRadius: BorderRadius.circular(1000),
-      child: UserAvatar(Client.currentlySelected!.name.split(' ').map((e) => e[0]).join()),
+      child: UserAvatar(Client.currentlySelected != null
+          ? Client.currentlySelected!.name.split(' ').map((e) => e[0]).join()
+          : 'ERR'),
     );
   }
 }

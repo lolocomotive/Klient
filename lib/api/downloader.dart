@@ -23,6 +23,7 @@ import 'dart:math';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
+import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/messages.dart';
@@ -40,27 +41,39 @@ class Downloader {
     final userInfo = await Client.getClient().request(Action.getUserInfo);
     ConfigProvider.getStorage().write(key: 'username', value: userInfo['nom']);
     ConfigProvider.username = userInfo['nom'];
-    for (final student in userInfo['eleves']) {
-      //In order to get the permissions for each student we have to make one request per student. Otherwise Null is returned as permission.
-      final studentSpecificInfo = await Client.getClient()
-          .request(Action.getUserInfo, params: ['ideleve/${student['uid']}']);
-      for (final student2 in studentSpecificInfo['eleves']) {
-        if (student2['uid'] == student['uid']) {
-          print(student2['nom']);
-          print(student2['uid']);
-          print(student2['permissions']);
-          (await DatabaseProvider.getDB()).insert(
-            'Students',
-            {
-              'UID': student2['uid'],
-              'Name': student2['nom'],
-              'Permissions': student2['permissions']
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
+    if (userInfo['eleves'] == null) {
+      //In this case it's probably a student (and not parent) account
+      //We need to get the permissions from etabs[0].permissions in that case.
+      //Edge cases may break.
+      (await DatabaseProvider.getDB()).insert(
+        'Students',
+        {'UID': '0', 'Name': userInfo['nom'], 'Permissions': userInfo['etabs'][0]['permissions']},
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+    } else {
+      for (final student in userInfo['eleves']) {
+        //In order to get the permissions for each student we have to make one request per student. Otherwise Null is returned as permission.
+        final studentSpecificInfo = await Client.getClient()
+            .request(Action.getUserInfo, params: ['ideleve/${student['uid']}']);
+        for (final student2 in studentSpecificInfo['eleves']) {
+          if (student2['uid'] == student['uid']) {
+            print(student2['nom']);
+            print(student2['uid']);
+            print(student2['permissions']);
+            (await DatabaseProvider.getDB()).insert(
+              'Students',
+              {
+                'UID': student2['uid'],
+                'Name': student2['nom'],
+                'Permissions': student2['permissions']
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
+            );
+          }
         }
       }
     }
+    await Student.fetchAll().then((value) => Client.students = value);
   }
 
   static String _cleanupHTML(String html) {
@@ -111,8 +124,9 @@ class Downloader {
       await fetchMessageData();
       SetupPage.downloadStep++;
       print('Finished downloading');
-    } catch (_) {
-      print('EEEE $_');
+    } catch (e, st) {
+      print('EEEE $e');
+      print(st);
     }
   }
 
@@ -283,8 +297,15 @@ class Downloader {
     final db = await DatabaseProvider.getDB();
     if (ConfigProvider.demo) return;
     try {
-      final result = await Client.getClient()
-          .request(Action.getNewsArticles, params: [Client.currentlySelected!.uid]);
+      Action action;
+      if (Client.students.length > 1) {
+        action = Action.getNewsArticlesStudent;
+      } else {
+        //The other one doesn't work when only one student is associated to the account
+        action = Action.getNewsArticlesEtab;
+      }
+      final result =
+          await Client.getClient().request(action, params: [Client.currentlySelected!.uid]);
       for (final newsArticle in result['articles']) {
         Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
           await db.insert(

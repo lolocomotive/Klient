@@ -106,8 +106,12 @@ class Client {
   static Future<Student> getCurrentlySelected() async {
     if (currentlySelected != null) return currentlySelected!;
     students = await Student.fetchAll();
-    currentlySelected = students[0];
-    return currentlySelected!;
+    if (students.isNotEmpty) {
+      currentlySelected = students[0];
+      return currentlySelected!;
+    } else {
+      return Student('', '', '');
+    }
   }
 
   static Student? currentlySelected;
@@ -223,7 +227,7 @@ class Client {
 
   /// Make a request to the API
 
-  Future<Map<String, dynamic>> request(Action action, {List<String>? params, String? body}) async {
+  Future<Map<String, dynamic>> request(Action action, {List<String?>? params, String? body}) async {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
       'X-Kdecole-Auth': _token,
@@ -231,7 +235,7 @@ class Client {
 
     String url = apiurl + action.url;
     for (final param in params ?? []) {
-      url += param + '/';
+      url += (param ?? '0') + '/';
     }
 
     http.Response? response;
@@ -365,7 +369,8 @@ class Action {
   static final Action getConversations = Action('messagerie/boiteReception/');
   static final Action getConversationDetail = Action('messagerie/communication/');
   static final Action getUserInfo = Action('infoutilisateur/');
-  static final Action getNewsArticles = Action('actualites/ideleve/');
+  static final Action getNewsArticlesStudent = Action('actualites/ideleve/');
+  static final Action getNewsArticlesEtab = Action('actualites/idetablissement/');
   static final Action getArticleDetails = Action('contenuArticle/article/');
   static final Action getGrades = Action('consulterNotes/ideleve/');
   static final Action getTimeTableEleve = Action('calendrier/ideleve/');
