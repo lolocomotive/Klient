@@ -39,6 +39,10 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  final GlobalKey<_HomeworkListWrapperState> _hKey = GlobalKey();
+  final GlobalKey<_GradeListState> _gKey = GlobalKey();
+  final GlobalKey<_ArticleListState> _aKey = GlobalKey();
+
   @override
   Widget build(BuildContext context) {
     return NestedScrollView(
@@ -55,10 +59,11 @@ class _HomePageState extends State<HomePage> {
         },
         body: RefreshIndicator(
           onRefresh: (() async {
-            await DatabaseManager.fetchGradesData();
-            await DatabaseManager.fetchNewsData();
-            await DatabaseManager.fetchTimetable();
-            setState(() {});
+          await Future.wait(<Future>[
+            DatabaseManager.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
+            DatabaseManager.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
+            DatabaseManager.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
+          ]);
           }),
           child: Scrollbar(
             child: SingleChildScrollView(
@@ -73,27 +78,27 @@ class _HomePageState extends State<HomePage> {
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: const [
-                                SectionTitle('Travail à faire'),
-                                HomeworkListWrapper(),
+                            children: [
+                              const SectionTitle('Travail à faire'),
+                              HomeworkListWrapper(key: _hKey),
                               ],
                             ),
                           ),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: const [
-                                SectionTitle('Dernières notes'),
-                                GradeList(),
+                            children: [
+                              const SectionTitle('Dernières notes'),
+                              GradeList(key: _gKey),
                               ],
                             ),
                           ),
                           Expanded(
                               child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: const [
-                              SectionTitle('Actualités'),
-                              ArticleList(),
+                          children: [
+                            const SectionTitle('Actualités'),
+                            ArticleList(key: _aKey),
                             ],
                           ))
                         ],
@@ -102,13 +107,13 @@ class _HomePageState extends State<HomePage> {
                     if (constraints.maxWidth < 700) {
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: const [
-                          SectionTitle('Travail à faire'),
-                          HomeworkListWrapper(),
-                          SectionTitle('Dernières notes'),
-                          GradeList(),
-                          SectionTitle('Actualités'),
-                          ArticleList(),
+                      children: [
+                        const SectionTitle('Travail à faire'),
+                        HomeworkListWrapper(key: _hKey),
+                        const SectionTitle('Dernières notes'),
+                        GradeList(key: _gKey),
+                        const SectionTitle('Actualités'),
+                        ArticleList(key: _aKey),
                         ],
                       );
                     }
@@ -118,20 +123,20 @@ class _HomePageState extends State<HomePage> {
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: const [
-                              SectionTitle('Travail à faire'),
-                              HomeworkListWrapper(),
-                              SectionTitle('Dernières notes'),
-                              GradeList(),
+                          children: [
+                            const SectionTitle('Travail à faire'),
+                            HomeworkListWrapper(key: _hKey),
+                            const SectionTitle('Dernières notes'),
+                            GradeList(key: _gKey),
                             ],
                           ),
                         ),
                         Expanded(
                             child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: const [
-                            SectionTitle('Actualités'),
-                            ArticleList(),
+                        children: [
+                          const SectionTitle('Actualités'),
+                          ArticleList(key: _aKey),
                           ],
                         ))
                       ],
@@ -141,14 +146,21 @@ class _HomePageState extends State<HomePage> {
               ),
             ),
           ),
-        ));
+      ),
+    );
   }
 }
 
-class HomeworkListWrapper extends StatelessWidget {
+class HomeworkListWrapper extends StatefulWidget {
   const HomeworkListWrapper({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<HomeworkListWrapper> createState() => _HomeworkListWrapperState();
+}
+
+class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
   Future<List<MapEntry<Exercise, Lesson>>> _fetchHomework() async {
     final exercises = await Exercise.fetchAll();
     List<MapEntry<Exercise, Lesson>> r = [];
@@ -195,10 +207,16 @@ class HomeworkListWrapper extends StatelessWidget {
   }
 }
 
-class GradeList extends StatelessWidget {
+class GradeList extends StatefulWidget {
   const GradeList({
     Key? key,
   }) : super(key: key);
+
+  @override
+  State<GradeList> createState() => _GradeListState();
+}
+
+class _GradeListState extends State<GradeList> {
   Future<List<List<Grade>>> _fetchGrades() async {
     final grades = await Grade.fetchAll();
     List<List<Grade>> r = [];
@@ -263,11 +281,16 @@ class GradeList extends StatelessWidget {
   }
 }
 
-class ArticleList extends StatelessWidget {
+class ArticleList extends StatefulWidget {
   const ArticleList({
     Key? key,
   }) : super(key: key);
 
+  @override
+  State<ArticleList> createState() => _ArticleListState();
+}
+
+class _ArticleListState extends State<ArticleList> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<NewsArticle>>(
