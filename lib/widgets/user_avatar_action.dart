@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/screens/user_dialog.dart';
 import 'package:kosmos_client/widgets/user_avatar.dart';
 
@@ -27,13 +26,7 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         );
       },
       borderRadius: BorderRadius.circular(1000),
-      child: FutureBuilder<Student>(
-          future: Client.getCurrentlySelected(),
-          builder: (context, snapshot) {
-            return UserAvatar(snapshot.data == null
-                ? ''
-                : snapshot.data!.name.split(' ').map((e) => e[0]).join());
-          }),
+      child: UserAvatar(Client.currentlySelected!.name.split(' ').map((e) => e[0]).join()),
     );
   }
 }
