@@ -51,6 +51,7 @@ class LoginState extends State<Login> {
       await ConfigProvider.getStorage().write(key: 'demoMode', value: 'true');
       await db.close();
       await deleteDatabase(db.path);
+      await DatabaseProvider.initDB();
       generate();
       ConfigProvider.demo = true;
       Client.demo();

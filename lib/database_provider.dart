@@ -43,7 +43,7 @@ class DatabaseProvider {
     final dbDir = await getDatabasesPath();
     final dbPath = '$dbDir/kdecole.db';
     if (kDebugMode) {
-      await deleteDatabase(dbPath);
+      //await deleteDatabase(dbPath);
     }
 
     final password = await ConfigProvider.getStorage().read(key: 'dbPassword') ??

@@ -341,6 +341,8 @@ class Client {
   }
 
   Client.demo() {
+    currentlySelected = Student('DEMO', 'Demo User', 'vsc-notes-consulter');
+    ConfigProvider.username = 'Demo User';
     _client = this;
   }
 
