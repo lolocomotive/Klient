@@ -108,6 +108,51 @@ class DebugScreen extends StatelessWidget {
                 child: const Text('drop grades')),
             ElevatedButton(onPressed: _showNotification, child: const Text('Force notification')),
             const ElevatedButton(onPressed: generate, child: Text('Force generate')),
+            ElevatedButton(
+              onPressed: () async {
+                await Downloader.fetchUserInfo();
+                final db = await DatabaseProvider.getDB();
+                await db.update('NewsArticles', {'StudentUID': '0'});
+                await db.update('Lessons', {'StudentUID': '0'});
+                await db.update('Exercises', {'StudentUID': '0'});
+                await db.update('Lessons', {'StudentUID': '0'});
+                print('Upgraded to v2');
+              },
+              child: const Text('Force Migrate2 step2'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final db = await DatabaseProvider.getDB();
+
+                print('Upgrading to v1');
+                await db.execute('''
+            CREATE TABLE IF NOT EXISTS Students(
+              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              UID TEXT NOT NULL UNIQUE,
+              Name TEXT NOT NULL,
+              Permissions TEXT NOT NULL
+            )''');
+                await db.execute('''ALTER TABLE NewsArticles ADD StudentUID TEXT''');
+                await db.execute('''ALTER TABLE NewsAttachments ADD StudentUID TEXT''');
+                await db.execute('''ALTER TABLE Grades ADD StudentUID TEXT''');
+                await db.execute('''ALTER TABLE Lessons ADD StudentUID TEXT''');
+                await db.execute('''ALTER TABLE ExercisesADD StudentUID TEXT''');
+                await db.execute('''ALTER TABLE ExerciseAttachmentsADD StudentUID TEXT''');
+                print('Upgraded to v1');
+              },
+              child: const Text('Force Migrate1'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                final db = await DatabaseProvider.getDB();
+                final r = await db.query('sqlite_master');
+                print(r.length);
+                for (final table in r) {
+                  print((table['tbl_name'] as String) + (table['name'] as String));
+                }
+              },
+              child: const Text('Sqlite master print'),
+            ),
           ],
         ),
       ),

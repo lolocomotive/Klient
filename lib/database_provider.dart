@@ -21,6 +21,8 @@ import 'dart:convert';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
+import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
@@ -62,6 +64,35 @@ class DatabaseProvider {
     }
   }
 
+  static migrate0to2(Database db) async {
+    print('Upgrading database...');
+    await db.execute('''
+            CREATE TABLE Students(
+              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+              UID TEXT NOT NULL UNIQUE,
+              Name TEXT NOT NULL,
+              Permissions TEXT NOT NULL
+            )''');
+    await db.execute('ALTER TABLE NewsArticles ADD StudentUID TEXT');
+    await db.execute('ALTER TABLE NewsAttachments ADD StudentUID TEXT');
+    await db.execute('ALTER TABLE Grades ADD StudentUID TEXT');
+    await db.execute('ALTER TABLE Lessons ADD StudentUID TEXT');
+    await db.execute('ALTER TABLE Exercises ADD StudentUID TEXT');
+    await db.execute('ALTER TABLE ExerciseAttachments ADD StudentUID TEXT');
+
+    print('Client init...');
+
+    Client(ConfigProvider.token!);
+    print('Downloading user info...');
+    await Downloader.fetchUserInfo(db: db);
+    print('Attempting to fix db...');
+    await db.update('NewsArticles', {'StudentUID': '0'});
+    await db.update('Lessons', {'StudentUID': '0'});
+    await db.update('Exercises', {'StudentUID': '0'});
+    await db.update('Lessons', {'StudentUID': '0'});
+    print('Done upgrading');
+  }
+
   static Future<Database> openDB(String dbPath, String password) async {
     return openDatabase(
       dbPath,
@@ -69,49 +100,18 @@ class DatabaseProvider {
       version: 2,
       onUpgrade: (db, oldVersion, newVersion) async {
         print('Upgrading DB $oldVersion -> $newVersion');
-        if (oldVersion < 1) {
-          await db.execute('''
-            CREATE TABLE Students(
-              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-              UID TEXT NOT NULL UNIQUE,
-              Name TEXT NOT NULL,
-              Permissions TEXT NOT NULL
-            );
-            ALTER TABLE NewsArticles
-              ADD StudentUID TEXT;
-            ALTER TABLE NewsAttchments
-              ADD StudentUID TEXT;
-            ALTER TABLE Grades
-              ADD StudentUID TEXT;
-            ALTER TABLE Lessons
-              ADD StudentUID TEXT;
-            ALTER TABLE Exercises
-              ADD StudentUID TEXT;
-            ALTER TABLE ExerciseAttachments
-              ADD StudentUID TEXT;
-          ''');
-          print('Upgraded to v1');
-        }
-        if (oldVersion < 2) {
-          //Drop constraint is not implemented in sqlite,
-          //We have to recreate the table to drop the NOT NULL constraint
-          await db.execute('''CREATE TABLE temp ( 
-              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-              UID TEXT UNIQUE,
-              Name TEXT NOT NULL,
-              Permissions TEXT NOT NULL
-            );
-            INSERT INTO temp (UID, Name, Permissions)
-              SELECT UID, Name, Permissions FROM Students;
-            DROP TABLE Students;
-            ALTER TABLE temp RENAME TO Students;''');
-          print('Upgraded to v2');
-        }
       },
       onCreate: (db, version) async {
         print('Creating db version $version');
+        final tables = await db.query('sqlite_master');
+        print('${tables.length} tables');
+        if (tables.length == 12) {
+          //The database has been created with an old version of the app and it can't be upgraded with onUpgrade.
+          //We have to force the migration
+          await migrate0to2(db);
+          return;
+        }
         final batch = db.batch();
-
         batch.execute('''
         CREATE TABLE IF NOT EXISTS NewsArticles(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,

@@ -18,6 +18,7 @@
  */
 
 import 'package:kosmos_client/database_provider.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Student {
   String uid;
@@ -30,9 +31,10 @@ class Student {
     this.permissions,
   );
 
-  static Future<List<Student>> fetchAll() async {
+  static Future<List<Student>> fetchAll({Database? db}) async {
+    db = db ?? await DatabaseProvider.getDB();
     final List<Student> articles = [];
-    final results = await (await DatabaseProvider.getDB()).query('Students');
+    final results = await db.query('Students');
     for (final result in results) {
       articles.add(Student(
         result['UID'] as String,

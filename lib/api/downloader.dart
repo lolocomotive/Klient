@@ -37,7 +37,10 @@ import 'conversation.dart';
 class Downloader {
   static bool loadingMessages = false;
 
-  static fetchUserInfo() async {
+  /// db is used here when this method is called during migration,
+  /// in which case getDB() won't work
+  static fetchUserInfo({Database? db}) async {
+    db = db ?? await DatabaseProvider.getDB();
     final userInfo = await Client.getClient().request(Action.getUserInfo);
     ConfigProvider.getStorage().write(key: 'username', value: userInfo['nom']);
     ConfigProvider.username = userInfo['nom'];
@@ -45,7 +48,7 @@ class Downloader {
       //In this case it's probably a student (and not parent) account
       //We need to get the permissions from etabs[0].permissions in that case.
       //Edge cases may break.
-      (await DatabaseProvider.getDB()).insert(
+      db.insert(
         'Students',
         {'UID': '0', 'Name': userInfo['nom'], 'Permissions': userInfo['etabs'][0]['permissions']},
         conflictAlgorithm: ConflictAlgorithm.replace,
@@ -60,7 +63,7 @@ class Downloader {
             print(student2['nom']);
             print(student2['uid']);
             print(student2['permissions']);
-            (await DatabaseProvider.getDB()).insert(
+            db.insert(
               'Students',
               {
                 'UID': student2['uid'],
@@ -73,7 +76,7 @@ class Downloader {
         }
       }
     }
-    await Student.fetchAll().then((value) => Client.students = value);
+    await Student.fetchAll(db: db).then((value) => Client.students = value);
   }
 
   static String _cleanupHTML(String html) {
