@@ -40,7 +40,7 @@ class Message {
   static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
     final results = await (await DatabaseProvider.getDB())
-        .query('Messages', where: 'ParentID = $conversationID');
+        .query('Messages', where: 'ParentID = $conversationID', orderBy: 'DateSent ASC');
     for (final result in results) {
       messages.add(
         Message(
