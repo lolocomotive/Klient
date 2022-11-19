@@ -233,7 +233,7 @@ class LoginState extends State<Login> {
                       if (snapshot.hasError) {
                         print(snapshot.error);
                         return Text('Erreur: "${snapshot.error}"');
-                      } else if (snapshot.connectionState == ConnectionState.done) {
+                      } else if (snapshot.data != null) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),
                           child: Opacity(
@@ -245,10 +245,8 @@ class LoginState extends State<Login> {
                             ),
                           ),
                         );
-                      } else if (snapshot.data == null) {
-                        return Container();
                       } else {
-                        return const Text('???');
+                        return Container();
                       }
                     }),
                   ),
