@@ -31,6 +31,8 @@ import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/login.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/util.dart';
+import 'package:restart_app/restart_app.dart';
+import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import 'conversation.dart';
 
@@ -103,6 +105,28 @@ class Request {
 
 /// Utility class making it easier to communicate with the API
 class Client {
+  static disconnect(BuildContext context) async {
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+      return WillPopScope(
+        onWillPop: () async => false,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [CircularProgressIndicator()],
+        ),
+      );
+    }));
+    Client.getClient().clear();
+    try {
+      await Client.getClient().request(Action.logout);
+    } catch (_) {}
+    await (await DatabaseProvider.getDB()).close();
+    await deleteDatabase((await DatabaseProvider.getDB()).path);
+    await ConfigProvider.getStorage().deleteAll();
+    await ConfigProvider.load();
+    await DatabaseProvider.initDB();
+    await Restart.restartApp();
+  }
+
   static Future<Student> getCurrentlySelected() async {
     if (currentlySelected != null) return currentlySelected!;
     students = await Student.fetchAll();

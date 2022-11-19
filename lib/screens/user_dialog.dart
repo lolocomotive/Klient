@@ -3,15 +3,12 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:kosmos_client/screens/debug.dart';
 import 'package:kosmos_client/screens/settings.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/user_avatar.dart';
-import 'package:restart_app/restart_app.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class UserDialog extends StatefulWidget {
   final void Function()? onStudentChange;
@@ -85,7 +82,7 @@ class _UserDialogState extends State<UserDialog> {
                   Option(
                     icon: Icons.logout_outlined,
                     text: 'Se déconnecter',
-                    onTap: () => _disconnect(context),
+                    onTap: () => Client.disconnect(context),
                   ),
                   if (kDebugMode)
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
@@ -118,28 +115,6 @@ class _UserDialogState extends State<UserDialog> {
         ),
       ),
     );
-  }
-
-  _disconnect(BuildContext context) async {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-      return WillPopScope(
-        onWillPop: () async => false,
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: const [CircularProgressIndicator()],
-        ),
-      );
-    }));
-    Client.getClient().clear();
-    try {
-      await Client.getClient().request(Action.logout);
-    } catch (_) {}
-    await (await DatabaseProvider.getDB()).close();
-    await deleteDatabase((await DatabaseProvider.getDB()).path);
-    await ConfigProvider.getStorage().deleteAll();
-    await ConfigProvider.load();
-    await DatabaseProvider.initDB();
-    await Restart.restartApp();
   }
 }
 

@@ -82,6 +82,36 @@ class _HomePageState extends State<HomePage> {
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1400),
                 child: LayoutBuilder(builder: (context, constraints) {
+                  if (Client.currentlySelected == null) {
+                    return FutureBuilder(
+                        future: Future.delayed(const Duration(seconds: 2)),
+                        builder: (context, snapshot) {
+                          return Padding(
+                            padding: const EdgeInsets.all(16.0),
+                            child: AnimatedOpacity(
+                              opacity: snapshot.connectionState == ConnectionState.done ? 1 : 0,
+                              duration: const Duration(milliseconds: 300),
+                              child: Column(
+                                children: [
+                                  Text(
+                                    'Si vous pouvez lire ce texte c\'est que quelque chose a mal tourné :/ Essayez de supprimer les données de l\'application puis de la redémarrer.',
+                                    textAlign: TextAlign.center,
+                                    style:
+                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                  ),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 16.0),
+                                    child: ElevatedButton(
+                                      onPressed: () => Client.disconnect(context),
+                                      child: const Text('Supprimmer les données et redémarrer'),
+                                    ),
+                                  )
+                                ],
+                              ),
+                            ),
+                          );
+                        });
+                  }
                   if (constraints.maxWidth > 1200) {
                     return Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
