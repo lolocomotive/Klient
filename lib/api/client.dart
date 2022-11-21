@@ -58,6 +58,9 @@ class Request {
       //Ignore the exception since this happens when the certificate is already there
     }
     final httpClient = HttpClient(context: context);
+    httpClient.badCertificateCallback = ((X509Certificate cert, String host, int port) {
+      return host == 'mobilite.kosmoseducation.com';
+    });
     final client = IOClient(httpClient);
     bool success = false;
     do {
@@ -272,6 +275,11 @@ class Client {
       //Ignore the exception since this happens when the certificate is already there
     }
     final httpClient = HttpClient(context: context);
+
+    httpClient.badCertificateCallback = ((X509Certificate cert, String host, int port) {
+      return host == 'mobilite.kosmoseducation.com';
+    });
+
     final client = IOClient(httpClient);
     bool success = false;
     do {

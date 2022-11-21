@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/main.dart';
 
@@ -81,6 +82,9 @@ class ConfigProvider {
           ColorProvider.addColor(key.substring(6), int.parse(value));
         }
         switch (key) {
+          case 'apiurl':
+            Client.apiurl = value;
+            break;
           case 'token':
             token = value;
             break;
