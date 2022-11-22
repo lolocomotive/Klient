@@ -405,6 +405,7 @@ class Downloader {
               'Title': lesson['titre'],
               'Subject': lesson['matiere'],
               'IsModified': lesson['flagModif'] ? 1 : 0,
+              'IsCanceled': lesson['flagActif'] ? 0 : 1,
               'ShouldNotify': shouldNotify ? 1 : 0,
               'ModificationMessage': lesson['motifModif'],
               'StudentUID': Client.currentlySelected!.uid,

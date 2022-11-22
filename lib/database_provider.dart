@@ -81,25 +81,29 @@ class DatabaseProvider {
     await db.execute('ALTER TABLE ExerciseAttachments ADD StudentUID TEXT');
 
     print('Client init...');
-
-    Client(ConfigProvider.token!);
-    print('Downloading user info...');
-    await Downloader.fetchUserInfo(db: db);
-    print('Attempting to fix db...');
-    await db.update('NewsArticles', {'StudentUID': '0'});
-    await db.update('Lessons', {'StudentUID': '0'});
-    await db.update('Exercises', {'StudentUID': '0'});
-    await db.update('Lessons', {'StudentUID': '0'});
-    print('Done upgrading');
+    if (ConfigProvider.token != null) {
+      Client(ConfigProvider.token!);
+      print('Downloading user info...');
+      await Downloader.fetchUserInfo(db: db);
+      print('Attempting to fix db...');
+      await db.update('NewsArticles', {'StudentUID': '0'});
+      await db.update('Lessons', {'StudentUID': '0'});
+      await db.update('Exercises', {'StudentUID': '0'});
+      await db.update('Lessons', {'StudentUID': '0'});
+      print('Done upgrading');
+    }
   }
 
   static Future<Database> openDB(String dbPath, String password) async {
     return openDatabase(
       dbPath,
       password: password,
-      version: 2,
+      version: 3,
       onUpgrade: (db, oldVersion, newVersion) async {
         print('Upgrading DB $oldVersion -> $newVersion');
+        if (oldVersion < 3) {
+          await db.execute('ALTER TABLE Lessons ADD IsCanceled INT NOT NULL DEFAULT 0');
+        }
       },
       onCreate: (db, version) async {
         print('Creating db version $version');
@@ -184,6 +188,7 @@ class DatabaseProvider {
           Subject TEXT NOT NULL,
           Title TEXT NOT NULL,
           IsModified BOOLEAN NOT NULL,
+          IsCanceled INT NOT NULL,
           ShouldNotify BOOLEAN NOT NULL,
           ModificationMessage TEXT,
           StudentUID TEXT

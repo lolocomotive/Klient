@@ -41,13 +41,15 @@ class Lesson {
   bool shouldNotify;
   String? modificationMessage;
 
+  bool isCanceled;
+
   ///1 = 1 hour
   late double length;
   late double startDouble;
   late MaterialColor color;
 
   Lesson(this.id, this.date, this.startTime, this.endTime, this.room, this.title, this.exercises,
-      this.isModified, this.shouldNotify, bool headless,
+      this.isModified, this.isCanceled, this.shouldNotify, bool headless,
       [this.modificationMessage]) {
     startDouble = int.parse(startTime.substring(0, 2)) + int.parse(startTime.substring(3)) / 60;
     final e = int.parse(endTime.substring(0, 2)) + int.parse(endTime.substring(3)) / 60;
@@ -70,6 +72,7 @@ class Lesson {
       result['Subject'] as String,
       await Exercise.fromParentLesson(result['ID'] as int, await DatabaseProvider.getDB()),
       result['IsModified'] as int == 1,
+      result['IsCanceled'] as int == 1,
       result['ShouldNotify'] as int == 1,
       headless,
       result['ModificationMessage'] as String?,

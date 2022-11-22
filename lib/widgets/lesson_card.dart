@@ -39,6 +39,7 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool hasIcons = _lesson.exercises.isNotEmpty;
     final iconsRow = Opacity(
       opacity: 0.5,
       child: Row(
@@ -58,7 +59,9 @@ class LessonCard extends StatelessWidget {
                   )
               .isNotEmpty)
             const Tooltip(
-                message: 'Travail à faire à l\'issue de la séance donné', child: Icon(Icons.update))
+              message: 'Travail à faire à l\'issue de la séance donné',
+              child: Icon(Icons.update),
+            ),
         ],
       ),
     );
@@ -73,7 +76,7 @@ class LessonCard extends StatelessWidget {
         ),
         clipBehavior: Clip.antiAlias,
         child: CustomPaint(
-          painter: _lesson.isModified ? StripesPainter() : null,
+          painter: _lesson.isCanceled ? StripesPainter() : null,
           child: InkWell(
             onTap: () {
               if (!positionned) return;
@@ -129,11 +132,21 @@ class LessonCard extends StatelessWidget {
                           children: [
                             Row(
                               children: [
+                                if (_lesson.isModified)
+                                  Padding(
+                                    padding: const EdgeInsets.only(right: 4.0),
+                                    child: Tooltip(
+                                        message: _lesson.modificationMessage ?? 'Cours modifié',
+                                        child: Icon(
+                                          Icons.info_outline,
+                                          size: MediaQuery.of(context).textScaleFactor * 18,
+                                        )),
+                                  ),
                                 Text(
                                   '${_lesson.title} ',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                if (_lesson.length <= 1 && _lesson.exercises.isNotEmpty)
+                                if (_lesson.length <= 1 && hasIcons)
                                   Flexible(
                                       child: Text(
                                     _lesson.room,
@@ -143,7 +156,7 @@ class LessonCard extends StatelessWidget {
                             ),
                             if (_lesson.length > 1 && _lesson.isModified)
                               Text(_lesson.modificationMessage!),
-                            if (_lesson.length > 1 || _lesson.exercises.isEmpty) Text(_lesson.room),
+                            if (_lesson.length > 1 || !hasIcons) Text(_lesson.room),
                             Flexible(child: iconsRow)
                           ],
                         ),
