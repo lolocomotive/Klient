@@ -129,6 +129,9 @@ class _CardContentsState extends State<_CardContents> {
 
   @override
   Widget build(BuildContext context) {
+    final bool online =
+        RegExp('<p.*#FFB622.*Ce travail à faire est à remettre directement en ligne.*<\\/p>')
+            .hasMatch(widget.widget._exercise.htmlContent);
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
       child: Container(
@@ -178,9 +181,10 @@ class _CardContentsState extends State<_CardContents> {
                       ],
                     ),
                   ),
-                  if (widget.widget._exercise.type == ExerciseType.exercise ||
-                      widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
-                      widget.widget._exercise.attachments.isNotEmpty)
+                  if (!online &&
+                      (widget.widget._exercise.type == ExerciseType.exercise ||
+                          widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
+                          widget.widget._exercise.attachments.isNotEmpty))
                     Icon(
                       widget.expanded ? Icons.expand_less : Icons.expand_more,
                       color: widget.widget.compact ? null : Colors.black,
@@ -193,31 +197,33 @@ class _CardContentsState extends State<_CardContents> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  widget.widget._exercise.htmlContent == ''
-                      ? Padding(
-                          padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
-                          child: Text(
-                            'Aucun contenu renseigné',
-                            style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                            textAlign: TextAlign.center,
-                          ),
-                        )
-                      : Html(
-                          data: widget.widget._exercise.htmlContent.substringWords(
-                                  widget.expanded
-                                      ? widget.widget._exercise.htmlContent.length
-                                      : min(_CardContents.cutLength,
-                                          widget.widget._exercise.htmlContent.length),
-                                  _CardContents.cutThreshold) +
-                              (widget.expanded ||
-                                      widget.widget._exercise.htmlContent.length <=
-                                          _CardContents.cutThreshold
-                                  ? ''
-                                  : '...'),
-                          onLinkTap: (url, context, map, element) {
-                            launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                          },
-                        ),
+                  online
+                      ? const OnlineWarning()
+                      : widget.widget._exercise.htmlContent == ''
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                              child: Text(
+                                'Aucun contenu renseigné',
+                                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : Html(
+                              data: widget.widget._exercise.htmlContent.substringWords(
+                                      widget.expanded
+                                          ? widget.widget._exercise.htmlContent.length
+                                          : min(_CardContents.cutLength,
+                                              widget.widget._exercise.htmlContent.length),
+                                      _CardContents.cutThreshold) +
+                                  (widget.expanded ||
+                                          widget.widget._exercise.htmlContent.length <=
+                                              _CardContents.cutThreshold
+                                      ? ''
+                                      : '...'),
+                              onLinkTap: (url, context, map, element) {
+                                launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+                              },
+                            ),
                   if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
                     DefaultCard(
                         elevation: widget.widget.elevation * 2,
@@ -238,7 +244,8 @@ class _CardContentsState extends State<_CardContents> {
                             ),
                           ],
                         )),
-                  if (!widget.expanded &&
+                  if (!online &&
+                      !widget.expanded &&
                       (widget.widget._exercise.attachments.isNotEmpty ||
                           widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold))
                     ExpandableButton(
@@ -254,7 +261,9 @@ class _CardContentsState extends State<_CardContents> {
                         ),
                       ),
                     ),
-                  if (widget.expanded && widget.widget._exercise.type == ExerciseType.exercise)
+                  if (!online &&
+                      widget.expanded &&
+                      widget.widget._exercise.type == ExerciseType.exercise)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -312,6 +321,19 @@ class _CardContentsState extends State<_CardContents> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class OnlineWarning extends StatelessWidget {
+  const OnlineWarning({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const DefaultCard(
+      elevation: 4,
+      child: Text(
+          'Ce travail à faire est à remettre directement en ligne. Le statut se mettra à jour automatiquement dès que vous aurez déposé ou retiré le fichier sur l\'ENT.'),
     );
   }
 }
