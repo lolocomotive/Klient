@@ -28,6 +28,7 @@ import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
+import 'package:kosmos_client/widgets/attachments_widget.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -225,25 +226,10 @@ class _CardContentsState extends State<_CardContents> {
                               },
                             ),
                   if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
-                    DefaultCard(
-                        elevation: widget.widget.elevation * 2,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text(
-                              'Pièces jointes',
-                              style: TextStyle(
-                                color: Theme.of(context).colorScheme.primary,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            ...widget.widget._exercise.attachments.map(
-                              (attachment) => Row(
-                                children: [Flexible(child: Text(attachment.name))],
-                              ),
-                            ),
-                          ],
-                        )),
+                    AttachmentsWidget(
+                      attachments: widget.widget._exercise.attachments,
+                      elevation: widget.widget.elevation * 2,
+                    ),
                   if (!online &&
                       !widget.expanded &&
                       (widget.widget._exercise.attachments.isNotEmpty ||

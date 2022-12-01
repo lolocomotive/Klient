@@ -17,13 +17,15 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/attachment.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 /// An attachment that is linked to a [NewsArticle] (only it's uid to avoid circular references though)
-class NewsAttachment {
+class NewsAttachment extends Attachment {
   /// The UID of the corresponding [NewsArticle]
   String parentUID;
+  @override
   String name;
 
   NewsAttachment(this.parentUID, this.name);

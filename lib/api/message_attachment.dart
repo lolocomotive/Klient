@@ -17,12 +17,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/attachment.dart';
 import 'package:kosmos_client/api/message.dart';
 import 'package:kosmos_client/database_provider.dart';
 
 /// An attachment that is linked to a [Message] (only it's id to avoid circular
 /// references though)
-class MessageAttachment {
+class MessageAttachment extends Attachment {
   int id;
 
   /// The ID of the [Message] this attachment belongs to
@@ -32,6 +33,7 @@ class MessageAttachment {
   /// provided by the API so we have to redirect the user to a web browser for
   /// him to be able to download the attachment
   String? url;
+  @override
   String name;
 
   MessageAttachment(this.id, this.parentID, this.url, this.name);

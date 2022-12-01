@@ -26,7 +26,7 @@ import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/util.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/attachments_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConversationPage extends StatefulWidget {
@@ -180,32 +180,10 @@ class _ConversationPageState extends State<ConversationPage> {
                                   },
                                 ),
                                 if (_conversation!.messages[index].attachments.isNotEmpty)
-                                  DefaultCard(
+                                  AttachmentsWidget(
+                                    attachments: _conversation!.messages[index].attachments,
                                     elevation: 3,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        Text(
-                                          'Pièces jointes',
-                                          style: TextStyle(
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontWeight: FontWeight.bold,
-                                          ),
-                                        ),
-                                        ..._conversation!.messages[index].attachments.map(
-                                          (attachment) => Row(
-                                            children: [
-                                              Flexible(
-                                                child: Text(
-                                                  attachment.name,
-                                                ),
-                                              )
-                                            ],
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                  )
                               ],
                             ),
                           ),

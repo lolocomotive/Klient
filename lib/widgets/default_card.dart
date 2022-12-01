@@ -28,11 +28,14 @@ class DefaultCard extends StatelessWidget {
 
   final EdgeInsets padding;
 
+  final void Function()? onTap;
+
   const DefaultCard(
       {Key? key,
       this.elevation,
       this.outlined = false,
       this.child,
+      this.onTap,
       this.padding = const EdgeInsets.all(16)})
       : super(key: key);
 
@@ -46,7 +49,11 @@ class DefaultCard extends StatelessWidget {
         side: outlined ? BorderSide(color: Theme.of(context).colorScheme.outline) : BorderSide.none,
       ),
       //clipBehavior: Clip.antiAlias,
-      child: Padding(padding: padding, child: child),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(8),
+        onTap: onTap,
+        child: Padding(padding: padding, child: child),
+      ),
     );
   }
 }

@@ -20,7 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:kosmos_client/api/news_article.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/attachments_widget.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ArticlePage extends StatelessWidget {
@@ -47,22 +47,8 @@ class ArticlePage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (_article.attachments.isNotEmpty)
-                  DefaultCard(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Text(
-                          'Pièces jointes',
-                          style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        ..._article.attachments.map((attachment) => Row(
-                              children: [Flexible(child: Text(attachment.name))],
-                            ))
-                      ],
-                    ),
+                  AttachmentsWidget(
+                    attachments: _article.attachments,
                   ),
                 Center(
                   child: GestureDetector(

@@ -17,17 +17,19 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:kosmos_client/api/attachment.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/database_provider.dart';
 
 /// An attachment that is linked to a [Exercise] (only it's id to avoid circular
 /// references though)
-class ExerciseAttachment {
+class ExerciseAttachment extends Attachment {
   int id;
 
   /// The ID of the [Exercise] this attachment belongs to
   int parentID;
   String url;
+  @override
   String name;
 
   ExerciseAttachment(this.id, this.parentID, this.url, this.name);
