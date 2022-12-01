@@ -50,7 +50,6 @@ class DatabaseProvider {
 
     final password = await ConfigProvider.getStorage().read(key: 'dbPassword') ??
         base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
-    print('Database URL: $dbPath');
     ConfigProvider.getStorage().write(key: 'dbPassword', value: password);
     try {
       _database = await openDB(dbPath, password);

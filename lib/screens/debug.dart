@@ -146,7 +146,6 @@ class DebugScreen extends StatelessWidget {
               onPressed: () async {
                 final db = await DatabaseProvider.getDB();
                 final r = await db.query('sqlite_master');
-                print(r.length);
                 for (final table in r) {
                   print((table['tbl_name'] as String) + (table['name'] as String));
                 }

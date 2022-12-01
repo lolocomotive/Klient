@@ -60,9 +60,6 @@ class Downloader {
             .request(Action.getUserInfo, params: ['ideleve/${student['uid']}']);
         for (final student2 in studentSpecificInfo['eleves']) {
           if (student2['uid'] == student['uid']) {
-            print(student2['nom']);
-            print(student2['uid']);
-            print(student2['permissions']);
             db.insert(
               'Students',
               {
@@ -255,7 +252,6 @@ class Downloader {
   /// Download all the grades
   static fetchGradesData([r = 3]) async {
     if (!Client.currentlySelected!.permissions.contains('vsc-notes-consulter')) return;
-    print(Client.currentlySelected);
     final db = await DatabaseProvider.getDB();
     if (ConfigProvider.demo) return;
     try {
