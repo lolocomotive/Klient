@@ -235,6 +235,8 @@ generate() async {
       final end = day.add(Duration(minutes: 55 * l));
       final lid = random.nextInt(1 << 32);
       final subject = subjects[random.nextInt(subjects.length)];
+      final modified = random.nextInt(2) * random.nextInt(2);
+      final canceled = modified * random.nextInt(2) * random.nextInt(2);
       lessons.add({
         'ID': lid,
         'LessonDate': day.millisecondsSinceEpoch,
@@ -245,9 +247,10 @@ generate() async {
         'Room': random.nextInt(999),
         'Title': '',
         'Subject': subject,
-        'IsModified': random.nextInt(2) * random.nextInt(2),
+        'IsModified': modified,
+        'IsCanceled': canceled,
         'ShouldNotify': 0,
-        'ModificationMessage': 'Cours annulé',
+        'ModificationMessage': canceled == 1 ? 'Cours annulé' : 'Cours modifié',
         'StudentUID': 'DEMO',
       });
       // Lesson content
