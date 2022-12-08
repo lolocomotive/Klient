@@ -39,7 +39,7 @@ class Grade {
         result['Grade'] as num,
         result['Of'] as num,
         DateTime.fromMillisecondsSinceEpoch(result['Date'] as int),
-        result['GradeText'] as String?,
+        result['GradeString'] as String?,
       ));
     }
     return grades;
