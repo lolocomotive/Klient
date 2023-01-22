@@ -25,7 +25,6 @@ import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:kosmos_client/util.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Login extends StatefulWidget {
   const Login(this.onLogin, {Key? key}) : super(key: key);
@@ -50,7 +49,7 @@ class LoginState extends State<Login> {
     if (_unameController.text == '__DEMO') {
       await ConfigProvider.getStorage().write(key: 'demoMode', value: 'true');
       await db.close();
-      await deleteDatabase(db.path);
+      await DatabaseProvider.deleteDb(db.path);
       await DatabaseProvider.initDB();
       generate();
       ConfigProvider.demo = true;
@@ -68,7 +67,7 @@ class LoginState extends State<Login> {
         await Client.login(_unameController.text, _pwdController.text);
         await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
         await db.close();
-        await deleteDatabase(db.path);
+        await DatabaseProvider.deleteDb(db.path);
         await DatabaseProvider.initDB();
         Client.getClient().clear();
         widget.onLogin();
