@@ -33,8 +33,8 @@ class Util {
   static void onException(Exception e, StackTrace st) {
     print(e);
     print(st);
-    print('Current state: ${KosmosApp.currentState}');
-    if (KosmosApp.currentState == AppLifecycleState.resumed) {
+    print('Current state: ${KosmosApp.currentLifecycleState}');
+    if (KosmosApp.currentLifecycleState == AppLifecycleState.resumed) {
       KosmosApp.messengerKey.currentState?.showSnackBar(
         SnackBar(
             content: Column(

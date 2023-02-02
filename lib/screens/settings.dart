@@ -23,7 +23,6 @@ import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/widgets/lesson_card.dart';
-import 'package:restart_app/restart_app.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -126,21 +125,10 @@ class _SettingsPageState extends State<SettingsPage> {
                                         : value == 'dark'
                                             ? Brightness.dark
                                             : null;
-                                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                                        content: Row(
-                                      children: [
-                                        const Expanded(
-                                          child: Text(
-                                              'Redémarrer l\'application pour que le changement apparaîsse'),
-                                        ),
-                                        ElevatedButton(
-                                            onPressed: (() {
-                                              Restart.restartApp();
-                                            }),
-                                            child: const Text('Redémarrer maintenant'))
-                                      ],
-                                    )));
+
+                                    ConfigProvider.setTheme();
                                     setState(() {});
+                                    KosmosState.currentState!.setState(() {});
                                   },
                                 ),
                               ),

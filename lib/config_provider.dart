@@ -19,6 +19,7 @@
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/api/client.dart';
@@ -52,6 +53,26 @@ class ConfigProvider {
     'Skolengo formation': 'https://mobilite.formation.skolengo.com/mobilite/',
     'Schulportal Ostbelgien': 'https://mobilite.schulen.be/mobilite/'
   };
+  static ColorScheme? lightDynamic;
+  static ColorScheme? darkDynamic;
+
+  static setTheme() {
+    Color primary = darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
+    Color highlight = HSLColor.fromColor(primary).withLightness(.8).toColor().withAlpha(80);
+    ColorScheme colorScheme;
+    Brightness brightness =
+        enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness;
+    if (lightDynamic != null && darkDynamic != null) {
+      colorScheme = brightness == Brightness.light ? lightDynamic! : darkDynamic!;
+    } else {
+      colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
+    }
+
+    KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+      highlightColor: highlight,
+      splashColor: highlight,
+    );
+  }
 
   static FlutterSecureStorage getStorage() {
     if (_storage != null) return _storage!;
@@ -69,7 +90,7 @@ class ConfigProvider {
       ));
     });
     if (kDebugMode) {
-      //ConfigProvider.getStorage().deleteAll();
+      //getStorage().deleteAll();
     }
     try {
       print('Reading preferences');

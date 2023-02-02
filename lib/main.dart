@@ -19,7 +19,6 @@
 
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/scheduler.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:kosmos_client/api/background_tasks.dart';
 import 'package:kosmos_client/api/client.dart';
@@ -74,7 +73,7 @@ class KosmosApp extends StatefulWidget {
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
   static List<DropdownMenuItem> dropdownItems = [];
-  static AppLifecycleState? currentState;
+  static AppLifecycleState? currentLifecycleState;
   static void Function()? onLogin;
 
   const KosmosApp({Key? key}) : super(key: key);
@@ -89,6 +88,7 @@ class KosmosState extends State with WidgetsBindingObserver {
   final title = 'Kosmos client';
 
   Widget? _mainWidget;
+  static KosmosState? currentState;
 
   @override
   void initState() {
@@ -97,7 +97,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     _checkNotifications();
     NotificationsProvider.getNotifications().then((notifications) => notifications.cancelAll());
     WidgetsBinding.instance.addObserver(this);
-    KosmosApp.currentState = AppLifecycleState.resumed;
+    KosmosApp.currentLifecycleState = AppLifecycleState.resumed;
   }
 
   @override
@@ -110,7 +110,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     KosmosApp.onLogin = () {
       setState(() {
         _mainWidget = const Main();
-        KosmosApp.currentState = AppLifecycleState.resumed;
+        KosmosApp.currentLifecycleState = AppLifecycleState.resumed;
       });
     };
     _mainWidget = const Main();
@@ -128,28 +128,16 @@ class KosmosState extends State with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {}
-    KosmosApp.currentState = state;
+    KosmosApp.currentLifecycleState = state;
   }
 
   @override
   Widget build(BuildContext context) {
+    currentState = this;
     return DynamicColorBuilder(builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
-      Color primary = darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
-      Color highlight = HSLColor.fromColor(primary).withLightness(.8).toColor().withAlpha(80);
-      ColorScheme colorScheme;
-      Brightness brightness =
-          ConfigProvider.enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness;
-      if (lightDynamic != null && darkDynamic != null) {
-        colorScheme = brightness == Brightness.light ? lightDynamic : darkDynamic;
-      } else {
-        colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
-      }
-
-      KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
-        highlightColor: highlight,
-        splashColor: highlight,
-      );
-
+      ConfigProvider.lightDynamic = lightDynamic;
+      ConfigProvider.darkDynamic = darkDynamic;
+      ConfigProvider.setTheme();
       return MaterialApp(
         scaffoldMessengerKey: KosmosApp.messengerKey,
         navigatorKey: KosmosApp.navigatorKey,
