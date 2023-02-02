@@ -130,7 +130,7 @@ class _SetupPageState extends State<SetupPage> {
                   ),
                   Step(
                     isActive: currentStep == 2,
-                    title: const Flexible(child: Text('Téléchergement des données')),
+                    title: const Flexible(child: Text('Téléchargement des données')),
                     content: Column(
                       children: [
                         Padding(
