@@ -17,7 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:badges/badges.dart';
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/config_provider.dart';
@@ -86,8 +85,8 @@ class MainState extends State<Main> {
                 future: Conversation.existsUnread(),
                 builder: (context, snapshot) {
                   return Badge(
-                    badgeColor: Theme.of(context).colorScheme.primary,
-                    showBadge: snapshot.data == true,
+                    backgroundColor: Theme.of(context).colorScheme.primary,
+                    isLabelVisible: snapshot.data == true,
                     child: const Icon(Icons.message_outlined),
                   );
                 }),
