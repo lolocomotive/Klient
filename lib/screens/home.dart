@@ -56,7 +56,7 @@ class _HomePageState extends State<HomePage> {
             forceElevated: innerBoxIsScrolled,
             actions: [
               UserAvatarAction(
-                onStudentChange: () {
+                onUpdate: () {
                   if (_gKey.currentState != null) {
                     _gKey.currentState!.setState(() {});
                   }

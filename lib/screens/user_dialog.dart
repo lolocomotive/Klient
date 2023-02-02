@@ -11,8 +11,8 @@ import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/user_avatar.dart';
 
 class UserDialog extends StatefulWidget {
-  final void Function()? onStudentChange;
-  const UserDialog({this.onStudentChange, Key? key}) : super(key: key);
+  final void Function()? onUpdate;
+  const UserDialog({this.onUpdate, Key? key}) : super(key: key);
 
   @override
   State<UserDialog> createState() => _UserDialogState();
@@ -45,8 +45,8 @@ class _UserDialogState extends State<UserDialog> {
                               Client.currentlySelected = student;
                               setState(() {});
                               Navigator.of(context).pop();
-                              if (widget.onStudentChange != null) {
-                                widget.onStudentChange!();
+                              if (widget.onUpdate != null) {
+                                widget.onUpdate!();
                               }
                             }))
                         .toList(),
@@ -64,7 +64,7 @@ class _UserDialogState extends State<UserDialog> {
                         ..pop()
                         ..push(MaterialPageRoute(builder: (_) => const SettingsPage()))
                             .then((value) {
-                          if (widget.onStudentChange != null) widget.onStudentChange!();
+                          if (widget.onUpdate != null) widget.onUpdate!();
                         });
                     },
                   ),

@@ -4,9 +4,9 @@ import 'package:kosmos_client/screens/user_dialog.dart';
 import 'package:kosmos_client/widgets/user_avatar.dart';
 
 class UserAvatarAction extends StatefulWidget {
-  final void Function()? onStudentChange;
+  final void Function()? onUpdate;
 
-  const UserAvatarAction({Key? key, this.onStudentChange}) : super(key: key);
+  const UserAvatarAction({Key? key, this.onUpdate}) : super(key: key);
 
   @override
   State<UserAvatarAction> createState() => _UserAvatarActionState();
@@ -19,9 +19,9 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
       onTap: () {
         showDialog(
           context: context,
-          builder: (_) => UserDialog(onStudentChange: () {
+          builder: (_) => UserDialog(onUpdate: () {
             setState(() {});
-            if (widget.onStudentChange != null) widget.onStudentChange!();
+            if (widget.onUpdate != null) widget.onUpdate!();
           }),
         );
       },

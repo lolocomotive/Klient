@@ -95,8 +95,10 @@ class _TimetablePageState extends State<TimetablePage> {
             title: const Text('Emploi du temps'),
             actions: [
               UserAvatarAction(
-                onStudentChange: () {
-                  setState(() {});
+                onUpdate: () {
+                  setState(() {
+                    compact = ConfigProvider.compact!;
+                  });
                 },
               )
             ],
