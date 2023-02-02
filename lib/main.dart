@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -132,24 +133,31 @@ class KosmosState extends State with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    KosmosApp.theme = ThemeData.from(
-      colorScheme: ColorScheme.fromSeed(
-        seedColor: Colors.deepPurple,
-        brightness: ConfigProvider.enforcedBrightness ??
-            SchedulerBinding.instance.window.platformBrightness,
-      ),
-      useMaterial3: true,
-    ).copyWith(
-      highlightColor: Colors.deepPurpleAccent.shade100.withAlpha(80),
-      splashColor: Colors.deepPurpleAccent.shade100.withAlpha(80),
-    );
-    return MaterialApp(
-      scaffoldMessengerKey: KosmosApp.messengerKey,
-      navigatorKey: KosmosApp.navigatorKey,
-      title: title,
-      theme: KosmosApp.theme!,
-      darkTheme: KosmosApp.theme!,
-      home: _mainWidget,
-    );
+    return DynamicColorBuilder(builder: (ColorScheme? lightDynamic, ColorScheme? darkDynamic) {
+      Color primary = darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
+      Color highlight = HSLColor.fromColor(primary).withLightness(.8).toColor().withAlpha(80);
+      ColorScheme colorScheme;
+      Brightness brightness =
+          ConfigProvider.enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness;
+      if (lightDynamic != null && darkDynamic != null) {
+        colorScheme = brightness == Brightness.light ? lightDynamic : darkDynamic;
+      } else {
+        colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
+      }
+
+      KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+        highlightColor: highlight,
+        splashColor: highlight,
+      );
+
+      return MaterialApp(
+        scaffoldMessengerKey: KosmosApp.messengerKey,
+        navigatorKey: KosmosApp.navigatorKey,
+        title: title,
+        theme: KosmosApp.theme!,
+        darkTheme: KosmosApp.theme!,
+        home: _mainWidget,
+      );
+    });
   }
 }
