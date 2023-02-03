@@ -172,14 +172,30 @@ class CompactSelector extends StatefulWidget {
 class _CompactSelectorState extends State<CompactSelector> {
   @override
   Widget build(BuildContext context) {
+    bool icon = false;
+    try {
+      SettingsTheme.of(context);
+      icon = true;
+    } catch (_) {}
     final boldPrimary = TextStyle(
         fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 14);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(0, 0, 0, 16.0),
-          child: Text('Style d\'affichage'),
+        Padding(
+          padding: const EdgeInsets.only(bottom: 24.0, top: 0),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              if (icon)
+                Padding(
+                  padding: const EdgeInsets.only(right: 24),
+                  child: Icon(Icons.display_settings,
+                      color: SettingsTheme.of(context).themeData.leadingIconsColor),
+                ),
+              const Text('Style d\'affichage'),
+            ],
+          ),
         ),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
