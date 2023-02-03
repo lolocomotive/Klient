@@ -25,6 +25,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/widgets/color_picker.dart';
 
 class ConfigProvider {
   static FlutterSecureStorage? _storage;
@@ -55,14 +56,16 @@ class ConfigProvider {
   };
   static ColorScheme? lightDynamic;
   static ColorScheme? darkDynamic;
+  static Color? enforcedColor;
 
   static setTheme() {
-    Color primary = darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
+    Color primary =
+        enforcedColor ?? darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
     Color highlight = HSLColor.fromColor(primary).withLightness(.8).toColor().withAlpha(80);
     ColorScheme colorScheme;
     Brightness brightness =
         enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness;
-    if (lightDynamic != null && darkDynamic != null) {
+    if (enforcedColor == null && lightDynamic != null && darkDynamic != null) {
       colorScheme = brightness == Brightness.light ? lightDynamic! : darkDynamic!;
     } else {
       colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
@@ -118,6 +121,11 @@ class ConfigProvider {
           case 'display.compact':
             compact = value == 'true';
             break;
+          case 'display.enforcedColor':
+            if (int.parse(value) != -1) {
+              enforcedColor = ColorPickerPageState.colors[int.parse(value)];
+            }
+            break;
           case 'display.enforcedBrightness':
             enforcedBrightness = value == 'light'
                 ? Brightness.light
@@ -135,5 +143,16 @@ class ConfigProvider {
       await getStorage().deleteAll();
       await Future.delayed(const Duration(seconds: 1));
     }
+  }
+
+  static setColor(Color? color) {
+    enforcedColor = color;
+    final int index;
+    if (color == null) {
+      index = -1;
+    } else {
+      index = ColorPickerPageState.colors.indexOf(color);
+    }
+    getStorage().write(key: 'display.enforcedColor', value: index.toString());
   }
 }

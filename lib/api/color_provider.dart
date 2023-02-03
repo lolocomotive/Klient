@@ -37,6 +37,7 @@ class ColorProvider {
     Colors.yellow,
     Colors.cyan,
     Colors.lime,
+    Colors.purple,
   ];
   static final Map<String, MaterialColor> _lessonColors = {};
 

@@ -22,6 +22,7 @@ import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/widgets/color_picker.dart';
 import 'package:kosmos_client/widgets/lesson_card.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -125,9 +126,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                         : value == 'dark'
                                             ? Brightness.dark
                                             : null;
-
-                                    ConfigProvider.setTheme();
-                                    setState(() {});
                                     KosmosState.currentState!.setState(() {});
                                   },
                                 ),
@@ -136,6 +134,21 @@ class _SettingsPageState extends State<SettingsPage> {
                           ],
                         ),
                       ),
+                      SettingsTile(
+                          leading: const Icon(Icons.color_lens),
+                          title: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              const Text('Couleur principale'),
+                              ColorPicker(
+                                color: ConfigProvider.enforcedColor,
+                                onChange: (color) {
+                                  ConfigProvider.setColor(color);
+                                  KosmosState.currentState!.setState(() {});
+                                },
+                              )
+                            ],
+                          )),
                       SettingsTile(
                         title: const CompactSelector(),
                       )
