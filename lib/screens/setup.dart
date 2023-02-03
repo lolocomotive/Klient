@@ -58,176 +58,182 @@ class _SetupPageState extends State<SetupPage> {
         leadingWidth: 0,
         title: const Text('Premiers pas'),
       ),
-      body: Center(
-        child: Container(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            children: [
-              Stepper(
-                currentStep: currentStep,
-                controlsBuilder: (context, details) {
-                  return Container();
-                },
-                steps: [
-                  Step(
-                    isActive: currentStep == 0,
-                    title: const Text('Notifications'),
-                    content: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Padding(padding: EdgeInsets.all(16.0)),
-                        SwitchListTile(
-                            title: const Text('Messagerie'),
-                            subtitle: const Text(
-                                'Recevoir des notifications quand il y a un nouveau message'),
-                            value: ConfigProvider.notifMsgEnabled!,
-                            onChanged: (value) {
-                              ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
-                              setState(() {});
-                            }),
-                        const Padding(padding: EdgeInsets.all(8.0)),
-                        Row(
-                          children: [
-                            TextButton(
-                                onPressed: () {
-                                  currentStep++;
-                                  ConfigProvider.getStorage().write(
-                                      key: 'notifications.messages',
-                                      value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
-                                  setState(() {});
-                                },
-                                child: const Text(
-                                  'CONTINUER',
-                                )),
-                          ],
-                        )
-                      ],
-                    ),
-                  ),
-                  Step(
-                    title: const Flexible(child: Text('Affichage')),
-                    content: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const CompactSelector(),
-                        TextButton(
-                            onPressed: () {
-                              currentStep++;
-                              Client.retryNetworkRequests = true;
-                              Downloader.downloadAll().then((_) {
-                                Client.retryNetworkRequests = false;
-                              });
-                              update();
-                              setState(() {});
-                            },
-                            child: const Text(
-                              'CONTINUER',
-                            )),
-                      ],
-                    ),
-                    isActive: currentStep == 1,
-                  ),
-                  Step(
-                    isActive: currentStep == 2,
-                    title: const Flexible(child: Text('Téléchargement des données')),
-                    content: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Flexible(child: Text('Téléchargement des dernières notes')),
-                              SetupPage.downloadStep >= 1
-                                  ? const Icon(Icons.done)
-                                  : const CircularProgressIndicator(),
-                            ],
-                          ),
-                        ),
-                        if (SetupPage.downloadStep >= 1)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Flexible(child: Text('Téléchargement de l\'emploi du temps')),
-                                SetupPage.downloadStep >= 2
-                                    ? const Icon(Icons.done)
-                                    : const CircularProgressIndicator(),
-                              ],
-                            ),
-                          ),
-                        if (SetupPage.downloadStep >= 2)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Flexible(child: Text('Téléchargement des actualités')),
-                                SetupPage.downloadStep >= 3
-                                    ? const Icon(Icons.done)
-                                    : const CircularProgressIndicator(),
-                              ],
-                            ),
-                          ),
-                        if (SetupPage.downloadStep >= 3)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Flexible(
-                                    child: Text(
-                                        'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
-                                SetupPage.downloadStep >= 4
-                                    ? const Icon(Icons.done)
-                                    : const CircularProgressIndicator(),
-                              ],
-                            ),
-                          ),
-                        if (SetupPage.downloadStep >= 4)
-                          Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                const Flexible(
-                                    child: Text('Téléchargement du contenu des messages')),
-                                SetupPage.downloadStep >= 5 ? const Icon(Icons.done) : Container(),
-                              ],
-                            ),
-                          ),
-                        if (SetupPage.progressOf != 0)
-                          Column(
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Text(
-                                    'Téléchargement ${SetupPage.progress}/${SetupPage.progressOf}'),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: LinearProgressIndicator(
-                                  value: SetupPage.progress / SetupPage.progressOf,
-                                ),
-                              ),
-                            ],
-                          ),
-                      ],
-                    ),
-                  )
-                ],
-              ),
-              if (SetupPage.downloadStep >= 5)
-                ElevatedButton(
-                  onPressed: () {
-                    widget._callback();
-                    Navigator.of(context).pop();
+      body: SingleChildScrollView(
+        child: Center(
+          child: Container(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: Column(
+              children: [
+                Stepper(
+                  physics: const ClampingScrollPhysics(),
+                  currentStep: currentStep,
+                  controlsBuilder: (context, details) {
+                    return Container();
                   },
-                  child: const Text('Fermer'),
-                )
-            ],
+                  steps: [
+                    Step(
+                      isActive: currentStep == 0,
+                      title: const Text('Notifications'),
+                      content: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          const Padding(padding: EdgeInsets.all(16.0)),
+                          SwitchListTile(
+                              title: const Text('Messagerie'),
+                              subtitle: const Text(
+                                  'Recevoir des notifications quand il y a un nouveau message'),
+                              value: ConfigProvider.notifMsgEnabled!,
+                              onChanged: (value) {
+                                ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
+                                setState(() {});
+                              }),
+                          const Padding(padding: EdgeInsets.all(8.0)),
+                          Row(
+                            children: [
+                              TextButton(
+                                  onPressed: () {
+                                    currentStep++;
+                                    ConfigProvider.getStorage().write(
+                                        key: 'notifications.messages',
+                                        value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
+                                    setState(() {});
+                                  },
+                                  child: const Text(
+                                    'CONTINUER',
+                                  )),
+                            ],
+                          )
+                        ],
+                      ),
+                    ),
+                    Step(
+                      title: const Flexible(child: Text('Affichage')),
+                      content: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const CompactSelector(),
+                          TextButton(
+                              onPressed: () {
+                                currentStep++;
+                                Client.retryNetworkRequests = true;
+                                Downloader.downloadAll().then((_) {
+                                  Client.retryNetworkRequests = false;
+                                });
+                                update();
+                                setState(() {});
+                              },
+                              child: const Text(
+                                'CONTINUER',
+                              )),
+                        ],
+                      ),
+                      isActive: currentStep == 1,
+                    ),
+                    Step(
+                      isActive: currentStep == 2,
+                      title: const Flexible(child: Text('Téléchargement des données')),
+                      content: Column(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                const Flexible(child: Text('Téléchargement des dernières notes')),
+                                SetupPage.downloadStep >= 1
+                                    ? const Icon(Icons.done)
+                                    : const CircularProgressIndicator(),
+                              ],
+                            ),
+                          ),
+                          if (SetupPage.downloadStep >= 1)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Flexible(
+                                      child: Text('Téléchargement de l\'emploi du temps')),
+                                  SetupPage.downloadStep >= 2
+                                      ? const Icon(Icons.done)
+                                      : const CircularProgressIndicator(),
+                                ],
+                              ),
+                            ),
+                          if (SetupPage.downloadStep >= 2)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Flexible(child: Text('Téléchargement des actualités')),
+                                  SetupPage.downloadStep >= 3
+                                      ? const Icon(Icons.done)
+                                      : const CircularProgressIndicator(),
+                                ],
+                              ),
+                            ),
+                          if (SetupPage.downloadStep >= 3)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Flexible(
+                                      child: Text(
+                                          'Téléchargement de la liste des messages (peut prendre un certain temps) ')),
+                                  SetupPage.downloadStep >= 4
+                                      ? const Icon(Icons.done)
+                                      : const CircularProgressIndicator(),
+                                ],
+                              ),
+                            ),
+                          if (SetupPage.downloadStep >= 4)
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  const Flexible(
+                                      child: Text('Téléchargement du contenu des messages')),
+                                  SetupPage.downloadStep >= 5
+                                      ? const Icon(Icons.done)
+                                      : Container(),
+                                ],
+                              ),
+                            ),
+                          if (SetupPage.progressOf != 0)
+                            Column(
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                      'Téléchargement ${SetupPage.progress}/${SetupPage.progressOf}'),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: LinearProgressIndicator(
+                                    value: SetupPage.progress / SetupPage.progressOf,
+                                  ),
+                                ),
+                              ],
+                            ),
+                        ],
+                      ),
+                    )
+                  ],
+                ),
+                if (SetupPage.downloadStep >= 5)
+                  ElevatedButton(
+                    onPressed: () {
+                      widget._callback();
+                      Navigator.of(context).pop();
+                    },
+                    child: const Text('Fermer'),
+                  )
+              ],
+            ),
           ),
         ),
       ),

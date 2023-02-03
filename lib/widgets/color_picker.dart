@@ -128,32 +128,34 @@ class ColorPickerPageState extends State<ColorPickerPage> {
 
     return AlertDialog(
       title: const Text('Sélectionnez une couleur'),
-      content: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(
-                  color: _color == null
-                      ? Theme.of(context).colorScheme.onBackground
-                      : Colors.transparent,
-                  width: 2,
+      content: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Container(
+                decoration: BoxDecoration(
+                  border: Border.all(
+                    color: _color == null
+                        ? Theme.of(context).colorScheme.onBackground
+                        : Colors.transparent,
+                    width: 2,
+                  ),
+                  borderRadius: BorderRadius.circular(100),
                 ),
-                borderRadius: BorderRadius.circular(100),
-              ),
-              child: TextButton(
-                onPressed: () {
-                  _setColor(null);
-                },
-                child: const Text('Couleurs du système'),
+                child: TextButton(
+                  onPressed: () {
+                    _setColor(null);
+                  },
+                  child: const Text('Couleurs du système'),
+                ),
               ),
             ),
-          ),
-          ...rows,
-        ],
+            ...rows,
+          ],
+        ),
       ),
       actions: [
         ElevatedButton(
