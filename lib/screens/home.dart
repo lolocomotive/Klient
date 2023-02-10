@@ -68,15 +68,15 @@ class _HomePageState extends State<HomePage> {
           )
         ];
       },
-      body: RefreshIndicator(
-        onRefresh: (() async {
-          await Future.wait(<Future>[
-            Downloader.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
-            Downloader.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
-            Downloader.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
-          ]);
-        }),
-        child: Scrollbar(
+      body: Scrollbar(
+        child: RefreshIndicator(
+          onRefresh: (() async {
+            await Future.wait(<Future>[
+              Downloader.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
+              Downloader.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
+              Downloader.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
+            ]);
+          }),
           child: SingleChildScrollView(
             child: Center(
               child: ConstrainedBox(

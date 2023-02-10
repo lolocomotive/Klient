@@ -202,11 +202,11 @@ class MessagesPageState extends State<MessagesPage> {
                           )
                         ];
                       },
-                      body: RefreshIndicator(
-                        onRefresh: () async {
-                          await refresh();
-                        },
-                        child: Scrollbar(
+                      body: Scrollbar(
+                        child: RefreshIndicator(
+                          onRefresh: () async {
+                            await refresh();
+                          },
                           child: _e != null
                               ? Column(
                                   children: [
