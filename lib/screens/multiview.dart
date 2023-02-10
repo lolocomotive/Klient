@@ -81,12 +81,14 @@ class MainState extends State<Main> {
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: FutureBuilder<bool>(
-                future: Conversation.existsUnread(),
+            icon: FutureBuilder<int>(
+                future: Conversation.unreadCount(),
                 builder: (context, snapshot) {
                   return Badge(
+                    textColor: Theme.of(context).colorScheme.background,
+                    label: Text(snapshot.data.toString()),
                     backgroundColor: Theme.of(context).colorScheme.primary,
-                    isLabelVisible: snapshot.data == true,
+                    isLabelVisible: (snapshot.data ?? 0) > 0,
                     child: const Icon(Icons.message_outlined),
                   );
                 }),

@@ -183,9 +183,9 @@ class Conversation {
     return null;
   }
 
-  static Future<bool> existsUnread() async {
+  static Future<int> unreadCount() async {
     final results =
         await (await DatabaseProvider.getDB()).query('Conversations', where: 'Read = 0');
-    return results.isNotEmpty;
+    return results.length;
   }
 }
