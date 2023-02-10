@@ -155,7 +155,7 @@ class UserWidget extends StatelessWidget {
                   opacity: student.uid == Client.currentlySelected!.uid ? 1 : 0,
                   duration: const Duration(milliseconds: 300),
                   child: Container(
-                    color: Colors.deepPurpleAccent.shade100.withAlpha(80),
+                    color: Theme.of(context).highlightColor,
                   ),
                 ),
               ),

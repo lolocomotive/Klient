@@ -286,9 +286,9 @@ class MessagesPageState extends State<MessagesPage> {
                                               child: IgnorePointer(
                                                 child: AnimatedOpacity(
                                                   duration: const Duration(milliseconds: 300),
-                                                  opacity: (_selection.contains(index)) ? .3 : 0,
+                                                  opacity: (_selection.contains(index)) ? 1 : 0,
                                                   child: Container(
-                                                    color: Theme.of(context).colorScheme.primary,
+                                                    color: Theme.of(context).highlightColor,
                                                   ),
                                                 ),
                                               ),

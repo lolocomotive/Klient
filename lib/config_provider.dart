@@ -61,10 +61,14 @@ class ConfigProvider {
   static setTheme() {
     Color primary =
         enforcedColor ?? darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
-    Color highlight = HSLColor.fromColor(primary).withLightness(.8).toColor().withAlpha(80);
-    ColorScheme colorScheme;
     Brightness brightness =
         enforcedBrightness ?? SchedulerBinding.instance.window.platformBrightness;
+    Color highlight = HSLColor.fromColor(primary)
+        .withLightness(brightness == Brightness.light ? .6 : .8)
+        .toColor()
+        .withAlpha(80);
+    Color splash = HSLColor.fromColor(primary).withLightness(.7).toColor().withAlpha(60);
+    ColorScheme colorScheme;
     if (enforcedColor == null && lightDynamic != null && darkDynamic != null) {
       colorScheme = brightness == Brightness.light ? lightDynamic! : darkDynamic!;
     } else {
@@ -73,7 +77,7 @@ class ConfigProvider {
 
     KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
       highlightColor: highlight,
-      splashColor: highlight,
+      splashColor: splash,
     );
   }
 
