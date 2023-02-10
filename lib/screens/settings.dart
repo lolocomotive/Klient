@@ -126,6 +126,8 @@ class _SettingsPageState extends State<SettingsPage> {
                                         : value == 'dark'
                                             ? Brightness.dark
                                             : null;
+                                    // If we don't setState here the value does not update when the setting does not change what is displayed.
+                                    setState(() {});
                                     KosmosState.currentState!.setState(() {});
                                   },
                                 ),
