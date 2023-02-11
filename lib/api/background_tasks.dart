@@ -30,6 +30,7 @@ import 'package:kosmos_client/notifications_provider.dart';
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
+  print('Starting headless Task $taskId');
   if (isTimeout) {
     print('[BackgroundFetch] Headless task timed-out: $taskId');
     BackgroundFetch.finish(taskId);
@@ -68,7 +69,7 @@ Future<void> initPlatformState() async {
         requiresStorageNotLow: false,
         requiresDeviceIdle: false,
         forceAlarmManager: false,
-        requiredNetworkType: NetworkType.NONE,
+        requiredNetworkType: NetworkType.ANY,
       ), (String taskId) async {
     print('[BackgroundFetch] Event #received $taskId');
     await Downloader.downloadAll();

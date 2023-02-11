@@ -33,7 +33,11 @@ void main() async {
   await initializeDateFormatting('FR_fr');
   await ConfigProvider.load();
   await Client.getCurrentlySelected();
+
+  //Background fetch
+  await initPlatformState();
   registerTasks();
+
   runApp(const KosmosApp());
 }
 
