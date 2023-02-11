@@ -84,8 +84,9 @@ class _SetupPageState extends State<SetupPage> {
                                   'Recevoir des notifications quand il y a un nouveau message'),
                               value: ConfigProvider.notifMsgEnabled!,
                               onChanged: (value) {
-                                ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
-                                setState(() {});
+                                ConfigProvider.setMessageNotifications(value, () {
+                                  setState(() {});
+                                });
                               }),
                           const Padding(padding: EdgeInsets.all(8.0)),
                           Row(
@@ -93,9 +94,6 @@ class _SetupPageState extends State<SetupPage> {
                               TextButton(
                                   onPressed: () {
                                     currentStep++;
-                                    ConfigProvider.getStorage().write(
-                                        key: 'notifications.messages',
-                                        value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
                                     setState(() {});
                                   },
                                   child: const Text(

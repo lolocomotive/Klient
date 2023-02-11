@@ -162,15 +162,14 @@ class _ConversationPageState extends State<ConversationPage> {
                                   data: HtmlUnescape()
                                       .convert(_conversation!.messages[index].htmlContent),
                                   style: {
-                                    'body':
-                                        Style(margin: EdgeInsets.zero, padding: EdgeInsets.zero),
+                                    'body': Style(margin: Margins.all(0), padding: EdgeInsets.zero),
                                     'blockquote': Style(
                                       border: Border(
                                           left: BorderSide(
                                               color: Theme.of(context).colorScheme.secondary,
                                               width: 2)),
                                       padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                      margin: EdgeInsets.zero,
+                                      margin: Margins.all(0),
                                       fontStyle: FontStyle.italic,
                                     )
                                   },

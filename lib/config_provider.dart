@@ -21,6 +21,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/color_provider.dart';
@@ -81,6 +82,27 @@ class ConfigProvider {
     );
   }
 
+  static setMessageNotifications(bool value, Function callback) {
+    if (value == true) {
+      FlutterLocalNotificationsPlugin()
+          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
+          .requestPermission()
+          .then((success) {
+        if (success == true) {
+          ConfigProvider.notifMsgEnabled = true;
+        } else {
+          ConfigProvider.notifMsgEnabled = false;
+        }
+        callback();
+      });
+    } else {
+      ConfigProvider.notifMsgEnabled = false;
+      callback();
+    }
+    ConfigProvider.getStorage().write(
+        key: 'notifications.messages', value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
+  }
+
   static FlutterSecureStorage getStorage() {
     if (_storage != null) return _storage!;
     _storage =
@@ -138,7 +160,12 @@ class ConfigProvider {
                     : null;
             break;
           case 'notifications.messages':
-            notifMsgEnabled = value == 'true';
+            FlutterLocalNotificationsPlugin()
+                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
+                .areNotificationsEnabled()
+                .then((enabled) {
+              notifMsgEnabled = value == 'true' && enabled == true;
+            });
             break;
         }
       });

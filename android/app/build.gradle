@@ -37,6 +37,9 @@ android {
     compileSdkVersion rootProject.ext.compileSdkVersion
 
     compileOptions {
+        // flutter_local_notifications: Flag to enable support for the new language APIs
+        coreLibraryDesugaringEnabled true
+
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
@@ -78,6 +81,12 @@ flutter {
 }
 
 dependencies {
+    // flutter_local_notifications:
+    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:1.1.5'
+    // Fix crashes on 12L, https://github.com/flutter/flutter/issues/110658
+    implementation 'androidx.window:window:1.0.0'
+    implementation 'androidx.window:window-java:1.0.0'
+
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
     implementation 'androidx.core:core-ktx:1.5.0-beta01' 
 }

@@ -42,8 +42,8 @@ _checkNotifications() async {
       await (await NotificationsProvider.getNotifications()).getNotificationAppLaunchDetails();
   if (details == null) return;
   if (!details.didNotificationLaunchApp) return;
-  if (details.payload == null) return;
-  NotificationsProvider.notificationCallback(details.payload);
+  if (details.notificationResponse!.payload == null) return;
+  NotificationsProvider.notificationCallback(details.notificationResponse);
 }
 
 class PopupMenuItemWithIcon extends PopupMenuItem {

@@ -29,11 +29,13 @@ class NotificationsProvider {
   static Future<void> initNotifications() async {
     _notifications = FlutterLocalNotificationsPlugin();
     await _notifications!.initialize(
-        const InitializationSettings(android: AndroidInitializationSettings('ic_stat_name')),
-        onSelectNotification: notificationCallback);
+      const InitializationSettings(android: AndroidInitializationSettings('ic_stat_name')),
+      onDidReceiveNotificationResponse: notificationCallback,
+    );
   }
 
-  static void notificationCallback(String? payload) {
+  static void notificationCallback(NotificationResponse? response) {
+    final payload = response?.payload;
     if (payload == null) return;
     if (payload.startsWith('conv-')) {
       final id = payload.substring(5, payload.length);

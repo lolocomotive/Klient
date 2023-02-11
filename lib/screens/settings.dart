@@ -78,12 +78,10 @@ class _SettingsPageState extends State<SettingsPage> {
                   tiles: <SettingsTile>[
                     SettingsTile.switchTile(
                       initialValue: ConfigProvider.notifMsgEnabled,
-                      onToggle: (_) {
-                        ConfigProvider.notifMsgEnabled = !ConfigProvider.notifMsgEnabled!;
-                        ConfigProvider.getStorage().write(
-                            key: 'notifications.messages',
-                            value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
-                        setState(() {});
+                      onToggle: (value) {
+                        ConfigProvider.setMessageNotifications(value, () {
+                          setState(() {});
+                        });
                       },
                       leading: const Icon(Icons.message_outlined),
                       title: const Text('Messagerie'),
