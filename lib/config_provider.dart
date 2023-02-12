@@ -89,18 +89,19 @@ class ConfigProvider {
           .requestPermission()
           .then((success) {
         if (success == true) {
-          ConfigProvider.notifMsgEnabled = true;
+          notifMsgEnabled = true;
         } else {
-          ConfigProvider.notifMsgEnabled = false;
+          notifMsgEnabled = false;
         }
+        getStorage()
+            .write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
         callback();
       });
     } else {
-      ConfigProvider.notifMsgEnabled = false;
+      notifMsgEnabled = false;
+      getStorage().write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
       callback();
     }
-    ConfigProvider.getStorage().write(
-        key: 'notifications.messages', value: ConfigProvider.notifMsgEnabled! ? 'true' : 'false');
   }
 
   static FlutterSecureStorage getStorage() {
@@ -160,6 +161,7 @@ class ConfigProvider {
                     : null;
             break;
           case 'notifications.messages':
+            print(value);
             FlutterLocalNotificationsPlugin()
                 .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
                 .areNotificationsEnabled()
