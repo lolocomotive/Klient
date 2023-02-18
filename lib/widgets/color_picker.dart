@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 
 class ColorPicker extends StatefulWidget {
@@ -92,70 +94,74 @@ class ColorPickerPageState extends State<ColorPickerPage> {
       _color = widget.color;
       initialized = true;
     }
-    final List<Row> rows = [];
-    List<Widget> children = [];
-    final size = 50 * MediaQuery.of(context).textScaleFactor;
-    for (int i = 0; i < colors.length; i++) {
-      children.add(InkWell(
-        borderRadius: BorderRadius.circular(100),
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Container(
-            width: size,
-            height: size,
-            decoration: BoxDecoration(
-              border: Border.all(
-                  color: _color == colors[i]
-                      ? Theme.of(context).colorScheme.onBackground
-                      : Colors.transparent,
-                  width: 2),
-              borderRadius: BorderRadius.circular(100),
-              color: colors[i],
-            ),
-          ),
-        ),
-        onTap: () {
-          _setColor(colors[i]);
-        },
-      ));
-      if (i.remainder(4) == 3) {
-        rows.add(Row(
-          children: children,
-        ));
-        children = [];
-      }
-    }
 
     return AlertDialog(
+      contentPadding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 40, vertical: 24),
       title: const Text('Sélectionnez une couleur'),
       content: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(
-                    color: _color == null
-                        ? Theme.of(context).colorScheme.onBackground
-                        : Colors.transparent,
-                    width: 2,
+        child: Builder(builder: (context) {
+          final List<Row> rows = [];
+          List<Widget> children = [];
+          final size = min((MediaQuery.of(context).size.width - 128) / 4 - 12, 64).toDouble();
+          for (int i = 0; i < colors.length; i++) {
+            children.add(InkWell(
+              borderRadius: BorderRadius.circular(100),
+              child: Padding(
+                padding: const EdgeInsets.all(6.0),
+                child: Container(
+                  width: size,
+                  height: size,
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                        color: _color == colors[i]
+                            ? Theme.of(context).colorScheme.onBackground
+                            : Colors.transparent,
+                        width: 2),
+                    borderRadius: BorderRadius.circular(100),
+                    color: colors[i],
                   ),
-                  borderRadius: BorderRadius.circular(100),
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    _setColor(null);
-                  },
-                  child: const Text('Couleurs du système'),
                 ),
               ),
-            ),
-            ...rows,
-          ],
-        ),
+              onTap: () {
+                _setColor(colors[i]);
+              },
+            ));
+            if (i.remainder(4) == 3) {
+              rows.add(Row(
+                children: children,
+              ));
+              children = [];
+            }
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: _color == null
+                          ? Theme.of(context).colorScheme.onBackground
+                          : Colors.transparent,
+                      width: 2,
+                    ),
+                    borderRadius: BorderRadius.circular(100),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      _setColor(null);
+                    },
+                    child: const Text('Couleurs du système'),
+                  ),
+                ),
+              ),
+              ...rows,
+            ],
+          );
+        }),
       ),
       actions: [
         ElevatedButton(
