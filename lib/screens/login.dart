@@ -73,7 +73,7 @@ class LoginState extends State<Login> {
         Client.getClient().clear();
         widget.onLogin();
       } on BadCredentialsException catch (_) {
-        ScaffoldMessenger.of(context)
+        KosmosApp.messengerKey.currentState!
             .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
       } on Exception catch (e, st) {
         Util.onException(e, st);

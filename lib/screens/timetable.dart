@@ -25,6 +25,8 @@ import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/widgets/day_view.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/default_transition.dart';
+import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/user_avatar_action.dart';
 
@@ -50,7 +52,7 @@ class TimetablePage extends StatefulWidget {
   State<TimetablePage> createState() => _TimetablePageState();
 }
 
-class _TimetablePageState extends State<TimetablePage> {
+class _TimetablePageState extends State<TimetablePage> with TickerProviderStateMixin {
   PageController _pageController = PageController();
   int _page = 0;
 
@@ -131,7 +133,9 @@ class _TimetablePageState extends State<TimetablePage> {
                           return const Padding(
                             padding: EdgeInsets.all(8.0),
                             child: Center(
-                              child: CircularProgressIndicator(),
+                              child: DelayedProgressIndicator(
+                                delay: Duration(milliseconds: 500),
+                              ),
                             ),
                           );
                         } else if (snapshot.hasError) {
@@ -144,48 +148,50 @@ class _TimetablePageState extends State<TimetablePage> {
                             ],
                           );
                         }
-                        return LayoutBuilder(builder: (context, constraints) {
-                          var fraction = 0.8;
-                          if (constraints.maxWidth > 700) {
-                            fraction = 0.4;
-                          }
-                          if (constraints.maxWidth > 1200) {
-                            fraction = 0.9;
-                          }
-                          _pageController = PageController(
-                              viewportFraction: fraction,
-                              initialPage: constraints.maxWidth > 1200
-                                  ? dayToWeek(_pageController.initialPage, snapshot.data!)
-                                  : _pageController.initialPage);
-                          return PageView.builder(
-                            pageSnapping: fraction != 0.4,
-                            controller: _pageController,
-                            itemBuilder: (ctx, index) {
-                              if (snapshot.data!.isEmpty) {
-                                return Column(
-                                  children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        'Rien à afficher',
-                                        style: TextStyle(
-                                            color: Theme.of(context).colorScheme.secondary),
+                        return DefaultTransition(
+                          child: LayoutBuilder(builder: (context, constraints) {
+                            var fraction = 0.8;
+                            if (constraints.maxWidth > 700) {
+                              fraction = 0.4;
+                            }
+                            if (constraints.maxWidth > 1200) {
+                              fraction = 0.9;
+                            }
+                            _pageController = PageController(
+                                viewportFraction: fraction,
+                                initialPage: constraints.maxWidth > 1200
+                                    ? dayToWeek(_pageController.initialPage, snapshot.data!)
+                                    : _pageController.initialPage);
+                            return PageView.builder(
+                              pageSnapping: fraction != 0.4,
+                              controller: _pageController,
+                              itemBuilder: (ctx, index) {
+                                if (snapshot.data!.isEmpty) {
+                                  return Column(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.all(8.0),
+                                        child: Text(
+                                          'Rien à afficher',
+                                          style: TextStyle(
+                                              color: Theme.of(context).colorScheme.secondary),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                );
-                              }
-                              return constraints.maxWidth > 1200
-                                  ? WeekView(snapshot.data!, index)
-                                  : DayView(snapshot.data![index]);
-                            },
-                            itemCount: max(
-                                constraints.maxWidth > 1200
-                                    ? getWeekCount(snapshot.data!)
-                                    : snapshot.data!.length,
-                                1),
-                          );
-                        });
+                                    ],
+                                  );
+                                }
+                                return constraints.maxWidth > 1200
+                                    ? WeekView(snapshot.data!, index)
+                                    : DayView(snapshot.data![index]);
+                              },
+                              itemCount: max(
+                                  constraints.maxWidth > 1200
+                                      ? getWeekCount(snapshot.data!)
+                                      : snapshot.data!.length,
+                                  1),
+                            );
+                          }),
+                        );
                       }),
                   Container(
                     color: Theme.of(context).colorScheme.background.withAlpha(150),

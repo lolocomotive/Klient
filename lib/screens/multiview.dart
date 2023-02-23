@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/config_provider.dart';
+import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/screens/timetable.dart';
 
@@ -39,7 +40,8 @@ class MainState extends State<Main> {
     if (await ConfigProvider.getStorage().read(key: 'firstTime') != 'false' &&
         !ConfigProvider.demo) {
       ConfigProvider.getStorage().write(key: 'firstTime', value: 'false');
-      Navigator.of(context).push(
+
+      KosmosApp.navigatorKey.currentState!.push(
         MaterialPageRoute(
           builder: (_) => WillPopScope(
             onWillPop: () async => false,

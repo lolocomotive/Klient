@@ -26,6 +26,8 @@ import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/widgets/article_card.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/default_transition.dart';
+import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/exercise_card.dart';
 import 'package:kosmos_client/widgets/grade_card.dart';
@@ -38,7 +40,7 @@ class HomePage extends StatefulWidget {
   State<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
   final GlobalKey<_HomeworkListWrapperState> _hKey = GlobalKey();
   final GlobalKey<_GradeListState> _gKey = GlobalKey();
   final GlobalKey<_ArticleListState> _aKey = GlobalKey();
@@ -210,7 +212,7 @@ class HomeworkListWrapper extends StatefulWidget {
   State<HomeworkListWrapper> createState() => _HomeworkListWrapperState();
 }
 
-class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
+class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerProviderStateMixin {
   Future<List<Exercise>> _fetchHomework() async {
     final exercises = (await Exercise.fetchAll())
         .where(
@@ -231,7 +233,9 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
             return const Padding(
               padding: EdgeInsets.all(8.0),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: DelayedProgressIndicator(
+                  delay: Duration(milliseconds: 500),
+                ),
               ),
             );
           } else if (snapshot.hasError) {
@@ -250,7 +254,9 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
                     style: TextStyle(color: Theme.of(context).colorScheme.secondary),
                   )),
                 )
-              : HomeworkList(data: snapshot.data!);
+              : DefaultTransition(
+                  child: HomeworkList(data: snapshot.data!),
+                );
         });
   }
 }
@@ -264,7 +270,7 @@ class GradeList extends StatefulWidget {
   State<GradeList> createState() => _GradeListState();
 }
 
-class _GradeListState extends State<GradeList> {
+class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
   Future<List<List<Grade>>> _fetchGrades() async {
     final grades = await Grade.fetchAll();
     List<List<Grade>> r = [];
@@ -287,44 +293,48 @@ class _GradeListState extends State<GradeList> {
             return const Padding(
               padding: EdgeInsets.all(8.0),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: DelayedProgressIndicator(
+                  delay: Duration(milliseconds: 500),
+                ),
               ),
             );
           } else if (snapshot.hasError) {
             return DefaultCard(
                 child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
           }
-          return snapshot.data!.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                      child: Text(
-                    'Rien à afficher',
-                    style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                  )),
-                )
-              : SizedBox(
-                  child: Column(
-                    children: snapshot.data!
-                        .map(
-                          (twoGrades) => Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              GradeCard(
-                                twoGrades[0],
-                                compact: ConfigProvider.compact!,
-                              ),
-                              if (twoGrades.length > 1)
+          return DefaultTransition(
+            child: snapshot.data!.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                        child: Text(
+                      'Rien à afficher',
+                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                    )),
+                  )
+                : SizedBox(
+                    child: Column(
+                      children: snapshot.data!
+                          .map(
+                            (twoGrades) => Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
                                 GradeCard(
-                                  twoGrades[1],
+                                  twoGrades[0],
                                   compact: ConfigProvider.compact!,
-                                )
-                            ],
-                          ),
-                        )
-                        .toList(),
+                                ),
+                                if (twoGrades.length > 1)
+                                  GradeCard(
+                                    twoGrades[1],
+                                    compact: ConfigProvider.compact!,
+                                  )
+                              ],
+                            ),
+                          )
+                          .toList(),
+                    ),
                   ),
-                );
+          );
         });
   }
 }
@@ -338,7 +348,7 @@ class ArticleList extends StatefulWidget {
   State<ArticleList> createState() => _ArticleListState();
 }
 
-class _ArticleListState extends State<ArticleList> {
+class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<NewsArticle>>(
@@ -348,7 +358,9 @@ class _ArticleListState extends State<ArticleList> {
             return const Padding(
               padding: EdgeInsets.all(8.0),
               child: Center(
-                child: CircularProgressIndicator(),
+                child: DelayedProgressIndicator(
+                  delay: Duration(milliseconds: 500),
+                ),
               ),
             );
           } else if (snapshot.hasError) {
@@ -361,20 +373,22 @@ class _ArticleListState extends State<ArticleList> {
               ),
             );
           }
-          return snapshot.data!.isEmpty
-              ? Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Center(
-                    child: Text(
-                      'Rien à afficher',
-                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+          return DefaultTransition(
+            child: snapshot.data!.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: Text(
+                        'Rien à afficher',
+                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                      ),
                     ),
+                  )
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: snapshot.data!.map((article) => ArticleCard(article)).toList(),
                   ),
-                )
-              : Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: snapshot.data!.map((article) => ArticleCard(article)).toList(),
-                );
+          );
         });
   }
 }

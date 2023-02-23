@@ -27,6 +27,8 @@ import 'package:kosmos_client/screens/conversation.dart';
 import 'package:kosmos_client/screens/message_search.dart';
 import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:kosmos_client/widgets/default_transition.dart';
+import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
 import 'package:kosmos_client/widgets/exception_widget.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
 import 'package:kosmos_client/widgets/user_avatar_action.dart';
@@ -39,7 +41,7 @@ class MessagesPage extends StatefulWidget {
   State<MessagesPage> createState() => MessagesPageState();
 }
 
-class MessagesPageState extends State<MessagesPage> {
+class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixin {
   final GlobalKey<MessagesPageState> key = GlobalKey();
   final List<int> _selection = [];
   Exception? _e;
@@ -214,92 +216,100 @@ class MessagesPageState extends State<MessagesPage> {
                                     DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
                                   ],
                                 )
-                              : ListView.builder(
-                                  itemCount: _conversations.isEmpty
-                                      ? 1
-                                      : _conversations.length +
-                                          (Downloader.loadingMessages ? 1 : 0),
-                                  padding: const EdgeInsets.all(0),
-                                  itemBuilder: (BuildContext context, int index) {
-                                    if (index == 0 && _conversations.isEmpty ||
-                                        index == _conversations.length) {
-                                      return Padding(
-                                        padding: EdgeInsets.fromLTRB(0, index == 0 ? 16 : 0, 0, 16),
+                              : _conversations.isEmpty
+                                  ? Center(
+                                      child: Padding(
+                                        padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
                                         child: Column(
                                           mainAxisAlignment: MainAxisAlignment.center,
                                           crossAxisAlignment: CrossAxisAlignment.center,
                                           children: const [
-                                            CircularProgressIndicator(),
-                                          ],
-                                        ),
-                                      );
-                                    }
-                                    final parentKey = GlobalKey();
-                                    return Column(
-                                      children: [
-                                        Stack(
-                                          children: [
-                                            Card(
-                                              key: parentKey,
-                                              margin: EdgeInsets.fromLTRB(14, index == 0 ? 16 : 7,
-                                                  14, index == _conversations.length - 1 ? 14 : 7),
-                                              elevation: 1,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius: BorderRadius.circular(8),
-                                              ),
-                                              clipBehavior: Clip.antiAlias,
-                                              child: InkWell(
-                                                child: Padding(
-                                                  padding: const EdgeInsets.all(8.0),
-                                                  child: MessageCard(_conversations[index]),
-                                                ),
-                                                onTap: () {
-                                                  if (_selection.isNotEmpty) {
-                                                    if (_selection.contains(index)) {
-                                                      setState(() {
-                                                        _selection.remove(index);
-                                                      });
-                                                      return;
-                                                    }
-                                                    _selection.add(index);
-                                                    setState(() {});
-                                                  } else {
-                                                    openConversation(
-                                                        context,
-                                                        parentKey,
-                                                        _conversations[index].id,
-                                                        _conversations[index].subject);
-                                                  }
-                                                },
-                                                onLongPress: () {
-                                                  if (_selection.contains(index)) {
-                                                    setState(() {
-                                                      _selection.remove(index);
-                                                    });
-                                                    return;
-                                                  }
-                                                  _selection.add(index);
-                                                  setState(() {});
-                                                },
-                                              ),
+                                            DelayedProgressIndicator(
+                                              delay: Duration(milliseconds: 500),
                                             ),
-                                            Positioned.fill(
-                                              child: IgnorePointer(
-                                                child: AnimatedOpacity(
-                                                  duration: const Duration(milliseconds: 300),
-                                                  opacity: (_selection.contains(index)) ? 1 : 0,
-                                                  child: Container(
-                                                    color: Theme.of(context).highlightColor,
-                                                  ),
-                                                ),
-                                              ),
-                                            )
                                           ],
                                         ),
-                                      ],
-                                    );
-                                  },
-                                ),
+                                      ),
+                                    )
+                                  : DefaultTransition(
+                                      child: ListView.builder(
+                                        itemCount: _conversations.length +
+                                            (Downloader.loadingMessages ? 1 : 0),
+                                        padding: const EdgeInsets.all(0),
+                                        itemBuilder: (BuildContext context, int index) {
+                                          final parentKey = GlobalKey();
+                                          return Column(
+                                            children: [
+                                              Stack(
+                                                children: [
+                                                  Card(
+                                                    key: parentKey,
+                                                    margin: EdgeInsets.fromLTRB(
+                                                        14,
+                                                        index == 0 ? 16 : 7,
+                                                        14,
+                                                        index == _conversations.length - 1
+                                                            ? 14
+                                                            : 7),
+                                                    elevation: 1,
+                                                    shape: RoundedRectangleBorder(
+                                                      borderRadius: BorderRadius.circular(8),
+                                                    ),
+                                                    clipBehavior: Clip.antiAlias,
+                                                    child: InkWell(
+                                                      child: Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: MessageCard(_conversations[index]),
+                                                      ),
+                                                      onTap: () {
+                                                        if (_selection.isNotEmpty) {
+                                                          if (_selection.contains(index)) {
+                                                            setState(() {
+                                                              _selection.remove(index);
+                                                            });
+                                                            return;
+                                                          }
+                                                          _selection.add(index);
+                                                          setState(() {});
+                                                        } else {
+                                                          openConversation(
+                                                              context,
+                                                              parentKey,
+                                                              _conversations[index].id,
+                                                              _conversations[index].subject);
+                                                        }
+                                                      },
+                                                      onLongPress: () {
+                                                        if (_selection.contains(index)) {
+                                                          setState(() {
+                                                            _selection.remove(index);
+                                                          });
+                                                          return;
+                                                        }
+                                                        _selection.add(index);
+                                                        setState(() {});
+                                                      },
+                                                    ),
+                                                  ),
+                                                  Positioned.fill(
+                                                    child: IgnorePointer(
+                                                      child: AnimatedOpacity(
+                                                        duration: const Duration(milliseconds: 300),
+                                                        opacity:
+                                                            (_selection.contains(index)) ? 1 : 0,
+                                                        child: Container(
+                                                          color: Theme.of(context).highlightColor,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  )
+                                                ],
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      ),
+                                    ),
                         ),
                       ),
                     ),
