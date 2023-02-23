@@ -37,20 +37,33 @@ class NewsArticle {
 
   static Future<List<NewsArticle>> fetchAll() async {
     final List<NewsArticle> articles = [];
-    final results = await (await DatabaseProvider.getDB())
-        .query('NewsArticles', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
+    final results = await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
+          NewsArticles.UID as NewsArticleUID,
+          NewsAttachments.ID AS NewsAttachmentID,
+          * FROM NewsArticles 
+          LEFT JOIN NewsAttachments ON NewsArticles.UID = NewsAttachments.ParentUID
+          Where NewsArticles.StudentUID = ${Client.currentlySelected!.uid}
+          AND (NewsAttachments.StudentUID = ${Client.currentlySelected!.uid} OR NewsAttachments.StudentUID IS Null);''');
+    NewsArticle? article;
     for (final result in results) {
-      articles.add(NewsArticle(
-        result['UID'] as String,
-        result['Type'] as String,
-        result['Author'] as String,
-        result['Title'] as String,
-        DateTime.fromMillisecondsSinceEpoch((result['PublishingDate'] as int)),
-        result['HTMLContent'] as String,
-        result['URL'] as String,
-        await NewsAttachment.fromParentUID(result['UID'] as String, await DatabaseProvider.getDB()),
-      ));
+      if (article == null || result['ArticleUID'] != article.uid) {
+        article = NewsArticle(
+          result['NewsArticleUID'] as String,
+          result['Type'] as String,
+          result['Author'] as String,
+          result['Title'] as String,
+          DateTime.fromMillisecondsSinceEpoch((result['PublishingDate'] as int)),
+          result['HTMLContent'] as String,
+          result['URL'] as String,
+          [],
+        );
+        articles.add(article);
+      }
+      if (result['NewsAttachmentID'] != null) {
+        article.attachments.add(NewsAttachment.parse(result));
+      }
     }
+
     return articles;
   }
 }

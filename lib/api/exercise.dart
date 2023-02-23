@@ -20,7 +20,6 @@
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise_attachment.dart';
 import 'package:kosmos_client/database_provider.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 
 enum ExerciseType {
   lessonContent,
@@ -69,41 +68,42 @@ class Exercise {
       [this.lessonFor, this.dateFor]);
 
   /// Construct an [Exercise] from the result of a database query
-  static Future<Exercise> _parse(Map<String, Object?> result) async {
+  static Exercise parse(Map<String, Object?> result) {
     return Exercise(
-        result['ID'] as int,
+        result['ID'] as int? ?? result['ExerciseID'] as int,
         result['ParentLesson'] as int?,
         result['Type'] as String == 'Cours' ? ExerciseType.lessonContent : ExerciseType.exercise,
         DateTime.fromMillisecondsSinceEpoch(result['ParentDate'] as int),
         result['Title'] as String,
         result['HTMLContent'] as String,
         result['Done'] == 1,
-        await ExerciseAttachment.fromParentID(result['ID'] as int),
+        [],
         result['LessonFor'] as int?,
         (result['DateFor'] as int?) == null
             ? null
             : DateTime.fromMillisecondsSinceEpoch(result['DateFor'] as int));
   }
 
-  /// Get the [Exercise]s by the parent [Lesson] ID
-  static Future<List<Exercise>> fromParentLesson(int parentLesson, Database db) async {
-    final List<Exercise> exercises = [];
-    final results = await db.query('Exercises',
-        where: 'ParentLesson = ? OR LessonFor = ?',
-        whereArgs: [parentLesson.toString(), parentLesson.toString()]);
-    for (final result in results) {
-      exercises.add(await _parse(result));
-    }
-    return exercises;
-  }
-
   /// Get all [Exercise]s
+
   static Future<List<Exercise>> fetchAll() async {
     final List<Exercise> exercises = [];
-    final results = await (await DatabaseProvider.getDB())
-        .query('Exercises', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
+    final results = await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
+          Exercises.ID as ExerciseID,
+          ExerciseAttachments.ID AS ExerciseAttachmentID,
+          * FROM Exercises 
+          LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
+          WHERE Exercises.StudentUID = ${Client.currentlySelected!.uid}
+          AND (ExerciseAttachments.StudentUID = ${Client.currentlySelected!.uid} OR ExerciseAttachments.StudentUID IS Null);''');
+    Exercise? exercise;
     for (final result in results) {
-      exercises.add(await _parse(result));
+      if (exercise == null || result['ExerciseID'] != exercise.uid) {
+        exercise = parse(result);
+        exercises.add(exercise);
+      }
+      if (result['ExerciseAttachmentID'] != null) {
+        exercise.attachments.add(ExerciseAttachment.parse(result));
+      }
     }
     return exercises;
   }

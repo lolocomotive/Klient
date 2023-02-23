@@ -22,7 +22,6 @@ import 'dart:math';
 
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
@@ -382,14 +381,6 @@ class Downloader {
 
       for (final day in result['listeJourCdt']) {
         for (final lesson in day['listeSeances']) {
-          //Check if this lesson is the same as the previous
-
-          final oldLesson = await Lesson.byID(lesson['idSeance'], true);
-          var shouldNotify = false;
-          if (oldLesson != null) {
-            shouldNotify = oldLesson.isModified != lesson['flagModif'];
-          }
-
           db.insert(
             'Lessons',
             {
@@ -402,7 +393,7 @@ class Downloader {
               'Subject': lesson['matiere'],
               'IsModified': lesson['flagModif'] ? 1 : 0,
               'IsCanceled': lesson['flagActif'] ? 0 : 1,
-              'ShouldNotify': shouldNotify ? 1 : 0,
+              'ShouldNotify': 0, //Lesson notifications have been removed
               'ModificationMessage': lesson['motifModif'],
               'StudentUID': Client.currentlySelected!.uid,
             },

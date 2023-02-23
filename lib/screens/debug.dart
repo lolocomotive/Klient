@@ -93,6 +93,7 @@ class DebugScreen extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [
+            ElevatedButton(onPressed: _joinTest, child: const Text('SQL JOIN test')),
             ElevatedButton(onPressed: _updateMessages, child: const Text('Update messages')),
             ElevatedButton(onPressed: _updateNews, child: const Text('Update news')),
             ElevatedButton(onPressed: _updateTimetable, child: const Text('Update Timetable')),
@@ -156,5 +157,15 @@ class DebugScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  _joinTest() {
+    DatabaseProvider.getDB().then((db) => {
+          db.rawQuery('''SELECT Lessons.ID as LessonID, Exercises.ID as ExerciseID, * 
+          FROM Lessons INNER JOIN Exercises ON Lessons.ID = Exercises.ParentLesson OR Lessons.ID = Exercises.LessonFor
+          ORDER BY Lessons.ID;''').then((result) {
+            print(result[0]);
+          })
+        });
   }
 }

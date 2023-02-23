@@ -58,6 +58,7 @@ class MessagesPageState extends State<MessagesPage> {
     } else {
       Navigator.of(context).push(
         MorpheusPageRoute(
+          //FIXME Builder is called twice
           builder: (_) => ConversationPage(
               onDelete: deleteConversationFromList,
               subject: conversationSubject,

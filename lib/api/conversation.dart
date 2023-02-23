@@ -20,6 +20,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/message_attachment.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/main.dart';
 
@@ -59,8 +60,13 @@ class Conversation {
   /// DOES NOT return messages
   static Future<List<Conversation>> fetchAll({int? offset, int? limit}) async {
     final List<Conversation> conversations = [];
-    final results =
-        await (await DatabaseProvider.getDB()).query('Conversations', limit: limit, offset: offset);
+    final results = await (await DatabaseProvider.getDB()).query(
+      'Conversations',
+      limit: limit,
+      offset: offset,
+      orderBy: 'LastDate DESC',
+    );
+
     for (final result in results) {
       List<Message> messages = [];
       conversations.add(
@@ -79,7 +85,7 @@ class Conversation {
         ),
       );
     }
-    conversations.sort((a, b) => b.lastDate.compareTo(a.lastDate));
+
     return conversations;
   }
 
@@ -128,6 +134,7 @@ class Conversation {
     String orderClause = 'LastDate desc';
     final results = await (await DatabaseProvider.getDB()).query('Conversations',
         where: likeClause, orderBy: orderClause, limit: limit, offset: offset);
+
     for (final result in results) {
       List<Message> messages = [];
       String fullMessageContents = result['FullMessageContents'] as String;
@@ -161,13 +168,34 @@ class Conversation {
   }
 
   static Future<Conversation?> byID(int id) async {
-    final results = await (await DatabaseProvider.getDB())
-        .query('Conversations', where: 'ID = ?', whereArgs: [id]);
-    for (final result in results) {
+    try {
+      final results = (await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
+          Conversations.ID as ConversationID,
+          Messages.ID as MessageID,
+          MessageAttachments.ID AS MessageAttachmentID,
+          Messages.ParentID as MessageParentID,
+          MessageAttachments.ParentID as MessageAttachmentParentID,
+          * FROM Conversations
+          LEFT JOIN Messages ON Conversations.ID = Messages.ParentID
+          LEFT JOIN MessageAttachments ON Messages.ID = MessageAttachments.ParentID
+          WHERE Conversations.ID = $id 
+          ORDER BY Messages.DateSent;'''
+          'Conversations'));
       List<Message> messages = [];
-      messages = await Message.fromConversationID(result['ID'] as int);
+      Message? message;
+      for (final result in results) {
+        if (message == null || result['MessageID'] != message.id) {
+          message = Message.parse(result);
+        }
+        if (result['MessageAttachmentID'] != null) {
+          message.attachments.add(MessageAttachment.parse(result));
+        }
+        messages.add(message);
+      }
+
+      final result = results[0];
       return Conversation(
-        result['ID'] as int,
+        result['ConversationID'] as int,
         result['Subject'] as String,
         result['Preview'] as String,
         result['HasAttachment'] as int == 1,
@@ -179,8 +207,11 @@ class Conversation {
         result['FirstAuthor'] as String,
         result['CanReply'] as int == 1,
       );
+    } catch (e, st) {
+      print(e);
+      print(st);
+      return null;
     }
-    return null;
   }
 
   static Future<int> unreadCount() async {

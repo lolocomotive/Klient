@@ -37,6 +37,7 @@ class Message {
   Message(this.id, this.parentID, this.htmlContent, this.author, this.date, this.attachments);
 
   /// Get the messages of a specific [Conversation]
+  @Deprecated('Use joins instead')
   static Future<List<Message>> fromConversationID(int conversationID) async {
     final List<Message> messages = [];
     final results = await (await DatabaseProvider.getDB())
@@ -54,5 +55,16 @@ class Message {
       );
     }
     return messages;
+  }
+
+  static Message parse(Map<String, dynamic> result) {
+    return Message(
+      result['ID'] as int? ?? result['MessageID'] as int,
+      result['ParentID'] as int? ?? result['MessageParentID'] as int,
+      result['HTMLContent'] as String,
+      result['Author'] as String,
+      DateTime.fromMillisecondsSinceEpoch(result['DateSent'] as int),
+      [],
+    );
   }
 }

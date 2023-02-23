@@ -19,7 +19,6 @@
 
 import 'package:kosmos_client/api/attachment.dart';
 import 'package:kosmos_client/api/news_article.dart';
-import 'package:sqflite_sqlcipher/sqflite.dart';
 
 /// An attachment that is linked to a [NewsArticle] (only it's uid to avoid circular references though)
 class NewsAttachment extends Attachment {
@@ -31,13 +30,7 @@ class NewsAttachment extends Attachment {
   NewsAttachment(this.parentUID, this.name);
 
   /// Get the attachments of a specific [NewsArticle]
-  static Future<List<NewsAttachment>> fromParentUID(String parentUID, Database db) async {
-    final List<NewsAttachment> attachments = [];
-    final results =
-        await db.query('NewsAttachments', where: 'ParentUID = ?', whereArgs: [parentUID]);
-    for (final result in results) {
-      attachments.add(NewsAttachment(parentUID, result['Name'] as String));
-    }
-    return attachments;
+  static NewsAttachment parse(Map<String, dynamic> result) {
+    return (NewsAttachment(result['ParentUID'], result['Name'] as String));
   }
 }

@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/exercise.dart';
+import 'package:kosmos_client/api/exercise_attachment.dart';
 import 'package:kosmos_client/database_provider.dart';
 
 class Lesson {
@@ -62,15 +63,15 @@ class Lesson {
     }
   }
 
-  static Future<Lesson> _parse(result, bool headless) async {
+  static Lesson _parse(result, bool headless) {
     return Lesson(
-      result['ID'] as int,
+      result['ID'] as int? ?? result['LessonID'] as int,
       DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
       result['StartTime'] as String,
       result['EndTime'] as String,
       result['Room'] as String,
       result['Subject'] as String,
-      await Exercise.fromParentLesson(result['ID'] as int, await DatabaseProvider.getDB()),
+      [],
       result['IsModified'] as int == 1,
       result['IsCanceled'] as int == 1,
       result['ShouldNotify'] as int == 1,
@@ -81,14 +82,39 @@ class Lesson {
 
   static Future<List<Lesson>> fetchAll([headless = false]) async {
     final List<Lesson> lessons = [];
-    final results = await (await DatabaseProvider.getDB()).query('Lessons',
-        orderBy: 'LessonDate', where: 'StudentUID = ?', whereArgs: [Client.currentlySelected!.uid]);
+    final results = await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
+          Lessons.ID as LessonID,
+          Exercises.ID as ExerciseID,
+          ExerciseAttachments.ID AS ExerciseAttachmentID,
+          * FROM Lessons 
+          LEFT JOIN Exercises ON Lessons.ID = Exercises.ParentLesson OR Lessons.ID = Exercises.LessonFor
+          LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
+          WHERE Lessons.StudentUID = ${Client.currentlySelected!.uid} 
+          AND (Exercises.StudentUID = ${Client.currentlySelected!.uid} OR  Exercises.StudentUID IS Null)
+          AND (ExerciseAttachments.StudentUID = ${Client.currentlySelected!.uid} OR ExerciseAttachments.StudentUID IS Null)
+          ORDER BY LessonDate;''');
+    Lesson? lesson;
+    Exercise? exercise;
     for (final result in results) {
-      lessons.add(await _parse(result, headless));
+      if (lesson == null || result['LessonID'] != lesson.id) {
+        lesson = _parse(result, headless);
+        lessons.add(lesson);
+      }
+      if (result['ExerciseID'] != null) {
+        if (exercise == null || result['ExerciseID'] != exercise.uid) {
+          exercise = Exercise.parse(result);
+        }
+        if (result['ExerciseAttachmentID'] != null) {
+          exercise.attachments.add(ExerciseAttachment.parse(result));
+        }
+        lesson.exercises.add(exercise);
+      }
     }
+
     return lessons;
   }
 
+  @Deprecated('Use joins instead')
   static Future<Lesson?> byID(int id, [headless = false]) async {
     final results =
         await (await DatabaseProvider.getDB()).query('Lessons', where: 'ID = ?', whereArgs: [id]);

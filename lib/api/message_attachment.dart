@@ -38,7 +38,13 @@ class MessageAttachment extends Attachment {
 
   MessageAttachment(this.id, this.parentID, this.url, this.name);
 
+  static MessageAttachment parse(Map<String, dynamic> result) {
+    return MessageAttachment(result['ID'] as int, result['ParentID'], result['URL'] as String?,
+        result['Name'] as String);
+  }
+
   /// Get the attachments of a specific [Message]
+  @Deprecated('Use joins instead')
   static Future<List<MessageAttachment>> fromMessageID(int messageID) async {
     final List<MessageAttachment> attachments = [];
     final results = await (await DatabaseProvider.getDB())

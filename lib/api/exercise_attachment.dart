@@ -19,7 +19,6 @@
 
 import 'package:kosmos_client/api/attachment.dart';
 import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/database_provider.dart';
 
 /// An attachment that is linked to a [Exercise] (only it's id to avoid circular
 /// references though)
@@ -34,14 +33,12 @@ class ExerciseAttachment extends Attachment {
 
   ExerciseAttachment(this.id, this.parentID, this.url, this.name);
 
-  static Future<List<ExerciseAttachment>> fromParentID(int parentID) async {
-    final List<ExerciseAttachment> attachments = [];
-    final results = await (await DatabaseProvider.getDB())
-        .query('ExerciseAttachments', where: 'ParentID = ?', whereArgs: [parentID]);
-    for (final result in results) {
-      attachments.add(ExerciseAttachment(
-          result['ID'] as int, parentID, result['URL'] as String, result['Name'] as String));
-    }
-    return attachments;
+  static ExerciseAttachment parse(Map<String, dynamic> result) {
+    return ExerciseAttachment(
+      result['ID'] as int? ?? result['ExerciseAttachmentID'] as int,
+      result['ParentID'],
+      result['URL'] as String,
+      result['Name'] as String,
+    );
   }
 }

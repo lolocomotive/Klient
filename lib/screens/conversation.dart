@@ -35,10 +35,7 @@ class ConversationPage extends StatefulWidget {
       : super(key: key);
 
   @override
-  // Ignore here because I haven't found a way to do it in another way.
-  // Using widget.id will not work because _ConversationPageState needs to access id from the constructor.
-  // ignore: no_logic_in_create_state
-  State<ConversationPage> createState() => _ConversationPageState(id);
+  State<ConversationPage> createState() => _ConversationPageState();
 
   final Function onDelete;
   final int id;
@@ -50,11 +47,14 @@ class _ConversationPageState extends State<ConversationPage> {
   final TextEditingController _textFieldController = TextEditingController();
   bool _busy = false;
   bool _showReply = false;
-  _ConversationPageState(id) {
-    Conversation.byID(id).then((conversation) {
+
+  @override
+  void initState() {
+    super.initState();
+    Conversation.byID(widget.id).then((conversation) {
       if (!conversation!.read) {
         Client.getClient().markConversationRead(conversation);
-        MessagesPageState.currentState!.reloadFromDB();
+        MessagesPageState.currentState?.reloadFromDB();
       }
       if (!mounted) return;
       setState(() {
