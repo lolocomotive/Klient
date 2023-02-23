@@ -50,6 +50,7 @@ class ConfigProvider {
     'Webcollège Seine-Saint-Denis  ': 'https://mobilite.webcollege.seinesaintdenis.fr/mobilite/',
     'Eclat-BFC': 'https://mobilite.eclat-bfc.fr/mobilite/',
     '@ucollège84': 'https://mobilite.aucollege84.vaucluse.fr/mobilite/',
+    'Mon ENT Val de Marne': 'https://mobilite.entvaldemarne.skolengo.com/mobilite',
     'Skolengo Demo': 'https://mobilite.demo.skolengo.com/mobilite/',
     'Kosmos Éducation (aefe, etc.)': 'https://mobilite.kosmoseducation.com/mobilite/',
     'Skolengo formation': 'https://mobilite.formation.skolengo.com/mobilite/',
