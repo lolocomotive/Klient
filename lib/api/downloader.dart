@@ -25,7 +25,6 @@ import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/screens/setup.dart';
 import 'package:kosmos_client/util.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -178,9 +177,6 @@ class Downloader {
       }
       SetupPage.downloadStep++;
       await Client.getClient().process();
-      if (MessagesPageState.currentState != null) {
-        MessagesPageState.currentState!.reloadFromDB();
-      }
       loadingMessages = false;
     } on Exception catch (e, st) {
       Util.onException(e, st);

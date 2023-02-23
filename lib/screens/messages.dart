@@ -75,9 +75,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   reloadFromDB() {
     Conversation.fetchAll().then((conversations) {
       if (!mounted) return;
-      setState(() {
-        _conversations = conversations;
-      });
+      _conversations = conversations;
+      delayTransitionDone();
     });
   }
 
@@ -86,22 +85,24 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     await reloadFromDB();
   }
 
+  delayTransitionDone() {
+    setState(() {
+      _transitionDone = false;
+    });
+    Future.delayed(const Duration(milliseconds: 400)).then((_) {
+      _transitionDone = true;
+    });
+  }
+
   static MessagesPageState? currentState;
   @override
   initState() {
     super.initState();
-
-    Future.delayed(const Duration(milliseconds: 400)).then((_) {
-      _transitionDone = true;
-    });
     currentState = this;
     currentId = null;
     currentSubject = null;
     Conversation.fetchAll().then((conversations) {
-      if (conversations.isEmpty) {
-        refresh();
-        return;
-      }
+      delayTransitionDone();
       if (!mounted) return;
       setState(() {
         _conversations = conversations;

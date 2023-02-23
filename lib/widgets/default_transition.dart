@@ -45,6 +45,7 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
+      reverseDuration: Duration.zero,
     );
     _scaleAnimation = CurvedAnimation(
       parent: _controller,
@@ -58,10 +59,18 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
 
   @override
   Widget build(BuildContext context) {
-    Future.delayed(widget.delay).then((value) {
-      _controller.reset();
+    _controller.reset();
+    if (widget.delay == Duration.zero) {
       _controller.forward();
-    });
+    } else {
+      Future.delayed(widget.delay).then((value) {
+        _controller.forward();
+      });
+    }
+    if (widget.duration == Duration.zero) {
+      print('Dureation 0');
+      return widget.child;
+    }
     return ScaleTransition(
       scale: Tween(begin: 1.05, end: 1.0).animate(_scaleAnimation),
       child: FadeTransition(

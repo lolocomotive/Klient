@@ -207,9 +207,8 @@ class Conversation {
         result['FirstAuthor'] as String,
         result['CanReply'] as int == 1,
       );
-    } catch (e, st) {
-      print(e);
-      print(st);
+    } on TypeError catch (_) {
+      //Null check used
       return null;
     }
   }
