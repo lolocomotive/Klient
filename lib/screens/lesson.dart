@@ -62,12 +62,10 @@ class LessonPage extends StatelessWidget {
             MultiExerciseView(
               _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
               'Travail à faire pour cette séance',
-              _lesson,
             ),
             MultiExerciseView(
               _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
               'Contenu de la séance',
-              _lesson,
             ),
             MultiExerciseView(
               _lesson.exercises
@@ -78,7 +76,6 @@ class LessonPage extends StatelessWidget {
                       )
                   .toList(),
               'Travail donné lors de la séance',
-              _lesson,
               showDate: true,
             ),
           ],

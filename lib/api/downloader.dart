@@ -401,123 +401,38 @@ class Downloader {
           );
 
           for (final exercise in lesson['aFaire'] ?? []) {
-            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await db.insert(
-                'Exercises',
-                {
-                  'Type': exercise['type'],
-                  'Title': exerciseDetails['titre'],
-                  'ID': exercise['uid'],
-                  'LessonFor': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
-                  'DateFor': exercise['date'],
-                  'ParentDate': lesson['hdeb'],
-                  'ParentLesson': lesson['idSeance'],
-                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-                  'StudentUID': Client.currentlySelected!.uid,
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-              await db.delete('ExerciseAttachments',
-                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
-              for (final attachment in exerciseDetails['pjs'] ?? []) {
-                db.insert(
-                  'ExerciseAttachments',
-                  {
-                    'ID': attachment['idRessource'],
-                    'ParentID': exercise['uid'],
-                    'URL': attachment['url'],
-                    'Name': attachment['name'],
-                    'StudentUID': Client.currentlySelected!.uid,
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.replace,
-                );
-              }
-            }, params: [
-              (Client.currentlySelected!.uid).toString(),
-              (lesson['idSeance']).toString(),
-              (exercise['uid']).toString()
-            ]);
+            fetchExercise(
+              exercise,
+              db,
+              dateFor: exercise['date'],
+              lessonFor: _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
+              parentDate: lesson['hdeb'],
+              parentLesson: lesson['idSeance'],
+              subject: lesson['matiere'],
+            );
           }
           for (final exercise in lesson['enSeance'] ?? []) {
-            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await db.insert(
-                'Exercises',
-                {
-                  'Type': 'Cours',
-                  'Title': exerciseDetails['titre'],
-                  'ID': exercise['uid'],
-                  'ParentDate': exercise['date'],
-                  'ParentLesson': lesson['idSeance'],
-                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-                  'StudentUID': Client.currentlySelected!.uid,
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-              await db.delete('ExerciseAttachments',
-                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
-              for (final attachment in exerciseDetails['pjs'] ?? []) {
-                db.insert(
-                  'ExerciseAttachments',
-                  {
-                    'ID': attachment['idRessource'],
-                    'ParentID': exercise['uid'],
-                    'URL': attachment['url'],
-                    'Name': attachment['name'],
-                    'StudentUID': Client.currentlySelected!.uid,
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.replace,
-                );
-              }
-            }, params: [
-              (Client.currentlySelected!.uid).toString(),
-              (lesson['idSeance']).toString(),
-              (exercise['uid']).toString()
-            ]);
+            fetchExercise(
+              exercise,
+              db,
+              type: 'Cours',
+              parentDate: exercise['date'],
+              parentLesson: lesson['idSeance'],
+              subject: lesson['matiere'],
+            );
           }
           for (final exercise in lesson['aRendre'] ?? []) {
             if ((await db.query('Exercises', where: 'ID = ?', whereArgs: [exercise['uid']]))
                 .isNotEmpty) {
               continue;
             }
-            Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
-              await db.insert(
-                'Exercises',
-                {
-                  'Type': exercise['type'],
-                  'Title': exerciseDetails['titre'],
-                  'ID': exercise['uid'],
-                  'LessonFor': lesson['idSeance'],
-                  'DateFor': exerciseDetails['date'],
-                  'ParentDate': exercise['date'],
-                  'ParentLesson': _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
-                  'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
-                  'Done': exerciseDetails['flagRealise'] ? 1 : 0,
-                  'StudentUID': Client.currentlySelected!.uid,
-                },
-                conflictAlgorithm: ConflictAlgorithm.replace,
-              );
-              await db.delete('ExerciseAttachments',
-                  where: 'ParentID = ?', whereArgs: [exercise['uid']]);
-              for (final attachment in exerciseDetails['pjs'] ?? []) {
-                db.insert(
-                  'ExerciseAttachments',
-                  {
-                    'ID': attachment['idRessource'],
-                    'ParentID': exercise['uid'],
-                    'URL': attachment['url'],
-                    'Name': attachment['name'],
-                    'StudentUID': Client.currentlySelected!.uid,
-                  },
-                  conflictAlgorithm: ConflictAlgorithm.replace,
-                );
-              }
-            }, params: [
-              (Client.currentlySelected!.uid).toString(),
-              (lesson['idSeance']).toString(),
-              (exercise['uid']).toString()
-            ]);
+            fetchExercise(
+              exercise,
+              db,
+              lessonFor: lesson['idSeance'],
+              parentLesson: _lessonIdByTimestamp(exercise['date'], result['listeJourCdt']),
+              subject: lesson['matiere'],
+            );
           }
         }
       }
@@ -525,5 +440,67 @@ class Downloader {
     } on Exception catch (e, st) {
       Util.onException(e, st);
     }
+  }
+
+  static fetchExercise(dynamic exercise, Database db,
+      {int? lessonFor,
+      int? dateFor,
+      int? parentDate,
+      int? parentLesson,
+      String? type,
+      String? subject}) {
+    Client.getClient().addRequest(Action.getExerciseDetails, (exerciseDetails) async {
+      await db.insert(
+        'Exercises',
+        {
+          'Type': type ?? exercise['type'],
+          'Title': exerciseDetails['titre'],
+          'ID': exercise['uid'],
+          'LessonFor': lessonFor,
+          'DateFor': dateFor ?? exerciseDetails['date'],
+          'ParentDate': parentDate ?? exercise['date'],
+          'ParentLesson': parentLesson,
+          'HTMLContent': _cleanupHTML(exerciseDetails['codeHTML']),
+          'Done': exerciseDetails['flagRealise'] ? 1 : 0,
+          'StudentUID': Client.currentlySelected!.uid,
+          'Subject': subject ?? exercise['matiere']
+        },
+        conflictAlgorithm: ConflictAlgorithm.replace,
+      );
+      await db.delete('ExerciseAttachments', where: 'ParentID = ?', whereArgs: [exercise['uid']]);
+      for (final attachment in exerciseDetails['pjs'] ?? []) {
+        db.insert(
+          'ExerciseAttachments',
+          {
+            'ID': attachment['idRessource'],
+            'ParentID': exercise['uid'],
+            'URL': attachment['url'],
+            'Name': attachment['name'],
+            'StudentUID': Client.currentlySelected!.uid,
+          },
+          conflictAlgorithm: ConflictAlgorithm.replace,
+        );
+      }
+    }, params: [
+      (Client.currentlySelected!.uid).toString(),
+      (parentLesson ?? lessonFor).toString(),
+      (exercise['uid']).toString()
+    ]);
+  }
+
+  static fetchHomework() async {
+    final response = await Client.getClient().request(Action.getHomework, params: [
+      (Client.currentlySelected!.uid).toString(),
+    ]);
+    final list = [];
+    for (final exerciseList in response['listeTravaux']) {
+      list.addAll(exerciseList['listTravail']);
+    }
+
+    for (final exercise in list) {
+      fetchExercise(exercise, await DatabaseProvider.getDB(),
+          lessonFor: int.parse(exercise['uidSeance']));
+    }
+    await Client.getClient().process();
   }
 }

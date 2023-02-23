@@ -22,7 +22,6 @@ import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/grade.dart';
-import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/widgets/article_card.dart';
@@ -73,8 +72,8 @@ class _HomePageState extends State<HomePage> {
           onRefresh: (() async {
             await Future.wait(<Future>[
               Downloader.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
+              Downloader.fetchHomework().then((_) => _hKey.currentState!.setState(() {})),
               Downloader.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
-              Downloader.fetchTimetable().then((_) => _hKey.currentState!.setState(() {})),
             ]);
           }),
           child: SingleChildScrollView(
@@ -212,24 +211,20 @@ class HomeworkListWrapper extends StatefulWidget {
 }
 
 class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
-  Future<List<MapEntry<Exercise, Lesson>>> _fetchHomework() async {
-    final exercises = await Exercise.fetchAll();
-    List<MapEntry<Exercise, Lesson>> r = [];
-    for (final exercise in exercises) {
-      if (exercise.lessonFor == null) continue;
-      if (exercise.dateFor!.isBefore(DateTime.now())) continue;
-      r.add(MapEntry(exercise, (await Lesson.byID(exercise.lessonFor!))!));
-    }
-    r.sort(
-      (a, b) => a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+  Future<List<Exercise>> _fetchHomework() async {
+    final exercises = (await Exercise.fetchAll())
+        .where(
+            (exercise) => exercise.lessonFor != null && exercise.dateFor!.isAfter(DateTime.now()))
+        .toList();
+    exercises.sort(
+      (a, b) => a.dateFor!.millisecondsSinceEpoch - b.dateFor!.millisecondsSinceEpoch,
     );
-
-    return r;
+    return exercises;
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<MapEntry<Exercise, Lesson>>>(
+    return FutureBuilder<List<Exercise>>(
         future: _fetchHomework(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -240,6 +235,8 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> {
               ),
             );
           } else if (snapshot.hasError) {
+            print(snapshot.error);
+            print(snapshot.stackTrace);
             return DefaultCard(
                 child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
           }
@@ -404,11 +401,11 @@ class SectionTitle extends StatelessWidget {
 class HomeworkList extends StatefulWidget {
   const HomeworkList({
     Key? key,
-    required List<MapEntry<Exercise, Lesson>> data,
+    required List<Exercise> data,
   })  : _data = data,
         super(key: key);
 
-  final List<MapEntry<Exercise, Lesson>> _data;
+  final List<Exercise> _data;
 
   @override
   State<HomeworkList> createState() => _HomeworkListState();
@@ -417,7 +414,7 @@ class HomeworkList extends StatefulWidget {
 class _HomeworkListState extends State<HomeworkList> {
   bool _showDone = false;
 
-  List<MapEntry<Exercise, Lesson>>? mutableData;
+  List<Exercise>? mutableData;
   @override
   Widget build(BuildContext context) {
     mutableData ??= widget._data;
@@ -451,7 +448,7 @@ class _HomeworkListState extends State<HomeworkList> {
           ),
         ),
       ),
-      if (widget._data.where((element) => element.key.done == false).isEmpty && !_showDone)
+      if (widget._data.where((element) => element.done == false).isEmpty && !_showDone)
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Center(
@@ -462,26 +459,23 @@ class _HomeworkListState extends State<HomeworkList> {
         )
       else
         ...mutableData!.map((homework) {
-          if (!_showDone && homework.key.done) {
+          if (!_showDone && homework.done) {
             return Container();
           }
           return Opacity(
-            opacity: homework.key.done ? .6 : 1,
+            opacity: homework.done ? .6 : 1,
             child: ExerciseCard(
-              homework.key,
-              homework.value,
+              homework,
               compact: ConfigProvider.compact!,
               elevation: 1,
               showDate: true,
               showSubject: true,
               onMarkedDone: (bool done) {
                 mutableData!.remove(homework);
-                MapEntry<Exercise, Lesson> modified =
-                    MapEntry(homework.key..done = done, homework.value);
+                Exercise modified = (homework..done = done);
                 mutableData!.add(modified);
                 mutableData!.sort(
-                  (a, b) =>
-                      a.key.dateFor!.millisecondsSinceEpoch - b.key.dateFor!.millisecondsSinceEpoch,
+                  (a, b) => a.dateFor!.millisecondsSinceEpoch - b.dateFor!.millisecondsSinceEpoch,
                 );
                 setState(() {});
               },

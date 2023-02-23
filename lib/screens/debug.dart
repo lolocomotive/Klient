@@ -59,7 +59,7 @@ class DebugScreen extends StatelessWidget {
     db.delete('Exercises');
   }
 
-  void _showNotification() async {
+  _showNotification() async {
     const AndroidNotificationDetails lessonChannel = AndroidNotificationDetails(
       'channel-lessons',
       'channel-lessons',
@@ -85,6 +85,56 @@ class DebugScreen extends StatelessWidget {
         payload: 'conv-135794');
   }
 
+  _sqliteMasterPrint() async {
+    final db = await DatabaseProvider.getDB();
+    final r = await db.query('sqlite_master');
+    for (final table in r) {
+      print((table['tbl_name'] as String) + (table['name'] as String));
+    }
+  }
+
+  _forceMigrate1() async {
+    final db = await DatabaseProvider.getDB();
+
+    print('Upgrading to v1');
+    await db.execute('''
+          CREATE TABLE IF NOT EXISTS Students(
+            ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+            UID TEXT NOT NULL UNIQUE,
+            Name TEXT NOT NULL,
+            Permissions TEXT NOT NULL
+          )''');
+    await db.execute('''ALTER TABLE NewsArticles ADD StudentUID TEXT''');
+    await db.execute('''ALTER TABLE NewsAttachments ADD StudentUID TEXT''');
+    await db.execute('''ALTER TABLE Grades ADD StudentUID TEXT''');
+    await db.execute('''ALTER TABLE Lessons ADD StudentUID TEXT''');
+    await db.execute('''ALTER TABLE ExercisesADD StudentUID TEXT''');
+    await db.execute('''ALTER TABLE ExerciseAttachmentsADD StudentUID TEXT''');
+    print('Upgraded to v1');
+  }
+
+  _forceM2Step2() async {
+    await Downloader.fetchUserInfo();
+    final db = await DatabaseProvider.getDB();
+    await db.update('NewsArticles', {'StudentUID': '0'});
+    await db.update('Lessons', {'StudentUID': '0'});
+    await db.update('Exercises', {'StudentUID': '0'});
+    await db.update('Lessons', {'StudentUID': '0'});
+    print('Upgraded to v2');
+  }
+
+  _dropGrades() async {
+    (await DatabaseProvider.getDB()).execute('DROP TABLE GRADES');
+  }
+
+  _updateHomework() {
+    Downloader.fetchHomework();
+  }
+
+  _fetchUserInfo() {
+    Downloader.fetchUserInfo();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -97,62 +147,17 @@ class DebugScreen extends StatelessWidget {
             ElevatedButton(onPressed: _updateMessages, child: const Text('Update messages')),
             ElevatedButton(onPressed: _updateNews, child: const Text('Update news')),
             ElevatedButton(onPressed: _updateTimetable, child: const Text('Update Timetable')),
+            ElevatedButton(onPressed: _updateHomework, child: const Text('Update Homework')),
             ElevatedButton(onPressed: _updateGrades, child: const Text('Update grades')),
             ElevatedButton(onPressed: _clearDatabase, child: const Text('Clear database')),
             ElevatedButton(onPressed: _closeDB, child: const Text('Close database')),
-            const ElevatedButton(
-                onPressed: Downloader.fetchUserInfo, child: Text('Fetch user info')),
-            ElevatedButton(
-                onPressed: () async {
-                  (await DatabaseProvider.getDB()).execute('DROP TABLE GRADES');
-                },
-                child: const Text('drop grades')),
+            ElevatedButton(onPressed: _fetchUserInfo, child: const Text('Fetch user info')),
+            ElevatedButton(onPressed: _dropGrades, child: const Text('drop grades')),
             ElevatedButton(onPressed: _showNotification, child: const Text('Force notification')),
             const ElevatedButton(onPressed: generate, child: Text('Force generate')),
-            ElevatedButton(
-              onPressed: () async {
-                await Downloader.fetchUserInfo();
-                final db = await DatabaseProvider.getDB();
-                await db.update('NewsArticles', {'StudentUID': '0'});
-                await db.update('Lessons', {'StudentUID': '0'});
-                await db.update('Exercises', {'StudentUID': '0'});
-                await db.update('Lessons', {'StudentUID': '0'});
-                print('Upgraded to v2');
-              },
-              child: const Text('Force Migrate2 step2'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final db = await DatabaseProvider.getDB();
-
-                print('Upgrading to v1');
-                await db.execute('''
-            CREATE TABLE IF NOT EXISTS Students(
-              ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-              UID TEXT NOT NULL UNIQUE,
-              Name TEXT NOT NULL,
-              Permissions TEXT NOT NULL
-            )''');
-                await db.execute('''ALTER TABLE NewsArticles ADD StudentUID TEXT''');
-                await db.execute('''ALTER TABLE NewsAttachments ADD StudentUID TEXT''');
-                await db.execute('''ALTER TABLE Grades ADD StudentUID TEXT''');
-                await db.execute('''ALTER TABLE Lessons ADD StudentUID TEXT''');
-                await db.execute('''ALTER TABLE ExercisesADD StudentUID TEXT''');
-                await db.execute('''ALTER TABLE ExerciseAttachmentsADD StudentUID TEXT''');
-                print('Upgraded to v1');
-              },
-              child: const Text('Force Migrate1'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                final db = await DatabaseProvider.getDB();
-                final r = await db.query('sqlite_master');
-                for (final table in r) {
-                  print((table['tbl_name'] as String) + (table['name'] as String));
-                }
-              },
-              child: const Text('Sqlite master print'),
-            ),
+            ElevatedButton(onPressed: _forceM2Step2, child: const Text('Force Migrate2 step2')),
+            ElevatedButton(onPressed: _forceMigrate1, child: const Text('Force Migrate1')),
+            ElevatedButton(onPressed: _sqliteMasterPrint, child: const Text('Sqlite master print')),
           ],
         ),
       ),

@@ -70,7 +70,7 @@ class Lesson {
       result['StartTime'] as String,
       result['EndTime'] as String,
       result['Room'] as String,
-      result['Subject'] as String,
+      result['Subject'] as String? ?? result['LessonSubject'],
       [],
       result['IsModified'] as int == 1,
       result['IsCanceled'] as int == 1,
@@ -86,6 +86,8 @@ class Lesson {
           Lessons.ID as LessonID,
           Exercises.ID as ExerciseID,
           ExerciseAttachments.ID AS ExerciseAttachmentID,
+          Lessons.Subject as LessonSubject,
+          Exercises.Subject as ExerciseSubject,
           * FROM Lessons 
           LEFT JOIN Exercises ON Lessons.ID = Exercises.ParentLesson OR Lessons.ID = Exercises.LessonFor
           LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
@@ -102,7 +104,7 @@ class Lesson {
       }
       if (result['ExerciseID'] != null) {
         if (exercise == null || result['ExerciseID'] != exercise.uid) {
-          exercise = Exercise.parse(result);
+          exercise = await Exercise.parse(result);
         }
         if (result['ExerciseAttachmentID'] != null) {
           exercise.attachments.add(ExerciseAttachment.parse(result));

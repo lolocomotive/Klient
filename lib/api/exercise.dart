@@ -17,8 +17,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:flutter/material.dart';
 import 'package:kosmos_client/api/client.dart';
+import 'package:kosmos_client/api/color_provider.dart';
 import 'package:kosmos_client/api/exercise_attachment.dart';
+import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/database_provider.dart';
 
 enum ExerciseType {
@@ -58,17 +61,32 @@ class Exercise {
   /// It is useful if the lesson is outside of the range provided by the API
   /// (+7 and -7 Days)
   DateTime? dateFor;
+
+  late MaterialColor color;
+  String subject;
   String title;
   String htmlContent;
   bool done;
   List<ExerciseAttachment> attachments;
 
-  Exercise(this.uid, this.parentLesson, this.type, this.date, this.title, this.htmlContent,
-      this.done, this.attachments,
-      [this.lessonFor, this.dateFor]);
+  Exercise(
+    this.uid,
+    this.parentLesson,
+    this.type,
+    this.date,
+    this.title,
+    this.htmlContent,
+    this.done,
+    this.attachments,
+    this.subject, [
+    this.lessonFor,
+    this.dateFor,
+  ]) {
+    color = ColorProvider.getColor(subject);
+  }
 
   /// Construct an [Exercise] from the result of a database query
-  static Exercise parse(Map<String, Object?> result) {
+  static Future<Exercise> parse(Map<String, Object?> result) async {
     return Exercise(
         result['ID'] as int? ?? result['ExerciseID'] as int,
         result['ParentLesson'] as int?,
@@ -78,6 +96,12 @@ class Exercise {
         result['HTMLContent'] as String,
         result['Done'] == 1,
         [],
+        result['Subject'] as String? ??
+            result['ExerciseSubject'] as String? ??
+            //This should never be called, it just exists as a backup solution in case the migration goes wrong.
+            (await Lesson.byID(result['ParentLesson'] as int? ?? result['LessonFor'] as int))
+                ?.title ??
+            'Erreur',
         result['LessonFor'] as int?,
         (result['DateFor'] as int?) == null
             ? null
@@ -98,7 +122,7 @@ class Exercise {
     Exercise? exercise;
     for (final result in results) {
       if (exercise == null || result['ExerciseID'] != exercise.uid) {
-        exercise = parse(result);
+        exercise = await parse(result);
         exercises.add(exercise);
       }
       if (result['ExerciseAttachmentID'] != null) {

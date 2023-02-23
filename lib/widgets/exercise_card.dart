@@ -25,7 +25,6 @@ import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/widgets/attachments_widget.dart';
@@ -35,7 +34,7 @@ import 'package:url_launcher/url_launcher.dart';
 class ExerciseCard extends StatefulWidget {
   final Function? onMarkedDone;
 
-  const ExerciseCard(this._exercise, this._lesson,
+  const ExerciseCard(this._exercise,
       {Key? key,
       this.showDate = false,
       this.compact = false,
@@ -47,7 +46,6 @@ class ExerciseCard extends StatefulWidget {
   final bool showSubject;
   final bool compact;
   final Exercise _exercise;
-  final Lesson _lesson;
   final double elevation;
 
   @override
@@ -64,7 +62,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
             child: Text(
-              '${widget.showSubject ? '${widget._lesson.title}: ' : ''}'
+              '${widget.showSubject ? '${widget._exercise.subject}: ' : ''}'
               'À faire pour ${DateFormat('EEEE${widget._exercise.dateFor!.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
                   ' - HH:mm', 'FR_fr').format(widget._exercise.dateFor!)}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -139,7 +137,7 @@ class _CardContentsState extends State<_CardContents> {
         decoration: widget.widget.compact
             ? BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: widget.widget._lesson.color.shade200, width: 6),
+                  left: BorderSide(color: widget.widget._exercise.color.shade200, width: 6),
                 ),
               )
             : null,
@@ -147,7 +145,7 @@ class _CardContentsState extends State<_CardContents> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: widget.widget.compact ? null : widget.widget._lesson.color.shade200,
+              color: widget.widget.compact ? null : widget.widget._exercise.color.shade200,
               padding: widget.widget.compact
                   ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
                   : const EdgeInsets.all(8.0),
@@ -279,7 +277,7 @@ class _CardContentsState extends State<_CardContents> {
                                         body: '{"flagRealise":${!widget.widget._exercise.done}}',
                                         params: [
                                           '0',
-                                          widget.widget._lesson.id.toString(),
+                                          widget.widget._exercise.parentLesson.toString(),
                                           widget.widget._exercise.uid.toString()
                                         ]);
                                     await (await DatabaseProvider.getDB()).update(

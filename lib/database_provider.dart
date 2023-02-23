@@ -93,15 +93,41 @@ class DatabaseProvider {
     }
   }
 
+  static migrate3to4(Database db) async {
+    print('Upgrading database...');
+    await db.execute('ALTER TABLE Exercises ADD Subject TEXT');
+    print('Attempting to fix data...');
+    final results = await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
+          Lessons.ID as LessonID,
+          Exercises.ID as ExerciseID,
+          ExerciseAttachments.ID AS ExerciseAttachmentID,
+          Lessons.Subject as LessonSubject,
+          Exercises.Subject as ExerciseSubject,
+          * FROM Lessons 
+          LEFT JOIN Exercises ON Lessons.ID = Exercises.ParentLesson OR Lessons.ID = Exercises.LessonFor
+          LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
+          ORDER BY LessonDate;''');
+    final batch = db.batch();
+    for (final result in results) {
+      batch.update('Exercises', {'Subject': result['LessonSubject']},
+          where: 'ID = ?', whereArgs: [result['ExerciseID']]);
+    }
+    await batch.commit();
+    print('Done upgrading');
+  }
+
   static Future<Database> openDB(String dbPath, String password) async {
     return openDatabase(
       dbPath,
       password: password,
-      version: 3,
+      version: 4,
       onUpgrade: (db, oldVersion, newVersion) async {
-        print('Upgrading DB $oldVersion -> $newVersion');
         if (oldVersion < 3) {
           await db.execute('ALTER TABLE Lessons ADD IsCanceled INT NOT NULL DEFAULT 0');
+        }
+        print('Upgrading DB $oldVersion -> $newVersion');
+        if (oldVersion < 4) {
+          migrate3to4(db);
         }
       },
       onCreate: (db, version) async {
@@ -204,6 +230,7 @@ class DatabaseProvider {
           HTMLContent TEXT NOT NULL,
           Done BOOLEAN NOT NULL,
           StudentUID TEXT,
+          Subject TEXT,
           FOREIGN KEY (ParentLesson) REFERENCES Lessons(ID),
           FOREIGN KEY (LessonFor) REFERENCES Lessons(ID)
         )''');
