@@ -49,6 +49,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   bool _sideBySide = false;
   String? currentSubject;
   int? currentId;
+  bool _transitionDone = false;
 
   void openConversation(
       BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
@@ -86,7 +87,13 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   static MessagesPageState? currentState;
-  MessagesPageState() {
+  @override
+  initState() {
+    super.initState();
+
+    Future.delayed(const Duration(milliseconds: 400)).then((_) {
+      _transitionDone = true;
+    });
     currentState = this;
     currentId = null;
     currentSubject = null;
@@ -231,14 +238,19 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         ),
                                       ),
                                     )
-                                  : DefaultTransition(
-                                      child: ListView.builder(
-                                        itemCount: _conversations.length +
-                                            (Downloader.loadingMessages ? 1 : 0),
-                                        padding: const EdgeInsets.all(0),
-                                        itemBuilder: (BuildContext context, int index) {
-                                          final parentKey = GlobalKey();
-                                          return Column(
+                                  : ListView.builder(
+                                      itemCount: _conversations.length +
+                                          (Downloader.loadingMessages ? 1 : 0),
+                                      padding: const EdgeInsets.all(0),
+                                      itemBuilder: (BuildContext context, int index) {
+                                        final parentKey = GlobalKey();
+                                        return DefaultTransition(
+                                          duration: _transitionDone
+                                              ? Duration.zero
+                                              : const Duration(milliseconds: 200),
+                                          delay: Duration(
+                                              milliseconds: _transitionDone ? 0 : 30 * index),
+                                          child: Column(
                                             children: [
                                               Stack(
                                                 children: [
@@ -306,9 +318,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                 ],
                                               ),
                                             ],
-                                          );
-                                        },
-                                      ),
+                                          ),
+                                        );
+                                      },
                                     ),
                         ),
                       ),

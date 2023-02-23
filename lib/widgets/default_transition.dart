@@ -21,7 +21,14 @@ import 'package:flutter/material.dart';
 
 class DefaultTransition extends StatefulWidget {
   final Widget child;
-  const DefaultTransition({Key? key, required this.child}) : super(key: key);
+  final Duration delay;
+  final Duration duration;
+  const DefaultTransition({
+    Key? key,
+    required this.child,
+    this.delay = Duration.zero,
+    this.duration = const Duration(milliseconds: 200),
+  }) : super(key: key);
 
   @override
   State<DefaultTransition> createState() => _DefaultTransitionState();
@@ -35,14 +42,9 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
   @override
   void initState() {
     super.initState();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    print('Build');
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 200),
+      duration: widget.duration,
     );
     _scaleAnimation = CurvedAnimation(
       parent: _controller,
@@ -52,8 +54,14 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
       parent: _controller,
       curve: Curves.easeIn,
     );
-    _controller.reset();
-    _controller.forward();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    Future.delayed(widget.delay).then((value) {
+      _controller.reset();
+      _controller.forward();
+    });
     return ScaleTransition(
       scale: Tween(begin: 1.05, end: 1.0).animate(_scaleAnimation),
       child: FadeTransition(
