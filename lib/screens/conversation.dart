@@ -27,6 +27,7 @@ import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/attachments_widget.dart';
+import 'package:kosmos_client/widgets/default_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ConversationPage extends StatefulWidget {
@@ -47,6 +48,7 @@ class _ConversationPageState extends State<ConversationPage> {
   final TextEditingController _textFieldController = TextEditingController();
   bool _busy = false;
   bool _showReply = false;
+  bool _transitionDone = false;
 
   @override
   void initState() {
@@ -57,9 +59,17 @@ class _ConversationPageState extends State<ConversationPage> {
         MessagesPageState.currentState?.reloadFromDB();
       }
       if (!mounted) return;
-      setState(() {
-        _conversation = conversation;
-      });
+      _conversation = conversation;
+      delayTransitionDone();
+    });
+  }
+
+  delayTransitionDone() {
+    setState(() {
+      _transitionDone = false;
+    });
+    Future.delayed(const Duration(milliseconds: 400)).then((_) {
+      _transitionDone = true;
     });
   }
 
@@ -79,6 +89,9 @@ class _ConversationPageState extends State<ConversationPage> {
                     SliverAppBar(
                       actions: [
                         IconButton(
+                            onPressed: delayTransitionDone,
+                            icon: const Icon(Icons.replay_outlined)),
+                        IconButton(
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();
@@ -96,8 +109,7 @@ class _ConversationPageState extends State<ConversationPage> {
                     removeTop: true,
                     child: ListView.builder(
                       itemCount: (_conversation != null ? _conversation!.messages.length : 0) +
-                          (_showReply ? 0 : 1) +
-                          1,
+                          (_showReply ? 1 : 2),
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Padding(
@@ -123,67 +135,74 @@ class _ConversationPageState extends State<ConversationPage> {
                               : const Text('');
                         }
                         final parentKey = GlobalKey();
-                        return Card(
-                          margin: const EdgeInsets.all(8.0),
-                          elevation: 1,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                            child: Column(
-                              key: parentKey,
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.stretch,
-                              children: [
-                                Row(
-                                  children: [
-                                    Expanded(
-                                      child: Text(
-                                        _conversation!.messages[index].author,
-                                        textAlign: TextAlign.left,
-                                        overflow: TextOverflow.ellipsis,
+                        return DefaultTransition(
+                          key: GlobalKey(),
+                          duration:
+                              _transitionDone ? Duration.zero : const Duration(milliseconds: 200),
+                          delay: Duration(milliseconds: _transitionDone ? 0 : 30 * index),
+                          child: Card(
+                            margin: const EdgeInsets.all(8.0),
+                            elevation: 1,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                              child: Column(
+                                key: parentKey,
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  Row(
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          _conversation!.messages[index].author,
+                                          textAlign: TextAlign.left,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: TextStyle(
+                                              fontSize: 14,
+                                              color: Theme.of(context).colorScheme.primary,
+                                              fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      Text(
+                                        Util.dateToString(_conversation!.messages[index].date),
                                         style: TextStyle(
-                                            fontSize: 14,
-                                            color: Theme.of(context).colorScheme.primary,
-                                            fontWeight: FontWeight.bold),
+                                          fontSize: 14,
+                                          color: Theme.of(context).colorScheme.primary,
+                                        ),
                                       ),
-                                    ),
-                                    Text(
-                                      Util.dateToString(_conversation!.messages[index].date),
-                                      style: TextStyle(
-                                        fontSize: 14,
-                                        color: Theme.of(context).colorScheme.primary,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Html(
-                                  data: HtmlUnescape()
-                                      .convert(_conversation!.messages[index].htmlContent),
-                                  style: {
-                                    'body': Style(margin: Margins.all(0), padding: EdgeInsets.zero),
-                                    'blockquote': Style(
-                                      border: Border(
-                                          left: BorderSide(
-                                              color: Theme.of(context).colorScheme.secondary,
-                                              width: 2)),
-                                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                      margin: Margins.all(0),
-                                      fontStyle: FontStyle.italic,
+                                    ],
+                                  ),
+                                  Html(
+                                    data: HtmlUnescape()
+                                        .convert(_conversation!.messages[index].htmlContent),
+                                    style: {
+                                      'body':
+                                          Style(margin: Margins.all(0), padding: EdgeInsets.zero),
+                                      'blockquote': Style(
+                                        border: Border(
+                                            left: BorderSide(
+                                                color: Theme.of(context).colorScheme.secondary,
+                                                width: 2)),
+                                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                        margin: Margins.all(0),
+                                        fontStyle: FontStyle.italic,
+                                      )
+                                    },
+                                    onLinkTap: (url, context, map, element) {
+                                      launchUrl(Uri.parse(url!),
+                                          mode: LaunchMode.externalApplication);
+                                    },
+                                  ),
+                                  if (_conversation!.messages[index].attachments.isNotEmpty)
+                                    AttachmentsWidget(
+                                      attachments: _conversation!.messages[index].attachments,
+                                      elevation: 3,
                                     )
-                                  },
-                                  onLinkTap: (url, context, map, element) {
-                                    launchUrl(Uri.parse(url!),
-                                        mode: LaunchMode.externalApplication);
-                                  },
-                                ),
-                                if (_conversation!.messages[index].attachments.isNotEmpty)
-                                  AttachmentsWidget(
-                                    attachments: _conversation!.messages[index].attachments,
-                                    elevation: 3,
-                                  )
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );

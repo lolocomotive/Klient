@@ -168,21 +168,19 @@ class Conversation {
   }
 
   static Future<Conversation?> byID(int id) async {
+    final stopwatch = Stopwatch()..start();
     try {
+      List<Message> messages = [];
+      Message? message;
       final results = (await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
-          Conversations.ID as ConversationID,
           Messages.ID as MessageID,
           MessageAttachments.ID AS MessageAttachmentID,
           Messages.ParentID as MessageParentID,
           MessageAttachments.ParentID as MessageAttachmentParentID,
-          * FROM Conversations
-          LEFT JOIN Messages ON Conversations.ID = Messages.ParentID
+          * FROM Messages
           LEFT JOIN MessageAttachments ON Messages.ID = MessageAttachments.ParentID
-          WHERE Conversations.ID = $id 
-          ORDER BY Messages.DateSent;'''
-          'Conversations'));
-      List<Message> messages = [];
-      Message? message;
+          WHERE Messages.ParentID = $id 
+          ORDER BY Messages.DateSent;'''));
       for (final result in results) {
         if (message == null || result['MessageID'] != message.id) {
           message = Message.parse(result);
@@ -193,21 +191,23 @@ class Conversation {
         messages.add(message);
       }
 
-      final result = results[0];
+      final conversation =
+          (await (await DatabaseProvider.getDB()).query('Conversations', where: 'ID = $id'))[0];
+      print('${stopwatch.elapsedMilliseconds}');
       return Conversation(
-        result['ConversationID'] as int,
-        result['Subject'] as String,
-        result['Preview'] as String,
-        result['HasAttachment'] as int == 1,
-        DateTime.fromMillisecondsSinceEpoch((result['LastDate'] as int)),
+        conversation['ID'] as int,
+        conversation['Subject'] as String,
+        conversation['Preview'] as String,
+        conversation['HasAttachment'] as int == 1,
+        DateTime.fromMillisecondsSinceEpoch((conversation['LastDate'] as int)),
         messages,
-        result['Read'] as int == 1,
-        result['NotificationShown'] as int == 1,
-        result['LastAuthor'] as String,
-        result['FirstAuthor'] as String,
-        result['CanReply'] as int == 1,
+        conversation['Read'] as int == 1,
+        conversation['NotificationShown'] as int == 1,
+        conversation['LastAuthor'] as String,
+        conversation['FirstAuthor'] as String,
+        conversation['CanReply'] as int == 1,
       );
-    } on TypeError catch (_) {
+    } on TypeError {
       //Null check used
       return null;
     }

@@ -40,8 +40,15 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
   late AnimationController _controller;
 
   @override
+  void dispose() {
+    _controller.dispose();
+    _scaleAnimation.dispose();
+    _fadeAnimation.dispose();
+    super.dispose();
+  }
+
+  @override
   void initState() {
-    super.initState();
     _controller = AnimationController(
       vsync: this,
       duration: widget.duration,
@@ -55,20 +62,20 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
       parent: _controller,
       curve: Curves.easeIn,
     );
+    super.initState();
   }
 
   @override
   Widget build(BuildContext context) {
     _controller.reset();
     if (widget.delay == Duration.zero) {
-      _controller.forward();
+      _controller.forward(from: 0.0);
     } else {
       Future.delayed(widget.delay).then((value) {
-        _controller.forward();
+        _controller.forward(from: 0.0);
       });
     }
     if (widget.duration == Duration.zero) {
-      print('Dureation 0');
       return widget.child;
     }
     return ScaleTransition(

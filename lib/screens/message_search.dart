@@ -56,7 +56,7 @@ class MessagesSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return const Center(child: CircularProgressIndicator());
+    return buildSuggestions(context);
   }
 
   @override
