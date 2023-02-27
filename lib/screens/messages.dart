@@ -81,8 +81,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   refresh() async {
+    Client.getClient().clear();
     await Downloader.fetchMessageData();
-    await reloadFromDB();
+    reloadFromDB();
   }
 
   delayTransitionDone() {

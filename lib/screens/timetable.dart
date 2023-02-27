@@ -20,6 +20,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
@@ -110,6 +111,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
       body: Scrollbar(
         child: RefreshIndicator(
           onRefresh: () async {
+            Client.getClient().clear();
             await Downloader.fetchTimetable();
             setState(() {});
           },
