@@ -22,6 +22,7 @@ import 'package:kosmos_client/api/conversation.dart';
 import 'package:kosmos_client/screens/conversation.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/widgets/message_card.dart';
+import 'package:morpheus/morpheus.dart';
 
 class MessagesSearchDelegate extends SearchDelegate {
   static MessageSearchResultsState? messageSearchSuggestionState;
@@ -111,8 +112,10 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
               ))
             : ListView.separated(
                 itemBuilder: (context, index) {
+                  final parentKey = GlobalKey();
                   return InkWell(
                       child: Padding(
+                        key: parentKey,
                         padding: const EdgeInsets.all(8.0),
                         child: MessageCard(
                           _conversations![index],
@@ -120,12 +123,14 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                       ),
                       onTap: () {
                         Navigator.of(context).push(
-                          MaterialPageRoute(
+                          MorpheusPageRoute(
+                            transitionToChild: true,
                             builder: (_) => ConversationPage(
                               onDelete: deleteConversation,
                               id: _conversations![index].id,
                               subject: _conversations![index].subject,
                             ),
+                            parentKey: parentKey,
                           ),
                         );
                       });
@@ -133,6 +138,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                 separatorBuilder: (context, index) {
                   return const Divider();
                 },
-                itemCount: _conversations!.length);
+                itemCount: _conversations!.length,
+              );
   }
 }

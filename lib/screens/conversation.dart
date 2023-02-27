@@ -89,9 +89,6 @@ class _ConversationPageState extends State<ConversationPage> {
                     SliverAppBar(
                       actions: [
                         IconButton(
-                            onPressed: delayTransitionDone,
-                            icon: const Icon(Icons.replay_outlined)),
-                        IconButton(
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();

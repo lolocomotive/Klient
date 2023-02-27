@@ -299,10 +299,11 @@ packages:
   morpheus:
     dependency: "direct main"
     description:
-      name: morpheus
-      sha256: "34f565437edd8a59ad72cd08f54ed98191596651512ac7a7ace1b59904f0eb9d"
-      url: "https://pub.dev"
-    source: hosted
+      path: "."
+      ref: "587d07abc9b3da6612147fb5a4335e09567cc1e7"
+      resolved-ref: "587d07abc9b3da6612147fb5a4335e09567cc1e7"
+      url: "https://github.com/lolocomotive/morpheus"
+    source: git
     version: "1.2.3"
   numerus:
     dependency: transitive

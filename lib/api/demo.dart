@@ -33,9 +33,10 @@ generate() async {
   List<Map<String, Object?>> exerciseAttachments = [];
 
   const articleCount = 5;
-  const conversationCount = 20;
+  const conversationCount = 200;
   const gradeCount = 4;
   const dayCount = 14;
+  const demoUID = 1234;
 
   final people = [
     'GRANDE Ariana',
@@ -144,7 +145,7 @@ generate() async {
       'Of': 20,
       'Date': DateTime.now().add(Duration(hours: random.nextInt(range))).millisecondsSinceEpoch,
       'UniqueID': random.nextInt(1 << 32),
-      'StudentUID': 'DEMO',
+      'StudentUID': demoUID,
     });
   }
   for (var i = 0; i < articleCount; i++) {
@@ -158,7 +159,7 @@ generate() async {
         'PublishingDate': DateTime.now().add(Duration(days: -offset)).millisecondsSinceEpoch,
         'HTMLContent': articleContents[random.nextInt(articleContents.length)],
         'URL': 'https://le-blog-de-sylvie.web.app/',
-        'StudentUID': 'DEMO',
+        'StudentUID': demoUID,
       },
     );
     for (var j = 0; j < random.nextInt(4); j++) {
@@ -247,7 +248,7 @@ generate() async {
         'IsCanceled': canceled,
         'ShouldNotify': 0,
         'ModificationMessage': canceled == 1 ? 'Cours annulé' : 'Cours modifié',
-        'StudentUID': 'DEMO',
+        'StudentUID': demoUID,
       });
       // Lesson content
       for (var j = 0; j < random.nextInt(3) * random.nextInt(2); j++) {
@@ -260,7 +261,7 @@ generate() async {
           'ParentLesson': lid,
           'HTMLContent': exerciceContents[random.nextInt(exerciceContents.length)],
           'Done': 0,
-          'StudentUID': 'DEMO',
+          'StudentUID': demoUID,
         });
       }
       // Work for this lesson
@@ -278,7 +279,7 @@ generate() async {
           'LessonFor': lid,
           'HTMLContent': exerciceContents[random.nextInt(exerciceContents.length)],
           'Done': 0,
-          'StudentUID': 'DEMO',
+          'StudentUID': demoUID,
         });
       }
       day = end;

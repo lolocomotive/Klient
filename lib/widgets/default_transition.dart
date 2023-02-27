@@ -38,9 +38,11 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
   late CurvedAnimation _scaleAnimation;
   late CurvedAnimation _fadeAnimation;
   late AnimationController _controller;
+  bool disposed = false;
 
   @override
   void dispose() {
+    disposed = true;
     _controller.dispose();
     _scaleAnimation.dispose();
     _fadeAnimation.dispose();
@@ -72,7 +74,9 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
       _controller.forward(from: 0.0);
     } else {
       Future.delayed(widget.delay).then((value) {
-        _controller.forward(from: 0.0);
+        if (!disposed) {
+          _controller.forward(from: 0.0);
+        }
       });
     }
     if (widget.duration == Duration.zero) {
