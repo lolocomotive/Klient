@@ -162,7 +162,6 @@ class ConfigProvider {
                     : null;
             break;
           case 'notifications.messages':
-            print(value);
             FlutterLocalNotificationsPlugin()
                 .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
                 .areNotificationsEnabled()

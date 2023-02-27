@@ -168,7 +168,6 @@ class Conversation {
   }
 
   static Future<Conversation?> byID(int id) async {
-    final stopwatch = Stopwatch()..start();
     try {
       List<Message> messages = [];
       Message? message;
@@ -193,7 +192,6 @@ class Conversation {
 
       final conversation =
           (await (await DatabaseProvider.getDB()).query('Conversations', where: 'ID = $id'))[0];
-      print('${stopwatch.elapsedMilliseconds}');
       return Conversation(
         conversation['ID'] as int,
         conversation['Subject'] as String,
