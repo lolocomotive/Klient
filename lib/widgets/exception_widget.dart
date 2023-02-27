@@ -52,7 +52,10 @@ class ExceptionWidget extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Text(message),
+              Text(
+                message,
+                style: TextStyle(color: Theme.of(context).colorScheme.onSurface),
+              ),
               if (hint != null)
                 Text(
                   hint,

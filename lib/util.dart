@@ -37,12 +37,13 @@ class Util {
     if (KosmosApp.currentLifecycleState == AppLifecycleState.resumed) {
       KosmosApp.messengerKey.currentState?.showSnackBar(
         SnackBar(
+            backgroundColor: KosmosApp.theme!.colorScheme.surface,
             content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ExceptionWidget(e: e, st: st),
-          ],
-        )),
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                ExceptionWidget(e: e, st: st),
+              ],
+            )),
       );
     }
   }

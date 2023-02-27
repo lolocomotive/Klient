@@ -73,8 +73,17 @@ class LoginState extends State<Login> {
         Client.getClient().clear();
         widget.onLogin();
       } on BadCredentialsException catch (_) {
-        KosmosApp.messengerKey.currentState!
-            .showSnackBar(const SnackBar(content: Text('Mauvais identifiant/mot de passe')));
+        KosmosApp.messengerKey.currentState!.showSnackBar(
+          SnackBar(
+            backgroundColor: KosmosApp.theme!.colorScheme.surface,
+            content: Text(
+              'Mauvais identifiant/code d\'activation',
+              style: TextStyle(
+                color: KosmosApp.theme!.colorScheme.onSurface,
+              ),
+            ),
+          ),
+        );
       } on Exception catch (e, st) {
         Util.onException(e, st);
       } finally {
