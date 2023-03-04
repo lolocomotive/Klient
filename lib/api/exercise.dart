@@ -88,7 +88,7 @@ class Exercise {
   /// Construct an [Exercise] from the result of a database query
   static Future<Exercise> parse(Map<String, Object?> result) async {
     return Exercise(
-        result['ID'] as int? ?? result['ExerciseID'] as int,
+        result['ExerciseID'] as int? ?? result['ID'] as int,
         result['ParentLesson'] as int?,
         result['Type'] as String == 'Cours' ? ExerciseType.lessonContent : ExerciseType.exercise,
         DateTime.fromMillisecondsSinceEpoch(result['ParentDate'] as int),
@@ -96,8 +96,8 @@ class Exercise {
         result['HTMLContent'] as String,
         result['Done'] == 1,
         [],
-        result['Subject'] as String? ??
-            result['ExerciseSubject'] as String? ??
+        result['ExerciseSubject'] as String? ??
+            result['Subject'] as String? ??
             //This should never be called, it just exists as a backup solution in case the migration goes wrong.
             (await Lesson.byID(result['ParentLesson'] as int? ?? result['LessonFor'] as int))
                 ?.title ??

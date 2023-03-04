@@ -50,28 +50,6 @@ _checkNotifications() async {
   NotificationsProvider.notificationCallback(details.notificationResponse);
 }
 
-class PopupMenuItemWithIcon extends PopupMenuItem {
-  PopupMenuItemWithIcon(String label, IconData icon, BuildContext context, {Key? key})
-      : super(
-          key: key,
-          value: label,
-          child: Row(
-            children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(0, 0, 8, 0),
-                child: Icon(
-                  icon,
-                  color: KosmosApp.theme!.colorScheme.brightness == Brightness.dark
-                      ? Colors.white54
-                      : Colors.black54,
-                ),
-              ),
-              Text(label),
-            ],
-          ),
-        );
-}
-
 class KosmosApp extends StatefulWidget {
   static ThemeData? theme;
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();

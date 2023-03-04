@@ -368,17 +368,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 }
 
-class SideConversationView extends StatelessWidget {
-  const SideConversationView({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(child: Text('Cliquer sur un message pour l\'afficher ici'));
-  }
-}
-
 deleteConversation(Conversation conv) async {
   final db = await DatabaseProvider.getDB();
 

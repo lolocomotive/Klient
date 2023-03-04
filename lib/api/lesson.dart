@@ -65,12 +65,12 @@ class Lesson {
 
   static Lesson _parse(result, bool headless) {
     return Lesson(
-      result['ID'] as int? ?? result['LessonID'] as int,
+      result['LessonID'] as int? ?? result['ID'] as int,
       DateTime.fromMillisecondsSinceEpoch((result['LessonDate'] as int)),
       result['StartTime'] as String,
       result['EndTime'] as String,
       result['Room'] as String,
-      result['Subject'] as String? ?? result['LessonSubject'],
+      result['LessonSubject'] as String? ?? result['Subject'],
       [],
       result['IsModified'] as int == 1,
       result['IsCanceled'] as int == 1,
@@ -105,11 +105,11 @@ class Lesson {
       if (result['ExerciseID'] != null) {
         if (exercise == null || result['ExerciseID'] != exercise.uid) {
           exercise = await Exercise.parse(result);
+          lesson.exercises.add(exercise);
         }
         if (result['ExerciseAttachmentID'] != null) {
           exercise.attachments.add(ExerciseAttachment.parse(result));
         }
-        lesson.exercises.add(exercise);
       }
     }
 

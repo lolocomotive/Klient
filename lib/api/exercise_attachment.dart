@@ -35,7 +35,7 @@ class ExerciseAttachment extends Attachment {
 
   static ExerciseAttachment parse(Map<String, dynamic> result) {
     return ExerciseAttachment(
-      result['ID'] as int? ?? result['ExerciseAttachmentID'] as int,
+      result['ExerciseAttachmentID'] as int? ?? result['ID'] as int,
       result['ParentID'],
       result['URL'] as String,
       result['Name'] as String,

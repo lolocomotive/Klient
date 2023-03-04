@@ -18,7 +18,6 @@
  */
 
 import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/database_provider.dart';
 
 import 'message_attachment.dart';
 
@@ -36,31 +35,10 @@ class Message {
 
   Message(this.id, this.parentID, this.htmlContent, this.author, this.date, this.attachments);
 
-  /// Get the messages of a specific [Conversation]
-  @Deprecated('Use joins instead')
-  static Future<List<Message>> fromConversationID(int conversationID) async {
-    final List<Message> messages = [];
-    final results = await (await DatabaseProvider.getDB())
-        .query('Messages', where: 'ParentID = $conversationID', orderBy: 'DateSent ASC');
-    for (final result in results) {
-      messages.add(
-        Message(
-          result['ID'] as int,
-          conversationID,
-          result['HTMLContent'] as String,
-          result['Author'] as String,
-          DateTime.fromMillisecondsSinceEpoch(result['DateSent'] as int),
-          await MessageAttachment.fromMessageID(result['ID'] as int),
-        ),
-      );
-    }
-    return messages;
-  }
-
   static Message parse(Map<String, dynamic> result) {
     return Message(
-      result['ID'] as int? ?? result['MessageID'] as int,
-      result['ParentID'] as int? ?? result['MessageParentID'] as int,
+      result['MessageID'] as int? ?? result['ID'] as int,
+      result['MessageParentID'] as int? ?? result['ParentID'] as int,
       result['HTMLContent'] as String,
       result['Author'] as String,
       DateTime.fromMillisecondsSinceEpoch(result['DateSent'] as int),

@@ -173,8 +173,8 @@ class Conversation {
       Message? message;
       final results = (await (await DatabaseProvider.getDB()).rawQuery('''SELECT 
           Messages.ID as MessageID,
-          MessageAttachments.ID AS MessageAttachmentID,
           Messages.ParentID as MessageParentID,
+          MessageAttachments.ID as MessageAttachmentID,
           MessageAttachments.ParentID as MessageAttachmentParentID,
           * FROM Messages
           LEFT JOIN MessageAttachments ON Messages.ID = MessageAttachments.ParentID
@@ -183,11 +183,11 @@ class Conversation {
       for (final result in results) {
         if (message == null || result['MessageID'] != message.id) {
           message = Message.parse(result);
+          messages.add(message);
         }
         if (result['MessageAttachmentID'] != null) {
           message.attachments.add(MessageAttachment.parse(result));
         }
-        messages.add(message);
       }
 
       final conversation =

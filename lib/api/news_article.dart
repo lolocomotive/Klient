@@ -46,7 +46,7 @@ class NewsArticle {
           AND (NewsAttachments.StudentUID = ${Client.currentlySelected!.uid} OR NewsAttachments.StudentUID IS Null);''');
     NewsArticle? article;
     for (final result in results) {
-      if (article == null || result['ArticleUID'] != article.uid) {
+      if (article == null || result['NewsArticleUID'] != article.uid) {
         article = NewsArticle(
           result['NewsArticleUID'] as String,
           result['Type'] as String,
