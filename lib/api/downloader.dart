@@ -22,6 +22,7 @@ import 'dart:math';
 
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/exercise.dart';
+import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/database_provider.dart';
@@ -298,39 +299,50 @@ class Downloader {
         //The other one doesn't work when only one student is associated to the account
         action = Action.getNewsArticlesEtab;
       }
-      final result =
-          await Client.getClient().request(action, params: [Client.currentlySelected!.uid]);
+      //Doing network and db request separately
+      final resultFuture =
+          Client.getClient().request(action, params: [Client.currentlySelected!.uid]);
+      final alreadyFuture = NewsArticle.fetchAll();
+
+      final result = await resultFuture;
+      final already = await alreadyFuture;
+
       for (final newsArticle in result['articles']) {
-        Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
-          await db.insert(
-            'NewsArticles',
-            {
-              'UID': newsArticle['uid'],
-              'Type': articleDetails['type'],
-              'Author': articleDetails['auteur'],
-              'Title': articleDetails['titre'],
-              'PublishingDate': articleDetails['date'],
-              'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
-              'URL': articleDetails['url'],
-              'StudentUID': Client.currentlySelected!.uid,
-            },
-            conflictAlgorithm: ConflictAlgorithm.replace,
-          );
-          for (final attachment in articleDetails['pjs'] ?? []) {
-            // Prevent duplicates since the given attachment UID is null we have to use
-            // auto-incremented IDs and delete all each time we update
-            await db.delete(
-              'NewsAttachments',
-              where: 'ParentUID = ?',
-              whereArgs: [newsArticle['uid']],
+        //Skip redownload if date is the same. Saves time
+        if (newsArticle['date'] ==
+            already.firstWhere((article) => article.uid == newsArticle['uid']).date) {
+          print('Adding article ${newsArticle['titre']}');
+          Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
+            await db.insert(
+              'NewsArticles',
+              {
+                'UID': newsArticle['uid'],
+                'Type': articleDetails['type'],
+                'Author': articleDetails['auteur'],
+                'Title': articleDetails['titre'],
+                'PublishingDate': articleDetails['date'],
+                'HTMLContent': _cleanupHTML(articleDetails['codeHTML']),
+                'URL': articleDetails['url'],
+                'StudentUID': Client.currentlySelected!.uid,
+              },
+              conflictAlgorithm: ConflictAlgorithm.replace,
             );
-            await db.insert('NewsAttachments', {
-              'Name': attachment['name'],
-              'ParentUID': newsArticle['uid'],
-              'StudentUID': Client.currentlySelected!.uid,
-            });
-          }
-        }, params: [newsArticle['uid']]);
+            for (final attachment in articleDetails['pjs'] ?? []) {
+              // Prevent duplicates since the given attachment UID is null we have to use
+              // auto-incremented IDs and delete all each time we update
+              await db.delete(
+                'NewsAttachments',
+                where: 'ParentUID = ?',
+                whereArgs: [newsArticle['uid']],
+              );
+              await db.insert('NewsAttachments', {
+                'Name': attachment['name'],
+                'ParentUID': newsArticle['uid'],
+                'StudentUID': Client.currentlySelected!.uid,
+              });
+            }
+          }, params: [newsArticle['uid']]);
+        }
       }
       await Client.getClient().process();
     } on Exception catch (e, st) {
