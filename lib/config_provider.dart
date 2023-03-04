@@ -130,9 +130,7 @@ class ConfigProvider {
       compact = false;
 
       data.forEach((key, value) {
-        if (key.startsWith('color.')) {
-          ColorProvider.addColor(key.substring(6), int.parse(value));
-        }
+        if (kDebugMode) print('[Config] $key : $value');
         switch (key) {
           case 'apiurl':
             Client.apiurl = value;
@@ -169,6 +167,8 @@ class ConfigProvider {
               notifMsgEnabled = value == 'true' && enabled == true;
             });
             break;
+          case 'lessonColors':
+            ColorProvider.init(value);
         }
       });
     } on PlatformException catch (_) {

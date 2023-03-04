@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/config_provider.dart';
 
@@ -39,28 +41,43 @@ class ColorProvider {
     Colors.lime,
     Colors.purple,
   ];
-  static final Map<String, MaterialColor> _lessonColors = {};
+  static Map<String, MaterialColor> _lessonColors = {};
+  static bool canSave = true;
 
   static MaterialColor getColor(String subject) {
-    MaterialColor? color = _lessonColors[subject];
+    String sanitized = subject.replaceAll(RegExp(r'[^a-zA-Z0-9]+'), '_');
+    sanitized = sanitized.replaceAll(RegExp(r'^_+|_+$'), '');
+    if (sanitized.isEmpty) {
+      sanitized = 'unnamed';
+    }
+    sanitized = '${sanitized.toLowerCase()}cs';
+    MaterialColor? color = _lessonColors[sanitized];
     if (color == null) {
       color = colors[_lessonColors.length % colors.length];
-      _lessonColors[subject] = color;
-      save();
+      _lessonColors[sanitized] = color;
+      if (canSave) {
+        canSave = false;
+        //Save after a slight delay because this method is often called multiple times in a row
+        Future.delayed(const Duration(milliseconds: 200)).then((_) {
+          canSave = true;
+          save();
+        });
+      }
     }
     return color;
   }
 
   static save() async {
-    _lessonColors.forEach((subject, color) {
-      ConfigProvider.getStorage()
-          .write(key: 'colors.$subject', value: colors.indexOf(color).toString());
-    });
+    final stopwatch = Stopwatch()..start();
+    await ConfigProvider.getStorage().write(
+      key: 'lessonColors',
+      value: jsonEncode(_lessonColors.map((key, value) => MapEntry(key, colors.indexOf(value)))),
+    );
+    print('${stopwatch.elapsedMilliseconds}ms');
   }
 
-  ///Used when loading from shared preferences, therefore save is not called here.
-  ///do not use to add a color since it will not be saved. Use getColor.
-  static addColor(String subject, int colorID) {
-    _lessonColors[subject] = colors[colorID];
+  static init(String json) {
+    _lessonColors = (jsonDecode(json) as Map<String, dynamic>)
+        .map((key, value) => MapEntry(key, colors[value]));
   }
 }

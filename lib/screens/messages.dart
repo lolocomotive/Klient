@@ -87,6 +87,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   delayTransitionDone() {
+    if (!mounted) return;
     setState(() {
       _transitionDone = false;
     });
