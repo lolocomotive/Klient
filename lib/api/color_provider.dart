@@ -68,12 +68,10 @@ class ColorProvider {
   }
 
   static save() async {
-    final stopwatch = Stopwatch()..start();
     await ConfigProvider.getStorage().write(
       key: 'lessonColors',
       value: jsonEncode(_lessonColors.map((key, value) => MapEntry(key, colors.indexOf(value)))),
     );
-    print('${stopwatch.elapsedMilliseconds}ms');
   }
 
   static init(String json) {

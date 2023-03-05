@@ -305,11 +305,19 @@ class Downloader {
 
       final result = await resultFuture;
       final already = await alreadyFuture;
+      int? firstWhere;
 
       for (final newsArticle in result['articles']) {
         //Skip redownload if date is the same. Saves time
-        if (newsArticle['date'] ==
-            already.firstWhere((article) => article.uid == newsArticle['uid']).date) {
+        try {
+          firstWhere = already
+              .firstWhere((article) => article.uid == newsArticle['uid'])
+              .date
+              .millisecondsSinceEpoch;
+        } catch (_) {
+          firstWhere = null;
+        }
+        if (newsArticle['date'] != firstWhere) {
           print('Adding article ${newsArticle['titre']}');
           Client.getClient().addRequest(Action.getArticleDetails, (articleDetails) async {
             await db.insert(
