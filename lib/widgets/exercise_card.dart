@@ -277,7 +277,9 @@ class _CardContentsState extends State<_CardContents> {
                                         body: '{"flagRealise":${!widget.widget._exercise.done}}',
                                         params: [
                                           '0',
-                                          widget.widget._exercise.parentLesson.toString(),
+                                          (widget.widget._exercise.parentLesson ??
+                                                  widget.widget._exercise.lessonFor)
+                                              .toString(),
                                           widget.widget._exercise.uid.toString()
                                         ]);
                                     await (await DatabaseProvider.getDB()).update(
