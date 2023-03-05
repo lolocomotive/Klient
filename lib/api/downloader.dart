@@ -267,11 +267,10 @@ class Downloader {
               'GradeString': value == -1 ? grade['note'] : null,
               'Of': (grade['bareme'] as int).toDouble(),
               'Date': grade['date'] as int,
-              'UniqueID': (grade['date'] as int).toString() +
-                  (grade['matiere'] as String) +
-                  (grade['note'] as String) +
-                  (grade['bareme'] as int).toString(),
-              'StudentUID': Client.currentlySelected!.uid
+              'StudentUID': Client.currentlySelected!.uid,
+
+              // Useless but kept to avoid migration.
+              'UniqueID': Random().nextInt(1 << 32).toString(),
             },
             conflictAlgorithm: ConflictAlgorithm.replace,
           );
