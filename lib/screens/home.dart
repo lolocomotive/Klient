@@ -74,9 +74,9 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           onRefresh: (() async {
             Client.getClient().clear();
             await Future.wait(<Future>[
-              Downloader.fetchGradesData().then((_) => _gKey.currentState!.setState(() {})),
-              Downloader.fetchHomework().then((_) => _hKey.currentState!.setState(() {})),
-              Downloader.fetchNewsData().then((_) => _aKey.currentState!.setState(() {})),
+              Downloader.fetchGradesData().then((_) => _gKey.currentState?.setState(() {})),
+              Downloader.fetchHomework().then((_) => _hKey.currentState?.setState(() {})),
+              Downloader.fetchNewsData().then((_) => _aKey.currentState?.setState(() {})),
             ]);
           }),
           child: SingleChildScrollView(
