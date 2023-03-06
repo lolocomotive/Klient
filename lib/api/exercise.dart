@@ -117,8 +117,8 @@ class Exercise {
           ExerciseAttachments.ID AS ExerciseAttachmentID,
           * FROM Exercises 
           LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
-          WHERE Exercises.StudentUID = ${Client.currentlySelected!.uid}
-          AND (ExerciseAttachments.StudentUID = ${Client.currentlySelected!.uid} OR ExerciseAttachments.StudentUID IS Null);''');
+          WHERE Exercises.StudentUID = '${Client.currentlySelected!.uid}'
+          AND (ExerciseAttachments.StudentUID = '${Client.currentlySelected!.uid}' OR ExerciseAttachments.StudentUID IS Null);''');
     Exercise? exercise;
     for (final result in results) {
       if (exercise == null || result['ExerciseID'] != exercise.uid) {
