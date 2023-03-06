@@ -91,9 +91,9 @@ class Lesson {
           * FROM Lessons 
           LEFT JOIN Exercises ON Lessons.ID = Exercises.ParentLesson OR Lessons.ID = Exercises.LessonFor
           LEFT JOIN ExerciseAttachments ON Exercises.ID = ExerciseAttachments.ParentID
-          WHERE Lessons.StudentUID = ${Client.currentlySelected!.uid} 
-          AND (Exercises.StudentUID = ${Client.currentlySelected!.uid} OR  Exercises.StudentUID IS Null)
-          AND (ExerciseAttachments.StudentUID = ${Client.currentlySelected!.uid} OR ExerciseAttachments.StudentUID IS Null)
+          WHERE Lessons.StudentUID = '${Client.currentlySelected!.uid}' 
+          AND (Exercises.StudentUID = '${Client.currentlySelected!.uid}' OR  Exercises.StudentUID IS Null)
+          AND (ExerciseAttachments.StudentUID = '${Client.currentlySelected!.uid}' OR ExerciseAttachments.StudentUID IS Null)
           ORDER BY LessonDate;''');
     Lesson? lesson;
     Exercise? exercise;

@@ -42,8 +42,8 @@ class NewsArticle {
           NewsAttachments.ID AS NewsAttachmentID,
           * FROM NewsArticles 
           LEFT JOIN NewsAttachments ON NewsArticles.UID = NewsAttachments.ParentUID
-          Where NewsArticles.StudentUID = ${Client.currentlySelected!.uid}
-          AND (NewsAttachments.StudentUID = ${Client.currentlySelected!.uid} OR NewsAttachments.StudentUID IS Null);''');
+          Where NewsArticles.StudentUID = '${Client.currentlySelected!.uid}'
+          AND (NewsAttachments.StudentUID = '${Client.currentlySelected!.uid}' OR NewsAttachments.StudentUID IS Null);''');
     NewsArticle? article;
     for (final result in results) {
       if (article == null || result['NewsArticleUID'] != article.uid) {
