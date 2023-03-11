@@ -136,12 +136,9 @@ class DatabaseProvider {
     print('Done upgrading');
   }
 
-  static Future<Database> openDB(String dbPath, String password) async {
-    if (Platform.isLinux || Platform.isWindows) {
-      final db = await databaseFactoryFfi.openDatabase(dbPath);
-      final batch = db.batch();
-      print('Opening databse with FFI');
-      batch.execute('''
+  static Future<void> createTables(Database db) async {
+    final batch = db.batch();
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS NewsArticles(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           UID TEXT UNIQUE NOT NULL,
@@ -153,7 +150,7 @@ class DatabaseProvider {
           StudentUID TEXT,
           URL TEXT NOT NULL
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS NewsAttachments(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           ParentUID TEXT NOT NULL,
@@ -161,7 +158,7 @@ class DatabaseProvider {
           StudentUID TEXT,
           foreign KEY(parentUID) REFERENCES NewsArticles(UID)
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Conversations(
           ID INTEGER PRIMARY KEY NOT NULL,
           Subject TEXT NOT NULL,
@@ -175,7 +172,7 @@ class DatabaseProvider {
           FirstAuthor STRING NOT NULL,
           FullMessageContents STRING NOT NULL
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Messages(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           ParentID INTEGER NOT NULL,
@@ -184,7 +181,7 @@ class DatabaseProvider {
           DateSent INT NOT NULL,
           FOREIGN KEY (ParentID) REFERENCES Conversations(ID)
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS MessageAttachments(
           ID INTEGER PRIMARY KEY NOT NULL,
           ParentID INTEGER NOT NULL,
@@ -192,7 +189,7 @@ class DatabaseProvider {
           Name TEXT NOT NULL,
           FOREIGN KEY (ParentID) references Messages(ID)
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Grades(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           Subject TEXT NOT NULL,
@@ -203,7 +200,7 @@ class DatabaseProvider {
           StudentUID TEXT,
           UniqueID TEXT NOT NULL UNIQUE
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Lessons(
           ID INTEGER PRIMARY KEY NOT NULL,
           LessonDate INTEGER NOT NULL,
@@ -218,7 +215,7 @@ class DatabaseProvider {
           ModificationMessage TEXT,
           StudentUID TEXT
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Exercises(
           ID INTEGER PRIMARY KEY NOT NULL,
           ParentLesson INTEGER,
@@ -230,10 +227,11 @@ class DatabaseProvider {
           HTMLContent TEXT NOT NULL,
           Done BOOLEAN NOT NULL,
           StudentUID TEXT,
+          Subject TEXT,
           FOREIGN KEY (ParentLesson) REFERENCES Lessons(ID),
           FOREIGN KEY (LessonFor) REFERENCES Lessons(ID)
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS ExerciseAttachments(
           ID INTEGER PRIMARY KEY NOT NULL,
           ParentID INTEGER NOT NULL,
@@ -242,14 +240,22 @@ class DatabaseProvider {
           StudentUID TEXT,
           FOREIGN KEY (ParentID) references Exercises(ID)
         )''');
-      batch.execute('''
+    batch.execute('''
         CREATE TABLE IF NOT EXISTS Students(
           ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
           UID TEXT UNIQUE,
           Name TEXT NOT NULL,
           Permissions TEXT NOT NULL
         )''');
-      await batch.commit();
+    await batch.commit();
+    print('Tables created');
+  }
+
+  static Future<Database> openDB(String dbPath, String password) async {
+    if (Platform.isLinux || Platform.isWindows) {
+      final db = await databaseFactoryFfi.openDatabase(dbPath);
+      print('Opening databse with FFI');
+      await createTables(db);
       return db;
     }
     return openDatabase(
@@ -275,118 +281,7 @@ class DatabaseProvider {
           await migrate0to2(db);
           return;
         }
-        final batch = db.batch();
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS NewsArticles(
-          ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          UID TEXT UNIQUE NOT NULL,
-          Type TEXT NOT NULL,
-          Author TEXT NOT NULL,
-          Title TEXT NOT NULL,
-          PublishingDate INTEGER NOT NULL,
-          HTMLContent TEXT NOT NULL,
-          StudentUID TEXT,
-          URL TEXT NOT NULL
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS NewsAttachments(
-          ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          ParentUID TEXT NOT NULL,
-          Name TEXT NOT NULL,
-          StudentUID TEXT,
-          foreign KEY(parentUID) REFERENCES NewsArticles(UID)
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Conversations(
-          ID INTEGER PRIMARY KEY NOT NULL,
-          Subject TEXT NOT NULL,
-          Preview TEXT NOT NULL,
-          HasAttachment BOOLEAN NOT NULL,
-          Read BOOLEAN NOT NULL,
-          CanReply BOOLEAN NOT NULL,
-          NotificationShown BOOLEAN NOT NULL,
-          LastDate INTEGER NOT NULL,
-          LastAuthor STRING NOT NULL,
-          FirstAuthor STRING NOT NULL,
-          FullMessageContents STRING NOT NULL
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Messages(
-          ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          ParentID INTEGER NOT NULL,
-          HTMLContent TEXT NOT NULL,
-          Author TEXT NOT NULL,
-          DateSent INT NOT NULL,
-          FOREIGN KEY (ParentID) REFERENCES Conversations(ID)
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS MessageAttachments(
-          ID INTEGER PRIMARY KEY NOT NULL,
-          ParentID INTEGER NOT NULL,
-          URL TEXT,
-          Name TEXT NOT NULL,
-          FOREIGN KEY (ParentID) references Messages(ID)
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Grades(
-          ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          Subject TEXT NOT NULL,
-          Grade REAL NOT NULL,
-          GradeString TEXT,
-          Of REAL NOT NULL,
-          Date INT NOT NULL,
-          StudentUID TEXT,
-          UniqueID TEXT NOT NULL UNIQUE
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Lessons(
-          ID INTEGER PRIMARY KEY NOT NULL,
-          LessonDate INTEGER NOT NULL,
-          StartTime TEXT NOT NULL,
-          EndTime TEXT NOT NULL,
-          Room TEXT NOT NULL,
-          Subject TEXT NOT NULL,
-          Title TEXT NOT NULL,
-          IsModified BOOLEAN NOT NULL,
-          IsCanceled INT NOT NULL,
-          ShouldNotify BOOLEAN NOT NULL,
-          ModificationMessage TEXT,
-          StudentUID TEXT
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Exercises(
-          ID INTEGER PRIMARY KEY NOT NULL,
-          ParentLesson INTEGER,
-          LessonFor INTEGER,
-          Type TEXT NOT NULL,
-          DateFor INTEGER,
-          ParentDate INTEGER NOT NULL,
-          Title TEXT NOT NULL,
-          HTMLContent TEXT NOT NULL,
-          Done BOOLEAN NOT NULL,
-          StudentUID TEXT,
-          Subject TEXT,
-          FOREIGN KEY (ParentLesson) REFERENCES Lessons(ID),
-          FOREIGN KEY (LessonFor) REFERENCES Lessons(ID)
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS ExerciseAttachments(
-          ID INTEGER PRIMARY KEY NOT NULL,
-          ParentID INTEGER NOT NULL,
-          URL TEXT,
-          Name TEXT NOT NULL,
-          StudentUID TEXT,
-          FOREIGN KEY (ParentID) references Exercises(ID)
-        )''');
-        batch.execute('''
-        CREATE TABLE IF NOT EXISTS Students(
-          ID INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-          UID TEXT UNIQUE,
-          Name TEXT NOT NULL,
-          Permissions TEXT NOT NULL
-        )''');
-        await batch.commit();
-        print('Tables created');
+        await createTables(db);
       },
     );
   }

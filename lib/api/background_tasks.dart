@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:html_unescape/html_unescape.dart';
@@ -55,10 +57,12 @@ void backgroundFetchHeadlessTask(HeadlessTask task) async {
 }
 
 registerTasks() {
+  if (Platform.isLinux) return;
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 }
 
 Future<void> initPlatformState() async {
+  if (Platform.isLinux) return;
   int status = await BackgroundFetch.configure(
       BackgroundFetchConfig(
         minimumFetchInterval: 15,
