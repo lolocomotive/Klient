@@ -45,6 +45,9 @@ class LessonPage extends StatelessWidget {
         child: ListView(
           children: [
             DefaultCard(
+              surfaceTintColor:
+                  Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+              shadowColor: Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
               child: Column(
                 children: [
                   Text(
@@ -62,10 +65,12 @@ class LessonPage extends StatelessWidget {
             MultiExerciseView(
               _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
               'Travail à faire pour cette séance',
+              _lesson.color,
             ),
             MultiExerciseView(
               _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
               'Contenu de la séance',
+              _lesson.color,
             ),
             MultiExerciseView(
               _lesson.exercises
@@ -76,6 +81,7 @@ class LessonPage extends StatelessWidget {
                       )
                   .toList(),
               'Travail donné lors de la séance',
+              _lesson.color,
               showDate: true,
             ),
           ],

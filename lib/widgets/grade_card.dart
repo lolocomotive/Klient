@@ -29,6 +29,7 @@ class GradeCard extends StatelessWidget {
   const GradeCard(this._grade, {Key? key, this.compact = true}) : super(key: key);
   @override
   Widget build(BuildContext context) {
+    final MaterialColor color = ColorProvider.getColor(_grade.subject);
     final titleRow = Row(
       mainAxisAlignment: compact ? MainAxisAlignment.start : MainAxisAlignment.spaceAround,
       children: [
@@ -51,6 +52,8 @@ class GradeCard extends StatelessWidget {
     );
     return Flexible(
       child: Card(
+          surfaceTintColor: Theme.of(context).brightness == Brightness.light ? color : null,
+          shadowColor: Theme.of(context).brightness == Brightness.light ? color : null,
           margin: const EdgeInsets.all(8.0),
           elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -59,8 +62,7 @@ class GradeCard extends StatelessWidget {
             decoration: compact
                 ? BoxDecoration(
                     border: Border(
-                      left: BorderSide(
-                          color: ColorProvider.getColor(_grade.subject).shade200, width: 6),
+                      left: BorderSide(color: color.shade200, width: 6),
                     ),
                   )
                 : null,

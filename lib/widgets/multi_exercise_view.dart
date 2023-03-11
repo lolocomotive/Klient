@@ -28,14 +28,17 @@ class MultiExerciseView extends StatelessWidget {
   final String _title;
   final bool showDate;
   final bool showSubject;
+  final Color color;
 
-  const MultiExerciseView(this._exercises, this._title,
+  const MultiExerciseView(this._exercises, this._title, this.color,
       {Key? key, this.showDate = false, this.showSubject = false})
       : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return DefaultCard(
+      surfaceTintColor: Theme.of(context).brightness == Brightness.light ? color : null,
+      shadowColor: Theme.of(context).brightness == Brightness.light ? color : null,
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
       child: Column(
         children: [
