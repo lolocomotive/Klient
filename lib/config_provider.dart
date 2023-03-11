@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/scheduler.dart';
@@ -85,6 +87,14 @@ class ConfigProvider {
 
   static setMessageNotifications(bool value, Function callback) {
     if (value == true) {
+      if (Platform.isLinux) {
+        notifMsgEnabled = true;
+        getStorage()
+            .write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
+        callback();
+        return;
+      }
+
       FlutterLocalNotificationsPlugin()
           .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
           .requestPermission()
@@ -160,6 +170,10 @@ class ConfigProvider {
                     : null;
             break;
           case 'notifications.messages':
+            if (Platform.isLinux) {
+              notifMsgEnabled = value == 'true';
+              break;
+            }
             FlutterLocalNotificationsPlugin()
                 .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
                 .areNotificationsEnabled()

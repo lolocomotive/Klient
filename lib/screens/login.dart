@@ -44,19 +44,35 @@ class LoginState extends State<Login> {
   bool _processing = false;
   LoginState();
 
+  _postLogin(Database db) async {
+    await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
+    _resetDb(db);
+    widget.onLogin();
+    return;
+  }
+
+  _resetDb(Database db) async {
+    await db.close();
+    await DatabaseProvider.deleteDb(db.path);
+    await DatabaseProvider.initDB();
+  }
+
   _login() async {
     // The demo mode is activated like that instead of with an obvious button because it would just uselessly clutter the UI otherwise
     final db = await DatabaseProvider.getDB();
     if (_unameController.text == '__DEMO') {
-      await ConfigProvider.getStorage().write(key: 'demoMode', value: 'true');
-      await db.close();
-      await deleteDatabase(db.path);
-      await DatabaseProvider.initDB();
+      await _resetDb(db);
       generate();
       ConfigProvider.demo = true;
       Client.demo();
       widget.onLogin();
       return;
+    }
+
+    if (_unameController.text.length == 125) {
+      //Set the token directly.
+      Client(_unameController.text);
+      await _postLogin(db);
     }
     ConfigProvider.demo = false;
     ConfigProvider.getStorage().write(key: 'demoMode', value: 'false');
@@ -66,12 +82,7 @@ class LoginState extends State<Login> {
       });
       try {
         await Client.login(_unameController.text, _pwdController.text);
-        await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
-        await db.close();
-        await deleteDatabase(db.path);
-        await DatabaseProvider.initDB();
-        Client.getClient().clear();
-        widget.onLogin();
+        await _postLogin(db);
       } on BadCredentialsException catch (_) {
         KosmosApp.messengerKey.currentState!.showSnackBar(
           SnackBar(

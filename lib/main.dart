@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -42,6 +44,7 @@ void main() async {
 }
 
 _checkNotifications() async {
+  if (Platform.isLinux) return;
   var details =
       await (await NotificationsProvider.getNotifications()).getNotificationAppLaunchDetails();
   if (details == null) return;

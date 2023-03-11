@@ -205,8 +205,7 @@ class Conversation {
         conversation['FirstAuthor'] as String,
         conversation['CanReply'] as int == 1,
       );
-    } on TypeError {
-      //Null check used
+    } catch (e) {
       return null;
     }
   }

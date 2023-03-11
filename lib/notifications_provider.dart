@@ -29,7 +29,10 @@ class NotificationsProvider {
   static Future<void> initNotifications() async {
     _notifications = FlutterLocalNotificationsPlugin();
     await _notifications!.initialize(
-      const InitializationSettings(android: AndroidInitializationSettings('ic_stat_name')),
+      const InitializationSettings(
+        android: AndroidInitializationSettings('ic_stat_name'),
+        linux: LinuxInitializationSettings(defaultActionName: 'Kosmos Client'),
+      ),
       onDidReceiveNotificationResponse: notificationCallback,
     );
   }

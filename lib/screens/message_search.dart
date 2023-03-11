@@ -101,44 +101,48 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
 
   @override
   Widget build(BuildContext context) {
-    return _conversations == null
-        ? const Center(child: CircularProgressIndicator())
-        : _conversations!.isEmpty
-            ? Center(
-                child: Text(
-                'Aucun résultat trouvé.',
-                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                textAlign: TextAlign.center,
-              ))
-            : ListView.separated(
-                itemBuilder: (context, index) {
-                  final parentKey = GlobalKey();
-                  return InkWell(
-                      child: Padding(
-                        key: parentKey,
-                        padding: const EdgeInsets.all(8.0),
-                        child: MessageCard(
-                          _conversations![index],
-                        ),
-                      ),
-                      onTap: () {
-                        Navigator.of(context).push(
-                          MorpheusPageRoute(
-                            transitionToChild: true,
-                            builder: (_) => ConversationPage(
-                              onDelete: deleteConversation,
-                              id: _conversations![index].id,
-                              subject: _conversations![index].subject,
+    return Center(
+      child: _conversations == null
+          ? const CircularProgressIndicator()
+          : _conversations!.isEmpty
+              ? Text(
+                  'Aucun résultat trouvé.',
+                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                  textAlign: TextAlign.center,
+                )
+              : ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 800),
+                  child: ListView.separated(
+                    itemBuilder: (context, index) {
+                      final parentKey = GlobalKey();
+                      return InkWell(
+                          child: Padding(
+                            key: parentKey,
+                            padding: const EdgeInsets.all(8.0),
+                            child: MessageCard(
+                              _conversations![index],
                             ),
-                            parentKey: parentKey,
                           ),
-                        );
-                      });
-                },
-                separatorBuilder: (context, index) {
-                  return const Divider();
-                },
-                itemCount: _conversations!.length,
-              );
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MorpheusPageRoute(
+                                transitionToChild: true,
+                                builder: (_) => ConversationPage(
+                                  onDelete: deleteConversation,
+                                  id: _conversations![index].id,
+                                  subject: _conversations![index].subject,
+                                ),
+                                parentKey: parentKey,
+                              ),
+                            );
+                          });
+                    },
+                    separatorBuilder: (context, index) {
+                      return const Divider();
+                    },
+                    itemCount: _conversations!.length,
+                  ),
+                ),
+    );
   }
 }
