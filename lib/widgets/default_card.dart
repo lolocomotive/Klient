@@ -21,17 +21,17 @@ import 'package:flutter/material.dart';
 
 class DefaultCard extends StatelessWidget {
   final double? elevation;
-
   final bool outlined;
-
   final Widget? child;
-
   final EdgeInsets padding;
-
   final void Function()? onTap;
+  final Color? shadowColor;
+  final Color? surfaceTintColor;
 
   const DefaultCard(
       {Key? key,
+      this.surfaceTintColor,
+      this.shadowColor,
       this.elevation,
       this.outlined = false,
       this.child,
@@ -42,6 +42,8 @@ class DefaultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      surfaceTintColor: surfaceTintColor,
+      shadowColor: shadowColor,
       margin: const EdgeInsets.all(8.0),
       elevation: elevation ?? 1,
       shape: RoundedRectangleBorder(

@@ -69,6 +69,10 @@ class _ExerciseCardState extends State<ExerciseCard> {
             ),
           ),
         Card(
+          surfaceTintColor:
+              Theme.of(context).brightness == Brightness.light ? widget._exercise.color : null,
+          shadowColor:
+              Theme.of(context).brightness == Brightness.light ? widget._exercise.color : null,
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,
