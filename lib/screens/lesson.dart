@@ -41,50 +41,56 @@ class LessonPage extends StatelessWidget {
         ),
         backgroundColor: _lesson.color.shade200,
       ),
-      body: Scrollbar(
-        child: ListView(
-          children: [
-            DefaultCard(
-              surfaceTintColor:
-                  Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-              shadowColor: Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-              child: Column(
-                children: [
-                  Text(
-                    'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
-                    textAlign: TextAlign.center,
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 700),
+          child: Scrollbar(
+            child: ListView(
+              children: [
+                DefaultCard(
+                  surfaceTintColor:
+                      Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+                  shadowColor:
+                      Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+                  child: Column(
+                    children: [
+                      Text(
+                        'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
+                        textAlign: TextAlign.center,
+                      ),
+                      Text(
+                        'Salle ${_lesson.room}',
+                        textAlign: TextAlign.center,
+                      ),
+                      if (_lesson.isModified) Text(_lesson.modificationMessage!)
+                    ],
                   ),
-                  Text(
-                    'Salle ${_lesson.room}',
-                    textAlign: TextAlign.center,
-                  ),
-                  if (_lesson.isModified) Text(_lesson.modificationMessage!)
-                ],
-              ),
+                ),
+                MultiExerciseView(
+                  _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
+                  'Travail à faire pour cette séance',
+                  _lesson.color,
+                ),
+                MultiExerciseView(
+                  _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
+                  'Contenu de la séance',
+                  _lesson.color,
+                ),
+                MultiExerciseView(
+                  _lesson.exercises
+                      .where((e) =>
+                              e.type == ExerciseType.exercise &&
+                              e.parentLesson == _lesson.id &&
+                              e.parentLesson != e.lessonFor // don't display those twice
+                          )
+                      .toList(),
+                  'Travail donné lors de la séance',
+                  _lesson.color,
+                  showDate: true,
+                ),
+              ],
             ),
-            MultiExerciseView(
-              _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
-              'Travail à faire pour cette séance',
-              _lesson.color,
-            ),
-            MultiExerciseView(
-              _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
-              'Contenu de la séance',
-              _lesson.color,
-            ),
-            MultiExerciseView(
-              _lesson.exercises
-                  .where((e) =>
-                          e.type == ExerciseType.exercise &&
-                          e.parentLesson == _lesson.id &&
-                          e.parentLesson != e.lessonFor // don't display those twice
-                      )
-                  .toList(),
-              'Travail donné lors de la séance',
-              _lesson.color,
-              showDate: true,
-            ),
-          ],
+          ),
         ),
       ),
     );
