@@ -24,6 +24,7 @@ import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/screens/settings.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 
 class SetupPage extends StatefulWidget {
   final Function() _callback;
@@ -52,13 +53,13 @@ class _SetupPageState extends State<SetupPage> {
   @override
   Widget build(BuildContext context) {
     ConfigProvider.notifMsgEnabled = ConfigProvider.notifMsgEnabled ?? false;
-    return Scaffold(
+    return DefaultActivity(
       appBar: AppBar(
         leading: Container(),
         leadingWidth: 0,
         title: const Text('Premiers pas'),
       ),
-      body: SingleChildScrollView(
+      child: SingleChildScrollView(
         child: Center(
           child: Container(
             constraints: const BoxConstraints(maxWidth: 600),

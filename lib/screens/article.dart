@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/widgets/attachments_widget.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class ArticlePage extends StatelessWidget {
@@ -29,54 +30,41 @@ class ArticlePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: NestedScrollView(
-        floatHeaderSlivers: true,
-        headerSliverBuilder: (context, innerBoxIsScrolled) {
-          return [
-            SliverAppBar(
-              title: Text(_article.title),
-              floating: true,
-              forceElevated: innerBoxIsScrolled,
-            )
-          ];
-        },
-        body: Scrollbar(
-          child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (_article.attachments.isNotEmpty)
-                  AttachmentsWidget(
-                    attachments: _article.attachments,
-                  ),
-                Center(
-                  child: GestureDetector(
-                    onTap: () {
-                      launchUrl(Uri.parse(_article.url), mode: LaunchMode.externalApplication);
-                    },
-                    child: Text(
-                      'Consulter dans l\'ENT',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.primary,
-                        fontWeight: FontWeight.bold,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+    return DefaultSliverActivity(
+      title: _article.title,
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (_article.attachments.isNotEmpty)
+              AttachmentsWidget(
+                attachments: _article.attachments,
+              ),
+            Center(
+              child: GestureDetector(
+                onTap: () {
+                  launchUrl(Uri.parse(_article.url), mode: LaunchMode.externalApplication);
+                },
+                child: Text(
+                  'Consulter dans l\'ENT',
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.bold,
+                    decoration: TextDecoration.underline,
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Html(
-                    data: _article.htmlContent,
-                    onLinkTap: (url, context, map, element) {
-                      launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                    },
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Html(
+                data: _article.htmlContent,
+                onLinkTap: (url, context, map, element) {
+                  launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+                },
+              ),
+            ),
+          ],
         ),
       ),
     );

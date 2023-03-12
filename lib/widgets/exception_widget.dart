@@ -21,6 +21,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
@@ -71,54 +72,41 @@ class ExceptionWidget extends StatelessWidget {
             KosmosApp.messengerKey.currentState?.hideCurrentSnackBar();
             KosmosApp.navigatorKey.currentState!.push(
               MaterialPageRoute(builder: (context) {
-                return Scaffold(
-                  body: NestedScrollView(
-                    floatHeaderSlivers: true,
-                    headerSliverBuilder: (context, innerBoxIsScrolled) {
-                      return [
-                        SliverAppBar(
-                          title: Text(message),
-                          floating: true,
-                          forceElevated: innerBoxIsScrolled,
-                        )
-                      ];
-                    },
-                    body: Scrollbar(
-                      child: SingleChildScrollView(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              DefaultCard(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Descriptif de l\'erreur',
-                                      style: TextStyle(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(e.toString()),
-                                  ],
+                return DefaultSliverActivity(
+                  title: message,
+                  child: SingleChildScrollView(
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          DefaultCard(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Descriptif de l\'erreur',
+                                  style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold),
                                 ),
-                              ),
-                              DefaultCard(
-                                child: Column(
-                                  children: [
-                                    Text(
-                                      'Stack trace',
-                                      style: TextStyle(
-                                          color: Theme.of(context).colorScheme.primary,
-                                          fontWeight: FontWeight.bold),
-                                    ),
-                                    Text(st.toString()),
-                                  ],
-                                ),
-                              ),
-                            ],
+                                Text(e.toString()),
+                              ],
+                            ),
                           ),
-                        ),
+                          DefaultCard(
+                            child: Column(
+                              children: [
+                                Text(
+                                  'Stack trace',
+                                  style: TextStyle(
+                                      color: Theme.of(context).colorScheme.primary,
+                                      fontWeight: FontWeight.bold),
+                                ),
+                                Text(st.toString()),
+                              ],
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),

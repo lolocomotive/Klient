@@ -138,146 +138,165 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
           _sideBySide = constraints.maxWidth > 1200;
           return Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1400),
-              child: Row(
-                children: [
-                  Flexible(
-                    flex: 1,
-                    child: NestedScrollView(
-                      floatHeaderSlivers: true,
-                      headerSliverBuilder: (ctx, innerBoxIsScrolled) {
-                        return <Widget>[
-                          SliverAppBar(
-                            leading: _selection.isNotEmpty
-                                ? IconButton(
-                                    tooltip: 'Désactiver la sélection',
-                                    onPressed: () {
-                                      setState(() {
-                                        while (_selection.isNotEmpty) {
-                                          _selection.removeLast();
-                                        }
-                                      });
+              constraints: const BoxConstraints(maxWidth: 1600),
+              child: Container(
+                color: Theme.of(context).colorScheme.background,
+                child: Row(
+                  children: [
+                    Flexible(
+                      flex: 1,
+                      child: NestedScrollView(
+                        floatHeaderSlivers: true,
+                        headerSliverBuilder: (ctx, innerBoxIsScrolled) {
+                          return <Widget>[
+                            SliverAppBar(
+                              leading: _selection.isNotEmpty
+                                  ? IconButton(
+                                      tooltip: 'Désactiver la sélection',
+                                      onPressed: () {
+                                        setState(() {
+                                          while (_selection.isNotEmpty) {
+                                            _selection.removeLast();
+                                          }
+                                        });
+                                      },
+                                      icon: Icon(
+                                        Icons.arrow_back,
+                                        color: Theme.of(context).colorScheme.onPrimary,
+                                      ))
+                                  : null,
+                              backgroundColor: _selection.isNotEmpty
+                                  ? Theme.of(context).colorScheme.primary
+                                  : Theme.of(context).colorScheme.background,
+                              actions: [
+                                if (_selection.isNotEmpty)
+                                  IconButton(
+                                    tooltip: 'Supprimer les messages sélectionnés',
+                                    onPressed: () async {
+                                      //TODO show that progress is being made
+
+                                      deleteSelection(_selection);
+                                      while (_selection.isNotEmpty) {
+                                        _selection.removeLast();
+                                      }
+                                      setState(() {});
                                     },
                                     icon: Icon(
-                                      Icons.arrow_back,
+                                      Icons.delete,
                                       color: Theme.of(context).colorScheme.onPrimary,
-                                    ))
-                                : null,
-                            backgroundColor: _selection.isNotEmpty
-                                ? Theme.of(context).colorScheme.primary
-                                : Theme.of(context).colorScheme.background,
-                            actions: [
-                              if (_selection.isNotEmpty)
-                                IconButton(
-                                  tooltip: 'Supprimer les messages sélectionnés',
-                                  onPressed: () async {
-                                    //TODO show that progress is being made
-
-                                    deleteSelection(_selection);
-                                    while (_selection.isNotEmpty) {
-                                      _selection.removeLast();
-                                    }
-                                    setState(() {});
-                                  },
-                                  icon: Icon(
-                                    Icons.delete,
-                                    color: Theme.of(context).colorScheme.onPrimary,
+                                    ),
                                   ),
+                                if (!_selection.isNotEmpty)
+                                  IconButton(
+                                    tooltip: 'Rechercher dans les messages',
+                                    icon: const Icon(Icons.search),
+                                    onPressed: () {
+                                      showSearch(
+                                        context: context,
+                                        delegate: MessagesSearchDelegate(),
+                                      );
+                                    },
+                                  ),
+                                if (!_selection.isNotEmpty) const UserAvatarAction()
+                              ],
+                              title: Text(
+                                _selection.isNotEmpty
+                                    ? _selection.length == 1
+                                        ? _conversations[_selection[0]].subject
+                                        : '${_selection.length} conversations'
+                                    : 'Messagerie',
+                                style: TextStyle(
+                                  color: _selection.isNotEmpty
+                                      ? Theme.of(context).colorScheme.onPrimary
+                                      : Theme.of(context).colorScheme.onBackground,
                                 ),
-                              if (!_selection.isNotEmpty)
-                                IconButton(
-                                  tooltip: 'Rechercher dans les messages',
-                                  icon: const Icon(Icons.search),
-                                  onPressed: () {
-                                    showSearch(
-                                      context: context,
-                                      delegate: MessagesSearchDelegate(),
-                                    );
-                                  },
-                                ),
-                              if (!_selection.isNotEmpty) const UserAvatarAction()
-                            ],
-                            title: Text(
-                              _selection.isNotEmpty
-                                  ? _selection.length == 1
-                                      ? _conversations[_selection[0]].subject
-                                      : '${_selection.length} conversations'
-                                  : 'Messagerie',
-                              style: TextStyle(
-                                color: _selection.isNotEmpty
-                                    ? Theme.of(context).colorScheme.onPrimary
-                                    : Theme.of(context).colorScheme.onBackground,
                               ),
-                            ),
-                            floating: false,
-                            forceElevated: innerBoxIsScrolled,
-                            pinned: _selection.isNotEmpty,
-                          )
-                        ];
-                      },
-                      body: Scrollbar(
-                        child: RefreshIndicator(
-                          onRefresh: () async {
-                            await refresh();
-                          },
-                          child: _e != null
-                              ? Column(
-                                  children: [
-                                    DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
-                                  ],
-                                )
-                              : _conversations.isEmpty
-                                  ? Center(
-                                      child: Padding(
-                                        padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
-                                        child: Column(
-                                          mainAxisAlignment: MainAxisAlignment.center,
-                                          crossAxisAlignment: CrossAxisAlignment.center,
-                                          children: const [
-                                            DelayedProgressIndicator(
-                                              delay: Duration(milliseconds: 500),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  : ListView.builder(
-                                      itemCount: _conversations.length +
-                                          (Downloader.loadingMessages ? 1 : 0),
-                                      padding: const EdgeInsets.all(0),
-                                      itemBuilder: (BuildContext context, int index) {
-                                        final parentKey = GlobalKey();
-                                        return DefaultTransition(
-                                          duration: _transitionDone
-                                              ? Duration.zero
-                                              : const Duration(milliseconds: 200),
-                                          delay: Duration(
-                                              milliseconds: _transitionDone ? 0 : 30 * index),
+                              floating: false,
+                              forceElevated: innerBoxIsScrolled,
+                              pinned: _selection.isNotEmpty,
+                            )
+                          ];
+                        },
+                        body: Scrollbar(
+                          child: RefreshIndicator(
+                            onRefresh: () async {
+                              await refresh();
+                            },
+                            child: _e != null
+                                ? Column(
+                                    children: [
+                                      DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
+                                    ],
+                                  )
+                                : _conversations.isEmpty
+                                    ? Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
                                           child: Column(
-                                            children: [
-                                              Stack(
-                                                children: [
-                                                  Card(
-                                                    key: parentKey,
-                                                    margin: EdgeInsets.fromLTRB(
-                                                        14,
-                                                        index == 0 ? 16 : 7,
-                                                        14,
-                                                        index == _conversations.length - 1
-                                                            ? 14
-                                                            : 7),
-                                                    elevation: 1,
-                                                    shape: RoundedRectangleBorder(
-                                                      borderRadius: BorderRadius.circular(8),
-                                                    ),
-                                                    clipBehavior: Clip.antiAlias,
-                                                    child: InkWell(
-                                                      child: Padding(
-                                                        padding: const EdgeInsets.all(8.0),
-                                                        child: MessageCard(_conversations[index]),
+                                            mainAxisAlignment: MainAxisAlignment.center,
+                                            crossAxisAlignment: CrossAxisAlignment.center,
+                                            children: const [
+                                              DelayedProgressIndicator(
+                                                delay: Duration(milliseconds: 500),
+                                              ),
+                                            ],
+                                          ),
+                                        ),
+                                      )
+                                    : ListView.builder(
+                                        itemCount: _conversations.length +
+                                            (Downloader.loadingMessages ? 1 : 0),
+                                        padding: const EdgeInsets.all(0),
+                                        itemBuilder: (BuildContext context, int index) {
+                                          final parentKey = GlobalKey();
+                                          return DefaultTransition(
+                                            duration: _transitionDone
+                                                ? Duration.zero
+                                                : const Duration(milliseconds: 200),
+                                            delay: Duration(
+                                                milliseconds: _transitionDone ? 0 : 30 * index),
+                                            child: Column(
+                                              children: [
+                                                Stack(
+                                                  children: [
+                                                    Card(
+                                                      key: parentKey,
+                                                      margin: EdgeInsets.fromLTRB(
+                                                          14,
+                                                          index == 0 ? 16 : 7,
+                                                          14,
+                                                          index == _conversations.length - 1
+                                                              ? 14
+                                                              : 7),
+                                                      elevation: 1,
+                                                      shape: RoundedRectangleBorder(
+                                                        borderRadius: BorderRadius.circular(8),
                                                       ),
-                                                      onTap: () {
-                                                        if (_selection.isNotEmpty) {
+                                                      clipBehavior: Clip.antiAlias,
+                                                      child: InkWell(
+                                                        child: Padding(
+                                                          padding: const EdgeInsets.all(8.0),
+                                                          child: MessageCard(_conversations[index]),
+                                                        ),
+                                                        onTap: () {
+                                                          if (_selection.isNotEmpty) {
+                                                            if (_selection.contains(index)) {
+                                                              setState(() {
+                                                                _selection.remove(index);
+                                                              });
+                                                              return;
+                                                            }
+                                                            _selection.add(index);
+                                                            setState(() {});
+                                                          } else {
+                                                            openConversation(
+                                                                context,
+                                                                parentKey,
+                                                                _conversations[index].id,
+                                                                _conversations[index].subject);
+                                                          }
+                                                        },
+                                                        onLongPress: () {
                                                           if (_selection.contains(index)) {
                                                             setState(() {
                                                               _selection.remove(index);
@@ -286,63 +305,48 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                           }
                                                           _selection.add(index);
                                                           setState(() {});
-                                                        } else {
-                                                          openConversation(
-                                                              context,
-                                                              parentKey,
-                                                              _conversations[index].id,
-                                                              _conversations[index].subject);
-                                                        }
-                                                      },
-                                                      onLongPress: () {
-                                                        if (_selection.contains(index)) {
-                                                          setState(() {
-                                                            _selection.remove(index);
-                                                          });
-                                                          return;
-                                                        }
-                                                        _selection.add(index);
-                                                        setState(() {});
-                                                      },
-                                                    ),
-                                                  ),
-                                                  Positioned.fill(
-                                                    child: IgnorePointer(
-                                                      child: AnimatedOpacity(
-                                                        duration: const Duration(milliseconds: 300),
-                                                        opacity:
-                                                            (_selection.contains(index)) ? 1 : 0,
-                                                        child: Container(
-                                                          color: Theme.of(context).highlightColor,
-                                                        ),
+                                                        },
                                                       ),
                                                     ),
-                                                  )
-                                                ],
-                                              ),
-                                            ],
-                                          ),
-                                        );
-                                      },
-                                    ),
+                                                    Positioned.fill(
+                                                      child: IgnorePointer(
+                                                        child: AnimatedOpacity(
+                                                          duration:
+                                                              const Duration(milliseconds: 300),
+                                                          opacity:
+                                                              (_selection.contains(index)) ? 1 : 0,
+                                                          child: Container(
+                                                            color: Theme.of(context).highlightColor,
+                                                          ),
+                                                        ),
+                                                      ),
+                                                    )
+                                                  ],
+                                                ),
+                                              ],
+                                            ),
+                                          );
+                                        },
+                                      ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  if (_sideBySide)
-                    Flexible(
-                      flex: 2,
-                      child: currentId == null
-                          ? const Center(
-                              child: Text('Cliquer sur une conversation pour l\'afficher ici'))
-                          : ConversationPage(
-                              key: Key(currentId.toString()),
-                              id: currentId!,
-                              subject: currentSubject!,
-                              onDelete: deleteConversationFromList,
-                            ),
-                    )
-                ],
+                    if (_sideBySide)
+                      Flexible(
+                        flex: 2,
+                        child: currentId == null
+                            ? const Center(
+                                child: Text('Cliquer sur une conversation pour l\'afficher ici'))
+                            : ConversationPage(
+                                key: Key(currentId.toString()),
+                                id: currentId!,
+                                subject: currentSubject!,
+                                onDelete: deleteConversationFromList,
+                              ),
+                      )
+                  ],
+                ),
               ),
             ),
           );

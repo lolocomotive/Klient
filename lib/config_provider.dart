@@ -62,6 +62,8 @@ class ConfigProvider {
   static ColorScheme? darkDynamic;
   static Color? enforcedColor;
 
+  static late HSLColor bgColor;
+
   static setTheme() {
     Color primary =
         enforcedColor ?? darkDynamic?.primary ?? lightDynamic?.primary ?? Colors.deepPurple;
@@ -78,10 +80,21 @@ class ConfigProvider {
     } else {
       colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
     }
-
+    bgColor = HSLColor.fromColor(colorScheme.background);
+    if (brightness == Brightness.light) {
+      bgColor = bgColor.withLightness(bgColor.lightness - .05).withSaturation(.3);
+    } else {
+      bgColor = bgColor.withLightness(bgColor.lightness - .01);
+    }
     KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
       highlightColor: highlight,
       splashColor: splash,
+      scaffoldBackgroundColor: colorScheme.background,
+      snackBarTheme: const SnackBarThemeData(
+        insetPadding: EdgeInsets.all(8),
+        behavior: SnackBarBehavior.floating,
+        width: 700,
+      ),
     );
   }
 

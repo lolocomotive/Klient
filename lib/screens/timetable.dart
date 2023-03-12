@@ -25,6 +25,7 @@ import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/widgets/day_view.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/default_transition.dart';
 import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
@@ -88,140 +89,127 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
-    return NestedScrollView(
-      floatHeaderSlivers: true,
-      headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
-        return [
-          SliverAppBar(
-            floating: true,
-            forceElevated: innerBoxIsScrolled,
-            title: const Text('Emploi du temps'),
-            actions: [
-              UserAvatarAction(
-                onUpdate: () {
-                  setState(() {
-                    compact = ConfigProvider.compact!;
-                  });
-                },
-              )
-            ],
-          )
-        ];
-      },
-      body: Scrollbar(
-        child: RefreshIndicator(
-          onRefresh: () async {
-            Client.getClient().clear();
-            await Downloader.fetchTimetable();
-            setState(() {});
+    return DefaultSliverActivity(
+      title: 'Emploi du temps',
+      actions: [
+        UserAvatarAction(
+          onUpdate: () {
+            setState(() {
+              compact = ConfigProvider.compact!;
+            });
           },
-          child: SingleChildScrollView(
-            child: SizedBox(
-              height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
-                      MediaQuery.of(context).textScaleFactor *
-                      Values.maxLessonsPerDay *
-                      Values.lessonLength +
-                  32,
-              child: Stack(
-                children: [
-                  FutureBuilder<List<List<Lesson>>>(
-                      future: _getCalendar()
-                        ..then((value) {
-                          _pageController =
-                              PageController(viewportFraction: .8, initialPage: _page);
+        )
+      ],
+      child: RefreshIndicator(
+        onRefresh: () async {
+          Client.getClient().clear();
+          await Downloader.fetchTimetable();
+          setState(() {});
+        },
+        child: SingleChildScrollView(
+          child: SizedBox(
+            height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
+                    MediaQuery.of(context).textScaleFactor *
+                    Values.maxLessonsPerDay *
+                    Values.lessonLength +
+                32,
+            child: Stack(
+              children: [
+                FutureBuilder<List<List<Lesson>>>(
+                    future: _getCalendar()
+                      ..then((value) {
+                        _pageController = PageController(viewportFraction: .8, initialPage: _page);
+                      }),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: Center(
+                            child: DelayedProgressIndicator(
+                              delay: Duration(milliseconds: 500),
+                            ),
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return Column(
+                          children: [
+                            DefaultCard(
+                              child: ExceptionWidget(
+                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!),
+                            ),
+                          ],
+                        );
+                      }
+                      return DefaultTransition(
+                        child: LayoutBuilder(builder: (context, constraints) {
+                          var fraction = 0.8;
+                          if (constraints.maxWidth > 700) {
+                            fraction = 0.4;
+                          }
+                          if (constraints.maxWidth > 1200) {
+                            fraction = 0.9;
+                          }
+                          _pageController = PageController(
+                              viewportFraction: fraction,
+                              initialPage: constraints.maxWidth > 1200
+                                  ? dayToWeek(_pageController.initialPage, snapshot.data!)
+                                  : _pageController.initialPage);
+                          return PageView.builder(
+                            pageSnapping: fraction != 0.4,
+                            controller: _pageController,
+                            itemBuilder: (ctx, index) {
+                              if (snapshot.data!.isEmpty) {
+                                return Column(
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Text(
+                                        'Rien à afficher',
+                                        style: TextStyle(
+                                            color: Theme.of(context).colorScheme.secondary),
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              }
+                              return constraints.maxWidth > 1200
+                                  ? WeekView(snapshot.data!, index)
+                                  : DayView(snapshot.data![index]);
+                            },
+                            itemCount: max(
+                                constraints.maxWidth > 1200
+                                    ? getWeekCount(snapshot.data!)
+                                    : snapshot.data!.length,
+                                1),
+                          );
                         }),
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
-                          return const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: Center(
-                              child: DelayedProgressIndicator(
-                                delay: Duration(milliseconds: 500),
-                              ),
+                      );
+                    }),
+                Container(
+                  color: Theme.of(context).colorScheme.background.withAlpha(150),
+                  width: Values.timeWidth,
+                  child: MediaQuery.removePadding(
+                    removeTop: true,
+                    context: context,
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
+                      child: ListView.builder(
+                        itemBuilder: (ctx, index) {
+                          return SizedBox(
+                            height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
+                                MediaQuery.of(context).textScaleFactor,
+                            child: Text(
+                              '${index + Values.startTime}h',
+                              textAlign: TextAlign.center,
                             ),
                           );
-                        } else if (snapshot.hasError) {
-                          return Column(
-                            children: [
-                              DefaultCard(
-                                child: ExceptionWidget(
-                                    e: snapshot.error! as Exception, st: snapshot.stackTrace!),
-                              ),
-                            ],
-                          );
-                        }
-                        return DefaultTransition(
-                          child: LayoutBuilder(builder: (context, constraints) {
-                            var fraction = 0.8;
-                            if (constraints.maxWidth > 700) {
-                              fraction = 0.4;
-                            }
-                            if (constraints.maxWidth > 1200) {
-                              fraction = 0.9;
-                            }
-                            _pageController = PageController(
-                                viewportFraction: fraction,
-                                initialPage: constraints.maxWidth > 1200
-                                    ? dayToWeek(_pageController.initialPage, snapshot.data!)
-                                    : _pageController.initialPage);
-                            return PageView.builder(
-                              pageSnapping: fraction != 0.4,
-                              controller: _pageController,
-                              itemBuilder: (ctx, index) {
-                                if (snapshot.data!.isEmpty) {
-                                  return Column(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.all(8.0),
-                                        child: Text(
-                                          'Rien à afficher',
-                                          style: TextStyle(
-                                              color: Theme.of(context).colorScheme.secondary),
-                                        ),
-                                      ),
-                                    ],
-                                  );
-                                }
-                                return constraints.maxWidth > 1200
-                                    ? WeekView(snapshot.data!, index)
-                                    : DayView(snapshot.data![index]);
-                              },
-                              itemCount: max(
-                                  constraints.maxWidth > 1200
-                                      ? getWeekCount(snapshot.data!)
-                                      : snapshot.data!.length,
-                                  1),
-                            );
-                          }),
-                        );
-                      }),
-                  Container(
-                    color: Theme.of(context).colorScheme.background.withAlpha(150),
-                    width: Values.timeWidth,
-                    child: MediaQuery.removePadding(
-                      removeTop: true,
-                      context: context,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(0, 32, 0, 0),
-                        child: ListView.builder(
-                          itemBuilder: (ctx, index) {
-                            return SizedBox(
-                              height:
-                                  (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
-                                      MediaQuery.of(context).textScaleFactor,
-                              child: Text(
-                                '${index + Values.startTime}h',
-                                textAlign: TextAlign.center,
-                              ),
-                            );
-                          },
-                          itemCount: Values.maxLessonsPerDay,
-                        ),
+                        },
+                        itemCount: Values.maxLessonsPerDay,
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),
