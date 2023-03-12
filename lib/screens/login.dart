@@ -25,6 +25,7 @@ import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/screens/about.dart';
 import 'package:kosmos_client/util.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class Login extends StatefulWidget {
@@ -115,7 +116,7 @@ class LoginState extends State<Login> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return DefaultActivity(
       appBar: AppBar(
         title: const Text('Connexion'),
         actions: [
@@ -131,7 +132,7 @@ class LoginState extends State<Login> {
           )
         ],
       ),
-      body: Column(
+      child: Column(
         children: [
           Center(
             child: ConstrainedBox(

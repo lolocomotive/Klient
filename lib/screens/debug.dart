@@ -23,6 +23,7 @@ import 'package:kosmos_client/api/demo.dart';
 import 'package:kosmos_client/api/downloader.dart';
 import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/notifications_provider.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);
@@ -137,9 +138,9 @@ class DebugScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return DefaultActivity(
       appBar: AppBar(title: const Text('Debug')),
-      body: Padding(
+      child: Padding(
         padding: const EdgeInsets.all(8.0),
         child: ListView(
           children: [

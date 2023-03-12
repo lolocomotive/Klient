@@ -23,6 +23,7 @@ import 'package:kosmos_client/api/lesson.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/main.dart';
 import 'package:kosmos_client/widgets/color_picker.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/lesson_card.dart';
 import 'package:settings_ui/settings_ui.dart';
 
@@ -38,11 +39,11 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget build(BuildContext context) {
     final boldPrimary = TextStyle(
         fontWeight: FontWeight.bold, color: Theme.of(context).colorScheme.primary, fontSize: 14);
-    return Scaffold(
+    return DefaultActivity(
       appBar: AppBar(
         title: const Text('Paramètres'),
       ),
-      body: Column(
+      child: Column(
         children: [
           Expanded(
             child: SettingsList(

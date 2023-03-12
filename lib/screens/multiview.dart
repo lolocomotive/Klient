@@ -111,6 +111,7 @@ class MainState extends State<Main> {
         },
       ),
       body: currentWidget,
+      backgroundColor: ConfigProvider.bgColor.toColor(),
     );
   }
 }

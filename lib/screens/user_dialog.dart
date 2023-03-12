@@ -24,67 +24,69 @@ class _UserDialogState extends State<UserDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       alignment: Alignment.topCenter,
-      child: Padding(
-        padding: const EdgeInsets.all(8.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Text(
-                ConfigProvider.username ?? '',
-                style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
-              ),
-            ),
-            if (Client.students.length > 1)
-              DefaultCard(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    ...Client.students
-                        .map((student) => UserWidget(student, () {
-                              Client.currentlySelected = student;
-                              setState(() {});
-                              Navigator.of(context).pop();
-                              if (widget.onUpdate != null) {
-                                widget.onUpdate!();
-                              }
-                            }))
-                        .toList(),
-                  ],
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 400),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Text(
+                  ConfigProvider.username ?? '',
+                  style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
                 ),
               ),
-            DefaultCard(
-              child: Column(
-                children: [
-                  Option(
-                    icon: Icons.settings_outlined,
-                    text: 'Paramètres',
-                    onTap: () {
-                      Navigator.of(context)
-                        ..pop()
-                        ..push(MaterialPageRoute(builder: (_) => const SettingsPage()))
-                            .then((value) {
-                          if (widget.onUpdate != null) widget.onUpdate!();
-                        });
-                    },
+              if (Client.students.length > 1)
+                DefaultCard(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      ...Client.students
+                          .map((student) => UserWidget(student, () {
+                                Client.currentlySelected = student;
+                                setState(() {});
+                                Navigator.of(context).pop();
+                                if (widget.onUpdate != null) {
+                                  widget.onUpdate!();
+                                }
+                              }))
+                          .toList(),
+                    ],
                   ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                  Option(
-                    icon: Icons.info_outlined,
-                    text: 'À propos',
-                    onTap: () {
-                      Navigator.of(context)
-                        ..pop()
-                        ..push(MaterialPageRoute(builder: (_) => const AboutPage()));
-                    },
-                  ),
-                  Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                  Option(
-                    icon: Icons.logout_outlined,
-                    text: 'Se déconnecter',
-                    onTap: () => Client.disconnect(context),
-                  ),
+                ),
+              DefaultCard(
+                child: Column(
+                  children: [
+                    Option(
+                      icon: Icons.settings_outlined,
+                      text: 'Paramètres',
+                      onTap: () {
+                        Navigator.of(context)
+                          ..pop()
+                          ..push(MaterialPageRoute(builder: (_) => const SettingsPage()))
+                              .then((value) {
+                            if (widget.onUpdate != null) widget.onUpdate!();
+                          });
+                      },
+                    ),
+                    Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
+                    Option(
+                      icon: Icons.info_outlined,
+                      text: 'À propos',
+                      onTap: () {
+                        Navigator.of(context)
+                          ..pop()
+                          ..push(MaterialPageRoute(builder: (_) => const AboutPage()));
+                      },
+                    ),
+                    Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
+                    Option(
+                      icon: Icons.logout_outlined,
+                      text: 'Se déconnecter',
+                      onTap: () => Client.disconnect(context),
+                    ),
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
                     Option(
                       icon: Icons.copy,
@@ -100,33 +102,34 @@ class _UserDialogState extends State<UserDialog> {
                     if (kDebugMode)
                       Divider(
                           height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                  if (kDebugMode)
-                    Option(
-                      text: 'Debug',
-                      icon: Icons.bug_report_outlined,
-                      onTap: () {
-                        Navigator.of(context)
-                          ..pop()
-                          ..push(MaterialPageRoute(builder: (_) => const DebugScreen()));
-                      },
-                    ),
-                  if (kDebugMode)
+                    if (kDebugMode)
+                      Option(
+                        text: 'Debug',
+                        icon: Icons.bug_report_outlined,
+                        onTap: () {
+                          Navigator.of(context)
+                            ..pop()
+                            ..push(MaterialPageRoute(builder: (_) => const DebugScreen()));
+                        },
+                      ),
+                    if (kDebugMode)
                       Divider(
                           height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                  if (kDebugMode)
-                    Option(
-                      text: 'Initial setup',
-                      icon: Icons.bug_report_outlined,
-                      onTap: () {
-                        Navigator.of(context)
-                          ..pop()
-                          ..push(MaterialPageRoute(builder: (_) => SetupPage(() {})));
-                      },
-                    ),
-                ],
-              ),
-            )
-          ],
+                    if (kDebugMode)
+                      Option(
+                        text: 'Initial setup',
+                        icon: Icons.bug_report_outlined,
+                        onTap: () {
+                          Navigator.of(context)
+                            ..pop()
+                            ..push(MaterialPageRoute(builder: (_) => SetupPage(() {})));
+                        },
+                      ),
+                  ],
+                ),
+              )
+            ],
+          ),
         ),
       ),
     );

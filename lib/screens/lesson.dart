@@ -21,7 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:kosmos_client/api/exercise.dart';
 import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/multi_exercise_view.dart';
 
@@ -31,65 +31,58 @@ class LessonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: KosmosApp.theme!.colorScheme.background,
-      appBar: AppBar(
-        foregroundColor: Colors.black,
-        leading: const BackButton(color: Colors.black),
-        title: Text(
-          _lesson.title,
-        ),
-        backgroundColor: _lesson.color.shade200,
-      ),
-      body: Center(
+    return DefaultSliverActivity(
+      title: _lesson.title,
+      titleColor: Colors.black,
+      titleBackground: _lesson.color.shade200,
+      leading: const BackButton(color: Colors.black),
+      child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 700),
-          child: Scrollbar(
-            child: ListView(
-              children: [
-                DefaultCard(
-                  surfaceTintColor:
-                      Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-                  shadowColor:
-                      Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-                  child: Column(
-                    children: [
-                      Text(
-                        'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
-                        textAlign: TextAlign.center,
-                      ),
-                      Text(
-                        'Salle ${_lesson.room}',
-                        textAlign: TextAlign.center,
-                      ),
-                      if (_lesson.isModified) Text(_lesson.modificationMessage!)
-                    ],
-                  ),
+          child: ListView(
+            children: [
+              DefaultCard(
+                surfaceTintColor:
+                    Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+                shadowColor:
+                    Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+                child: Column(
+                  children: [
+                    Text(
+                      'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
+                      textAlign: TextAlign.center,
+                    ),
+                    Text(
+                      'Salle ${_lesson.room}',
+                      textAlign: TextAlign.center,
+                    ),
+                    if (_lesson.isModified) Text(_lesson.modificationMessage!)
+                  ],
                 ),
-                MultiExerciseView(
-                  _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
-                  'Travail à faire pour cette séance',
-                  _lesson.color,
-                ),
-                MultiExerciseView(
-                  _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
-                  'Contenu de la séance',
-                  _lesson.color,
-                ),
-                MultiExerciseView(
-                  _lesson.exercises
-                      .where((e) =>
-                              e.type == ExerciseType.exercise &&
-                              e.parentLesson == _lesson.id &&
-                              e.parentLesson != e.lessonFor // don't display those twice
-                          )
-                      .toList(),
-                  'Travail donné lors de la séance',
-                  _lesson.color,
-                  showDate: true,
-                ),
-              ],
-            ),
+              ),
+              MultiExerciseView(
+                _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
+                'Travail à faire pour cette séance',
+                _lesson.color,
+              ),
+              MultiExerciseView(
+                _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
+                'Contenu de la séance',
+                _lesson.color,
+              ),
+              MultiExerciseView(
+                _lesson.exercises
+                    .where((e) =>
+                            e.type == ExerciseType.exercise &&
+                            e.parentLesson == _lesson.id &&
+                            e.parentLesson != e.lessonFor // don't display those twice
+                        )
+                    .toList(),
+                'Travail donné lors de la séance',
+                _lesson.color,
+                showDate: true,
+              ),
+            ],
           ),
         ),
       ),

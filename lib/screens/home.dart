@@ -25,6 +25,7 @@ import 'package:kosmos_client/api/grade.dart';
 import 'package:kosmos_client/api/news_article.dart';
 import 'package:kosmos_client/config_provider.dart';
 import 'package:kosmos_client/widgets/article_card.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/default_card.dart';
 import 'package:kosmos_client/widgets/default_transition.dart';
 import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
@@ -47,157 +48,136 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return NestedScrollView(
-      floatHeaderSlivers: true,
-      headerSliverBuilder: (context, innerBoxIsScrolled) {
-        return <Widget>[
-          SliverAppBar(
-            title: const Text('Accueil'),
-            floating: true,
-            forceElevated: innerBoxIsScrolled,
-            actions: [
-              UserAvatarAction(
-                onUpdate: () {
-                  if (_gKey.currentState != null) {
-                    _gKey.currentState!.setState(() {});
-                  }
-                  _aKey.currentState!.setState(() {});
-                  _hKey.currentState!.setState(() {});
-                },
-              )
-            ],
-          )
-        ];
-      },
-      body: Scrollbar(
-        child: RefreshIndicator(
-          onRefresh: (() async {
-            Client.getClient().clear();
-            await Future.wait(<Future>[
-              Downloader.fetchGradesData().then((_) => _gKey.currentState?.setState(() {})),
-              Downloader.fetchHomework().then((_) => _hKey.currentState?.setState(() {})),
-              Downloader.fetchNewsData().then((_) => _aKey.currentState?.setState(() {})),
-            ]);
-          }),
-          child: SingleChildScrollView(
-            child: Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 1400),
-                child: LayoutBuilder(builder: (context, constraints) {
-                  if (Client.currentlySelected == null) {
-                    return FutureBuilder(
-                        future: Future.delayed(const Duration(seconds: 2)),
-                        builder: (context, snapshot) {
-                          return Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: AnimatedOpacity(
-                              opacity: snapshot.connectionState == ConnectionState.done ? 1 : 0,
-                              duration: const Duration(milliseconds: 300),
-                              child: Column(
-                                children: [
-                                  Text(
-                                    'Si vous pouvez lire ce texte c\'est que quelque chose a mal tourné :/ Essayez de supprimer les données de l\'application puis de la redémarrer.',
-                                    textAlign: TextAlign.center,
-                                    style:
-                                        TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(top: 16.0),
-                                    child: ElevatedButton(
-                                      onPressed: () => Client.disconnect(context),
-                                      child: const Text('Supprimmer les données et redémarrer'),
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
-                          );
-                        });
-                  }
-                  if (constraints.maxWidth > 1200) {
-                    return Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              const SectionTitle('Travail à faire'),
-                              HomeworkListWrapper(key: _hKey),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              if (Client.currentlySelected!.permissions
-                                  .contains('vsc-notes-consulter'))
-                                const SectionTitle('Dernières notes'),
-                              if (Client.currentlySelected!.permissions
-                                  .contains('vsc-notes-consulter'))
-                                GradeList(key: _gKey),
-                            ],
-                          ),
-                        ),
-                        Expanded(
-                            child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
+    return DefaultSliverActivity(
+      title: 'Acceuil',
+      actions: [
+        UserAvatarAction(
+          onUpdate: () {
+            if (_gKey.currentState != null) {
+              _gKey.currentState!.setState(() {});
+            }
+            _aKey.currentState!.setState(() {});
+            _hKey.currentState!.setState(() {});
+          },
+        )
+      ],
+      child: RefreshIndicator(
+        onRefresh: (() async {
+          Client.getClient().clear();
+          await Future.wait(<Future>[
+            Downloader.fetchGradesData().then((_) => _gKey.currentState?.setState(() {})),
+            Downloader.fetchHomework().then((_) => _hKey.currentState?.setState(() {})),
+            Downloader.fetchNewsData().then((_) => _aKey.currentState?.setState(() {})),
+          ]);
+        }),
+        child: SingleChildScrollView(
+          child: LayoutBuilder(builder: (context, constraints) {
+            if (Client.currentlySelected == null) {
+              return FutureBuilder(
+                  future: Future.delayed(const Duration(seconds: 2)),
+                  builder: (context, snapshot) {
+                    return Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: AnimatedOpacity(
+                        opacity: snapshot.connectionState == ConnectionState.done ? 1 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        child: Column(
                           children: [
-                            const SectionTitle('Actualités'),
-                            ArticleList(key: _aKey),
+                            Text(
+                              'Si vous pouvez lire ce texte c\'est que quelque chose a mal tourné :/ Essayez de supprimer les données de l\'application puis de la redémarrer.',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 16.0),
+                              child: ElevatedButton(
+                                onPressed: () => Client.disconnect(context),
+                                child: const Text('Supprimmer les données et redémarrer'),
+                              ),
+                            )
                           ],
-                        ))
-                      ],
+                        ),
+                      ),
                     );
-                  }
-                  if (constraints.maxWidth < 700) {
-                    return Column(
+                  });
+            }
+            if (constraints.maxWidth > 1200) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         const SectionTitle('Travail à faire'),
                         HomeworkListWrapper(key: _hKey),
+                      ],
+                    ),
+                  ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
                         if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
                           const SectionTitle('Dernières notes'),
                         if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
                           GradeList(key: _gKey),
-                        const SectionTitle('Actualités'),
-                        ArticleList(key: _aKey),
                       ],
-                    );
-                  }
-                  return Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    ),
+                  ),
+                  Expanded(
+                      child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            const SectionTitle('Travail à faire'),
-                            HomeworkListWrapper(key: _hKey),
-                            if (Client.currentlySelected!.permissions
-                                .contains('vsc-notes-consulter'))
-                              const SectionTitle('Dernières notes'),
-                            if (Client.currentlySelected!.permissions
-                                .contains('vsc-notes-consulter'))
-                              GradeList(key: _gKey),
-                          ],
-                        ),
-                      ),
-                      Expanded(
-                          child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.stretch,
-                        children: [
-                          const SectionTitle('Actualités'),
-                          ArticleList(key: _aKey),
-                        ],
-                      ))
+                      const SectionTitle('Actualités'),
+                      ArticleList(key: _aKey),
                     ],
-                  );
-                }),
-              ),
-            ),
-          ),
+                  ))
+                ],
+              );
+            }
+            if (constraints.maxWidth < 700) {
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SectionTitle('Travail à faire'),
+                  HomeworkListWrapper(key: _hKey),
+                  if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                    const SectionTitle('Dernières notes'),
+                  if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                    GradeList(key: _gKey),
+                  const SectionTitle('Actualités'),
+                  ArticleList(key: _aKey),
+                ],
+              );
+            }
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      const SectionTitle('Travail à faire'),
+                      HomeworkListWrapper(key: _hKey),
+                      if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                        const SectionTitle('Dernières notes'),
+                      if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                        GradeList(key: _gKey),
+                    ],
+                  ),
+                ),
+                Expanded(
+                    child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const SectionTitle('Actualités'),
+                    ArticleList(key: _aKey),
+                  ],
+                ))
+              ],
+            );
+          }),
         ),
       ),
     );

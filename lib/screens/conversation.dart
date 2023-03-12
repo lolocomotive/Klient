@@ -27,6 +27,7 @@ import 'package:kosmos_client/database_provider.dart';
 import 'package:kosmos_client/screens/messages.dart';
 import 'package:kosmos_client/util.dart';
 import 'package:kosmos_client/widgets/attachments_widget.dart';
+import 'package:kosmos_client/widgets/default_activity.dart';
 import 'package:kosmos_client/widgets/default_transition.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -75,9 +76,8 @@ class _ConversationPageState extends State<ConversationPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.background,
-      body: SizedBox(
+    return DefaultActivity(
+      child: SizedBox(
         height: MediaQuery.of(context).size.height,
         child: Column(
           children: [
