@@ -142,7 +142,7 @@ class Client {
   static bool retryNetworkRequests = false;
   static const String _appVersion = '3.7.14';
   static String apiurl = 'https://mobilite.kosmoseducation.com/mobilite/';
-  late String _token;
+  late String token;
   final List<Request> _requests = [];
   static const int _maxConcurrentDownloads = 4;
   int _currentlyDownloading = 0;
@@ -197,7 +197,7 @@ class Client {
       void Function()? onHttpErr}) {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
-      'X-Kdecole-Auth': _token,
+      'X-Kdecole-Auth': token,
     };
     String url = apiurl + action.url;
     for (final param in params ?? []) {
@@ -253,7 +253,7 @@ class Client {
   Future<Map<String, dynamic>> request(Action action, {List<String?>? params, String? body}) async {
     Map<String, String> headers = {
       'X-Kdecole-Vers': _appVersion,
-      'X-Kdecole-Auth': _token,
+      'X-Kdecole-Auth': token,
     };
 
     String url = apiurl + action.url;
@@ -345,11 +345,11 @@ class Client {
     }
   }
 
-  Client(String token) {
-    _token = token;
+  Client(String newToken) {
+    token = newToken;
     _client = this;
-    ConfigProvider.getStorage().write(key: 'token', value: _token);
-    if (token == '') return;
+    ConfigProvider.getStorage().write(key: 'token', value: token);
+    if (newToken == '') return;
     try {
       request(Action.startup);
     } on Exception catch (e, st) {

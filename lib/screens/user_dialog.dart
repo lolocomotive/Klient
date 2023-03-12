@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:flutter/services.dart';
 import 'package:kosmos_client/api/client.dart';
 import 'package:kosmos_client/api/student.dart';
 import 'package:kosmos_client/config_provider.dart';
@@ -84,8 +85,21 @@ class _UserDialogState extends State<UserDialog> {
                     text: 'Se déconnecter',
                     onTap: () => Client.disconnect(context),
                   ),
-                  if (kDebugMode)
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
+                    Option(
+                      icon: Icons.copy,
+                      text: 'Copier le jeton d\'authentification',
+                      onTap: () async {
+                        Clipboard.setData(ClipboardData(text: Client.getClient().token));
+                        //KosmosApp.messengerKey.currentState!
+                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+                          content: Text('Copié'),
+                        ));
+                      },
+                    ),
+                    if (kDebugMode)
+                      Divider(
+                          height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
                   if (kDebugMode)
                     Option(
                       text: 'Debug',
@@ -97,7 +111,8 @@ class _UserDialogState extends State<UserDialog> {
                       },
                     ),
                   if (kDebugMode)
-                    Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
+                      Divider(
+                          height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
                   if (kDebugMode)
                     Option(
                       text: 'Initial setup',
