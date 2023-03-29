@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,7 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/attachment.dart';
+import 'package:klient/api/attachment.dart';
 
 import 'default_card.dart';
 

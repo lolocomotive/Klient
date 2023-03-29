@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,10 +18,10 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/screens/timetable.dart';
-import 'package:kosmos_client/widgets/lesson_card.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/screens/timetable.dart';
+import 'package:klient/widgets/lesson_card.dart';
 
 class DayView extends StatelessWidget {
   final List<Lesson> _lessons;

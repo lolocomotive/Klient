@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,11 +20,11 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/screens/lesson.dart';
-import 'package:kosmos_client/screens/timetable.dart';
+import 'package:klient/api/exercise.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/main.dart';
+import 'package:klient/screens/lesson.dart';
+import 'package:klient/screens/timetable.dart';
 import 'package:morpheus/morpheus.dart';
 
 class LessonCard extends StatelessWidget {
@@ -224,7 +224,7 @@ class StripesPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final Paint foreground = Paint();
     foreground.color =
-        KosmosApp.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
+        KlientApp.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
     foreground.strokeWidth = 15;
     const step = 45.0;
 

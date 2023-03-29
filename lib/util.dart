@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,8 +18,8 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/widgets/exception_widget.dart';
+import 'package:klient/main.dart';
+import 'package:klient/widgets/exception_widget.dart';
 
 class Util {
   static const standardShadow = [
@@ -33,11 +33,11 @@ class Util {
   static void onException(Exception e, StackTrace st) {
     print(e);
     print(st);
-    print('Current state: ${KosmosApp.currentLifecycleState}');
-    if (KosmosApp.currentLifecycleState == AppLifecycleState.resumed) {
-      KosmosApp.messengerKey.currentState?.showSnackBar(
+    print('Current state: ${KlientApp.currentLifecycleState}');
+    if (KlientApp.currentLifecycleState == AppLifecycleState.resumed) {
+      KlientApp.messengerKey.currentState?.showSnackBar(
         SnackBar(
-            backgroundColor: KosmosApp.theme!.colorScheme.surface,
+            backgroundColor: KlientApp.theme!.colorScheme.surface,
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [

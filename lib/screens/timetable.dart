@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,16 +20,16 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/widgets/day_view.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
-import 'package:kosmos_client/widgets/default_transition.dart';
-import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
-import 'package:kosmos_client/widgets/exception_widget.dart';
-import 'package:kosmos_client/widgets/user_avatar_action.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/widgets/day_view.dart';
+import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/default_transition.dart';
+import 'package:klient/widgets/delayed_progress_indicator.dart';
+import 'package:klient/widgets/exception_widget.dart';
+import 'package:klient/widgets/user_avatar_action.dart';
 
 extension DateOnlyCompare on DateTime {
   bool isSameDay(DateTime other) {

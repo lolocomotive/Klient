@@ -1,4 +1,4 @@
-package de.loicezt.kosmos_client
+package de.loicezt.klient
 
 import io.flutter.embedding.android.FlutterActivity
 import androidx.core.view.WindowCompat 

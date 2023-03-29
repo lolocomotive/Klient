@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,11 +18,11 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/color_provider.dart';
-import 'package:kosmos_client/api/exercise_attachment.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/database_provider.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/color_provider.dart';
+import 'package:klient/api/exercise_attachment.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/database_provider.dart';
 
 enum ExerciseType {
   lessonContent,

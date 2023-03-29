@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -19,10 +19,10 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/screens/conversation.dart';
-import 'package:kosmos_client/screens/messages.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/main.dart';
+import 'package:klient/screens/conversation.dart';
+import 'package:klient/screens/messages.dart';
 
 class NotificationsProvider {
   static FlutterLocalNotificationsPlugin? _notifications;
@@ -42,7 +42,7 @@ class NotificationsProvider {
       Conversation.byID(int.parse(id)).then((conv) {
         if (conv == null) return;
 
-        KosmosApp.navigatorKey.currentState?.push(MaterialPageRoute(
+        KlientApp.navigatorKey.currentState?.push(MaterialPageRoute(
           builder: (context) {
             return ConversationPage(
               onDelete: deleteConversation,

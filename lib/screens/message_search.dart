@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,10 +18,10 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/screens/conversation.dart';
-import 'package:kosmos_client/screens/messages.dart';
-import 'package:kosmos_client/widgets/message_card.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/screens/conversation.dart';
+import 'package:klient/screens/messages.dart';
+import 'package:klient/widgets/message_card.dart';
 import 'package:morpheus/morpheus.dart';
 
 class MessagesSearchDelegate extends SearchDelegate {

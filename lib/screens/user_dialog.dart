@@ -1,14 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/student.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/screens/about.dart';
-import 'package:kosmos_client/screens/debug.dart';
-import 'package:kosmos_client/screens/settings.dart';
-import 'package:kosmos_client/screens/setup.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
-import 'package:kosmos_client/widgets/user_avatar.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/student.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/screens/about.dart';
+import 'package:klient/screens/debug.dart';
+import 'package:klient/screens/settings.dart';
+import 'package:klient/screens/setup.dart';
+import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/user_avatar.dart';
 
 class UserDialog extends StatefulWidget {
   final void Function()? onUpdate;

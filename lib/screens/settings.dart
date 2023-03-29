@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,12 +18,12 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/widgets/color_picker.dart';
-import 'package:kosmos_client/widgets/lesson_card.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
+import 'package:klient/widgets/color_picker.dart';
+import 'package:klient/widgets/lesson_card.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -61,7 +61,7 @@ class _SettingsPageState extends State<SettingsPage> {
                         title: DropdownButton(
                             value: Client.apiurl,
                             isExpanded: true,
-                            items: KosmosApp.dropdownItems,
+                            items: KlientApp.dropdownItems,
                             onChanged: (dynamic newValue) async {
                               await ConfigProvider.getStorage()
                                   .write(key: 'apiurl', value: newValue);
@@ -126,7 +126,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                             : null;
                                     // If we don't setState here the value does not update when the setting does not change what is displayed.
                                     setState(() {});
-                                    KosmosState.currentState!.setState(() {});
+                                    KlientState.currentState!.setState(() {});
                                   },
                                 ),
                               ),
@@ -144,7 +144,7 @@ class _SettingsPageState extends State<SettingsPage> {
                                 color: ConfigProvider.enforcedColor,
                                 onChange: (color) {
                                   ConfigProvider.setColor(color);
-                                  KosmosState.currentState!.setState(() {});
+                                  KlientState.currentState!.setState(() {});
                                 },
                               )
                             ],

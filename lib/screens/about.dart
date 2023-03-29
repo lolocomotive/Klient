@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,7 +20,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:klient/widgets/default_card.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -47,7 +47,7 @@ class AboutPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Text(
-                  'Kosmos Client',
+                  'Klient',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
@@ -118,9 +118,7 @@ class AboutPage extends StatelessWidget {
                                   text: 'github',
                                   recognizer: TapGestureRecognizer()
                                     ..onTap = () {
-                                      launchUrl(
-                                          Uri.parse(
-                                              'https://github.com/lolocomotive/kosmos_client'),
+                                      launchUrl(Uri.parse('https://github.com/lolocomotive/klient'),
                                           mode: LaunchMode.externalApplication);
                                     },
                                   style: TextStyle(

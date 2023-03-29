@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -19,11 +19,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/api/lesson.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
-import 'package:kosmos_client/widgets/multi_exercise_view.dart';
+import 'package:klient/api/exercise.dart';
+import 'package:klient/api/lesson.dart';
+import 'package:klient/main.dart';
+import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/multi_exercise_view.dart';
 
 class LessonPage extends StatelessWidget {
   final Lesson _lesson;
@@ -32,7 +32,7 @@ class LessonPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KosmosApp.theme!.colorScheme.background,
+      backgroundColor: KlientApp.theme!.colorScheme.background,
       appBar: AppBar(
         foregroundColor: Colors.black,
         leading: const BackButton(color: Colors.black),

@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,11 +18,11 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/screens/setup.dart';
-import 'package:kosmos_client/screens/timetable.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
+import 'package:klient/screens/setup.dart';
+import 'package:klient/screens/timetable.dart';
 
 import 'home.dart';
 import 'messages.dart';
@@ -41,7 +41,7 @@ class MainState extends State<Main> {
         !ConfigProvider.demo) {
       ConfigProvider.getStorage().write(key: 'firstTime', value: 'false');
 
-      KosmosApp.navigatorKey.currentState!.push(
+      KlientApp.navigatorKey.currentState!.push(
         MaterialPageRoute(
           builder: (_) => WillPopScope(
             onWillPop: () async => false,
