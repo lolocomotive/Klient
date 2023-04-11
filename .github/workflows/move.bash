@@ -6,3 +6,5 @@ mv build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk output/klient-$comm
 mv build/app/outputs/flutter-apk/app-x86_64-release.apk output/klient-$commit-x86_64.apk
 mv build/app/outputs/flutter-apk/app-release.apk output/klient-$commit.apk
 mv build/app/outputs/bundle/release/app-release.aab output/klient-$commit.aab
+
+tar -czf output/klient-linux-$commit.tar.gz -C build/linux/x64/release/bundle/ .
