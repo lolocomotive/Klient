@@ -1,6 +1,6 @@
 {
-    "name": "kosmos_client",
-    "short_name": "kosmos_client",
+    "name": "klient",
+    "short_name": "klient",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

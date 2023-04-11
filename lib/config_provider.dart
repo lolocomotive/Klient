@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -25,10 +25,10 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/color_provider.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/widgets/color_picker.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/color_provider.dart';
+import 'package:klient/main.dart';
+import 'package:klient/widgets/color_picker.dart';
 
 class ConfigProvider {
   static FlutterSecureStorage? _storage;
@@ -80,13 +80,15 @@ class ConfigProvider {
     } else {
       colorScheme = ColorScheme.fromSeed(seedColor: primary, brightness: brightness);
     }
+
     bgColor = HSLColor.fromColor(colorScheme.background);
     if (brightness == Brightness.light) {
       bgColor = bgColor.withLightness(bgColor.lightness - .05).withSaturation(.3);
     } else {
       bgColor = bgColor.withLightness(bgColor.lightness - .01);
     }
-    KosmosApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
+
+    KlientApp.theme = ThemeData.from(colorScheme: colorScheme, useMaterial3: true).copyWith(
       highlightColor: highlight,
       splashColor: splash,
       scaffoldBackgroundColor: colorScheme.background,
@@ -138,7 +140,7 @@ class ConfigProvider {
   static save() {}
   static load() async {
     apiUrls.forEach((key, value) {
-      KosmosApp.dropdownItems.add(DropdownMenuItem(
+      KlientApp.dropdownItems.add(DropdownMenuItem(
         value: value,
         child: Text(key),
       ));

@@ -9,56 +9,56 @@
    id="svg5"
    inkscape:version="1.1 (1:1.1+202105261518+ce6663b3b7)"
    sodipodi:docname="logo.svg"
-   inkscape:export-filename="/home/stonksic/StudioProjects/kosmos_client/logo.png"
+   inkscape:export-filename="/home/stonksic/StudioProjects/klient/logo.png"
    inkscape:export-xdpi="409.60001"
    inkscape:export-ydpi="409.60001"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns="http://www.w3.org/2000/svg"
    xmlns:svg="http://www.w3.org/2000/svg">
-  <sodipodi:namedview
-     id="namedview7"
-     pagecolor="#ffffff"
-     bordercolor="#666666"
-     borderopacity="1.0"
-     inkscape:pageshadow="2"
-     inkscape:pageopacity="0.0"
-     inkscape:pagecheckerboard="0"
-     inkscape:document-units="px"
-     showgrid="false"
-     inkscape:zoom="7.8371002"
-     inkscape:cx="55.76042"
-     inkscape:cy="55.122429"
-     inkscape:window-width="2560"
-     inkscape:window-height="1412"
-     inkscape:window-x="1080"
-     inkscape:window-y="321"
-     inkscape:window-maximized="1"
-     inkscape:current-layer="layer1" />
-  <defs
-     id="defs2" />
-  <g
-     inkscape:label="Layer 1"
-     inkscape:groupmode="layer"
-     id="layer1">
-    <rect
-       style="fill:#191739;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke fill markers"
-       id="rect8484"
-       width="31.75"
-       height="31.75"
-       x="0"
-       y="0" />
-    <text
-       xml:space="preserve"
-       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.8032px;line-height:1.25;font-family:Saab;-inkscape-font-specification:Saab;letter-spacing:0px;word-spacing:0px;fill:#fefefe;fill-opacity:1;stroke:none;stroke-width:0.360975;stroke-opacity:1"
-       x="6.9275498"
-       y="24.974297"
-       id="text3224"
-       transform="scale(0.92789298,1.0777105)"><tspan
+   <sodipodi:namedview
+      id="namedview7"
+      pagecolor="#ffffff"
+      bordercolor="#666666"
+      borderopacity="1.0"
+      inkscape:pageshadow="2"
+      inkscape:pageopacity="0.0"
+      inkscape:pagecheckerboard="0"
+      inkscape:document-units="px"
+      showgrid="false"
+      inkscape:zoom="7.8371002"
+      inkscape:cx="55.76042"
+      inkscape:cy="55.122429"
+      inkscape:window-width="2560"
+      inkscape:window-height="1412"
+      inkscape:window-x="1080"
+      inkscape:window-y="321"
+      inkscape:window-maximized="1"
+      inkscape:current-layer="layer1" />
+   <defs
+      id="defs2" />
+   <g
+      inkscape:label="Layer 1"
+      inkscape:groupmode="layer"
+      id="layer1">
+      <rect
+         style="fill:#191739;fill-opacity:1;stroke:none;stroke-width:0.529167;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1;paint-order:stroke fill markers"
+         id="rect8484"
+         width="31.75"
+         height="31.75"
+         x="0"
+         y="0" />
+      <text
+         xml:space="preserve"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:30.8032px;line-height:1.25;font-family:Saab;-inkscape-font-specification:Saab;letter-spacing:0px;word-spacing:0px;fill:#fefefe;fill-opacity:1;stroke:none;stroke-width:0.360975;stroke-opacity:1"
+         x="6.9275498"
+         y="24.974297"
+         id="text3224"
+         transform="scale(0.92789298,1.0777105)"><tspan
          sodipodi:role="line"
          id="tspan3222"
          style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:30.8032px;font-family:Poppins;-inkscape-font-specification:Poppins;fill:#fefefe;fill-opacity:1;stroke:none;stroke-width:0.360975;stroke-opacity:1"
          x="6.9275498"
          y="24.974297">K</tspan></text>
-  </g>
+   </g>
 </svg>

@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,10 +18,10 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
-import 'package:kosmos_client/widgets/exercise_card.dart';
+import 'package:klient/api/exercise.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/exercise_card.dart';
 
 class MultiExerciseView extends StatelessWidget {
   final List<Exercise> _exercises;

@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -24,13 +24,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart';
-import 'package:kosmos_client/api/student.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/screens/login.dart';
-import 'package:kosmos_client/screens/setup.dart';
-import 'package:kosmos_client/util.dart';
+import 'package:klient/api/student.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/main.dart';
+import 'package:klient/screens/login.dart';
+import 'package:klient/screens/setup.dart';
+import 'package:klient/util.dart';
 import 'package:restart_app/restart_app.dart';
 
 import 'conversation.dart';
@@ -153,7 +153,7 @@ class Client {
       _requests.removeAt(0);
     }
     showDialog(
-        context: KosmosApp.navigatorKey.currentContext!,
+        context: KlientApp.navigatorKey.currentContext!,
         builder: (context) {
           return AlertDialog(
             alignment: Alignment.center,
@@ -173,13 +173,13 @@ class Client {
               ElevatedButton(
                   onPressed: () {
                     ConfigProvider.getStorage().delete(key: 'token');
-                    KosmosApp.navigatorKey.currentState!
+                    KlientApp.navigatorKey.currentState!
                       ..pop()
                       ..push(
                         MaterialPageRoute(
                           builder: (_) => Login(() {
-                            KosmosApp.navigatorKey.currentState!.pop();
-                            KosmosApp.onLogin!();
+                            KlientApp.navigatorKey.currentState!.pop();
+                            KlientApp.onLogin!();
                           }),
                         ),
                       );

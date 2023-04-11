@@ -4,38 +4,37 @@ name: CI
 
 # Controls when the workflow will run
 on:
-  # Triggers the workflow on push or pull request events but only for the "master" branch
-  push:
-    branches:
-      - 'master'
-      - 'actions-test'
+    # Triggers the workflow on push or pull request events but only for the "master" branch
+    push:
+        branches:
+            - 'master'
+            - 'actions-test'
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+    # Allows you to run this workflow manually from the Actions tab
+    workflow_dispatch:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # This workflow contains a single job called "build"
-  build:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-java@v3.5.0
-      with:
-        distribution: 'zulu'
-        java-version: '11'
-    - uses: subosito/flutter-action@v2
-      with:
-        channel: 'stable'
-    - run: flutter pub get
-    # This is required due to the way github checks out the repository.
-    - run: cp .git/$(cat .git/HEAD | cut -c6- ) .git/ORIG_HEAD
-    - run: flutter build apk --split-per-abi 
-    - run: flutter build apk
-    - run: echo "commit=$(git rev-parse HEAD | head -c 6)" >> $GITHUB_ENV
-    - run: bash .github/workflows/move.bash
-    - uses: actions/upload-artifact@v3
-      with:
-        name: kosmos-client-${{ env.commit }}
-        path: output/
-
+    # This workflow contains a single job called "build"
+    build:
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v3
+            - uses: actions/setup-java@v3.5.0
+              with:
+                  distribution: 'zulu'
+                  java-version: '11'
+            - uses: subosito/flutter-action@v2
+              with:
+                  channel: 'stable'
+            - run: flutter pub get
+            # This is required due to the way github checks out the repository.
+            - run: cp .git/$(cat .git/HEAD | cut -c6- ) .git/ORIG_HEAD
+            - run: flutter build apk --split-per-abi
+            - run: flutter build apk
+            - run: echo "commit=$(git rev-parse HEAD | head -c 6)" >> $GITHUB_ENV
+            - run: bash .github/workflows/move.bash
+            - uses: actions/upload-artifact@v3
+              with:
+                  name: klient-${{ env.commit }}
+                  path: output/

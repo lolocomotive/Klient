@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/screens/user_dialog.dart';
-import 'package:kosmos_client/widgets/user_avatar.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/screens/user_dialog.dart';
+import 'package:klient/widgets/user_avatar.dart';
 
 class UserAvatarAction extends StatefulWidget {
   final void Function()? onUpdate;

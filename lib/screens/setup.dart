@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,11 +20,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/screens/settings.dart';
-import 'package:kosmos_client/widgets/default_activity.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/screens/settings.dart';
+import 'package:klient/widgets/default_activity.dart';
 
 class SetupPage extends StatefulWidget {
   final Function() _callback;

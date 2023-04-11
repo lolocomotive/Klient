@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,20 +18,20 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/screens/conversation.dart';
-import 'package:kosmos_client/screens/message_search.dart';
-import 'package:kosmos_client/util.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
-import 'package:kosmos_client/widgets/default_transition.dart';
-import 'package:kosmos_client/widgets/delayed_progress_indicator.dart';
-import 'package:kosmos_client/widgets/exception_widget.dart';
-import 'package:kosmos_client/widgets/message_card.dart';
-import 'package:kosmos_client/widgets/user_avatar_action.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/screens/conversation.dart';
+import 'package:klient/screens/message_search.dart';
+import 'package:klient/util.dart';
+import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/default_transition.dart';
+import 'package:klient/widgets/delayed_progress_indicator.dart';
+import 'package:klient/widgets/exception_widget.dart';
+import 'package:klient/widgets/message_card.dart';
+import 'package:klient/widgets/user_avatar_action.dart';
 import 'package:morpheus/morpheus.dart';
 
 class MessagesPage extends StatefulWidget {

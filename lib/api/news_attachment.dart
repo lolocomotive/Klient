@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -17,8 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:kosmos_client/api/attachment.dart';
-import 'package:kosmos_client/api/news_article.dart';
+import 'package:klient/api/attachment.dart';
+import 'package:klient/api/news_article.dart';
 
 /// An attachment that is linked to a [NewsArticle] (only it's uid to avoid circular references though)
 class NewsAttachment extends Attachment {

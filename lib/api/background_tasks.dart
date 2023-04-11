@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -22,12 +22,12 @@ import 'dart:io';
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/notifications_provider.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/notifications_provider.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;

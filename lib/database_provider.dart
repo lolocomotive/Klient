@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -22,9 +22,9 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:flutter/foundation.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/config_provider.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/config_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -50,7 +50,7 @@ class DatabaseProvider {
       // Initialize FFI
       sqfliteFfiInit();
       // Change the default factory
-      dbDir = '${await getDownloadsDirectory()}/kosmos_client/kdecole.db';
+      dbDir = '${await getDownloadsDirectory()}/klient/kdecole.db';
     } else {
       dbDir = await getDatabasesPath();
     }

@@ -5,10 +5,10 @@
 // 'flutter create' template.
 
 // The application's name. By default this is also the title of the Flutter window.
-PRODUCT_NAME = kosmos_client
+PRODUCT_NAME = klient
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = de.loicezt.kosmosClient
+PRODUCT_BUNDLE_IDENTIFIER = de.loicezt.klient
 
 // The copyright displayed in application information
 PRODUCT_COPYRIGHT = Copyright © 2023 de.loicezt. All rights reserved.

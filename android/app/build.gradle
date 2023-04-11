@@ -53,7 +53,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "de.loicezt.kosmos_client"
+        applicationId "de.loicezt.klient"
         minSdkVersion 19
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode flutterVersionCode.toInteger()

@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -22,11 +22,11 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:kosmos_client/api/background_tasks.dart';
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/notifications_provider.dart';
-import 'package:kosmos_client/screens/login.dart';
+import 'package:klient/api/background_tasks.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/notifications_provider.dart';
+import 'package:klient/screens/login.dart';
 
 import 'screens/multiview.dart';
 
@@ -40,7 +40,7 @@ void main() async {
   await initPlatformState();
   registerTasks();
 
-  runApp(const KosmosApp());
+  runApp(const KlientApp());
 }
 
 _checkNotifications() async {
@@ -53,7 +53,7 @@ _checkNotifications() async {
   NotificationsProvider.notificationCallback(details.notificationResponse);
 }
 
-class KosmosApp extends StatefulWidget {
+class KlientApp extends StatefulWidget {
   static ThemeData? theme;
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -61,19 +61,19 @@ class KosmosApp extends StatefulWidget {
   static AppLifecycleState? currentLifecycleState;
   static void Function()? onLogin;
 
-  const KosmosApp({Key? key}) : super(key: key);
+  const KlientApp({Key? key}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() {
-    return KosmosState();
+    return KlientState();
   }
 }
 
-class KosmosState extends State with WidgetsBindingObserver {
-  final title = 'Kosmos client';
+class KlientState extends State with WidgetsBindingObserver {
+  final title = 'Klient';
 
   Widget? _mainWidget;
-  static KosmosState? currentState;
+  static KlientState? currentState;
 
   @override
   void initState() {
@@ -82,7 +82,7 @@ class KosmosState extends State with WidgetsBindingObserver {
     NotificationsProvider.getNotifications().then((notifications) => notifications.cancelAll());
 
     WidgetsBinding.instance.addObserver(this);
-    KosmosApp.currentLifecycleState = AppLifecycleState.resumed;
+    KlientApp.currentLifecycleState = AppLifecycleState.resumed;
   }
 
   @override
@@ -91,11 +91,11 @@ class KosmosState extends State with WidgetsBindingObserver {
     super.dispose();
   }
 
-  KosmosState() {
-    KosmosApp.onLogin = () {
+  KlientState() {
+    KlientApp.onLogin = () {
       setState(() {
         _mainWidget = const Main();
-        KosmosApp.currentLifecycleState = AppLifecycleState.resumed;
+        KlientApp.currentLifecycleState = AppLifecycleState.resumed;
       });
     };
     _mainWidget = const Main();
@@ -104,7 +104,7 @@ class KosmosState extends State with WidgetsBindingObserver {
       return;
     }
     if (ConfigProvider.token == null || ConfigProvider.token == '') {
-      _mainWidget = Login(KosmosApp.onLogin!);
+      _mainWidget = Login(KlientApp.onLogin!);
     } else {
       Client(ConfigProvider.token!);
     }
@@ -113,7 +113,7 @@ class KosmosState extends State with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {}
-    KosmosApp.currentLifecycleState = state;
+    KlientApp.currentLifecycleState = state;
   }
 
   @override
@@ -131,11 +131,11 @@ class KosmosState extends State with WidgetsBindingObserver {
       ConfigProvider.darkDynamic = darkDynamic;
       ConfigProvider.setTheme();
       return MaterialApp(
-        scaffoldMessengerKey: KosmosApp.messengerKey,
-        navigatorKey: KosmosApp.navigatorKey,
+        scaffoldMessengerKey: KlientApp.messengerKey,
+        navigatorKey: KlientApp.navigatorKey,
         title: title,
-        theme: KosmosApp.theme!,
-        darkTheme: KosmosApp.theme!,
+        theme: KlientApp.theme!,
+        darkTheme: KlientApp.theme!,
         home: _mainWidget,
       );
     });

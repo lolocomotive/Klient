@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -19,8 +19,8 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:html_unescape/html_unescape.dart';
-import 'package:kosmos_client/api/conversation.dart';
-import 'package:kosmos_client/util.dart';
+import 'package:klient/api/conversation.dart';
+import 'package:klient/util.dart';
 
 class MessageCard extends StatelessWidget {
   final Conversation _conversation;

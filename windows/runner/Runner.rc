@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "de.loicezt" "\0"
-            VALUE "FileDescription", "kosmos_client" "\0"
+            VALUE "FileDescription", "klient" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "kosmos_client" "\0"
+            VALUE "InternalName", "klient" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2023 de.loicezt. All rights reserved." "\0"
-            VALUE "OriginalFilename", "kosmos_client.exe" "\0"
-            VALUE "ProductName", "kosmos_client" "\0"
+            VALUE "OriginalFilename", "klient.exe" "\0"
+            VALUE "ProductName", "klient" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

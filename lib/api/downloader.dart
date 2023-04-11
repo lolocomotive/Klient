@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,14 +20,14 @@
 import 'dart:async';
 import 'dart:math';
 
-import 'package:kosmos_client/api/client.dart';
-import 'package:kosmos_client/api/exercise.dart';
-import 'package:kosmos_client/api/news_article.dart';
-import 'package:kosmos_client/api/student.dart';
-import 'package:kosmos_client/config_provider.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/screens/setup.dart';
-import 'package:kosmos_client/util.dart';
+import 'package:klient/api/client.dart';
+import 'package:klient/api/exercise.dart';
+import 'package:klient/api/news_article.dart';
+import 'package:klient/api/student.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/screens/setup.dart';
+import 'package:klient/util.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 import 'conversation.dart';

@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,9 +20,9 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/message_attachment.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/main.dart';
+import 'package:klient/api/message_attachment.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/main.dart';
 
 import 'message.dart';
 
@@ -114,7 +114,7 @@ class Conversation {
                   : ''));
       children.add(TextSpan(
           text: replaceWith[i],
-          style: TextStyle(backgroundColor: background ?? KosmosApp.theme!.highlightColor)));
+          style: TextStyle(backgroundColor: background ?? KlientApp.theme!.highlightColor)));
       children.add(TextSpan(
           text: split[i + 1].substring(0, min(75, split[i + 1].length)) +
               (split[i + 1].length > 75 ? '...\n' : '')));
@@ -155,11 +155,11 @@ class Conversation {
           result['FirstAuthor'] as String,
           result['CanReply'] as int == 1,
           fullMessageContents.toUpperCase().contains(query.toUpperCase())
-              ? highlight(query, fullMessageContents, color: KosmosApp.theme!.colorScheme.secondary)
+              ? highlight(query, fullMessageContents, color: KlientApp.theme!.colorScheme.secondary)
               : null,
           (result['Subject'] as String).toUpperCase().contains(query.toUpperCase())
               ? highlight(query, result['Subject'] as String,
-                  color: KosmosApp.theme!.colorScheme.secondary, fontSize: 14)
+                  color: KlientApp.theme!.colorScheme.secondary, fontSize: 14)
               : null,
         ),
       );

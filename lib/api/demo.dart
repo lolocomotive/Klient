@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -19,7 +19,7 @@
 
 import 'dart:math';
 
-import 'package:kosmos_client/database_provider.dart';
+import 'package:klient/database_provider.dart';
 
 generate() async {
   List<Map<String, Object?>> newsArticles = [];

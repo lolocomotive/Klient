@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -19,11 +19,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:kosmos_client/api/demo.dart';
-import 'package:kosmos_client/api/downloader.dart';
-import 'package:kosmos_client/database_provider.dart';
-import 'package:kosmos_client/notifications_provider.dart';
-import 'package:kosmos_client/widgets/default_activity.dart';
+import 'package:klient/api/demo.dart';
+import 'package:klient/api/downloader.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/notifications_provider.dart';
+import 'package:klient/widgets/default_activity.dart';
 
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);

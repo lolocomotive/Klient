@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -18,9 +18,9 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/api/news_article.dart';
-import 'package:kosmos_client/screens/article.dart';
-import 'package:kosmos_client/util.dart';
+import 'package:klient/api/news_article.dart';
+import 'package:klient/screens/article.dart';
+import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
 
 class ArticleCard extends StatelessWidget {

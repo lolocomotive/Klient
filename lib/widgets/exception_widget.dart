@@ -1,5 +1,5 @@
 /*
- * This file is part of the Kosmos Client (https://github.com/lolocomotive/kosmos_client)
+ * This file is part of the Klient (https://github.com/lolocomotive/klient)
  *
  * Copyright (C) 2022 lolocomotive
  *
@@ -20,9 +20,9 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:kosmos_client/main.dart';
-import 'package:kosmos_client/widgets/default_activity.dart';
-import 'package:kosmos_client/widgets/default_card.dart';
+import 'package:klient/main.dart';
+import 'package:klient/widgets/default_activity.dart';
+import 'package:klient/widgets/default_card.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class ExceptionWidget extends StatelessWidget {
@@ -69,8 +69,8 @@ class ExceptionWidget extends StatelessWidget {
         ),
         TextButton(
           onPressed: () {
-            KosmosApp.messengerKey.currentState?.hideCurrentSnackBar();
-            KosmosApp.navigatorKey.currentState!.push(
+            KlientApp.messengerKey.currentState?.hideCurrentSnackBar();
+            KlientApp.navigatorKey.currentState!.push(
               MaterialPageRoute(builder: (context) {
                 return DefaultSliverActivity(
                   title: message,
