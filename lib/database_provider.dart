@@ -50,12 +50,12 @@ class DatabaseProvider {
       // Initialize FFI
       sqfliteFfiInit();
       // Change the default factory
-      dbDir = '${await getDownloadsDirectory()}/klient/kdecole.db';
+      dbDir = '${(await getApplicationDocumentsDirectory()).path}/klient';
     } else {
       dbDir = await getDatabasesPath();
     }
 
-    final dbPath = '$dbDir/kdecole.db';
+    final dbPath = '$dbDir/klient.db';
     if (kDebugMode) {
       //await deleteDatabase(dbPath);
     }
