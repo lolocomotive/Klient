@@ -93,7 +93,6 @@ class _UserDialogState extends State<UserDialog> {
                       text: 'Copier le jeton d\'authentification',
                       onTap: () async {
                         Clipboard.setData(ClipboardData(text: Client.getClient().token));
-                        //KosmosApp.messengerKey.currentState!
                         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
                           content: Text('Copié'),
                         ));
