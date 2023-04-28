@@ -19,46 +19,31 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
-import 'package:klient/api/news_article.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/default_activity.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ArticlePage extends StatelessWidget {
-  const ArticlePage(this._article, {Key? key}) : super(key: key);
-  final NewsArticle _article;
+class SchoolInfoPage extends StatelessWidget {
+  const SchoolInfoPage(this._info, {Key? key}) : super(key: key);
+  final SchoolInfo _info;
 
   @override
   Widget build(BuildContext context) {
     return DefaultSliverActivity(
-      title: _article.title,
+      title: _info.title,
       child: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            if (_article.attachments.isNotEmpty)
+            if (_info.attachments.isNotEmpty)
               AttachmentsWidget(
-                attachments: _article.attachments,
+                attachments: _info.attachments,
               ),
-            Center(
-              child: GestureDetector(
-                onTap: () {
-                  launchUrl(Uri.parse(_article.url), mode: LaunchMode.externalApplication);
-                },
-                child: Text(
-                  'Consulter dans l\'ENT',
-                  style: TextStyle(
-                    color: Theme.of(context).colorScheme.primary,
-                    fontWeight: FontWeight.bold,
-                    decoration: TextDecoration.underline,
-                  ),
-                ),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Html(
-                data: _article.htmlContent,
+                data: _info.content,
                 onLinkTap: (url, context, map, element) {
                   launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                 },

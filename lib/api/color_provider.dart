@@ -79,3 +79,7 @@ class ColorProvider {
         .map((key, value) => MapEntry(key, colors[value]));
   }
 }
+
+extension StringColor on String {
+  MaterialColor get color => ColorProvider.getColor(this);
+}

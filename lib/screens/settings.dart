@@ -18,13 +18,12 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/lesson.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/color_picker.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/lesson_card.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 import 'package:settings_ui/settings_ui.dart';
 
 class SettingsPage extends StatefulWidget {
@@ -52,25 +51,6 @@ class _SettingsPageState extends State<SettingsPage> {
               lightTheme: SettingsThemeData(
                   settingsListBackground: Theme.of(context).colorScheme.background),
               sections: [
-                SettingsSection(
-                    title: Text(
-                      'API URL',
-                      style: boldPrimary,
-                    ),
-                    tiles: [
-                      SettingsTile(
-                        title: DropdownButton(
-                            value: Client.apiurl,
-                            isExpanded: true,
-                            items: KlientApp.dropdownItems,
-                            onChanged: (dynamic newValue) async {
-                              await ConfigProvider.getStorage()
-                                  .write(key: 'apiurl', value: newValue);
-                              Client.apiurl = newValue;
-                              setState(() {});
-                            }),
-                      ),
-                    ]),
                 SettingsSection(
                   title: Text(
                     'Notifications',
@@ -171,6 +151,21 @@ class CompactSelector extends StatefulWidget {
 }
 
 class _CompactSelectorState extends State<CompactSelector> {
+  final demoLesson = Lesson(
+      canceled: false,
+      endDateTime: DateTime.now().toIso8601String(),
+      startDateTime: DateTime.now().toIso8601String(),
+      id: '',
+      location: '404',
+      title: 'Exemple',
+      locationComplement: null,
+      subject: Subject(
+        id: '',
+        label: 'Exemple',
+        color: 'null',
+        type: 'subject',
+      ),
+      type: 'lesson');
   @override
   Widget build(BuildContext context) {
     bool icon = false;
@@ -230,19 +225,7 @@ class _CompactSelectorState extends State<CompactSelector> {
                       ),
                       IgnorePointer(
                         child: LessonCard(
-                          Lesson(
-                            0,
-                            DateTime.now(),
-                            '13:45',
-                            '14:40',
-                            '404',
-                            'Exemple',
-                            [],
-                            false,
-                            false,
-                            false,
-                            false,
-                          ),
+                          demoLesson,
                           positionned: false,
                         ),
                       ),
@@ -280,19 +263,7 @@ class _CompactSelectorState extends State<CompactSelector> {
                       ),
                       IgnorePointer(
                         child: LessonCard(
-                          Lesson(
-                            0,
-                            DateTime.now(),
-                            '13:45',
-                            '14:40',
-                            '404',
-                            'Exemple',
-                            [],
-                            false,
-                            false,
-                            false,
-                            false,
-                          ),
+                          demoLesson,
                           positionned: false,
                           compact: true,
                         ),

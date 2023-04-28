@@ -18,19 +18,19 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/exercise.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/exercise_card.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
-class MultiExerciseView extends StatelessWidget {
-  final List<Exercise> _exercises;
+class HomeworkList extends StatelessWidget {
+  final List<HomeworkAssignment> _hws;
   final String _title;
   final bool showDate;
   final bool showSubject;
   final Color color;
 
-  const MultiExerciseView(this._exercises, this._title, this.color,
+  const HomeworkList(this._hws, this._title, this.color,
       {Key? key, this.showDate = false, this.showSubject = false})
       : super(key: key);
 
@@ -46,15 +46,15 @@ class MultiExerciseView extends StatelessWidget {
             _title,
             style: const TextStyle(fontSize: 16),
           ),
-          ..._exercises
-              .map((e) => ExerciseCard(
+          ..._hws
+              .map((e) => HomeworkCard(
                     e,
                     compact: ConfigProvider.compact!,
                     showDate: showDate,
                     showSubject: showSubject,
                   ))
               .toList(),
-          if (_exercises.isEmpty)
+          if (_hws.isEmpty)
             Padding(
               padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
               child: Text(

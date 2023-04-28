@@ -19,11 +19,12 @@
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
-import 'package:klient/api/exercise.dart';
-import 'package:klient/api/lesson.dart';
+import 'package:klient/api/color_provider.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
-import 'package:klient/widgets/multi_exercise_view.dart';
+import 'package:klient/widgets/homework_list.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class LessonPage extends StatelessWidget {
   final Lesson _lesson;
@@ -31,10 +32,11 @@ class LessonPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = _lesson.subject.id.color;
     return DefaultSliverActivity(
       title: _lesson.title,
       titleColor: Colors.black,
-      titleBackground: _lesson.color.shade200,
+      titleBackground: color.shade200,
       leading: const BackButton(color: Colors.black),
       child: Center(
         child: ConstrainedBox(
@@ -42,44 +44,38 @@ class LessonPage extends StatelessWidget {
           child: ListView(
             children: [
               DefaultCard(
-                surfaceTintColor:
-                    Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-                shadowColor:
-                    Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+                surfaceTintColor: Theme.of(context).brightness == Brightness.light ? color : null,
+                shadowColor: Theme.of(context).brightness == Brightness.light ? color : null,
                 child: Column(
                   children: [
                     Text(
-                      'Séance du ${DateFormat('dd/MM').format(_lesson.date)} de ${_lesson.startTime} à ${_lesson.endTime}',
+                      'Séance du ${DateFormat('dd/MM').format(_lesson.startDateTime.date())} de ${_lesson.startDateTime.hm()} à ${_lesson.endDateTime.hm()}',
                       textAlign: TextAlign.center,
                     ),
                     Text(
-                      'Salle ${_lesson.room}',
+                      'Salle ${_lesson.location}',
                       textAlign: TextAlign.center,
                     ),
-                    if (_lesson.isModified) Text(_lesson.modificationMessage!)
+                    // TODO new API doesn't have this ?
+                    //if (_lesson.isModified) Text(_lesson.modificationMessage!)
                   ],
                 ),
               ),
-              MultiExerciseView(
-                _lesson.exercises.where((e) => e.lessonFor == _lesson.id).toList(),
+              HomeworkList(
+                _lesson.toDoForTheLesson ?? [],
                 'Travail à faire pour cette séance',
-                _lesson.color,
+                color,
               ),
-              MultiExerciseView(
+              /* TODO implement lessonContent display
+              HomeworkList(
                 _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
                 'Contenu de la séance',
-                _lesson.color,
-              ),
-              MultiExerciseView(
-                _lesson.exercises
-                    .where((e) =>
-                            e.type == ExerciseType.exercise &&
-                            e.parentLesson == _lesson.id &&
-                            e.parentLesson != e.lessonFor // don't display those twice
-                        )
-                    .toList(),
+                color,
+              ), */
+              HomeworkList(
+                _lesson.toDoAfterTheLesson ?? [],
                 'Travail donné lors de la séance',
-                _lesson.color,
+                color,
                 showDate: true,
               ),
             ],

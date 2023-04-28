@@ -20,7 +20,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:klient/api/demo.dart';
-import 'package:klient/api/downloader.dart';
 import 'package:klient/database_provider.dart';
 import 'package:klient/notifications_provider.dart';
 import 'package:klient/widgets/default_activity.dart';
@@ -28,24 +27,8 @@ import 'package:klient/widgets/default_activity.dart';
 class DebugScreen extends StatelessWidget {
   const DebugScreen({Key? key}) : super(key: key);
 
-  _updateMessages() {
-    Downloader.fetchMessageData();
-  }
-
-  _updateNews() {
-    Downloader.fetchNewsData();
-  }
-
-  _updateTimetable() {
-    Downloader.fetchTimetable();
-  }
-
   _closeDB() async {
     (await DatabaseProvider.getDB()).close();
-  }
-
-  _updateGrades() {
-    Downloader.fetchGradesData();
   }
 
   _clearDatabase() async {
@@ -114,26 +97,8 @@ class DebugScreen extends StatelessWidget {
     print('Upgraded to v1');
   }
 
-  _forceM2Step2() async {
-    await Downloader.fetchUserInfo();
-    final db = await DatabaseProvider.getDB();
-    await db.update('NewsArticles', {'StudentUID': '0'});
-    await db.update('Lessons', {'StudentUID': '0'});
-    await db.update('Exercises', {'StudentUID': '0'});
-    await db.update('Lessons', {'StudentUID': '0'});
-    print('Upgraded to v2');
-  }
-
   _dropGrades() async {
     (await DatabaseProvider.getDB()).execute('DROP TABLE GRADES');
-  }
-
-  _updateHomework() {
-    Downloader.fetchHomework();
-  }
-
-  _fetchUserInfo() {
-    Downloader.fetchUserInfo();
   }
 
   @override
@@ -145,18 +110,11 @@ class DebugScreen extends StatelessWidget {
         child: ListView(
           children: [
             ElevatedButton(onPressed: _joinTest, child: const Text('SQL JOIN test')),
-            ElevatedButton(onPressed: _updateMessages, child: const Text('Update messages')),
-            ElevatedButton(onPressed: _updateNews, child: const Text('Update news')),
-            ElevatedButton(onPressed: _updateTimetable, child: const Text('Update Timetable')),
-            ElevatedButton(onPressed: _updateHomework, child: const Text('Update Homework')),
-            ElevatedButton(onPressed: _updateGrades, child: const Text('Update grades')),
             ElevatedButton(onPressed: _clearDatabase, child: const Text('Clear database')),
             ElevatedButton(onPressed: _closeDB, child: const Text('Close database')),
-            ElevatedButton(onPressed: _fetchUserInfo, child: const Text('Fetch user info')),
             ElevatedButton(onPressed: _dropGrades, child: const Text('drop grades')),
             ElevatedButton(onPressed: _showNotification, child: const Text('Force notification')),
             const ElevatedButton(onPressed: generate, child: Text('Force generate')),
-            ElevatedButton(onPressed: _forceM2Step2, child: const Text('Force Migrate2 step2')),
             ElevatedButton(onPressed: _forceMigrate1, child: const Text('Force Migrate1')),
             ElevatedButton(onPressed: _sqliteMasterPrint, child: const Text('Sqlite master print')),
           ],

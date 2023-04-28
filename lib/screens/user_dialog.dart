@@ -1,15 +1,12 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:flutter/services.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/student.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/screens/debug.dart';
 import 'package:klient/screens/settings.dart';
-import 'package:klient/screens/setup.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/user_avatar.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class UserDialog extends StatefulWidget {
   final void Function()? onUpdate;
@@ -38,6 +35,7 @@ class _UserDialogState extends State<UserDialog> {
                   style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
                 ),
               ),
+              /* TODO rewrite this 
               if (Client.students.length > 1)
                 DefaultCard(
                   child: Column(
@@ -55,7 +53,7 @@ class _UserDialogState extends State<UserDialog> {
                           .toList(),
                     ],
                   ),
-                ),
+                ), */
               DefaultCard(
                 child: Column(
                   children: [
@@ -82,22 +80,12 @@ class _UserDialogState extends State<UserDialog> {
                       },
                     ),
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                    Option(
+                    const Option(
                       icon: Icons.logout_outlined,
                       text: 'Se déconnecter',
-                      onTap: () => Client.disconnect(context),
+                      // onTap: () => Client.disconnect(context),
                     ),
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                    Option(
-                      icon: Icons.copy,
-                      text: 'Copier le jeton d\'authentification',
-                      onTap: () async {
-                        Clipboard.setData(ClipboardData(text: Client.getClient().token));
-                        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
-                          content: Text('Copié'),
-                        ));
-                      },
-                    ),
                     if (kDebugMode)
                       Divider(
                           height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
@@ -114,16 +102,6 @@ class _UserDialogState extends State<UserDialog> {
                     if (kDebugMode)
                       Divider(
                           height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                    if (kDebugMode)
-                      Option(
-                        text: 'Initial setup',
-                        icon: Icons.bug_report_outlined,
-                        onTap: () {
-                          Navigator.of(context)
-                            ..pop()
-                            ..push(MaterialPageRoute(builder: (_) => SetupPage(() {})));
-                        },
-                      ),
                   ],
                 ),
               )
@@ -136,11 +114,11 @@ class _UserDialogState extends State<UserDialog> {
 }
 
 class UserWidget extends StatelessWidget {
-  final Student student;
+  final User user;
   final void Function() onTap;
 
   const UserWidget(
-    this.student,
+    this.user,
     this.onTap, {
     Key? key,
   }) : super(key: key);
@@ -160,16 +138,16 @@ class UserWidget extends StatelessWidget {
             Row(children: [
               SizedBox(
                   height: MediaQuery.of(context).textScaleFactor * 55,
-                  child: UserAvatar(student.name.split(' ').map((e) => e[0]).join())),
+                  child: UserAvatar(user.firstName[0] + user.lastName[0])),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(student.name),
+                child: Text('${user.firstName} ${user.lastName}'),
               ),
             ]),
             Positioned.fill(
               child: IgnorePointer(
                 child: AnimatedOpacity(
-                  opacity: student.uid == Client.currentlySelected!.uid ? 1 : 0,
+                  opacity: /*user.id == Client.currentlySelected!.uid ? 1 : 0*/ 1,
                   duration: const Duration(milliseconds: 300),
                   child: Container(
                     color: Theme.of(context).highlightColor,

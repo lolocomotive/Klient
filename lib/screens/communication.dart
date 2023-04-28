@@ -19,50 +19,45 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
-import 'package:html_unescape/html_unescape.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/conversation.dart';
-import 'package:klient/api/downloader.dart';
-import 'package:klient/database_provider.dart';
-import 'package:klient/screens/messages.dart';
-import 'package:klient/util.dart';
-import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_transition.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ConversationPage extends StatefulWidget {
-  const ConversationPage(
+class CommunicationPage extends StatefulWidget {
+  const CommunicationPage(
       {Key? key, required this.onDelete, required this.id, required this.subject})
       : super(key: key);
 
   @override
-  State<ConversationPage> createState() => _ConversationPageState();
+  State<CommunicationPage> createState() => _CommunicationPageState();
 
   final Function onDelete;
-  final int id;
+  final String id;
   final String subject;
 }
 
-class _ConversationPageState extends State<ConversationPage> {
-  Conversation? _conversation;
+class _CommunicationPageState extends State<CommunicationPage> {
+  Communication? _communication;
   final TextEditingController _textFieldController = TextEditingController();
-  bool _busy = false;
+  final bool _busy = false;
   bool _showReply = false;
   bool _transitionDone = false;
 
   @override
   void initState() {
     super.initState();
+
+/* TODO rewrite this
     Conversation.byID(widget.id).then((conversation) {
       if (!conversation!.read) {
         Client.getClient().markConversationRead(conversation);
         MessagesPageState.currentState?.reloadFromDB();
       }
       if (!mounted) return;
-      _conversation = conversation;
+      _communication = conversation;
       delayTransitionDone();
-    });
+    }); */
   }
 
   delayTransitionDone() {
@@ -92,7 +87,7 @@ class _ConversationPageState extends State<ConversationPage> {
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();
-                              await widget.onDelete(_conversation);
+                              await widget.onDelete(_communication);
                             },
                             icon: const Icon(Icons.delete))
                       ],
@@ -105,21 +100,24 @@ class _ConversationPageState extends State<ConversationPage> {
                     context: context,
                     removeTop: true,
                     child: ListView.builder(
-                      itemCount: (_conversation != null ? _conversation!.messages.length : 0) +
+                      itemCount: (_communication != null
+                              ? (_communication!.participationsNumber ?? 0).toInt()
+                              : 0) +
                           (_showReply ? 1 : 2),
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                             child: Text(
-                              _conversation != null ? _conversation!.subject : widget.subject,
+                              _communication != null ? _communication!.subject : widget.subject,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           );
                         }
                         index -= 1;
-                        if (_conversation == null || index >= _conversation!.messages.length) {
-                          return _conversation != null && _conversation!.canReply
+                        if (_communication == null ||
+                            index >= _communication!.participationsNumber!) {
+                          return _communication != null && _communication!.replyToAllAllowed!
                               ? Padding(
                                   padding: const EdgeInsets.all(8.0),
                                   child: OutlinedButton(
@@ -154,7 +152,7 @@ class _ConversationPageState extends State<ConversationPage> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          _conversation!.messages[index].author,
+                                          /*_communication!.messages[index].author*/ 'Unimplemented', //FIXME
                                           textAlign: TextAlign.left,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -164,7 +162,7 @@ class _ConversationPageState extends State<ConversationPage> {
                                         ),
                                       ),
                                       Text(
-                                        Util.dateToString(_conversation!.messages[index].date),
+                                        /*Util.dateToString(_communication!.messages[index].date)*/ 'Unimplemented', //FIXME
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Theme.of(context).colorScheme.primary,
@@ -173,8 +171,9 @@ class _ConversationPageState extends State<ConversationPage> {
                                     ],
                                   ),
                                   Html(
-                                    data: HtmlUnescape()
-                                        .convert(_conversation!.messages[index].htmlContent),
+                                    data: /* HtmlUnescape()
+                                        .convert(_communication!.messages[index].htmlContent)*/
+                                        'Unimplemented', //FIXME
                                     style: {
                                       'body':
                                           Style(margin: Margins.all(0), padding: EdgeInsets.zero),
@@ -193,11 +192,12 @@ class _ConversationPageState extends State<ConversationPage> {
                                           mode: LaunchMode.externalApplication);
                                     },
                                   ),
-                                  if (_conversation!.messages[index].attachments.isNotEmpty)
+                                  /* FIXME
+                                 if (_communication!.messages[index].attachments.isNotEmpty)
                                     AttachmentsWidget(
-                                      attachments: _conversation!.messages[index].attachments,
+                                      attachments: _communication!.messages[index].attachments,
                                       elevation: 3,
-                                    )
+                                    )*/
                                 ],
                               ),
                             ),
@@ -249,28 +249,29 @@ class _ConversationPageState extends State<ConversationPage> {
                                   onPressed: _busy
                                       ? null
                                       : () async {
+                                          /* TODO rewrite this
                                           _busy = true;
                                           setState(() {});
                                           try {
                                             await Client.getClient().request(Action.reply,
-                                                params: [_conversation!.id.toString()],
+                                                params: [_communication!.id.toString()],
                                                 body:
                                                     '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
                                             _textFieldController.clear();
                                             final batch = (await DatabaseProvider.getDB()).batch();
-                                            await Downloader.clearConversation(_conversation!.id);
+                                            await Downloader.clearConversation(_communication!.id);
                                             await Downloader.fetchSingleConversation(
-                                                _conversation!.id, batch);
+                                                _communication!.id, batch);
                                             await Client.getClient().process();
                                             //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.
                                             //Committing the batch twice would duplicate all the messages.
-                                            await Conversation.byID(_conversation!.id)
+                                            await Conversation.byID(_communication!.id)
                                                 .then((conversation) {
                                               if (!mounted) return;
                                               setState(() {
                                                 _busy = false;
                                                 _showReply = false;
-                                                _conversation = conversation;
+                                                _communication = conversation;
                                               });
                                             });
                                             MessagesPageState.currentState!.reloadFromDB();
@@ -279,7 +280,7 @@ class _ConversationPageState extends State<ConversationPage> {
                                               _busy = false;
                                             });
                                             Util.onException(e, st);
-                                          }
+                                          }*/
                                         },
                                   child: _busy
                                       ? Transform.scale(

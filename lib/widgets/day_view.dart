@@ -18,10 +18,10 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/lesson.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/timetable.dart';
 import 'package:klient/widgets/lesson_card.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class DayView extends StatelessWidget {
   final List<Lesson> _lessons;
@@ -31,17 +31,18 @@ class DayView extends StatelessWidget {
   static const _days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
   @override
   Widget build(BuildContext context) {
+    final date0 = DateTime.parse(_lessons[0].startDateTime);
     return Column(
       children: [
         Padding(
           padding: const EdgeInsets.all(8.0),
           child: Text(
-            '${_days[_lessons[0].date.weekday - 1]} ${_lessons[0].date.day}/${_lessons[0].date.month}',
+            '${_days[date0.weekday - 1]} ${date0.day}/${date0.month}',
             style: const TextStyle(fontWeight: FontWeight.bold),
           ),
         ),
         SizedBox(
-          height: (ConfigProvider.compact! ? Values.compactHeightPerHour : Values.heightPerHour) *
+          height: (ConfigProvider.compact! ? Values.compactHeightPerHour : Values.heightPerMinute) *
                   MediaQuery.of(context).textScaleFactor *
                   Values.maxLessonsPerDay *
                   Values.lessonLength -

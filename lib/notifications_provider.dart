@@ -17,12 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:klient/api/conversation.dart';
-import 'package:klient/main.dart';
-import 'package:klient/screens/conversation.dart';
-import 'package:klient/screens/messages.dart';
 
 class NotificationsProvider {
   static FlutterLocalNotificationsPlugin? _notifications;
@@ -41,20 +36,21 @@ class NotificationsProvider {
     final payload = response?.payload;
     if (payload == null) return;
     if (payload.startsWith('conv-')) {
+      /* TODO rewrite this 
       final id = payload.substring(5, payload.length);
       Conversation.byID(int.parse(id)).then((conv) {
         if (conv == null) return;
 
         KlientApp.navigatorKey.currentState?.push(MaterialPageRoute(
           builder: (context) {
-            return ConversationPage(
+            return CommunicationPage(
               onDelete: deleteConversation,
               id: int.parse(id),
               subject: conv.subject,
             );
           },
         ));
-      });
+      }); */
     }
   }
 

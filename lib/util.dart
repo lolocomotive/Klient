@@ -79,7 +79,8 @@ class Util {
     }
   }
 
-  static String dateToString(DateTime date) {
+  static String formatDate(String dateString) {
+    DateTime date = DateTime.parse(dateString);
     final DateTime now = DateTime.now();
     if (date.day == now.day && date.month == now.month && date.year == now.year) {
       return '${date.hour}:${date.second.toString().padLeft(2, '0')}';
@@ -88,5 +89,22 @@ class Util {
     } else {
       return '${date.day}/${date.month}/${date.year}';
     }
+  }
+}
+
+extension Date on String {
+  DateTime date() {
+    return DateTime.parse(this);
+  }
+
+  // Return a nicely formatted human readable date
+  String format() {
+    return Util.formatDate(this);
+  }
+
+  /// Return a string in the format HH:MM
+  String hm() {
+    final date = this.date();
+    return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }

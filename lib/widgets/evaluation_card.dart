@@ -19,23 +19,23 @@
 
 import 'package:flutter/material.dart';
 import 'package:klient/api/color_provider.dart';
-import 'package:klient/api/grade.dart';
 import 'package:klient/util.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
-class GradeCard extends StatelessWidget {
-  final Grade _grade;
+class EvaluationCard extends StatelessWidget {
+  final Evaluation _evaluation;
   final bool compact;
 
-  const GradeCard(this._grade, {Key? key, this.compact = true}) : super(key: key);
+  const EvaluationCard(this._evaluation, {Key? key, this.compact = true}) : super(key: key);
   @override
   Widget build(BuildContext context) {
-    final MaterialColor color = ColorProvider.getColor(_grade.subject);
+    final MaterialColor color = ColorProvider.getColor(_evaluation.subject.id);
     final titleRow = Row(
       mainAxisAlignment: compact ? MainAxisAlignment.start : MainAxisAlignment.spaceAround,
       children: [
         Flexible(
           child: Text(
-            '${_grade.subject} ',
+            '${_evaluation.subject} ',
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: FontWeight.bold,
@@ -44,7 +44,7 @@ class GradeCard extends StatelessWidget {
           ),
         ),
         Text(
-          Util.dateToString(_grade.date),
+          _evaluation.date.format(),
           textAlign: TextAlign.center,
           style: TextStyle(color: compact ? null : Colors.black),
         ),
@@ -75,19 +75,18 @@ class GradeCard extends StatelessWidget {
                 else
                   Container(
                     padding: const EdgeInsets.all(8.0),
-                    color: ColorProvider.getColor(_grade.subject).shade200,
+                    color: ColorProvider.getColor(_evaluation.subject.id).shade200,
                     child: titleRow,
                   ),
                 if (compact)
                   Row(
                     children: [
                       Text(
-                        _grade.grade == -1
-                            ? _grade.gradeText!
-                            : _grade.grade.toString().replaceAll('.', ','),
+                        //FIXME support for non-numeric grades
+                        _evaluation.result.mark.toString(),
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
-                      if (_grade.of != 20) Text('/${_grade.of}')
+                      if (_evaluation.scale != 20) Text('/${_evaluation.scale}')
                     ],
                   )
                 else
@@ -100,13 +99,12 @@ class GradeCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                _grade.grade == -1
-                                    ? _grade.gradeText!
-                                    : _grade.grade.toString().replaceAll('.', ','),
+                                //FIXME support for non-numeric grades
+                                _evaluation.result.mark.toString().replaceAll('.', ','),
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               ),
                               const Divider(height: 10),
-                              Text(_grade.of.toInt().toString())
+                              Text(_evaluation.scale.toString())
                             ],
                           ),
                         ),

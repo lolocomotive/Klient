@@ -18,21 +18,18 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/downloader.dart';
-import 'package:klient/api/exercise.dart';
-import 'package:klient/api/grade.dart';
-import 'package:klient/api/news_article.dart';
 import 'package:klient/config_provider.dart';
-import 'package:klient/widgets/article_card.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/delayed_progress_indicator.dart';
+import 'package:klient/widgets/evaluation_card.dart';
 import 'package:klient/widgets/exception_widget.dart';
 import 'package:klient/widgets/exercise_card.dart';
-import 'package:klient/widgets/grade_card.dart';
+import 'package:klient/widgets/school_info_card.dart';
 import 'package:klient/widgets/user_avatar_action.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -63,16 +60,17 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ],
       child: RefreshIndicator(
         onRefresh: (() async {
+          /* TODO rewrite this
           Client.getClient().clear();
           await Future.wait(<Future>[
             Downloader.fetchGradesData().then((_) => _gKey.currentState?.setState(() {})),
             Downloader.fetchHomework().then((_) => _hKey.currentState?.setState(() {})),
             Downloader.fetchNewsData().then((_) => _aKey.currentState?.setState(() {})),
-          ]);
+          ]);*/
         }),
         child: SingleChildScrollView(
           child: LayoutBuilder(builder: (context, constraints) {
-            if (Client.currentlySelected == null) {
+            /* if (Client.currentlySelected == null) {
               return FutureBuilder(
                   future: Future.delayed(const Duration(seconds: 2)),
                   builder: (context, snapshot) {
@@ -91,7 +89,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                             Padding(
                               padding: const EdgeInsets.only(top: 16.0),
                               child: ElevatedButton(
-                                onPressed: () => Client.disconnect(context),
+                                onPressed: () {/*Client.disconnect(context)*/},
                                 child: const Text('Supprimmer les données et redémarrer'),
                               ),
                             )
@@ -100,7 +98,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                       ),
                     );
                   });
-            }
+            }*/
             if (constraints.maxWidth > 1200) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -118,10 +116,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                          const SectionTitle('Dernières notes'),
-                        if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                          GradeList(key: _gKey),
+                        // if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                        const SectionTitle('Dernières notes'),
+                        // if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                        GradeList(key: _gKey),
                       ],
                     ),
                   ),
@@ -142,10 +140,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 children: [
                   const SectionTitle('Travail à faire'),
                   HomeworkListWrapper(key: _hKey),
-                  if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                    const SectionTitle('Dernières notes'),
-                  if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                    GradeList(key: _gKey),
+                  //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                  const SectionTitle('Dernières notes'),
+                  //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                  GradeList(key: _gKey),
                   const SectionTitle('Actualités'),
                   ArticleList(key: _aKey),
                 ],
@@ -160,10 +158,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       const SectionTitle('Travail à faire'),
                       HomeworkListWrapper(key: _hKey),
-                      if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                        const SectionTitle('Dernières notes'),
-                      if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                        GradeList(key: _gKey),
+                      //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                      const SectionTitle('Dernières notes'),
+                      //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
+                      GradeList(key: _gKey),
                     ],
                   ),
                 ),
@@ -194,7 +192,8 @@ class HomeworkListWrapper extends StatefulWidget {
 }
 
 class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerProviderStateMixin {
-  Future<List<Exercise>> _fetchHomework() async {
+  Future<List<HomeworkAssignment>> _fetchHomework() async {
+    /* TODO rewrite this
     final exercises = (await Exercise.fetchAll())
         .where(
             (exercise) => exercise.lessonFor != null && exercise.dateFor!.isAfter(DateTime.now()))
@@ -203,11 +202,13 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
       (a, b) => a.dateFor!.millisecondsSinceEpoch - b.dateFor!.millisecondsSinceEpoch,
     );
     return exercises;
+    */
+    return [];
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Exercise>>(
+    return FutureBuilder<List<HomeworkAssignment>>(
         future: _fetchHomework(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -252,22 +253,25 @@ class GradeList extends StatefulWidget {
 }
 
 class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
-  Future<List<List<Grade>>> _fetchGrades() async {
-    final grades = await Grade.fetchAll();
-    List<List<Grade>> r = [];
+  Future<List<List<Evaluation>>> _fetchGrades() async {
+    /* TODO rewrite this
+    final grades = await Evaluation.fetchAll();
+    List<List<Evaluation>> r = [];
     for (int i = 0; i < grades.length; i++) {
       if (i % 2 == 0) {
         r.add([grades[i]]);
       } else {
         r[(i / 2).floor()].add(grades[i]);
       }
-    }
+    } 
     return r;
+    */
+    return [];
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<List<Grade>>>(
+    return FutureBuilder<List<List<Evaluation>>>(
         future: _fetchGrades(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -300,12 +304,12 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
                             (twoGrades) => Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                GradeCard(
+                                EvaluationCard(
                                   twoGrades[0],
                                   compact: ConfigProvider.compact!,
                                 ),
                                 if (twoGrades.length > 1)
-                                  GradeCard(
+                                  EvaluationCard(
                                     twoGrades[1],
                                     compact: ConfigProvider.compact!,
                                   )
@@ -332,8 +336,8 @@ class ArticleList extends StatefulWidget {
 class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<NewsArticle>>(
-        future: NewsArticle.fetchAll(),
+    return FutureBuilder<List<SchoolInfo>>(
+        future: /*NewsArticle.fetchAll()*/ Future.value([]), //TODO rewrite this
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -367,7 +371,7 @@ class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: snapshot.data!.map((article) => ArticleCard(article)).toList(),
+                    children: snapshot.data!.map((article) => SchoolInfoCard(article)).toList(),
                   ),
           );
         });
@@ -396,11 +400,11 @@ class SectionTitle extends StatelessWidget {
 class HomeworkList extends StatefulWidget {
   const HomeworkList({
     Key? key,
-    required List<Exercise> data,
+    required List<HomeworkAssignment> data,
   })  : _data = data,
         super(key: key);
 
-  final List<Exercise> _data;
+  final List<HomeworkAssignment> _data;
 
   @override
   State<HomeworkList> createState() => _HomeworkListState();
@@ -409,7 +413,7 @@ class HomeworkList extends StatefulWidget {
 class _HomeworkListState extends State<HomeworkList> {
   bool _showDone = false;
 
-  List<Exercise>? mutableData;
+  List<HomeworkAssignment>? mutableData;
   @override
   Widget build(BuildContext context) {
     mutableData ??= widget._data;
@@ -459,7 +463,7 @@ class _HomeworkListState extends State<HomeworkList> {
           }
           return Opacity(
             opacity: homework.done ? .6 : 1,
-            child: ExerciseCard(
+            child: HomeworkCard(
               homework,
               compact: ConfigProvider.compact!,
               elevation: 1,
@@ -467,10 +471,12 @@ class _HomeworkListState extends State<HomeworkList> {
               showSubject: true,
               onMarkedDone: (bool done) {
                 mutableData!.remove(homework);
-                Exercise modified = (homework..done = done);
+                HomeworkAssignment modified = (homework..done = done);
                 mutableData!.add(modified);
                 mutableData!.sort(
-                  (a, b) => a.dateFor!.millisecondsSinceEpoch - b.dateFor!.millisecondsSinceEpoch,
+                  (a, b) =>
+                      a.dueDateTime.date().millisecondsSinceEpoch -
+                      b.dueDateTime.date().millisecondsSinceEpoch,
                 );
                 setState(() {});
               },

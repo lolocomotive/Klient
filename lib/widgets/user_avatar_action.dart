@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:klient/api/client.dart';
 import 'package:klient/screens/user_dialog.dart';
 import 'package:klient/widgets/user_avatar.dart';
 
@@ -26,9 +25,12 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         );
       },
       borderRadius: BorderRadius.circular(1000),
-      child: UserAvatar(Client.currentlySelected != null
+      child: const UserAvatar(
+          /* FIXME
+      Client.currentlySelected != null
           ? Client.currentlySelected!.name.split(' ').map((e) => e[0]).join()
-          : 'ERR'),
+          : */
+          'ERR'),
     );
   }
 }

@@ -18,21 +18,16 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:klient/api/client.dart';
-import 'package:klient/api/conversation.dart';
-import 'package:klient/api/downloader.dart';
-import 'package:klient/config_provider.dart';
-import 'package:klient/database_provider.dart';
-import 'package:klient/screens/conversation.dart';
+import 'package:klient/screens/communication.dart';
 import 'package:klient/screens/message_search.dart';
-import 'package:klient/util.dart';
+import 'package:klient/widgets/communication_card.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/delayed_progress_indicator.dart';
 import 'package:klient/widgets/exception_widget.dart';
-import 'package:klient/widgets/message_card.dart';
 import 'package:klient/widgets/user_avatar_action.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class MessagesPage extends StatefulWidget {
   const MessagesPage({Key? key}) : super(key: key);
@@ -48,24 +43,24 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   StackTrace? _st;
   bool _sideBySide = false;
   String? currentSubject;
-  int? currentId;
+  String? currentId;
   bool _transitionDone = false;
 
-  void openConversation(
-      BuildContext context, GlobalKey? parentKey, int conversationId, String conversationSubject) {
+  void openConversation(BuildContext context, GlobalKey? parentKey, String communicationId,
+      String conversationSubject) {
     if (_sideBySide) {
       setState(() {
-        currentId = conversationId;
+        currentId = communicationId;
         currentSubject = conversationSubject;
       });
     } else {
       Navigator.of(context).push(
         MorpheusPageRoute(
           //FIXME Builder is called twice
-          builder: (_) => ConversationPage(
+          builder: (_) => CommunicationPage(
               onDelete: deleteConversationFromList,
               subject: conversationSubject,
-              id: conversationId),
+              id: communicationId),
           parentKey: parentKey,
         ),
       );
@@ -73,17 +68,19 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   reloadFromDB() {
+    /* TODO rewrite this
     Conversation.fetchAll().then((conversations) {
       if (!mounted) return;
       _conversations = conversations;
       delayTransitionDone();
-    });
+    }); */
   }
 
   refresh() async {
-    Client.getClient().clear();
+/*TODO rewrite this  
+   Client.getClient().clear();
     await Downloader.fetchMessageData();
-    reloadFromDB();
+    reloadFromDB(); */
   }
 
   delayTransitionDone() {
@@ -103,7 +100,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentState = this;
     currentId = null;
     currentSubject = null;
-    Conversation.fetchAll().then((conversations) {
+    /* TODO rewrite this     
+      Conversation.fetchAll().then((conversations) {
       delayTransitionDone();
       if (!mounted) return;
       setState(() {
@@ -113,10 +111,10 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
       _e = e as Exception;
       _st = st;
       setState(() {});
-    });
+    }); */
   }
 
-  List<Conversation> _conversations = [];
+  final List<Communication> _communications = [];
 
   @override
   Widget build(BuildContext context) {
@@ -202,7 +200,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                               title: Text(
                                 _selection.isNotEmpty
                                     ? _selection.length == 1
-                                        ? _conversations[_selection[0]].subject
+                                        ? _communications[_selection[0]].subject
                                         : '${_selection.length} conversations'
                                     : 'Messagerie',
                                 style: TextStyle(
@@ -228,14 +226,14 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                       DefaultCard(child: ExceptionWidget(e: _e!, st: _st!)),
                                     ],
                                   )
-                                : _conversations.isEmpty
-                                    ? Center(
+                                : _communications.isEmpty
+                                    ? const Center(
                                         child: Padding(
-                                          padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
+                                          padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             crossAxisAlignment: CrossAxisAlignment.center,
-                                            children: const [
+                                            children: [
                                               DelayedProgressIndicator(
                                                 delay: Duration(milliseconds: 500),
                                               ),
@@ -244,8 +242,10 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         ),
                                       )
                                     : ListView.builder(
-                                        itemCount: _conversations.length +
-                                            (Downloader.loadingMessages ? 1 : 0),
+                                        itemCount: _communications
+                                            .length /* +
+                                            (Downloader.loadingMessages ? 1 : 0)*/
+                                        ,
                                         padding: const EdgeInsets.all(0),
                                         itemBuilder: (BuildContext context, int index) {
                                           final parentKey = GlobalKey();
@@ -265,7 +265,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                           14,
                                                           index == 0 ? 16 : 7,
                                                           14,
-                                                          index == _conversations.length - 1
+                                                          index == _communications.length - 1
                                                               ? 14
                                                               : 7),
                                                       elevation: 1,
@@ -276,7 +276,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                       child: InkWell(
                                                         child: Padding(
                                                           padding: const EdgeInsets.all(8.0),
-                                                          child: MessageCard(_conversations[index]),
+                                                          child: CommunicationCard(
+                                                              _communications[index]),
                                                         ),
                                                         onTap: () {
                                                           if (_selection.isNotEmpty) {
@@ -292,8 +293,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                             openConversation(
                                                                 context,
                                                                 parentKey,
-                                                                _conversations[index].id,
-                                                                _conversations[index].subject);
+                                                                _communications[index].id,
+                                                                _communications[index].subject);
                                                           }
                                                         },
                                                         onLongPress: () {
@@ -338,7 +339,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                         child: currentId == null
                             ? const Center(
                                 child: Text('Cliquer sur une conversation pour l\'afficher ici'))
-                            : ConversationPage(
+                            : CommunicationPage(
                                 key: Key(currentId.toString()),
                                 id: currentId!,
                                 subject: currentSubject!,
@@ -355,10 +356,10 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     );
   }
 
-  deleteConversationFromList(Conversation conv) async {
-    await deleteConversation(conv);
+  deleteConversationFromList(Communication comm) async {
+    await deleteConversation(comm);
     try {
-      _conversations.removeAt(_conversations.indexOf(conv));
+      _communications.removeAt(_communications.indexOf(comm));
     } catch (_) {
       reloadFromDB();
     }
@@ -367,24 +368,25 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
 
   void deleteSelection(List<int> selection) {
     for (var index in selection) {
-      deleteConversationFromList(_conversations[index]);
+      deleteConversationFromList(_communications[index]);
     }
   }
 }
 
-deleteConversation(Conversation conv) async {
-  final db = await DatabaseProvider.getDB();
+deleteConversation(Communication comm) async {
+  /*TODO rewrite this
+   final db = await DatabaseProvider.getDB();
 
   try {
     if (!ConfigProvider.demo) {
-      await Client.getClient().request(Action.deleteMessage, params: [conv.id.toString()]);
+      await Client.getClient().request(Action.deleteMessage, params: [comm.id.toString()]);
     }
-    db.delete('Conversations', where: 'ID = ?', whereArgs: [conv.id]);
-    db.delete('Messages', where: 'ParentID = ?', whereArgs: [conv.id]);
-    for (var message in conv.messages) {
+    db.delete('Conversations', where: 'ID = ?', whereArgs: [comm.id]);
+    db.delete('Messages', where: 'ParentID = ?', whereArgs: [comm.id]);
+    for (var message in comm.messages) {
       db.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [message.id]);
     }
   } on Exception catch (e, st) {
     Util.onException(e, st);
-  }
+  } */
 }

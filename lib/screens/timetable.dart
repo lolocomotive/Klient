@@ -20,10 +20,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/downloader.dart';
-import 'package:klient/api/lesson.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/day_view.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
@@ -31,6 +29,7 @@ import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/delayed_progress_indicator.dart';
 import 'package:klient/widgets/exception_widget.dart';
 import 'package:klient/widgets/user_avatar_action.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 extension DateOnlyCompare on DateTime {
   bool isSameDay(DateTime other) {
@@ -40,7 +39,7 @@ extension DateOnlyCompare on DateTime {
 
 class Values {
   static const timeWidth = 32.0;
-  static const heightPerHour = 120.0;
+  static const heightPerMinute = 2.0;
   static const compactHeightPerHour = 70.0;
   static const lessonLength = 55.0 / 55.0;
   static const maxLessonsPerDay = 11;
@@ -56,11 +55,12 @@ class TimetablePage extends StatefulWidget {
 
 class _TimetablePageState extends State<TimetablePage> with TickerProviderStateMixin {
   PageController _pageController = PageController();
-  int _page = 0;
+  final int _page = 0;
 
   bool compact = ConfigProvider.compact!;
   Future<List<List<Lesson>>> _getCalendar() async {
     List<List<Lesson>> r = [];
+    /* TODO rewrite this
     var lessons = await Lesson.fetchAll();
     List<Lesson> day = [];
     DateTime lastDate = DateTime.utc(0);
@@ -83,7 +83,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
           lesson.date.isSameDay(DateTime.now())) {
         _page = r.length;
       }
-    }
+    } */
     return r;
   }
 
@@ -102,13 +102,14 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
       ],
       child: RefreshIndicator(
         onRefresh: () async {
+          /* TODO rewrite this
           Client.getClient().clear();
           await Downloader.fetchTimetable();
-          setState(() {});
+          setState(() {}); */
         },
         child: SingleChildScrollView(
           child: SizedBox(
-            height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
+            height: (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
                     MediaQuery.of(context).textScaleFactor *
                     Values.maxLessonsPerDay *
                     Values.lessonLength +
@@ -196,8 +197,9 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                       child: ListView.builder(
                         itemBuilder: (ctx, index) {
                           return SizedBox(
-                            height: (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
-                                MediaQuery.of(context).textScaleFactor,
+                            height:
+                                (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
+                                    MediaQuery.of(context).textScaleFactor,
                             child: Text(
                               '${index + Values.startTime}h',
                               textAlign: TextAlign.center,
@@ -221,7 +223,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
 int getWeekCount(List<List<Lesson>> data) {
   var weeks = 1;
   for (final day in data) {
-    if (day[0].date.weekday == DateTime.monday) {
+    if (day[0].startDateTime.date().weekday == DateTime.monday) {
       weeks++;
     }
   }
@@ -232,7 +234,7 @@ int dayToWeek(int d, List<List<Lesson>> data) {
   var week = 1;
   int i = 0;
   for (final day in data) {
-    if (day[0].date.weekday == DateTime.monday) {
+    if (day[0].startDateTime.date().weekday == DateTime.monday) {
       week++;
     }
     i++;
@@ -246,12 +248,12 @@ class WeekView extends StatelessWidget {
     _week = [];
     var currentWeek = 0;
     for (final day in data) {
-      if (day[0].date.weekday == DateTime.monday) {
+      if (day[0].startDateTime.date().weekday == DateTime.monday) {
         currentWeek++;
       }
       if (currentWeek == index) {
-        if (_week.isEmpty && day[0].date.weekday > 1) {
-          for (var i = 1; i < day[0].date.weekday; i++) {
+        if (_week.isEmpty && day[0].startDateTime.date().weekday > 1) {
+          for (var i = 1; i < day[0].startDateTime.date().weekday; i++) {
             _week.add([]);
           }
         }

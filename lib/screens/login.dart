@@ -16,9 +16,8 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+/* TODO rewrite login
 import 'package:flutter/material.dart';
-import 'package:klient/api/client.dart';
 import 'package:klient/api/demo.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
@@ -280,3 +279,4 @@ class LoginState extends State<Login> {
     );
   }
 }
+*/

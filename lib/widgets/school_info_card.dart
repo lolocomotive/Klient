@@ -18,15 +18,15 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/news_article.dart';
 import 'package:klient/screens/article.dart';
 import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
-class ArticleCard extends StatelessWidget {
-  final NewsArticle _article;
+class SchoolInfoCard extends StatelessWidget {
+  final SchoolInfo _info;
   final GlobalKey _key = GlobalKey();
-  ArticleCard(this._article, {Key? key}) : super(key: key);
+  SchoolInfoCard(this._info, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +41,7 @@ class ArticleCard extends StatelessWidget {
       child: InkWell(
         onTap: (() {
           Navigator.of(context)
-              .push(MorpheusPageRoute(builder: (_) => ArticlePage(_article), parentKey: _key));
+              .push(MorpheusPageRoute(builder: (_) => SchoolInfoPage(_info), parentKey: _key));
         }),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -51,15 +51,17 @@ class ArticleCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    _article.author,
-                    style: const TextStyle(fontSize: 16),
-                  ),
-                  Text(Util.dateToString(_article.date))
+                  _info.author == null
+                      ? const Text('Auteur inconnu')
+                      : Text(
+                          '${_info.author!.firstName} ${_info.author!.lastName}',
+                          style: const TextStyle(fontSize: 16),
+                        ),
+                  Text(Util.formatDate(_info.publicationDateTime))
                 ],
               ),
               Text(
-                _article.title,
+                _info.title,
               ),
             ],
           ),

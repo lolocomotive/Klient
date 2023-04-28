@@ -23,18 +23,17 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/exercise.dart';
-import 'package:klient/config_provider.dart';
-import 'package:klient/database_provider.dart';
+import 'package:klient/api/color_provider.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/default_card.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class ExerciseCard extends StatefulWidget {
+class HomeworkCard extends StatefulWidget {
   final Function? onMarkedDone;
 
-  const ExerciseCard(this._exercise,
+  const HomeworkCard(this._hw,
       {Key? key,
       this.showDate = false,
       this.compact = false,
@@ -45,14 +44,14 @@ class ExerciseCard extends StatefulWidget {
   final bool showDate;
   final bool showSubject;
   final bool compact;
-  final Exercise _exercise;
+  final HomeworkAssignment _hw;
   final double elevation;
 
   @override
-  State<ExerciseCard> createState() => _ExerciseCardState();
+  State<HomeworkCard> createState() => _HomeworkCardState();
 }
 
-class _ExerciseCardState extends State<ExerciseCard> {
+class _HomeworkCardState extends State<HomeworkCard> {
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -62,17 +61,19 @@ class _ExerciseCardState extends State<ExerciseCard> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
             child: Text(
-              '${widget.showSubject ? '${widget._exercise.subject}: ' : ''}'
-              'À faire pour ${DateFormat('EEEE${widget._exercise.dateFor!.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
-                  ' - HH:mm', 'FR_fr').format(widget._exercise.dateFor!)}',
+              '${widget.showSubject ? '${widget._hw.subject}: ' : ''}'
+              'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
+                  ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime.date())}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
             ),
           ),
         Card(
-          surfaceTintColor:
-              Theme.of(context).brightness == Brightness.light ? widget._exercise.color : null,
-          shadowColor:
-              Theme.of(context).brightness == Brightness.light ? widget._exercise.color : null,
+          surfaceTintColor: Theme.of(context).brightness == Brightness.light
+              ? widget._hw.subject!.id.color
+              : null,
+          shadowColor: Theme.of(context).brightness == Brightness.light
+              ? widget._hw.subject!.id.color
+              : null,
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,
@@ -98,7 +99,7 @@ class _ExerciseCardState extends State<ExerciseCard> {
   }
 
   onMarkedDone(bool done) {
-    widget._exercise.done = done;
+    widget._hw.done = done;
     setState(() {});
     widget.onMarkedDone?.call(done);
   }
@@ -119,7 +120,7 @@ class _CardContents extends StatefulWidget {
     this.expanded = false,
   }) : super(key: key);
 
-  final ExerciseCard widget;
+  final HomeworkCard widget;
 
   @override
   State<_CardContents> createState() => _CardContentsState();
@@ -128,20 +129,20 @@ class _CardContents extends StatefulWidget {
 }
 
 class _CardContentsState extends State<_CardContents> {
-  bool _busy = false;
+  final bool _busy = false;
 
   @override
   Widget build(BuildContext context) {
     final bool online =
         RegExp('<p.*#FFB622.*Ce travail à faire est à remettre directement en ligne.*<\\/p>')
-            .hasMatch(widget.widget._exercise.htmlContent);
+            .hasMatch(widget.widget._hw.html);
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
       child: Container(
         decoration: widget.widget.compact
             ? BoxDecoration(
                 border: Border(
-                  left: BorderSide(color: widget.widget._exercise.color.shade200, width: 6),
+                  left: BorderSide(color: widget.widget._hw.subject!.id.color.shade200, width: 6),
                 ),
               )
             : null,
@@ -149,7 +150,7 @@ class _CardContentsState extends State<_CardContents> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Container(
-              color: widget.widget.compact ? null : widget.widget._exercise.color.shade200,
+              color: widget.widget.compact ? null : widget.widget._hw.subject!.id.color.shade200,
               padding: widget.widget.compact
                   ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
                   : const EdgeInsets.all(8.0),
@@ -164,11 +165,7 @@ class _CardContentsState extends State<_CardContents> {
                       children: [
                         Flexible(
                           child: Text(
-                            widget.widget._exercise.title +
-                                (widget.widget.compact &&
-                                        widget.widget._exercise.type == ExerciseType.exercise
-                                    ? ' - '
-                                    : ''),
+                            widget.widget._hw.title + (widget.widget.compact ? ' - ' : ''),
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
@@ -176,18 +173,16 @@ class _CardContentsState extends State<_CardContents> {
                             ),
                           ),
                         ),
-                        if (widget.widget._exercise.type == ExerciseType.exercise)
-                          Text(widget.widget._exercise.done ? 'Fait' : 'À faire',
-                              style: TextStyle(
-                                color: widget.widget.compact ? null : Colors.black,
-                              )),
+                        Text(widget.widget._hw.done ? 'Fait' : 'À faire',
+                            style: TextStyle(
+                              color: widget.widget.compact ? null : Colors.black,
+                            )),
                       ],
                     ),
                   ),
                   if (!online &&
-                      (widget.widget._exercise.type == ExerciseType.exercise ||
-                          widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold ||
-                          widget.widget._exercise.attachments.isNotEmpty))
+                      (widget.widget._hw.html.length > _CardContents.cutThreshold ||
+                          widget.widget._hw.attachments != null))
                     Icon(
                       widget.expanded ? Icons.expand_less : Icons.expand_more,
                       color: widget.widget.compact ? null : Colors.black,
@@ -202,7 +197,7 @@ class _CardContentsState extends State<_CardContents> {
                 children: [
                   online
                       ? const OnlineWarning()
-                      : widget.widget._exercise.htmlContent == ''
+                      : widget.widget._hw.html == ''
                           ? Padding(
                               padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
                               child: Text(
@@ -212,14 +207,14 @@ class _CardContentsState extends State<_CardContents> {
                               ),
                             )
                           : Html(
-                              data: widget.widget._exercise.htmlContent.substringWords(
+                              data: widget.widget._hw.html.substringWords(
                                       widget.expanded
-                                          ? widget.widget._exercise.htmlContent.length
+                                          ? widget.widget._hw.html.length
                                           : min(_CardContents.cutLength,
-                                              widget.widget._exercise.htmlContent.length),
+                                              widget.widget._hw.html.length),
                                       _CardContents.cutThreshold) +
                                   (widget.expanded ||
-                                          widget.widget._exercise.htmlContent.length <=
+                                          widget.widget._hw.html.length <=
                                               _CardContents.cutThreshold
                                       ? ''
                                       : '...'),
@@ -227,15 +222,15 @@ class _CardContentsState extends State<_CardContents> {
                                 launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
                               },
                             ),
-                  if (widget.widget._exercise.attachments.isNotEmpty && widget.expanded)
+                  if (widget.widget._hw.attachments != null && widget.expanded)
                     AttachmentsWidget(
-                      attachments: widget.widget._exercise.attachments,
+                      attachments: widget.widget._hw.attachments!,
                       elevation: widget.widget.elevation * 2,
                     ),
                   if (!online &&
                       !widget.expanded &&
-                      (widget.widget._exercise.attachments.isNotEmpty ||
-                          widget.widget._exercise.htmlContent.length > _CardContents.cutThreshold))
+                      (widget.widget._hw.attachments != null ||
+                          widget.widget._hw.html.length > _CardContents.cutThreshold))
                     ExpandableButton(
                       theme: const ExpandableThemeData(useInkWell: false),
                       child: Padding(
@@ -249,9 +244,7 @@ class _CardContentsState extends State<_CardContents> {
                         ),
                       ),
                     ),
-                  if (!online &&
-                      widget.expanded &&
-                      widget.widget._exercise.type == ExerciseType.exercise)
+                  if (!online && widget.expanded)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -259,49 +252,52 @@ class _CardContentsState extends State<_CardContents> {
                           onPressed: _busy
                               ? null
                               : () async {
+                                  //TODO implement with new API
+                                  /*
                                   setState(() {
                                     _busy = true;
                                   });
                                   if (ConfigProvider.demo) {
                                     await (await DatabaseProvider.getDB()).update(
                                       'Exercises',
-                                      {'Done': !widget.widget._exercise.done ? 1 : 0},
+                                      {'Done': !widget.widget._hw.done ? 1 : 0},
                                       where: 'ID = ?',
-                                      whereArgs: [widget.widget._exercise.uid],
+                                      whereArgs: [widget.widget._hw.uid],
                                     );
 
                                     setState(() {
-                                      widget.widget._exercise.done = !widget.widget._exercise.done;
-                                      widget.onMarkedDone(widget.widget._exercise.done);
+                                      widget.widget._hw.done = !widget.widget._hw.done;
+                                      widget.onMarkedDone(widget.widget._hw.done);
                                       _busy = false;
                                     });
                                   } else {
                                     final response = await Client.getClient().request(
                                         Action.markExerciseDone,
-                                        body: '{"flagRealise":${!widget.widget._exercise.done}}',
+                                        body: '{"flagRealise":${!widget.widget._hw.done}}',
                                         params: [
                                           '0',
-                                          (widget.widget._exercise.parentLesson ??
-                                                  widget.widget._exercise.lessonFor)
+                                          (widget.widget._hw.parentLesson ??
+                                                  widget.widget._hw.lessonFor)
                                               .toString(),
-                                          widget.widget._exercise.uid.toString()
+                                          widget.widget._hw.uid.toString()
                                         ]);
                                     await (await DatabaseProvider.getDB()).update(
                                       'Exercises',
                                       {'Done': response['flagRealise'] ? 1 : 0},
                                       where: 'ID = ?',
-                                      whereArgs: [widget.widget._exercise.uid],
+                                      whereArgs: [widget.widget._hw.uid],
                                     );
 
                                     setState(() {
-                                      widget.widget._exercise.done = response['flagRealise'];
+                                      widget.widget._hw.done = response['flagRealise'];
                                       widget.onMarkedDone(response['flagRealise']);
                                       _busy = false;
-                                    });
+                                    });  
                                   }
+                                  */
                                 },
-                          child: Text(
-                              'Marquer comme ${widget.widget._exercise.done ? "à faire" : "fait"}'),
+                          child:
+                              Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
                         ),
                       ],
                     )

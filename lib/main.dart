@@ -22,11 +22,8 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:klient/api/background_tasks.dart';
-import 'package:klient/api/client.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
-import 'package:klient/screens/login.dart';
 
 import 'screens/multiview.dart';
 
@@ -34,11 +31,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('FR_fr');
   await ConfigProvider.load();
-  await Client.getCurrentlySelected();
+  //await Client.getCurrentlySelected();
 
-  //Background fetch
-  await initPlatformState();
-  registerTasks();
+  //TODO fix Background fetch
+  //await initPlatformState();
+  //registerTasks();
 
   runApp(const KlientApp());
 }
@@ -99,6 +96,7 @@ class KlientState extends State with WidgetsBindingObserver {
       });
     };
     _mainWidget = const Main();
+    /*
     if (ConfigProvider.demo) {
       Client.demo();
       return;
@@ -107,7 +105,7 @@ class KlientState extends State with WidgetsBindingObserver {
       _mainWidget = Login(KlientApp.onLogin!);
     } else {
       Client(ConfigProvider.token!);
-    }
+    }*/
   }
 
   @override

@@ -18,11 +18,11 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:klient/api/conversation.dart';
-import 'package:klient/screens/conversation.dart';
+import 'package:klient/screens/communication.dart';
 import 'package:klient/screens/messages.dart';
-import 'package:klient/widgets/message_card.dart';
+import 'package:klient/widgets/communication_card.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class MessagesSearchDelegate extends SearchDelegate {
   static MessageSearchResultsState? messageSearchSuggestionState;
@@ -83,7 +83,7 @@ class MessageSearchResults extends StatefulWidget {
 }
 
 class MessageSearchResultsState extends State<MessageSearchResults> {
-  List<Conversation>? _conversations;
+  List<Communication>? _communications;
 
   MessageSearchResultsState() {
     MessagesSearchDelegate.messageSearchSuggestionState = this;
@@ -91,20 +91,22 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
   }
 
   refresh() {
-    Conversation.search(MessagesSearchDelegate.searchQuery!).then((conversations) {
+    /* TODO rewrite this
+     Conversation.search(MessagesSearchDelegate.searchQuery!).then((conversations) {
       if (!mounted) return;
       setState(() {
-        _conversations = conversations;
+        _communications = conversations;
       });
     });
+ */
   }
 
   @override
   Widget build(BuildContext context) {
     return Center(
-      child: _conversations == null
+      child: _communications == null
           ? const CircularProgressIndicator()
-          : _conversations!.isEmpty
+          : _communications!.isEmpty
               ? Text(
                   'Aucun résultat trouvé.',
                   style: TextStyle(color: Theme.of(context).colorScheme.secondary),
@@ -119,18 +121,18 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                           child: Padding(
                             key: parentKey,
                             padding: const EdgeInsets.all(8.0),
-                            child: MessageCard(
-                              _conversations![index],
+                            child: CommunicationCard(
+                              _communications![index],
                             ),
                           ),
                           onTap: () {
                             Navigator.of(context).push(
                               MorpheusPageRoute(
                                 transitionToChild: true,
-                                builder: (_) => ConversationPage(
+                                builder: (_) => CommunicationPage(
                                   onDelete: deleteConversation,
-                                  id: _conversations![index].id,
-                                  subject: _conversations![index].subject,
+                                  id: _communications![index].id,
+                                  subject: _communications![index].subject,
                                 ),
                                 parentKey: parentKey,
                               ),
@@ -140,7 +142,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                     separatorBuilder: (context, index) {
                       return const Divider();
                     },
-                    itemCount: _conversations!.length,
+                    itemCount: _communications!.length,
                   ),
                 ),
     );

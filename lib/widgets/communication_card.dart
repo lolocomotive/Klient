@@ -19,13 +19,13 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:html_unescape/html_unescape.dart';
-import 'package:klient/api/conversation.dart';
 import 'package:klient/util.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
-class MessageCard extends StatelessWidget {
-  final Conversation _conversation;
+class CommunicationCard extends StatelessWidget {
+  final Communication _communication;
 
-  const MessageCard(this._conversation, {Key? key}) : super(key: key);
+  const CommunicationCard(this._communication, {Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +36,15 @@ class MessageCard extends StatelessWidget {
         Transform.translate(
           offset: const Offset(0, 3),
           child: Container(
-            width: _conversation.read ? 0 : 8,
-            height: _conversation.read ? 0 : 8,
-            margin: _conversation.read
+            width: _communication.read! ? 0 : 8,
+            height: _communication.read! ? 0 : 8,
+            margin: _communication.read!
                 ? const EdgeInsets.all(0)
                 : const EdgeInsets.fromLTRB(0, 5, 5, 0),
             decoration: BoxDecoration(
-                color:
-                    _conversation.read ? Colors.transparent : Theme.of(context).colorScheme.primary,
+                color: _communication.read!
+                    ? Colors.transparent
+                    : Theme.of(context).colorScheme.primary,
                 shape: BoxShape.circle),
           ),
         ),
@@ -56,52 +57,53 @@ class MessageCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      _conversation.firstAuthor +
-                          (_conversation.lastAuthor != _conversation.firstAuthor
-                              ? ', ${_conversation.lastAuthor}'
-                              : ''),
+                      _communication.recipientsSummary ?? '',
                       style: TextStyle(
                         fontSize: 16,
-                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
+                        fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
                       ),
                     ),
                   ),
                   Text(
-                    Util.dateToString(_conversation.lastDate),
+                    _communication.lastParticipation!.dateTime.format(),
                     textAlign: TextAlign.right,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
-                        fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
+                        fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
                         fontSize: 14),
                   ),
                 ],
               ),
               Row(
+                //FIXME replace the commented out code
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                    child: _conversation.customSubject ??
+                    child: /*_communication.customSubject ??*/
                         Text(
-                          _conversation.subject,
-                          textAlign: TextAlign.left,
-                          overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontWeight: _conversation.read ? FontWeight.normal : FontWeight.bold,
-                              fontSize: 14),
-                        ),
+                      _communication.subject,
+                      textAlign: TextAlign.left,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                          fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
+                          fontSize: 14),
+                    ),
                   ),
-                  if (_conversation.hasAttachment)
+                  /*
+
+                  if (_communication.hasAttachment)
                     Transform.scale(
                       scale: .7,
                       child: const Icon(Icons.attach_file),
                     ),
+                    */
                 ],
               ),
-              _conversation.customPreview ??
-                  Text(
-                    HtmlUnescape().convert(_conversation.preview),
-                    style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.secondary),
-                  ),
+              /* _communication.customPreview ??*/
+              Text(
+                HtmlUnescape().convert(_communication.lastParticipation!.content),
+                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.secondary),
+              ),
             ],
           ),
         ),

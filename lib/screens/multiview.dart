@@ -18,10 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/conversation.dart';
 import 'package:klient/config_provider.dart';
-import 'package:klient/main.dart';
-import 'package:klient/screens/setup.dart';
 import 'package:klient/screens/timetable.dart';
 
 import 'home.dart';
@@ -36,25 +33,8 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   int _currentIndex = 0;
-  _openFirstSteps() async {
-    if (await ConfigProvider.getStorage().read(key: 'firstTime') != 'false' &&
-        !ConfigProvider.demo) {
-      ConfigProvider.getStorage().write(key: 'firstTime', value: 'false');
-
-      KlientApp.navigatorKey.currentState!.push(
-        MaterialPageRoute(
-          builder: (_) => WillPopScope(
-            onWillPop: () async => false,
-            child: SetupPage(() {
-              setState(() {
-                _currentIndex = 0;
-              });
-            }),
-          ),
-        ),
-      );
-    }
-  }
+  @Deprecated('First steps will be removed')
+  _openFirstSteps() async {}
 
   MainState();
 
@@ -84,7 +64,7 @@ class MainState extends State<Main> {
           ),
           NavigationDestination(
             icon: FutureBuilder<int>(
-                future: Conversation.unreadCount(),
+                future: /*Conversation.unreadCount()*/ Future.value(0), //TODO rewrite this
                 builder: (context, snapshot) {
                   return Badge(
                     textColor: Theme.of(context).colorScheme.background,

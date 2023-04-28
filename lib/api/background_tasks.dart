@@ -16,15 +16,12 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-
+/* TODO rewrite this
 import 'dart:io';
 
 import 'package:background_fetch/background_fetch.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:html_unescape/html_unescape.dart';
-import 'package:klient/api/client.dart';
-import 'package:klient/api/conversation.dart';
-import 'package:klient/api/downloader.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
 import 'package:klient/notifications_provider.dart';
@@ -121,3 +118,4 @@ Future<void> showNotifications() async {
     print('Message notifications disabled');
   }
 }
+*/

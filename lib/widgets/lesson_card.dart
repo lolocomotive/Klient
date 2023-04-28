@@ -20,12 +20,13 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/exercise.dart';
-import 'package:klient/api/lesson.dart';
+import 'package:klient/api/color_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/screens/lesson.dart';
 import 'package:klient/screens/timetable.dart';
+import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class LessonCard extends StatelessWidget {
   final Lesson _lesson;
@@ -39,25 +40,21 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool hasIcons = _lesson.exercises.isNotEmpty;
+    //FIXME
+    //final bool hasIcons = _lesson.exercises.isNotEmpty;
+    const bool hasIcons = true;
     final iconsRow = Opacity(
       opacity: 0.5,
       child: Row(
         children: [
-          if (_lesson.exercises.where((e) => e.lessonFor == _lesson.id).isNotEmpty)
+          if (_lesson.toDoForTheLesson != null)
             const Tooltip(
                 message: 'Travail à faire pour cette séance donné',
                 child: Icon(Icons.event_outlined)),
-          if (_lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).isNotEmpty)
+          if (_lesson.contents != null)
             const Tooltip(
                 message: 'Contenu de séance donné', child: Icon(Icons.event_note_outlined)),
-          if (_lesson.exercises
-              .where((e) =>
-                      e.type == ExerciseType.exercise &&
-                      e.parentLesson == _lesson.id &&
-                      e.parentLesson != e.lessonFor // don't display those twice
-                  )
-              .isNotEmpty)
+          if (_lesson.toDoAfterTheLesson != null)
             const Tooltip(
               message: 'Travail à faire à l\'issue de la séance donné',
               child: Icon(Icons.update),
@@ -66,18 +63,21 @@ class LessonCard extends StatelessWidget {
       ),
     );
     final content = SizedBox(
-      height: _lesson.length *
-          (compact ? Values.compactHeightPerHour : Values.heightPerHour) *
+      height: DateTime.parse(_lesson.endDateTime)
+              .difference(DateTime.parse(_lesson.startDateTime))
+              .inMinutes *
+          (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
           MediaQuery.of(context).textScaleFactor,
       child: Card(
-        surfaceTintColor: Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
-        shadowColor: Theme.of(context).brightness == Brightness.light ? _lesson.color : null,
+        surfaceTintColor:
+            Theme.of(context).brightness == Brightness.light ? _lesson.id.color : null,
+        shadowColor: Theme.of(context).brightness == Brightness.light ? _lesson.id.color : null,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         clipBehavior: Clip.antiAlias,
         child: CustomPaint(
-          painter: _lesson.isCanceled ? StripesPainter() : null,
+          painter: _lesson.canceled ? StripesPainter() : null,
           child: InkWell(
             onTap: () {
               if (!positionned) return;
@@ -96,7 +96,7 @@ class LessonCard extends StatelessWidget {
                 if (!compact)
                   Container(
                     padding: const EdgeInsets.all(8.0),
-                    color: _lesson.color.shade200,
+                    color: _lesson.id.color.shade200,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -111,11 +111,12 @@ class LessonCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        if (_lesson.isModified)
-                          Text(
-                            _lesson.modificationMessage!,
-                            style: const TextStyle(color: Colors.black),
-                          ),
+                        //FIXME not in new API ?
+                        //if (_lesson.modified)
+                        //  Text(
+                        //    _lesson.modificationMessage!,
+                        //    style: const TextStyle(color: Colors.black),
+                        //  ),
                       ],
                     ),
                   ),
@@ -124,7 +125,7 @@ class LessonCard extends StatelessWidget {
                     child: Container(
                       decoration: BoxDecoration(
                           border:
-                              Border(left: BorderSide(color: _lesson.color.shade200, width: 6))),
+                              Border(left: BorderSide(color: _lesson.id.color.shade200, width: 6))),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -133,31 +134,32 @@ class LessonCard extends StatelessWidget {
                           children: [
                             Row(
                               children: [
-                                if (_lesson.isModified)
-                                  Padding(
-                                    padding: const EdgeInsets.only(right: 4.0),
-                                    child: Tooltip(
-                                        message: _lesson.modificationMessage ?? 'Cours modifié',
-                                        child: Icon(
-                                          Icons.info_outline,
-                                          size: MediaQuery.of(context).textScaleFactor * 18,
-                                        )),
-                                  ),
+                                //FIXME not in new API?
+                                //if (_lesson.isModified)
+                                //  Padding(
+                                //    padding: const EdgeInsets.only(right: 4.0),
+                                //    child: Tooltip(
+                                //        message: _lesson.modificationMessage ?? 'Cours modifié',
+                                //        child: Icon(
+                                //          Icons.info_outline,
+                                //          size: MediaQuery.of(context).textScaleFactor * 18,
+                                //        )),
+                                //  ),
                                 Text(
                                   '${_lesson.title} ',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                if (_lesson.length <= 1 && hasIcons)
-                                  Flexible(
-                                      child: Text(
-                                    _lesson.room,
-                                    overflow: TextOverflow.ellipsis,
-                                  )),
+                                //if (_lesson.length <= 1 && hasIcons)
+                                Flexible(
+                                    child: Text(
+                                  _lesson.location,
+                                  overflow: TextOverflow.ellipsis,
+                                )),
                               ],
                             ),
-                            if (_lesson.length > 1 && _lesson.isModified)
-                              Text(_lesson.modificationMessage!),
-                            if (_lesson.length > 1 || !hasIcons) Text(_lesson.room),
+                            //if (_lesson.length > 1 && _lesson.isModified)
+                            //  Text(_lesson.modificationMessage!),
+                            //if (_lesson.length > 1 || !hasIcons) Text(_lesson.location),
                             Flexible(child: iconsRow)
                           ],
                         ),
@@ -175,14 +177,14 @@ class LessonCard extends StatelessWidget {
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
                                 child: Text(
-                                  _lesson.room,
+                                  _lesson.location,
                                   textAlign: TextAlign.center,
                                 ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
                                 child: Text(
-                                  '${_lesson.startTime} - ${_lesson.endTime}',
+                                  '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',
                                   textAlign: TextAlign.center,
                                 ),
                               ),
@@ -209,9 +211,9 @@ class LessonCard extends StatelessWidget {
     );
     return positionned
         ? Positioned(
-            top: (_lesson.startDouble - Values.startTime) *
+            top: (/*FIXME _lesson.startDouble */ -Values.startTime) *
                 MediaQuery.of(context).textScaleFactor *
-                (compact ? Values.compactHeightPerHour : Values.heightPerHour),
+                (compact ? Values.compactHeightPerHour : Values.heightPerMinute),
             left: 0,
             right: 0,
             child: content,

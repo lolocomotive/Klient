@@ -18,7 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
-import 'package:klient/api/attachment.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 import 'default_card.dart';
 

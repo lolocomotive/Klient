@@ -25,7 +25,6 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:klient/api/client.dart';
 import 'package:klient/api/color_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/color_picker.dart';
@@ -157,9 +156,6 @@ class ConfigProvider {
       data.forEach((key, value) {
         if (kDebugMode) print('[Config] $key : $value');
         switch (key) {
-          case 'apiurl':
-            Client.apiurl = value;
-            break;
           case 'token':
             token = value;
             break;
