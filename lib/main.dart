@@ -24,6 +24,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
+import 'package:klient/screens/login.dart';
 
 import 'screens/multiview.dart';
 
@@ -89,23 +90,19 @@ class KlientState extends State with WidgetsBindingObserver {
   }
 
   KlientState() {
-    KlientApp.onLogin = () {
-      setState(() {
-        _mainWidget = const Main();
-        KlientApp.currentLifecycleState = AppLifecycleState.resumed;
-      });
-    };
     _mainWidget = const Main();
     /*
     if (ConfigProvider.demo) {
       Client.demo();
       return;
-    }
-    if (ConfigProvider.token == null || ConfigProvider.token == '') {
-      _mainWidget = Login(KlientApp.onLogin!);
-    } else {
-      Client(ConfigProvider.token!);
     }*/
+    if (ConfigProvider.credentials == null) {
+      _mainWidget = Login(() {
+        setState(() {
+          _mainWidget = const Main();
+        });
+      });
+    }
   }
 
   @override

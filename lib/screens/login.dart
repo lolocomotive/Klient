@@ -16,16 +16,17 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/* TODO rewrite login
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:klient/api/demo.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
-import 'package:klient/main.dart';
 import 'package:klient/screens/about.dart';
-import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
+import 'package:openid_client/openid_client_io.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
+import 'package:webview_flutter/webview_flutter.dart';
 
 class Login extends StatefulWidget {
   const Login(this.onLogin, {Key? key}) : super(key: key);
@@ -40,8 +41,10 @@ class LoginState extends State<Login> {
   final _loginFormKey = GlobalKey<FormState>();
   final _unameController = TextEditingController();
   final _pwdController = TextEditingController();
+  final _controller = WebViewController();
+  bool _showBrowser = false;
 
-  bool _processing = false;
+  final bool _processing = false;
   LoginState();
 
   _postLogin(Database db) async {
@@ -58,51 +61,42 @@ class LoginState extends State<Login> {
   }
 
   _login() async {
-    // The demo mode is activated like that instead of with an obvious button because it would just uselessly clutter the UI otherwise
-    final db = await DatabaseProvider.getDB();
-    if (_unameController.text == '__DEMO') {
-      await _resetDb(db);
-      generate();
-      ConfigProvider.demo = true;
-      Client.demo();
-      widget.onLogin();
-      return;
+    _controller.setNavigationDelegate(NavigationDelegate(onUrlChange: (change) {
+      if (change.url == null) return;
+      if (change.url!.startsWith('skoapp-prod://')) {
+        _controller.loadRequest(
+            Uri.parse(change.url!.replaceAll('skoapp-prod://', 'http://localhost:3000/')));
+      }
+    }));
+    final client = Skolengo.unauthenticated();
+
+    //TODO allow user to choose school
+    final school = (await client.searchSchool('Lycée')).data.first;
+
+    final oidclient = await client.getOIDClient(school);
+
+    urlLauncher(String url) async {
+      setState(() {});
+      _showBrowser = true;
+      _controller.loadRequest(Uri.parse(url));
     }
 
-    if (_unameController.text.length == 125) {
-      //Set the token directly.
-      Client(_unameController.text);
-      await _postLogin(db);
-    }
-    ConfigProvider.demo = false;
-    ConfigProvider.getStorage().write(key: 'demoMode', value: 'false');
-    if (_loginFormKey.currentState!.validate()) {
-      setState(() {
-        _processing = true;
-      });
-      try {
-        await Client.login(_unameController.text, _pwdController.text);
-        await _postLogin(db);
-      } on BadCredentialsException catch (_) {
-        KlientApp.messengerKey.currentState!.showSnackBar(
-          SnackBar(
-            backgroundColor: KlientApp.theme!.colorScheme.surface,
-            content: Text(
-              'Mauvais identifiant/code d\'activation',
-              style: TextStyle(
-                color: KlientApp.theme!.colorScheme.onSurface,
-              ),
-            ),
-          ),
-        );
-      } on Exception catch (e, st) {
-        Util.onException(e, st);
-      } finally {
-        setState(() {
-          _processing = false;
-        });
-      }
-    }
+    final authenticator = Authenticator(
+      oidclient,
+      redirectUri: Uri.parse('skoapp-prod://sign-in-callback'),
+      urlLancher: urlLauncher,
+    );
+
+    ConfigProvider.credentials = await authenticator.authorize();
+    ConfigProvider.school = school;
+
+    ConfigProvider.getStorage()
+      ..write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()))
+      ..write(key: 'school', value: jsonEncode(ConfigProvider.school!.toJson()));
+
+    _postLogin(await DatabaseProvider.getDB());
+
+    // TODO rewrite demo mode
   }
 
   @override
@@ -131,152 +125,78 @@ class LoginState extends State<Login> {
           )
         ],
       ),
-      child: Column(
-        children: [
-          Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 500),
-              child: Column(
-                children: [
-                  Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                    child: Container(
-                      padding: const EdgeInsets.all(20.0),
-                      child: Form(
-                        key: _loginFormKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            Text('Portail de connexion:',
-                                style: TextStyle(color: Theme.of(context).colorScheme.secondary)),
-                            DropdownButton(
-                              isExpanded: true,
-                              value: Client.apiurl,
-                              items: KlientApp.dropdownItems,
-                              onChanged: (dynamic newValue) async {
-                                await ConfigProvider.getStorage()
-                                    .write(key: 'apiurl', value: newValue);
-                                Client.apiurl = newValue;
-                                setState(() {});
-                              },
-                            ),
-                            TextFormField(
-                              decoration: const InputDecoration(hintText: 'Identifiant mobile'),
-                              controller: _unameController,
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Veuillez entrer votre identifiant mobile';
-                                }
-                                return null;
-                              },
-                              enableSuggestions: false,
-                              autocorrect: false,
-                              autofocus: true,
-                            ),
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.end,
-                              children: [
-                                Expanded(
-                                  child: TextFormField(
-                                    decoration:
-                                        const InputDecoration(hintText: 'Code d\'activation'),
-                                    controller: _pwdController,
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Veuillez entrer votre code d\'activation';
-                                      }
-                                      return null;
-                                    },
-                                    enableSuggestions: false,
-                                    autocorrect: false,
-                                    obscureText: true,
-                                  ),
-                                ),
-                                IconButton(
-                                  tooltip: 'Où trouver ce code?',
-                                  alignment: Alignment.bottomCenter,
-                                  onPressed: () {
-                                    showDialog(
-                                      context: context,
-                                      builder: (_) => AlertDialog(
-                                        content: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.end,
-                                          mainAxisSize: MainAxisSize.min,
-                                          children: [
-                                            const Text(
-                                                'L\'identifiant mobile et le code d\'activation sont disponibles dans le menu "Application mobile" dans les paramètres utilisateur de l\'ENT'),
-                                            TextButton(
-                                              onPressed: () {
-                                                Navigator.of(context).pop();
-                                              },
-                                              child: const Text('OK'),
-                                            )
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  icon: Icon(
-                                    Icons.help_outline,
-                                    color: Theme.of(context).colorScheme.secondary,
-                                  ),
-                                )
-                              ],
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
+      child: _showBrowser
+          ? WebViewWidget(controller: _controller)
+          : Column(
+              children: [
+                Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 500),
+                    child: Column(
+                      children: [
+                        Card(
+                          elevation: 2,
+                          margin: const EdgeInsets.fromLTRB(32, 0, 32, 0),
+                          child: Container(
+                            padding: const EdgeInsets.all(20.0),
+                            child: Form(
+                              key: _loginFormKey,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
-                                  if (_processing)
-                                    Expanded(
-                                      child: Center(
-                                          child: Transform.scale(
-                                              scale: .7, child: const CircularProgressIndicator())),
+                                  Padding(
+                                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
+                                    child: Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        if (_processing)
+                                          Expanded(
+                                            child: Center(
+                                                child: Transform.scale(
+                                                    scale: .7,
+                                                    child: const CircularProgressIndicator())),
+                                          ),
+                                        OutlinedButton(
+                                          onPressed: _processing ? null : _login,
+                                          child: const Text('Se connecter'),
+                                        ),
+                                      ],
                                     ),
-                                  OutlinedButton(
-                                    onPressed: _processing ? null : _login,
-                                    child: const Text('Se connecter'),
-                                  ),
+                                  )
                                 ],
                               ),
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                  FutureBuilder<AppInfo>(
-                    future: AppInfo.getAppInfo(),
-                    builder: ((context, snapshot) {
-                      if (snapshot.hasError) {
-                        print(snapshot.error);
-                        return Text('Erreur: "${snapshot.error}"');
-                      } else if (snapshot.data != null) {
-                        return Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Opacity(
-                            opacity: snapshot.data!.branch != 'master' ? .3 : 0,
-                            child: Text(
-                              '${snapshot.data!.branch}-${snapshot.data!.commitID}${snapshot.data!.version}+${snapshot.data!.build}',
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontSize: 10),
                             ),
                           ),
-                        );
-                      } else {
-                        return Container();
-                      }
-                    }),
+                        ),
+                        FutureBuilder<AppInfo>(
+                          future: AppInfo.getAppInfo(),
+                          builder: ((context, snapshot) {
+                            if (snapshot.hasError) {
+                              print(snapshot.error);
+                              return Text('Erreur: "${snapshot.error}"');
+                            } else if (snapshot.data != null) {
+                              return Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Opacity(
+                                  opacity: snapshot.data!.branch != 'master' ? .3 : 0,
+                                  child: Text(
+                                    '${snapshot.data!.branch}-${snapshot.data!.commitID}${snapshot.data!.version}+${snapshot.data!.build}',
+                                    textAlign: TextAlign.center,
+                                    style: const TextStyle(fontSize: 10),
+                                  ),
+                                ),
+                              );
+                            } else {
+                              return Container();
+                            }
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ),
-        ],
-      ),
     );
   }
 }
-*/

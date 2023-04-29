@@ -3,7 +3,7 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <application tools:replace="android:label" android:label="Klient"
         android:icon="@mipmap/ic_launcher" android:allowBackup="false"
-        android:fullBackupContent="false">
+        android:fullBackupContent="false" android:usesCleartextTraffic="true">
         <activity android:name=".MainActivity" android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"

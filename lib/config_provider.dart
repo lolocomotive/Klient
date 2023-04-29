@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
@@ -28,12 +29,16 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:klient/api/color_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/color_picker.dart';
+import 'package:openid_client/openid_client.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class ConfigProvider {
+  //TODO rewrite this with proper getters/setters
   static FlutterSecureStorage? _storage;
   static String? username;
   static bool? compact;
-  static String? token;
+  static Credential? credentials;
+  static School? school;
   static bool? notifMsgEnabled;
   static Brightness? enforcedBrightness;
   static bool demo = false;
@@ -136,7 +141,6 @@ class ConfigProvider {
     return _storage!;
   }
 
-  static save() {}
   static load() async {
     apiUrls.forEach((key, value) {
       KlientApp.dropdownItems.add(DropdownMenuItem(
@@ -156,8 +160,11 @@ class ConfigProvider {
       data.forEach((key, value) {
         if (kDebugMode) print('[Config] $key : $value');
         switch (key) {
-          case 'token':
-            token = value;
+          case 'credentials':
+            credentials = Credential.fromJson(jsonDecode(value));
+            break;
+          case 'school':
+            school = School.fromJson(jsonDecode(value));
             break;
           case 'username':
             username = value;

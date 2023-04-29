@@ -54,6 +54,8 @@ dependencies:
     # cupertino_icons: ^1.0.2
 
     scolengo_api: ^0.0.5
+    openid_client: ^0.4.7
+    webview_flutter: ^4.2.0
 
 dev_dependencies:
     flutter_test:
