@@ -23,6 +23,7 @@ import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/widgets/default_activity.dart';
+import 'package:klient/widgets/default_card.dart';
 import 'package:openid_client/openid_client_io.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -38,13 +39,14 @@ class Login extends StatefulWidget {
 }
 
 class LoginState extends State<Login> {
-  final _loginFormKey = GlobalKey<FormState>();
-  final _unameController = TextEditingController();
-  final _pwdController = TextEditingController();
   final _controller = WebViewController();
   bool _showBrowser = false;
 
   final bool _processing = false;
+
+  final _searchController = TextEditingController();
+
+  String _query = '';
   LoginState();
 
   _postLogin(Database db) async {
@@ -60,7 +62,8 @@ class LoginState extends State<Login> {
     await DatabaseProvider.initDB();
   }
 
-  _login() async {
+  _login(School school) async {
+    _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
     _controller.setNavigationDelegate(NavigationDelegate(onUrlChange: (change) {
       if (change.url == null) return;
       if (change.url!.startsWith('skoapp-prod://')) {
@@ -69,10 +72,6 @@ class LoginState extends State<Login> {
       }
     }));
     final client = Skolengo.unauthenticated();
-
-    //TODO allow user to choose school
-    final school = (await client.searchSchool('Lycée')).data.first;
-
     final oidclient = await client.getOIDClient(school);
 
     urlLauncher(String url) async {
@@ -101,101 +100,117 @@ class LoginState extends State<Login> {
 
   @override
   void dispose() {
-    _unameController.dispose();
-    _pwdController.dispose();
+    _searchController.dispose();
 
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return DefaultActivity(
-      appBar: AppBar(
-        title: const Text('Connexion'),
-        actions: [
+    return DefaultSliverActivity(
+      title: 'Connexion',
+      actions: [
+        IconButton(
+          tooltip: 'À propos',
+          onPressed: () {
+            Navigator.of(context).push(MaterialPageRoute(builder: (context) => const AboutPage()));
+          },
+          icon: const Icon(
+            Icons.info_outline_rounded,
+          ),
+        ),
+        if (_showBrowser)
           IconButton(
-            tooltip: 'À propos',
+            tooltip: 'Fermer le navigateur',
             onPressed: () {
-              Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (context) => const AboutPage()));
+              setState(() {
+                _showBrowser = false;
+                _controller.loadHtmlString(' ');
+                //TODO cancel login
+              });
             },
             icon: const Icon(
-              Icons.info_outline_rounded,
+              Icons.close_rounded,
             ),
-          )
-        ],
-      ),
+          ),
+      ],
       child: _showBrowser
           ? WebViewWidget(controller: _controller)
-          : Column(
-              children: [
-                Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 500),
+          : SingleChildScrollView(
+              child: Column(
+                children: [
+                  DefaultCard(
                     child: Column(
                       children: [
-                        Card(
-                          elevation: 2,
-                          margin: const EdgeInsets.fromLTRB(32, 0, 32, 0),
-                          child: Container(
-                            padding: const EdgeInsets.all(20.0),
-                            child: Form(
-                              key: _loginFormKey,
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Padding(
-                                    padding: const EdgeInsets.fromLTRB(0, 16, 0, 0),
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        if (_processing)
-                                          Expanded(
-                                            child: Center(
-                                                child: Transform.scale(
-                                                    scale: .7,
-                                                    child: const CircularProgressIndicator())),
-                                          ),
-                                        OutlinedButton(
-                                          onPressed: _processing ? null : _login,
-                                          child: const Text('Se connecter'),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                ],
-                              ),
-                            ),
+                        Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: TextField(
+                            controller: _searchController,
+                            decoration:
+                                const InputDecoration(hintText: 'Rechercher un établissement'),
+                            onChanged: (value) {
+                              setState(() {
+                                _query = value;
+                              });
+                            },
                           ),
                         ),
-                        FutureBuilder<AppInfo>(
-                          future: AppInfo.getAppInfo(),
-                          builder: ((context, snapshot) {
-                            if (snapshot.hasError) {
-                              print(snapshot.error);
-                              return Text('Erreur: "${snapshot.error}"');
-                            } else if (snapshot.data != null) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Opacity(
-                                  opacity: snapshot.data!.branch != 'master' ? .3 : 0,
-                                  child: Text(
-                                    '${snapshot.data!.branch}-${snapshot.data!.commitID}${snapshot.data!.version}+${snapshot.data!.build}',
-                                    textAlign: TextAlign.center,
-                                    style: const TextStyle(fontSize: 10),
-                                  ),
-                                ),
-                              );
-                            } else {
-                              return Container();
-                            }
-                          }),
-                        ),
+                        _query.length < 3
+                            ? Text('Entrez au moins 3 caractères',
+                                style: TextStyle(color: Theme.of(context).colorScheme.secondary))
+                            : FutureBuilder<SkolengoResponse<List<School>>>(
+                                future: Skolengo.unauthenticated().searchSchool(_query),
+                                builder: (context, snapshot) {
+                                  if (snapshot.data != null) {
+                                    List<School> schools = snapshot.data!.data;
+                                    return Column(
+                                      children: schools
+                                          .map((e) => ListTile(
+                                                title: Text(e.name),
+                                                subtitle: Text(
+                                                  '${e.addressLine1} ${e.city}',
+                                                  style: TextStyle(
+                                                    color: Theme.of(context).colorScheme.secondary,
+                                                  ),
+                                                ),
+                                                onTap: () {
+                                                  _login(e);
+                                                },
+                                              ))
+                                          .toList(),
+                                    );
+                                  }
+                                  return const CircularProgressIndicator();
+                                },
+                              ),
                       ],
                     ),
                   ),
-                ),
-              ],
+                  FutureBuilder<AppInfo>(
+                    future: AppInfo.getAppInfo(),
+                    builder: ((context, snapshot) {
+                      if (snapshot.hasError) {
+                        print(snapshot.error);
+                        return Text('Erreur: "${snapshot.error}"');
+                      } else if (snapshot.data != null) {
+                        return Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Opacity(
+                            opacity: snapshot.data!.branch != 'master' ? .3 : 0,
+                            child: Text(
+                              '${snapshot.data!.branch}-${snapshot.data!.commitID}${snapshot.data!.version}+${snapshot.data!.build}',
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontSize: 10),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    }),
+                  ),
+                ],
+              ),
             ),
     );
   }
