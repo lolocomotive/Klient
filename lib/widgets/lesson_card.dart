@@ -62,11 +62,14 @@ class LessonCard extends StatelessWidget {
         ],
       ),
     );
+    print(DateTime.parse(_lesson.endDateTime)
+        .difference(DateTime.parse(_lesson.startDateTime))
+        .inMinutes);
     final content = SizedBox(
       height: DateTime.parse(_lesson.endDateTime)
               .difference(DateTime.parse(_lesson.startDateTime))
               .inMinutes *
-          (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
+          (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
           MediaQuery.of(context).textScaleFactor,
       child: Card(
         surfaceTintColor:
@@ -213,7 +216,7 @@ class LessonCard extends StatelessWidget {
         ? Positioned(
             top: (/*FIXME _lesson.startDouble */ -Values.startTime) *
                 MediaQuery.of(context).textScaleFactor *
-                (compact ? Values.compactHeightPerHour : Values.heightPerMinute),
+                (compact ? Values.compactHeightPerMinute : Values.heightPerMinute),
             left: 0,
             right: 0,
             child: content,

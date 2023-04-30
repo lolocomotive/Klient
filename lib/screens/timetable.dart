@@ -40,7 +40,7 @@ extension DateOnlyCompare on DateTime {
 class Values {
   static const timeWidth = 32.0;
   static const heightPerMinute = 2.0;
-  static const compactHeightPerHour = 70.0;
+  static const compactHeightPerMinute = 1.2;
   static const lessonLength = 55.0 / 55.0;
   static const maxLessonsPerDay = 11;
   static const startTime = 8;
@@ -109,7 +109,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
         },
         child: SingleChildScrollView(
           child: SizedBox(
-            height: (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
+            height: (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
                     MediaQuery.of(context).textScaleFactor *
                     Values.maxLessonsPerDay *
                     Values.lessonLength +
@@ -198,7 +198,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                         itemBuilder: (ctx, index) {
                           return SizedBox(
                             height:
-                                (compact ? Values.compactHeightPerHour : Values.heightPerMinute) *
+                                (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
                                     MediaQuery.of(context).textScaleFactor,
                             child: Text(
                               '${index + Values.startTime}h',

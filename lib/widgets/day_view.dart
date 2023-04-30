@@ -42,11 +42,12 @@ class DayView extends StatelessWidget {
           ),
         ),
         SizedBox(
-          height: (ConfigProvider.compact! ? Values.compactHeightPerHour : Values.heightPerMinute) *
-                  MediaQuery.of(context).textScaleFactor *
-                  Values.maxLessonsPerDay *
-                  Values.lessonLength -
-              4,
+          height:
+              (ConfigProvider.compact! ? Values.compactHeightPerMinute : Values.heightPerMinute) *
+                      MediaQuery.of(context).textScaleFactor *
+                      Values.maxLessonsPerDay *
+                      Values.lessonLength -
+                  4,
           child: Stack(
             children: _lessons
                 .map((lesson) => LessonCard(lesson, compact: ConfigProvider.compact!))

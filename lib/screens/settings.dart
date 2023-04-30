@@ -153,8 +153,8 @@ class CompactSelector extends StatefulWidget {
 class _CompactSelectorState extends State<CompactSelector> {
   final demoLesson = Lesson(
       canceled: false,
-      endDateTime: DateTime.now().toIso8601String(),
       startDateTime: DateTime.now().toIso8601String(),
+      endDateTime: DateTime.now().add(const Duration(minutes: 55)).toIso8601String(),
       id: '',
       location: '404',
       title: 'Exemple',
