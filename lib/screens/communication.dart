@@ -19,30 +19,32 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
+import 'package:html_unescape/html_unescape.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/util.dart';
+import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class CommunicationPage extends StatefulWidget {
-  const CommunicationPage(
-      {Key? key, required this.onDelete, required this.id, required this.subject})
+  const CommunicationPage({Key? key, required this.onDelete, required this.communication})
       : super(key: key);
 
   @override
   State<CommunicationPage> createState() => _CommunicationPageState();
 
   final Function onDelete;
-  final String id;
-  final String subject;
+  final Communication communication;
 }
 
 class _CommunicationPageState extends State<CommunicationPage> {
-  Communication? _communication;
   final TextEditingController _textFieldController = TextEditingController();
   final bool _busy = false;
   bool _showReply = false;
   bool _transitionDone = false;
+  List<Participation>? _participations;
 
   @override
   void initState() {
@@ -58,6 +60,14 @@ class _CommunicationPageState extends State<CommunicationPage> {
       _communication = conversation;
       delayTransitionDone();
     }); */
+    final client = Skolengo.fromCredentials(ConfigProvider.credentials!, ConfigProvider.school!);
+    client.getCommunicationParticipations(widget.communication.id).then((response) {
+      if (!mounted) return;
+      setState(() {
+        _participations = response.data;
+        delayTransitionDone();
+      });
+    });
   }
 
   delayTransitionDone() {
@@ -87,7 +97,8 @@ class _CommunicationPageState extends State<CommunicationPage> {
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();
-                              await widget.onDelete(_communication);
+                              //TODO fix this
+                              //await widget.onDelete(_communication);
                             },
                             icon: const Icon(Icons.delete))
                       ],
@@ -100,36 +111,34 @@ class _CommunicationPageState extends State<CommunicationPage> {
                     context: context,
                     removeTop: true,
                     child: ListView.builder(
-                      itemCount: (_communication != null
-                              ? (_communication!.participationsNumber ?? 0).toInt()
-                              : 0) +
-                          (_showReply ? 1 : 2),
+                      itemCount: (_participations != null ? _participations!.length : 0) +
+                          (_showReply ? 2 : 1),
                       itemBuilder: (BuildContext context, int index) {
                         if (index == 0) {
                           return Padding(
                             padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
                             child: Text(
-                              _communication != null ? _communication!.subject : widget.subject,
+                              widget.communication.subject,
                               style: Theme.of(context).textTheme.headlineSmall,
                             ),
                           );
                         }
                         index -= 1;
-                        if (_communication == null ||
-                            index >= _communication!.participationsNumber!) {
-                          return _communication != null && _communication!.replyToAllAllowed!
-                              ? Padding(
-                                  padding: const EdgeInsets.all(8.0),
-                                  child: OutlinedButton(
-                                      onPressed: () {
-                                        _showReply = true;
-                                        setState(() {});
-                                      },
-                                      child: const Text('Répondre à tous')),
-                                )
-                              : const Text('');
+                        if (_participations != null &&
+                            index == _participations!.length &&
+                            widget.communication.replyToAllAllowed!) {
+                          return Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: OutlinedButton(
+                                onPressed: () {
+                                  _showReply = true;
+                                  setState(() {});
+                                },
+                                child: const Text('Répondre à tous')),
+                          );
                         }
                         final parentKey = GlobalKey();
+                        final participation = _participations![index];
                         return DefaultTransition(
                           key: GlobalKey(),
                           duration:
@@ -152,7 +161,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                     children: [
                                       Expanded(
                                         child: Text(
-                                          /*_communication!.messages[index].author*/ 'Unimplemented', //FIXME
+                                          '${participation.sender!.person?.firstName} ${participation.sender!.person?.lastName}',
                                           textAlign: TextAlign.left,
                                           overflow: TextOverflow.ellipsis,
                                           style: TextStyle(
@@ -162,7 +171,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                         ),
                                       ),
                                       Text(
-                                        /*Util.dateToString(_communication!.messages[index].date)*/ 'Unimplemented', //FIXME
+                                        participation.dateTime.format(),
                                         style: TextStyle(
                                           fontSize: 14,
                                           color: Theme.of(context).colorScheme.primary,
@@ -171,9 +180,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                     ],
                                   ),
                                   Html(
-                                    data: /* HtmlUnescape()
-                                        .convert(_communication!.messages[index].htmlContent)*/
-                                        'Unimplemented', //FIXME
+                                    data: HtmlUnescape().convert(participation.content),
                                     style: {
                                       'body':
                                           Style(margin: Margins.all(0), padding: EdgeInsets.zero),
@@ -192,12 +199,11 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                           mode: LaunchMode.externalApplication);
                                     },
                                   ),
-                                  /* FIXME
-                                 if (_communication!.messages[index].attachments.isNotEmpty)
+                                  if (participation.attachments != null)
                                     AttachmentsWidget(
-                                      attachments: _communication!.messages[index].attachments,
+                                      attachments: participation.attachments!,
                                       elevation: 3,
-                                    )*/
+                                    )
                                 ],
                               ),
                             ),

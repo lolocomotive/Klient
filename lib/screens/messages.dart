@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
+import 'package:klient/config_provider.dart';
 import 'package:klient/screens/communication.dart';
 import 'package:klient/screens/message_search.dart';
 import 'package:klient/widgets/communication_card.dart';
@@ -46,28 +47,28 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   String? currentId;
   bool _transitionDone = false;
 
-  void openConversation(BuildContext context, GlobalKey? parentKey, String communicationId,
-      String conversationSubject) {
+  void openConversation(BuildContext context, GlobalKey? parentKey, Communication communication) {
     if (_sideBySide) {
       setState(() {
-        currentId = communicationId;
-        currentSubject = conversationSubject;
+        /*FIXME
+         currentId = communicationId;
+        currentSubject = conversationSubject; */
       });
     } else {
       Navigator.of(context).push(
         MorpheusPageRoute(
           //FIXME Builder is called twice
           builder: (_) => CommunicationPage(
-              onDelete: deleteConversationFromList,
-              subject: conversationSubject,
-              id: communicationId),
+            onDelete: deleteConversationFromList,
+            communication: communication,
+          ),
           parentKey: parentKey,
         ),
       );
     }
   }
 
-  reloadFromDB() {
+  reloadFromDB() async {
     /* TODO rewrite this
     Conversation.fetchAll().then((conversations) {
       if (!mounted) return;
@@ -100,21 +101,22 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentState = this;
     currentId = null;
     currentSubject = null;
-    /* TODO rewrite this     
-      Conversation.fetchAll().then((conversations) {
+    final client = Skolengo.fromCredentials(ConfigProvider.credentials!, ConfigProvider.school!);
+    client
+        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+        .then((settings) async {
+      _communications = (await client.getCommunicationsFromFolder(
+        settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
+        limit: 20,
+      ))
+          .data;
       delayTransitionDone();
       if (!mounted) return;
-      setState(() {
-        _conversations = conversations;
-      });
-    }).onError((e, st) {
-      _e = e as Exception;
-      _st = st;
       setState(() {});
-    }); */
+    });
   }
 
-  final List<Communication> _communications = [];
+  List<Communication> _communications = [];
 
   @override
   Widget build(BuildContext context) {
@@ -290,11 +292,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                             _selection.add(index);
                                                             setState(() {});
                                                           } else {
-                                                            openConversation(
-                                                                context,
-                                                                parentKey,
-                                                                _communications[index].id,
-                                                                _communications[index].subject);
+                                                            openConversation(context, parentKey,
+                                                                _communications[index]);
                                                           }
                                                         },
                                                         onLongPress: () {
@@ -341,8 +340,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                 child: Text('Cliquer sur une conversation pour l\'afficher ici'))
                             : CommunicationPage(
                                 key: Key(currentId.toString()),
-                                id: currentId!,
-                                subject: currentSubject!,
+                                //FIXME
+                                communication: Communication(id: '', subject: '', type: ''),
                                 onDelete: deleteConversationFromList,
                               ),
                       )

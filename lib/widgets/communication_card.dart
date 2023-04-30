@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
+import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -56,12 +57,15 @@ class CommunicationCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Text(
-                      _communication.recipientsSummary ?? '',
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
-                      ),
+                    child: Html(
+                      data: _communication.recipientsSummary ?? '',
+                      style: {
+                        '*': Style(
+                          fontSize: FontSize(16),
+                          textOverflow: TextOverflow.ellipsis,
+                          margin: Margins.zero,
+                        ),
+                      },
                     ),
                   ),
                   Text(
@@ -100,9 +104,20 @@ class CommunicationCard extends StatelessWidget {
                 ],
               ),
               /* _communication.customPreview ??*/
-              Text(
-                HtmlUnescape().convert(_communication.lastParticipation!.content),
-                style: TextStyle(fontSize: 13, color: Theme.of(context).colorScheme.secondary),
+              Html(
+                data: HtmlUnescape().convert(_communication.lastParticipation!.content),
+                style: {
+                  '*': Style(
+                    fontSize: FontSize(13),
+                    color: Theme.of(context).colorScheme.secondary,
+                    textOverflow: TextOverflow.ellipsis,
+                    maxLines: 4,
+                    margin: Margins.zero,
+                    padding: EdgeInsets.zero,
+                    display: Display.inline,
+                  ),
+                  'br': Style(display: Display.none),
+                },
               ),
             ],
           ),

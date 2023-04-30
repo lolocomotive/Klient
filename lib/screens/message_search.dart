@@ -131,8 +131,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                                 transitionToChild: true,
                                 builder: (_) => CommunicationPage(
                                   onDelete: deleteConversation,
-                                  id: _communications![index].id,
-                                  subject: _communications![index].subject,
+                                  communication: _communications![index],
                                 ),
                                 parentKey: parentKey,
                               ),
