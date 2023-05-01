@@ -336,8 +336,8 @@ class ArticleList extends StatefulWidget {
 class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin {
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<SchoolInfo>>(
-        future: /*NewsArticle.fetchAll()*/ Future.value([]), //TODO rewrite this
+    return FutureBuilder<SkolengoResponse<List<SchoolInfo>>>(
+        future: ConfigProvider.client!.getSchoolInfos(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -359,7 +359,7 @@ class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin
             );
           }
           return DefaultTransition(
-            child: snapshot.data!.isEmpty
+            child: snapshot.data!.data.isEmpty
                 ? Padding(
                     padding: const EdgeInsets.all(8.0),
                     child: Center(
@@ -371,7 +371,8 @@ class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin
                   )
                 : Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: snapshot.data!.map((article) => SchoolInfoCard(article)).toList(),
+                    children:
+                        snapshot.data!.data.map((article) => SchoolInfoCard(article)).toList(),
                   ),
           );
         });

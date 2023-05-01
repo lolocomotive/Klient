@@ -45,6 +45,7 @@ class ConfigProvider {
   static ColorScheme? lightDynamic;
   static ColorScheme? darkDynamic;
   static Color? enforcedColor;
+  static Skolengo? client;
 
   static late HSLColor bgColor;
 

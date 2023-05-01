@@ -101,11 +101,11 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentState = this;
     currentId = null;
     currentSubject = null;
-    final client = Skolengo.fromCredentials(ConfigProvider.credentials!, ConfigProvider.school!);
-    client
+
+    ConfigProvider.client!
         .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
         .then((settings) async {
-      _communications = (await client.getCommunicationsFromFolder(
+      _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
         settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
         limit: 20,
       ))

@@ -20,11 +20,13 @@
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
 import 'package:klient/screens/login.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 import 'screens/multiview.dart';
 
@@ -90,7 +92,6 @@ class KlientState extends State with WidgetsBindingObserver {
   }
 
   KlientState() {
-    _mainWidget = const Main();
     /*
     if (ConfigProvider.demo) {
       Client.demo();
@@ -102,6 +103,11 @@ class KlientState extends State with WidgetsBindingObserver {
           _mainWidget = const Main();
         });
       });
+    } else {
+      _mainWidget = const Main();
+      ConfigProvider.client = Skolengo.fromCredentials(
+          ConfigProvider.credentials!, ConfigProvider.school!,
+          debug: kDebugMode);
     }
   }
 

@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:klient/config_provider.dart';
 import 'package:klient/screens/article.dart';
 import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
@@ -43,28 +44,48 @@ class SchoolInfoCard extends StatelessWidget {
           Navigator.of(context)
               .push(MorpheusPageRoute(builder: (_) => SchoolInfoPage(_info), parentKey: _key));
         }),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        child: Column(
+          children: [
+            if (_info.illustration != null)
+              Hero(
+                tag: _info.illustration!.url,
+                child: Image(
+                    fit: BoxFit.cover,
+                    width: MediaQuery.of(context).size.width,
+                    image: NetworkImage(
+                      _info.illustration!.url,
+                      headers: ConfigProvider.client!.headers,
+                    )),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  _info.author == null
-                      ? const Text('Auteur inconnu')
-                      : Text(
-                          '${_info.author!.firstName} ${_info.author!.lastName}',
-                          style: const TextStyle(fontSize: 16),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      _info.author == null
+                          ? const Text('Auteur inconnu')
+                          : Text(
+                              '${_info.author!.firstName} ${_info.author!.lastName}',
+                              style: const TextStyle(fontSize: 16),
+                            ),
+                      if (_info.attachments != null)
+                        Transform.scale(
+                          scale: .7,
+                          child: const Icon(Icons.attach_file),
                         ),
-                  Text(Util.formatDate(_info.publicationDateTime))
+                      Text(Util.formatDate(_info.publicationDateTime))
+                    ],
+                  ),
+                  Text(
+                    _info.title,
+                  ),
                 ],
               ),
-              Text(
-                _info.title,
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
