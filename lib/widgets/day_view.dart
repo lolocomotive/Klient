@@ -45,7 +45,7 @@ class DayView extends StatelessWidget {
           height:
               (ConfigProvider.compact! ? Values.compactHeightPerMinute : Values.heightPerMinute) *
                       MediaQuery.of(context).textScaleFactor *
-                      Values.maxLessonsPerDay *
+                      Values.maxMinutesPerDay *
                       Values.lessonLength -
                   4,
           child: Stack(

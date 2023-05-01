@@ -28,6 +28,11 @@ import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
+extension IsLong on Lesson {
+  bool get isLong =>
+      DateTime.parse(endDateTime).difference(DateTime.parse(startDateTime)).inMinutes > 55;
+}
+
 class LessonCard extends StatelessWidget {
   final Lesson _lesson;
   final GlobalKey _key = GlobalKey();
@@ -40,9 +45,9 @@ class LessonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    //FIXME
-    //final bool hasIcons = _lesson.exercises.isNotEmpty;
-    const bool hasIcons = true;
+    final bool hasIcons = _lesson.toDoAfterTheLesson != null ||
+        _lesson.toDoForTheLesson != null ||
+        _lesson.contents != null;
     final iconsRow = Opacity(
       opacity: 0.5,
       child: Row(
@@ -62,9 +67,6 @@ class LessonCard extends StatelessWidget {
         ],
       ),
     );
-    print(DateTime.parse(_lesson.endDateTime)
-        .difference(DateTime.parse(_lesson.startDateTime))
-        .inMinutes);
     final content = SizedBox(
       height: DateTime.parse(_lesson.endDateTime)
               .difference(DateTime.parse(_lesson.startDateTime))
@@ -72,15 +74,18 @@ class LessonCard extends StatelessWidget {
           (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
           MediaQuery.of(context).textScaleFactor,
       child: Card(
-        surfaceTintColor:
-            Theme.of(context).brightness == Brightness.light ? _lesson.id.color : null,
-        shadowColor: Theme.of(context).brightness == Brightness.light ? _lesson.id.color : null,
+        surfaceTintColor: Theme.of(context).brightness == Brightness.light
+            ? _lesson.subject.id.color
+            : _lesson.subject.id.color.shade100,
+        shadowColor: Theme.of(context).brightness == Brightness.light
+            ? _lesson.subject.id.color
+            : _lesson.subject.id.color.shade200.withAlpha(100),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
         clipBehavior: Clip.antiAlias,
         child: CustomPaint(
-          painter: _lesson.canceled ? StripesPainter() : null,
+          painter: _lesson.canceled ? StripesPainter(_lesson.subject.id.color) : null,
           child: InkWell(
             onTap: () {
               if (!positionned) return;
@@ -99,7 +104,7 @@ class LessonCard extends StatelessWidget {
                 if (!compact)
                   Container(
                     padding: const EdgeInsets.all(8.0),
-                    color: _lesson.id.color.shade200,
+                    color: _lesson.subject.id.color.shade200,
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
@@ -127,8 +132,9 @@ class LessonCard extends StatelessWidget {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                          border:
-                              Border(left: BorderSide(color: _lesson.id.color.shade200, width: 6))),
+                          border: Border(
+                              left:
+                                  BorderSide(color: _lesson.subject.id.color.shade200, width: 6))),
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
                         child: Column(
@@ -136,6 +142,7 @@ class LessonCard extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 //FIXME not in new API?
                                 //if (_lesson.isModified)
@@ -152,7 +159,6 @@ class LessonCard extends StatelessWidget {
                                   '${_lesson.title} ',
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
-                                //if (_lesson.length <= 1 && hasIcons)
                                 Flexible(
                                     child: Text(
                                   _lesson.location,
@@ -162,7 +168,15 @@ class LessonCard extends StatelessWidget {
                             ),
                             //if (_lesson.length > 1 && _lesson.isModified)
                             //  Text(_lesson.modificationMessage!),
-                            //if (_lesson.length > 1 || !hasIcons) Text(_lesson.location),
+                            if (_lesson.isLong || !hasIcons)
+                              Text(_lesson.teachers
+                                      ?.map((e) => '${e.lastName} ${e.firstName}')
+                                      .join(', ') ??
+                                  ''),
+                            if (_lesson.isLong)
+                              Text(
+                                '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',
+                              ),
                             Flexible(child: iconsRow)
                           ],
                         ),
@@ -214,7 +228,9 @@ class LessonCard extends StatelessWidget {
     );
     return positionned
         ? Positioned(
-            top: (/*FIXME _lesson.startDouble */ -Values.startTime) *
+            top: (_lesson.startDateTime.date().hour * 60 +
+                    _lesson.startDateTime.date().minute -
+                    Values.startTime * 60) *
                 MediaQuery.of(context).textScaleFactor *
                 (compact ? Values.compactHeightPerMinute : Values.heightPerMinute),
             left: 0,
@@ -226,11 +242,16 @@ class LessonCard extends StatelessWidget {
 }
 
 class StripesPainter extends CustomPainter {
+  final MaterialColor color;
+
+  StripesPainter(this.color);
+
   @override
   void paint(Canvas canvas, Size size) {
     final Paint foreground = Paint();
-    foreground.color =
-        KlientApp.theme!.brightness == Brightness.light ? Colors.black12 : Colors.white10;
+    foreground.color = KlientApp.theme!.brightness == Brightness.light
+        ? color.shade700.withAlpha(20)
+        : color.shade100.withAlpha(20);
     foreground.strokeWidth = 15;
     const step = 45.0;
 

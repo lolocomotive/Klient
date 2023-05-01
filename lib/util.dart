@@ -94,7 +94,7 @@ class Util {
 
 extension Date on String {
   DateTime date() {
-    return DateTime.parse(this);
+    return DateTime.parse(this).toLocal();
   }
 
   // Return a nicely formatted human readable date
@@ -118,7 +118,7 @@ extension NiceSize on num {
     } else if (this < 1000000000) {
       return '${(this / 1000000).toStringAsFixed(1)}M';
     } else {
-      return '${(this / 1000000).toStringAsFixed(1)}M';
+      return '${(this / 1000000000).toStringAsFixed(1)}G';
     }
   }
 }

@@ -70,10 +70,10 @@ class _HomeworkCardState extends State<HomeworkCard> {
         Card(
           surfaceTintColor: Theme.of(context).brightness == Brightness.light
               ? widget._hw.subject!.id.color
-              : null,
+              : widget._hw.subject!.id.color.shade100,
           shadowColor: Theme.of(context).brightness == Brightness.light
               ? widget._hw.subject!.id.color
-              : null,
+              : widget._hw.subject!.id.color.shade200.withAlpha(100),
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,

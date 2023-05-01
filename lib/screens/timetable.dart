@@ -42,7 +42,7 @@ class Values {
   static const heightPerMinute = 2.0;
   static const compactHeightPerMinute = 1.2;
   static const lessonLength = 55.0 / 55.0;
-  static const maxLessonsPerDay = 11;
+  static const maxMinutesPerDay = 11 * 60;
   static const startTime = 8;
 }
 
@@ -59,32 +59,18 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
 
   bool compact = ConfigProvider.compact!;
   Future<List<List<Lesson>>> _getCalendar() async {
-    List<List<Lesson>> r = [];
-    /* TODO rewrite this
-    var lessons = await Lesson.fetchAll();
-    List<Lesson> day = [];
-    DateTime lastDate = DateTime.utc(0);
-    if (lessons.isNotEmpty) {
-      lastDate = lessons[0].date;
-    }
+    final response = await ConfigProvider.client!.getAgendas(
+      ConfigProvider.credentials!.idToken.claims.subject,
+      startDate: DateTime.now().add(const Duration(days: -14)),
+      endDate: DateTime.now().add(
+        const Duration(days: 14),
+      ),
+    );
 
-    _page = 0;
-    for (int i = 0; i < lessons.length; i++) {
-      final lesson = lessons[i];
-      if (lesson.date.isSameDay(lastDate)) {
-        day.add(lesson);
-      } else {
-        r.add(day);
-        day = [lesson];
-        lastDate = lesson.date;
-      }
-      if ((lesson.date.millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch >= 0 &&
-              _page == 0) ||
-          lesson.date.isSameDay(DateTime.now())) {
-        _page = r.length;
-      }
-    } */
-    return r;
+    return response.data
+        .where((element) => element.lessons != null)
+        .map((element) => element.lessons!)
+        .toList();
   }
 
   @override
@@ -111,7 +97,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
           child: SizedBox(
             height: (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
                     MediaQuery.of(context).textScaleFactor *
-                    Values.maxLessonsPerDay *
+                    Values.maxMinutesPerDay *
                     Values.lessonLength +
                 32,
             child: Stack(
@@ -199,6 +185,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                           return SizedBox(
                             height:
                                 (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
+                                    60 *
                                     MediaQuery.of(context).textScaleFactor,
                             child: Text(
                               '${index + Values.startTime}h',
@@ -206,7 +193,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                             ),
                           );
                         },
-                        itemCount: Values.maxLessonsPerDay,
+                        itemCount: (Values.maxMinutesPerDay / 60).round(),
                       ),
                     ),
                   ),
