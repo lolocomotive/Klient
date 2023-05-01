@@ -35,7 +35,7 @@ class EvaluationCard extends StatelessWidget {
       children: [
         Flexible(
           child: Text(
-            '${_evaluation.subject} ',
+            '${_evaluation.subject.label} ',
             overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontWeight: FontWeight.bold,

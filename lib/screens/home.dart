@@ -259,19 +259,19 @@ class GradeList extends StatefulWidget {
 
 class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
   Future<List<List<Evaluation>>> _fetchGrades() async {
-    /* TODO rewrite this
-    final grades = await Evaluation.fetchAll();
+    final response = await ConfigProvider.client!
+        .getEvaluationServices(ConfigProvider.credentials!.idToken.claims.subject, '');
+    final evaluations = response.data.map((e) => e.evaluations).expand((e) => e).toList();
+
     List<List<Evaluation>> r = [];
-    for (int i = 0; i < grades.length; i++) {
+    for (int i = 0; i < evaluations.length; i++) {
       if (i % 2 == 0) {
-        r.add([grades[i]]);
+        r.add([evaluations[i]]);
       } else {
-        r[(i / 2).floor()].add(grades[i]);
+        r[(i / 2).floor()].add(evaluations[i]);
       }
-    } 
+    }
     return r;
-    */
-    return [];
   }
 
   @override
