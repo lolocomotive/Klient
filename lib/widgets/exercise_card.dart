@@ -61,7 +61,7 @@ class _HomeworkCardState extends State<HomeworkCard> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
             child: Text(
-              '${widget.showSubject ? '${widget._hw.subject}: ' : ''}'
+              '${widget.showSubject ? '${widget._hw.subject?.label}: ' : ''}'
               'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
                   ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime.date())}',
               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),

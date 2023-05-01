@@ -23,6 +23,7 @@ import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/exercise_card.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
+//FIXME ambiguous name
 class HomeworkList extends StatelessWidget {
   final List<HomeworkAssignment> _hws;
   final String _title;
