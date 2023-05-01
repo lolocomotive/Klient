@@ -108,3 +108,17 @@ extension Date on String {
     return '${date.hour}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
+
+extension NiceSize on num {
+  String niceSize() {
+    if (this < 1000) {
+      return toString();
+    } else if (this < 1000000) {
+      return '${(this / 1000).toStringAsFixed(1)}k';
+    } else if (this < 1000000000) {
+      return '${(this / 1000000).toStringAsFixed(1)}M';
+    } else {
+      return '${(this / 1000000).toStringAsFixed(1)}M';
+    }
+  }
+}

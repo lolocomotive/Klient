@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 import 'default_card.dart';
@@ -34,15 +35,8 @@ class AttachmentsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    print(attachments);
     return DefaultCard(
-        onTap: () {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text(
-                  'À cause de limitations dues à l\'ENT, il est impossible de télécharger les pièces jointes depuis l\'application.'),
-            ),
-          );
-        },
         elevation: elevation,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -54,13 +48,19 @@ class AttachmentsWidget extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            ...attachments
-                .map(
-                  (attachment) => Row(
-                    children: [Flexible(child: Text(attachment.name))],
+            ...attachments.asMap().entries.map((entry) {
+              return Column(
+                children: [
+                  ListTile(
+                    title: Text(entry.value.name),
+                    subtitle: Text('${entry.value.size.niceSize()}o'),
+                    leading: const Icon(Icons.audio_file),
+                    onTap: () => print('download'),
                   ),
-                )
-                .toList(),
+                  if (entry.key < attachments.length - 1) const Divider(),
+                ],
+              );
+            }).toList(),
           ],
         ));
   }
