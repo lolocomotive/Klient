@@ -205,8 +205,8 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
     */
     return (await ConfigProvider.client!.getHomeworkAssignments(
       ConfigProvider.credentials!.idToken.claims.subject,
-      DateTime.now().toIso8601String(),
-      DateTime.now().add(const Duration(days: 14)).toIso8601String(),
+      DateTime.now().toIso8601String().substring(0, 10),
+      DateTime.now().add(const Duration(days: 14)).toIso8601String().substring(0, 10),
     ))
         .data;
   }

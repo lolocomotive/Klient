@@ -56,7 +56,7 @@ class DatabaseProvider {
 
     final dbPath = '$dbDir/klient.db';
     if (kDebugMode) {
-      //await deleteDatabase(dbPath);
+      await deleteDatabase(dbPath);
     }
 
     final password = await ConfigProvider.getStorage().read(key: 'dbPassword') ??
@@ -83,7 +83,14 @@ class DatabaseProvider {
   }
 
   static Future<void> createTables(Database db) async {
-    //TODO implement
+    await db.rawQuery('''
+      CREATE TABLE IF NOT EXISTS Cache (
+        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+        Uri TEXT NOT NULL,
+        Data TEXT NOT NULL,
+        DateTime TEXT NOT NULL
+      );
+    ''');
   }
 
   static Future<Database> openDB(String dbPath, String password) async {
@@ -97,6 +104,9 @@ class DatabaseProvider {
       dbPath,
       password: password,
       version: 1,
+      onCreate: (db, version) async {
+        await createTables(db);
+      },
       onUpgrade: (db, oldVersion, newVersion) async {},
     );
   }

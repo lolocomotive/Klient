@@ -60,8 +60,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
       _communication = conversation;
       delayTransitionDone();
     }); */
-    final client = Skolengo.fromCredentials(ConfigProvider.credentials!, ConfigProvider.school!);
-    client.getCommunicationParticipations(widget.communication.id).then((response) {
+    ConfigProvider.client!.getCommunicationParticipations(widget.communication.id).then((response) {
       if (!mounted) return;
       setState(() {
         _participations = response.data;

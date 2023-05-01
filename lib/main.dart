@@ -23,6 +23,7 @@ import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:klient/api/database_cache_provider.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
 import 'package:klient/screens/login.dart';
@@ -39,7 +40,8 @@ void main() async {
   //TODO fix Background fetch
   //await initPlatformState();
   //registerTasks();
-
+  KlientApp.cache = DatabaseCacheProvider();
+  await KlientApp.cache.init();
   runApp(const KlientApp());
 }
 
@@ -54,6 +56,7 @@ _checkNotifications() async {
 }
 
 class KlientApp extends StatefulWidget {
+  static late DatabaseCacheProvider cache;
   static ThemeData? theme;
   static GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
   static GlobalKey<ScaffoldMessengerState> messengerKey = GlobalKey<ScaffoldMessengerState>();
@@ -97,6 +100,7 @@ class KlientState extends State with WidgetsBindingObserver {
       Client.demo();
       return;
     }*/
+
     if (ConfigProvider.credentials == null) {
       _mainWidget = Login(() {
         setState(() {
@@ -104,6 +108,7 @@ class KlientState extends State with WidgetsBindingObserver {
           ConfigProvider.client = Skolengo.fromCredentials(
             ConfigProvider.credentials!,
             ConfigProvider.school!,
+            cacheProvider: KlientApp.cache,
             debug: kDebugMode,
           );
         });
@@ -113,6 +118,7 @@ class KlientState extends State with WidgetsBindingObserver {
       ConfigProvider.client = Skolengo.fromCredentials(
         ConfigProvider.credentials!,
         ConfigProvider.school!,
+        cacheProvider: KlientApp.cache,
         debug: kDebugMode,
       );
     }
