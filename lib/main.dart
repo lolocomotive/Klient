@@ -101,13 +101,20 @@ class KlientState extends State with WidgetsBindingObserver {
       _mainWidget = Login(() {
         setState(() {
           _mainWidget = const Main();
+          ConfigProvider.client = Skolengo.fromCredentials(
+            ConfigProvider.credentials!,
+            ConfigProvider.school!,
+            debug: kDebugMode,
+          );
         });
       });
     } else {
       _mainWidget = const Main();
       ConfigProvider.client = Skolengo.fromCredentials(
-          ConfigProvider.credentials!, ConfigProvider.school!,
-          debug: kDebugMode);
+        ConfigProvider.credentials!,
+        ConfigProvider.school!,
+        debug: kDebugMode,
+      );
     }
   }
 
