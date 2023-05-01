@@ -41,8 +41,11 @@ class SchoolInfoCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: (() {
-          Navigator.of(context)
-              .push(MorpheusPageRoute(builder: (_) => SchoolInfoPage(_info), parentKey: _key));
+          Navigator.of(context).push(
+            _info.illustration == null
+                ? MorpheusPageRoute(builder: (_) => SchoolInfoPage(_info), parentKey: _key)
+                : MaterialPageRoute(builder: (_) => SchoolInfoPage(_info)),
+          );
         }),
         child: Column(
           children: [
