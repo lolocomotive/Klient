@@ -41,7 +41,9 @@ void main() async {
   //await initPlatformState();
   //registerTasks();
   KlientApp.cache = DatabaseCacheProvider();
+  final stopwatch = Stopwatch()..start();
   await KlientApp.cache.init();
+  if (kDebugMode) print('Database cache provider init done in ${stopwatch.elapsedMilliseconds}ms');
   runApp(const KlientApp());
 }
 

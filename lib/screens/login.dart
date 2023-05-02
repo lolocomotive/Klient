@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
@@ -51,8 +52,9 @@ class LoginState extends State<Login> {
 
   _postLogin(Database db) async {
     await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
-    _resetDb(db);
+    await _resetDb(db);
     widget.onLogin();
+    await KlientApp.cache.init();
     return;
   }
 
