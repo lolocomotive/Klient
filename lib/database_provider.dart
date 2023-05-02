@@ -21,7 +21,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/foundation.dart';
 import 'package:klient/config_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'
@@ -55,11 +54,8 @@ class DatabaseProvider {
     }
 
     final dbPath = '$dbDir/klient.db';
-    if (kDebugMode) {
-      await deleteDatabase(dbPath);
-    }
 
-    final password = await ConfigProvider.getStorage().read(key: 'dbPassword') ??
+    final password = ConfigProvider.dbPassword ??
         base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
     ConfigProvider.getStorage().write(key: 'dbPassword', value: password);
     try {

@@ -46,6 +46,7 @@ class ConfigProvider {
   static ColorScheme? darkDynamic;
   static Color? enforcedColor;
   static Skolengo? client;
+  static String? dbPassword;
 
   static late HSLColor bgColor;
 
@@ -135,6 +136,9 @@ class ConfigProvider {
       data.forEach((key, value) {
         if (kDebugMode) print('[Config] $key : $value');
         switch (key) {
+          case 'dbPassword':
+            dbPassword = value;
+            break;
           case 'credentials':
             credentials = Credential.fromJson(jsonDecode(value));
             break;
