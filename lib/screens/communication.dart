@@ -23,10 +23,10 @@ import 'package:html_unescape/html_unescape.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
+import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:scolengo_api/scolengo_api.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class CommunicationPage extends StatefulWidget {
   const CommunicationPage({Key? key, required this.onDelete, required this.communication})
@@ -178,7 +178,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                       ),
                                     ],
                                   ),
-                                  Html(
+                                  CustomHtml(
                                     data: HtmlUnescape().convert(participation.content),
                                     style: {
                                       'body':
@@ -192,10 +192,6 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                         margin: Margins.all(0),
                                         fontStyle: FontStyle.italic,
                                       )
-                                    },
-                                    onLinkTap: (url, context, map, element) {
-                                      launchUrl(Uri.parse(url!),
-                                          mode: LaunchMode.externalApplication);
                                     },
                                   ),
                                   if (participation.attachments != null)

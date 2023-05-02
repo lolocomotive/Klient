@@ -107,7 +107,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
         .then((settings) async {
       _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
         settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
-        limit: 20,
+        limit: 2000,
       ))
           .data;
       delayTransitionDone();

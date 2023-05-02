@@ -17,14 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_html/flutter_html.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/widgets/attachments_widget.dart';
+import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:scolengo_api/scolengo_api.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class SchoolInfoPage extends StatefulWidget {
   const SchoolInfoPage(this._info, {Key? key}) : super(key: key);
@@ -62,7 +62,7 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
                 child: Image(
                   fit: BoxFit.cover,
                   width: MediaQuery.of(context).size.width,
-                  image: NetworkImage(
+                  image: CachedNetworkImageProvider(
                     widget._info.illustration!.url,
                     headers: ConfigProvider.client!.headers,
                   ),
@@ -70,11 +70,8 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
               ),
             Padding(
               padding: const EdgeInsets.all(8.0),
-              child: Html(
+              child: CustomHtml(
                 data: widget._info.content,
-                onLinkTap: (url, context, map, element) {
-                  launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                },
               ),
             ),
             if (_info.attachments != null)

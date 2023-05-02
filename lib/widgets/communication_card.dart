@@ -18,7 +18,6 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -57,15 +56,10 @@ class CommunicationCard extends StatelessWidget {
               Row(
                 children: [
                   Expanded(
-                    child: Html(
-                      data: _communication.recipientsSummary ?? '',
-                      style: {
-                        '*': Style(
-                          fontSize: FontSize(16),
-                          textOverflow: TextOverflow.ellipsis,
-                          margin: Margins.zero,
-                        ),
-                      },
+                    child: Text(
+                      HtmlUnescape().convert(_communication.recipientsSummary ?? '').innerText,
+                      style: const TextStyle(fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                   Text(
@@ -83,8 +77,7 @@ class CommunicationCard extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
-                    child: /*_communication.customSubject ??*/
-                        Text(
+                    child: Text(
                       _communication.subject,
                       textAlign: TextAlign.left,
                       overflow: TextOverflow.ellipsis,
@@ -104,20 +97,14 @@ class CommunicationCard extends StatelessWidget {
                 ],
               ),
               /* _communication.customPreview ??*/
-              Html(
-                data: HtmlUnescape().convert(_communication.lastParticipation!.content),
-                style: {
-                  '*': Style(
-                    fontSize: FontSize(13),
-                    color: Theme.of(context).colorScheme.secondary,
-                    textOverflow: TextOverflow.ellipsis,
-                    maxLines: 4,
-                    margin: Margins.zero,
-                    padding: EdgeInsets.zero,
-                    display: Display.inline,
-                  ),
-                  'br': Style(display: Display.none),
-                },
+              Text(
+                HtmlUnescape().convert(_communication.lastParticipation!.content).innerText,
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Theme.of(context).colorScheme.secondary,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                maxLines: 4,
               ),
             ],
           ),

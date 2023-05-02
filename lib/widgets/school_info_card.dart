@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/article.dart';
@@ -55,7 +56,7 @@ class SchoolInfoCard extends StatelessWidget {
                 child: Image(
                     fit: BoxFit.cover,
                     width: MediaQuery.of(context).size.width,
-                    image: NetworkImage(
+                    image: CachedNetworkImageProvider(
                       _info.illustration!.url,
                       headers: ConfigProvider.client!.headers,
                     )),

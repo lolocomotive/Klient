@@ -122,3 +122,13 @@ extension NiceSize on num {
     }
   }
 }
+
+extension HtmlUtils on String {
+  String get innerText =>
+      //First remove all html tags and line breaks
+      replaceAll(RegExp(r'^\s+|\r?\n|\r|<.*?>'), '')
+          //Then remove extra spaces
+          .replaceAll(RegExp(r'\s+'), ' ')
+          //Then remove leading space
+          .replaceAll(RegExp(r'^\s+'), '');
+}
