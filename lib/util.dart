@@ -17,9 +17,14 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/exception_widget.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 class Util {
   static const standardShadow = [
@@ -131,4 +136,17 @@ extension HtmlUtils on String {
           .replaceAll(RegExp(r'\s+'), ' ')
           //Then remove leading space
           .replaceAll(RegExp(r'^\s+'), '');
+}
+
+Skolengo createClient() {
+  ConfigProvider.credentials!.onTokenChanged.listen((event) {
+    ConfigProvider.getStorage()
+        .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));
+  });
+  return Skolengo.fromCredentials(
+    ConfigProvider.credentials!,
+    ConfigProvider.school!,
+    cacheProvider: KlientApp.cache,
+    debug: kDebugMode,
+  );
 }

@@ -27,7 +27,7 @@ import 'package:klient/api/database_cache_provider.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
 import 'package:klient/screens/login.dart';
-import 'package:scolengo_api/scolengo_api.dart';
+import 'package:klient/util.dart';
 
 import 'screens/multiview.dart';
 
@@ -107,22 +107,12 @@ class KlientState extends State with WidgetsBindingObserver {
       _mainWidget = Login(() {
         setState(() {
           _mainWidget = const Main();
-          ConfigProvider.client = Skolengo.fromCredentials(
-            ConfigProvider.credentials!,
-            ConfigProvider.school!,
-            cacheProvider: KlientApp.cache,
-            debug: kDebugMode,
-          );
+          ConfigProvider.client = createClient();
         });
       });
     } else {
       _mainWidget = const Main();
-      ConfigProvider.client = Skolengo.fromCredentials(
-        ConfigProvider.credentials!,
-        ConfigProvider.school!,
-        cacheProvider: KlientApp.cache,
-        debug: kDebugMode,
-      );
+      ConfigProvider.client = createClient();
     }
   }
 
