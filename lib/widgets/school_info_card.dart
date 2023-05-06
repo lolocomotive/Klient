@@ -67,7 +67,7 @@ class SchoolInfoCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       _info.author == null
                           ? const Text('Auteur inconnu')
@@ -80,7 +80,7 @@ class SchoolInfoCard extends StatelessWidget {
                           scale: .7,
                           child: const Icon(Icons.attach_file),
                         ),
-                      Text(Util.formatDate(_info.publicationDateTime))
+                      Text(_info.publicationDateTime.format()),
                     ],
                   ),
                   Text(
