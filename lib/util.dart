@@ -24,6 +24,7 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/exception_widget.dart';
+import 'package:openid_client/openid_client.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class Util {
@@ -139,14 +140,17 @@ extension HtmlUtils on String {
 }
 
 Skolengo createClient() {
-  ConfigProvider.credentials!.onTokenChanged.listen((event) {
-    ConfigProvider.getStorage()
-        .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));
-  });
-  return Skolengo.fromCredentials(
+  final client = Skolengo.fromCredentials(
     ConfigProvider.credentials!,
     ConfigProvider.school!,
     cacheProvider: KlientApp.cache,
     debug: kDebugMode,
   );
+  ConfigProvider.credentials!.onTokenChanged.listen((event) {
+    ConfigProvider.getStorage()
+        .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));
+    client.headers['Authorization'] =
+        'Bearer ${TokenResponse.fromJson(ConfigProvider.credentials!.response!).accessToken}';
+  });
+  return client;
 }
