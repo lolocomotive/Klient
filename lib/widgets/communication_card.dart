@@ -58,7 +58,10 @@ class CommunicationCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       HtmlUnescape().convert(_communication.recipientsSummary ?? '').innerText,
-                      style: const TextStyle(fontSize: 16),
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
+                      ),
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -73,7 +76,6 @@ class CommunicationCard extends StatelessWidget {
                 ],
               ),
               Row(
-                //FIXME replace the commented out code
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Flexible(
