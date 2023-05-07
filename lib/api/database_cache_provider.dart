@@ -18,13 +18,18 @@
  */
 
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:klient/database_provider.dart';
+import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class DatabaseCacheProvider extends CacheProvider {
   bool ready = false;
   late Map<String, String> _index;
+
+  ///Set this to true to ignore the cache.
+  bool forceRefresh = false;
 
   init() async {
     final stopwatch = Stopwatch()..start();
@@ -67,7 +72,29 @@ class DatabaseCacheProvider extends CacheProvider {
   @override
   Future<bool> shouldUseCache(String key) async {
     if (!ready) throw Exception('Database not ready!');
-    if (_index.containsKey(key)) return true;
-    return false;
+    if (!_index.containsKey(key)) return false;
+    if (forceRefresh) return false;
+    Duration expiryTime;
+    final route = key.substring(44).replaceAll(RegExp(r'\?.*'), '');
+    switch (route) {
+      case 'agendas':
+        expiryTime = const Duration(hours: 3);
+        break;
+      case 'communications':
+        expiryTime = const Duration(minutes: 30);
+        break;
+      case 'schools-info':
+        expiryTime = const Duration(days: 7);
+        break;
+      default:
+        expiryTime = const Duration(hours: 1);
+    }
+    if (route.startsWith('user-mail-settings')) {
+      expiryTime = const Duration(days: 7);
+    }
+    if (_index[key]!.date().add(expiryTime).isBefore(DateTime.now())) {
+      return false;
+    }
+    return true;
   }
 }
