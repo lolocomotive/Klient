@@ -37,9 +37,9 @@ class Util {
   ];
 
   static void onException(Exception e, StackTrace st) {
-    print(e);
-    print(st);
-    print('Current state: ${KlientApp.currentLifecycleState}');
+    debugPrint(e.toString());
+    debugPrintStack(stackTrace: st);
+    debugPrint('Current app lifecycle state: ${KlientApp.currentLifecycleState}');
     if (KlientApp.currentLifecycleState == AppLifecycleState.resumed) {
       KlientApp.messengerKey.currentState?.showSnackBar(
         SnackBar(

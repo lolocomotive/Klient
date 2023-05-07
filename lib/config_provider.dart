@@ -130,11 +130,10 @@ class ConfigProvider {
     try {
       print('Reading preferences');
       var data = await getStorage().readAll();
-
       compact = false;
 
       data.forEach((key, value) {
-        if (kDebugMode) print('[Config] $key : $value');
+        debugPrint('[Config] $key : $value');
         switch (key) {
           case 'dbPassword':
             dbPassword = value;

@@ -68,15 +68,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     }
   }
 
-  reloadFromDB() async {
-    /* TODO rewrite this
-    Conversation.fetchAll().then((conversations) {
-      if (!mounted) return;
-      _conversations = conversations;
-      delayTransitionDone();
-    }); */
-  }
-
   refresh() async {
 /*TODO rewrite this  
    Client.getClient().clear();
@@ -355,13 +346,12 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     );
   }
 
+//FIXME rewrite this
   deleteConversationFromList(Communication comm) async {
     await deleteConversation(comm);
     try {
       _communications.removeAt(_communications.indexOf(comm));
-    } catch (_) {
-      reloadFromDB();
-    }
+    } catch (_) {}
     setState(() {});
   }
 

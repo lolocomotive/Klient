@@ -226,8 +226,6 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
               ),
             );
           } else if (snapshot.hasError) {
-            print(snapshot.error);
-            print(snapshot.stackTrace);
             return DefaultCard(
                 child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
           }

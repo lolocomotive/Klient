@@ -25,6 +25,7 @@ import 'package:klient/main.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/exception_widget.dart';
 import 'package:openid_client/openid_client_io.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
@@ -192,8 +193,7 @@ class LoginState extends State<Login> {
                     future: AppInfo.getAppInfo(),
                     builder: ((context, snapshot) {
                       if (snapshot.hasError) {
-                        print(snapshot.error);
-                        return Text('Erreur: "${snapshot.error}"');
+                        return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);
                       } else if (snapshot.data != null) {
                         return Padding(
                           padding: const EdgeInsets.all(8.0),

@@ -35,9 +35,7 @@ class DatabaseCacheProvider extends CacheProvider {
       _index[result['Uri'] as String] = result['DateTime'] as String;
     }
     ready = true;
-    if (kDebugMode) {
-      print('Database cache provider init done in ${stopwatch.elapsedMilliseconds}ms');
-    }
+    debugPrint('Database cache provider init done in ${stopwatch.elapsedMilliseconds}ms');
   }
 
   @override
@@ -46,7 +44,7 @@ class DatabaseCacheProvider extends CacheProvider {
     final results = await (await DatabaseProvider.getDB())
         .query('Cache', columns: ['Data'], where: 'Uri = ?', whereArgs: [key]);
     if (results.isEmpty) throw Exception('Key not found!');
-    if (kDebugMode) print('CACHE GET $key');
+    debugPrint('CACHE GET $key');
     return results.first['Data'] as String;
   }
 
@@ -63,7 +61,7 @@ class DatabaseCacheProvider extends CacheProvider {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     _index[key] = DateTime.now().toIso8601String();
-    if (kDebugMode) print('CACHE SET $key took ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint('CACHE SET $key took ${stopwatch.elapsedMilliseconds}ms');
   }
 
   @override

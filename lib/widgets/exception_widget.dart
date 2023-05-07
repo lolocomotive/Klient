@@ -26,14 +26,17 @@ import 'package:klient/widgets/default_card.dart';
 import 'package:sqflite_sqlcipher/sqflite.dart';
 
 class ExceptionWidget extends StatelessWidget {
-  final Exception e;
+  final Object e;
   final StackTrace st;
 
-  const ExceptionWidget({
+  ExceptionWidget({
     required this.e,
     required this.st,
     Key? key,
-  }) : super(key: key);
+  }) : super(key: key) {
+    debugPrint(e.toString());
+    debugPrintStack(stackTrace: st);
+  }
 
   @override
   Widget build(BuildContext context) {

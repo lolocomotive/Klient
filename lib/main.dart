@@ -20,7 +20,6 @@
 import 'dart:io';
 
 import 'package:dynamic_color/dynamic_color.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:klient/api/database_cache_provider.dart';
@@ -43,7 +42,7 @@ void main() async {
   KlientApp.cache = DatabaseCacheProvider();
   final stopwatch = Stopwatch()..start();
   await KlientApp.cache.init();
-  if (kDebugMode) print('Database cache provider init done in ${stopwatch.elapsedMilliseconds}ms');
+  debugPrint('Database cache provider init done in ${stopwatch.elapsedMilliseconds}ms');
   runApp(const KlientApp());
 }
 

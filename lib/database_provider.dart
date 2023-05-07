@@ -21,6 +21,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:sqflite_common_ffi/sqflite_ffi.dart'
@@ -62,8 +63,8 @@ class DatabaseProvider {
       _database = await openDB(dbPath, password);
     } on DatabaseException catch (e, st) {
       // Delete database if password is wrong
-      print(e);
-      print(st);
+      debugPrint(e.toString());
+      debugPrintStack(stackTrace: st);
       print('Deleting database');
       await deleteDb(dbPath);
       _database = await openDB(dbPath, password);

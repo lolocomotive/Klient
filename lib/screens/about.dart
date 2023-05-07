@@ -22,6 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/exception_widget.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -58,8 +59,7 @@ class AboutPage extends StatelessWidget {
                     future: AppInfo.getAppInfo(),
                     builder: ((context, snapshot) {
                       if (snapshot.hasError) {
-                        print(snapshot.error);
-                        return Text('Erreur: "${snapshot.error}"');
+                        return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);
                       } else if (snapshot.connectionState == ConnectionState.done) {
                         return Table(
                           children: [
