@@ -20,6 +20,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
@@ -39,48 +40,58 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
   @override
   void initState() {
     _info = widget._info;
-    ConfigProvider.client!.getSchoolInfo(_info.id).then((response) {
-      if (!mounted) return;
-      setState(() {
-        _info = response.data;
-      });
-    });
+
     super.initState();
+  }
+
+  load() async {
+    final response = await ConfigProvider.client!.getSchoolInfo(_info.id);
+    if (!mounted) return;
+    setState(() {
+      _info = response.data;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return DefaultSliverActivity(
       title: widget._info.title,
-      child: SingleChildScrollView(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            if (widget._info.illustration != null)
-              Hero(
-                tag: widget._info.illustration!.url,
-                child: Image(
-                  fit: BoxFit.cover,
-                  width: MediaQuery.of(context).size.width,
-                  image: CachedNetworkImageProvider(
-                    widget._info.illustration!.url,
-                    headers: ConfigProvider.client!.headers,
+      child: RefreshIndicator(
+        onRefresh: () async {
+          KlientApp.cache.forceRefresh = true;
+          load();
+          KlientApp.cache.forceRefresh = false;
+        },
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (widget._info.illustration != null)
+                Hero(
+                  tag: widget._info.illustration!.url,
+                  child: Image(
+                    fit: BoxFit.cover,
+                    width: MediaQuery.of(context).size.width,
+                    image: CachedNetworkImageProvider(
+                      widget._info.illustration!.url,
+                      headers: ConfigProvider.client!.headers,
+                    ),
                   ),
                 ),
-              ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: CustomHtml(
-                data: widget._info.content,
-              ),
-            ),
-            if (_info.attachments != null)
-              DefaultTransition(
-                child: AttachmentsWidget(
-                  attachments: _info.attachments!,
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: CustomHtml(
+                  data: widget._info.content,
                 ),
               ),
-          ],
+              if (_info.attachments != null)
+                DefaultTransition(
+                  child: AttachmentsWidget(
+                    attachments: _info.attachments!,
+                  ),
+                ),
+            ],
+          ),
         ),
       ),
     );

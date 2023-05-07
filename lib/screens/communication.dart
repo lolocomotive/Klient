@@ -21,6 +21,7 @@ import 'package:flutter/material.dart' hide Action;
 import 'package:flutter_html/flutter_html.dart';
 import 'package:html_unescape/html_unescape.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/custom_html.dart';
@@ -49,23 +50,16 @@ class _CommunicationPageState extends State<CommunicationPage> {
   @override
   void initState() {
     super.initState();
+    load();
+  }
 
-/* TODO rewrite this
-    Conversation.byID(widget.id).then((conversation) {
-      if (!conversation!.read) {
-        Client.getClient().markConversationRead(conversation);
-        MessagesPageState.currentState?.reloadFromDB();
-      }
-      if (!mounted) return;
-      _communication = conversation;
+  load() async {
+    final response =
+        await ConfigProvider.client!.getCommunicationParticipations(widget.communication.id);
+    if (!mounted) return;
+    setState(() {
+      _participations = response.data;
       delayTransitionDone();
-    }); */
-    ConfigProvider.client!.getCommunicationParticipations(widget.communication.id).then((response) {
-      if (!mounted) return;
-      setState(() {
-        _participations = response.data;
-        delayTransitionDone();
-      });
     });
   }
 
@@ -106,105 +100,112 @@ class _CommunicationPageState extends State<CommunicationPage> {
                   ];
                 },
                 body: Scrollbar(
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: ListView.builder(
-                      itemCount: (_participations != null ? _participations!.length : 0) +
-                          (_showReply ? 2 : 1),
-                      itemBuilder: (BuildContext context, int index) {
-                        if (index == 0) {
-                          return Padding(
-                            padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
-                            child: Text(
-                              widget.communication.subject,
-                              style: Theme.of(context).textTheme.headlineSmall,
-                            ),
-                          );
-                        }
-                        index -= 1;
-                        if (_participations != null &&
-                            index == _participations!.length &&
-                            widget.communication.replyToAllAllowed!) {
-                          return Padding(
-                            padding: const EdgeInsets.all(8.0),
-                            child: OutlinedButton(
-                                onPressed: () {
-                                  _showReply = true;
-                                  setState(() {});
-                                },
-                                child: const Text('Répondre à tous')),
-                          );
-                        }
-                        final parentKey = GlobalKey();
-                        final participation = _participations![index];
-                        return DefaultTransition(
-                          key: GlobalKey(),
-                          duration:
-                              _transitionDone ? Duration.zero : const Duration(milliseconds: 200),
-                          delay: Duration(milliseconds: _transitionDone ? 0 : 30 * index),
-                          child: Card(
-                            margin: const EdgeInsets.all(8.0),
-                            elevation: 1,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
-                              child: Column(
-                                key: parentKey,
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          '${participation.sender!.person?.firstName} ${participation.sender!.person?.lastName}',
-                                          textAlign: TextAlign.left,
-                                          overflow: TextOverflow.ellipsis,
+                  child: RefreshIndicator(
+                    onRefresh: () async {
+                      KlientApp.cache.forceRefresh = true;
+                      await load();
+                      KlientApp.cache.forceRefresh = false;
+                    },
+                    child: MediaQuery.removePadding(
+                      context: context,
+                      removeTop: true,
+                      child: ListView.builder(
+                        itemCount: (_participations != null ? _participations!.length : 0) +
+                            (_showReply ? 2 : 1),
+                        itemBuilder: (BuildContext context, int index) {
+                          if (index == 0) {
+                            return Padding(
+                              padding: const EdgeInsets.fromLTRB(16, 0, 16, 0),
+                              child: Text(
+                                widget.communication.subject,
+                                style: Theme.of(context).textTheme.headlineSmall,
+                              ),
+                            );
+                          }
+                          index -= 1;
+                          if (_participations != null &&
+                              index == _participations!.length &&
+                              widget.communication.replyToAllAllowed!) {
+                            return Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: OutlinedButton(
+                                  onPressed: () {
+                                    _showReply = true;
+                                    setState(() {});
+                                  },
+                                  child: const Text('Répondre à tous')),
+                            );
+                          }
+                          final parentKey = GlobalKey();
+                          final participation = _participations![index];
+                          return DefaultTransition(
+                            key: GlobalKey(),
+                            duration:
+                                _transitionDone ? Duration.zero : const Duration(milliseconds: 200),
+                            delay: Duration(milliseconds: _transitionDone ? 0 : 30 * index),
+                            child: Card(
+                              margin: const EdgeInsets.all(8.0),
+                              elevation: 1,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),
+                                child: Column(
+                                  key: parentKey,
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Expanded(
+                                          child: Text(
+                                            '${participation.sender!.person?.firstName} ${participation.sender!.person?.lastName}',
+                                            textAlign: TextAlign.left,
+                                            overflow: TextOverflow.ellipsis,
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                color: Theme.of(context).colorScheme.primary,
+                                                fontWeight: FontWeight.bold),
+                                          ),
+                                        ),
+                                        Text(
+                                          participation.dateTime.format(),
                                           style: TextStyle(
-                                              fontSize: 14,
-                                              color: Theme.of(context).colorScheme.primary,
-                                              fontWeight: FontWeight.bold),
+                                            fontSize: 14,
+                                            color: Theme.of(context).colorScheme.primary,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        participation.dateTime.format(),
-                                        style: TextStyle(
-                                          fontSize: 14,
-                                          color: Theme.of(context).colorScheme.primary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                  CustomHtml(
-                                    data: HtmlUnescape().convert(participation.content),
-                                    style: {
-                                      'body':
-                                          Style(margin: Margins.all(0), padding: EdgeInsets.zero),
-                                      'blockquote': Style(
-                                        border: Border(
-                                            left: BorderSide(
-                                                color: Theme.of(context).colorScheme.secondary,
-                                                width: 2)),
-                                        padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
-                                        margin: Margins.all(0),
-                                        fontStyle: FontStyle.italic,
+                                      ],
+                                    ),
+                                    CustomHtml(
+                                      data: HtmlUnescape().convert(participation.content),
+                                      style: {
+                                        'body':
+                                            Style(margin: Margins.all(0), padding: EdgeInsets.zero),
+                                        'blockquote': Style(
+                                          border: Border(
+                                              left: BorderSide(
+                                                  color: Theme.of(context).colorScheme.secondary,
+                                                  width: 2)),
+                                          padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                                          margin: Margins.all(0),
+                                          fontStyle: FontStyle.italic,
+                                        )
+                                      },
+                                    ),
+                                    if (participation.attachments != null)
+                                      AttachmentsWidget(
+                                        attachments: participation.attachments!,
+                                        elevation: 3,
                                       )
-                                    },
-                                  ),
-                                  if (participation.attachments != null)
-                                    AttachmentsWidget(
-                                      attachments: participation.attachments!,
-                                      elevation: 3,
-                                    )
-                                ],
+                                  ],
+                                ),
                               ),
                             ),
-                          ),
-                        );
-                      },
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
