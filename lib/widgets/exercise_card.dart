@@ -21,14 +21,13 @@ import 'dart:math';
 
 import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart' hide Action;
-import 'package:flutter_html/flutter_html.dart';
 import 'package:intl/intl.dart';
 import 'package:klient/api/color_provider.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
+import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:scolengo_api/scolengo_api.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 class HomeworkCard extends StatefulWidget {
   final Function? onMarkedDone;
@@ -206,7 +205,7 @@ class _CardContentsState extends State<_CardContents> {
                                 textAlign: TextAlign.center,
                               ),
                             )
-                          : Html(
+                          : CustomHtml(
                               data: widget.widget._hw.html.substringWords(
                                       widget.expanded
                                           ? widget.widget._hw.html.length
@@ -218,9 +217,6 @@ class _CardContentsState extends State<_CardContents> {
                                               _CardContents.cutThreshold
                                       ? ''
                                       : '...'),
-                              onLinkTap: (url, context, map, element) {
-                                launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-                              },
                             ),
                   if (widget.widget._hw.attachments != null && widget.expanded)
                     AttachmentsWidget(

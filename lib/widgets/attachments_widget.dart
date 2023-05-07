@@ -35,7 +35,6 @@ class AttachmentsWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(attachments);
     return DefaultCard(
         elevation: elevation,
         child: Column(

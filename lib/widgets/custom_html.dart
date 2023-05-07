@@ -36,7 +36,12 @@ class CustomHtml extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Html(
-      data: data,
+      data: data.replaceAll(
+          RegExp(r'<p[^>]*>\s*<\/p>|<head>[\s\S]*?<\/head>', caseSensitive: false, multiLine: true),
+          ''),
+      // Remove empty paragraphs and head tag
+      // Empty paragraphs take up too much space.
+      // Head tag is removed as a workaround for https://github.com/Sub6Resources/flutter_html/issues/1227
       style: defaultStyle..addAll(style),
       onLinkTap: (url, context, attributes, element) {
         launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
