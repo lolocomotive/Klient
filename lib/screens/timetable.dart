@@ -55,7 +55,7 @@ class TimetablePage extends StatefulWidget {
 
 class _TimetablePageState extends State<TimetablePage> with TickerProviderStateMixin {
   PageController _pageController = PageController();
-  final int _page = 0;
+  int _page = 0;
 
   bool compact = ConfigProvider.compact!;
   Future<List<List<Lesson>>> _getCalendar() async {
@@ -66,11 +66,23 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
         const Duration(days: 14),
       ),
     );
-
-    return response.data
+    final days = response.data
         .where((element) => element.lessons != null)
         .map((element) => element.lessons!)
         .toList();
+
+    //Set _page to current or next day
+    for (var i = 0; i < days.length; i++) {
+      if (days[i][0].startDateTime.date().isSameDay(DateTime.now())) {
+        _page = i;
+        break;
+      } else if (days[i].last.startDateTime.date().isBefore(DateTime.now())) {
+        _page = i + 1;
+      } else {
+        break;
+      }
+    }
+    return days;
   }
 
   @override
