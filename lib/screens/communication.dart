@@ -42,7 +42,7 @@ class CommunicationPage extends StatefulWidget {
 
 class _CommunicationPageState extends State<CommunicationPage> {
   final TextEditingController _textFieldController = TextEditingController();
-  final bool _busy = false;
+  bool _busy = false;
   bool _showReply = false;
   bool _transitionDone = false;
   List<Participation>? _participations;
@@ -101,17 +101,15 @@ class _CommunicationPageState extends State<CommunicationPage> {
                 },
                 body: Scrollbar(
                   child: RefreshIndicator(
-                    onRefresh: () async {
-                      KlientApp.cache.forceRefresh = true;
-                      await load();
-                      KlientApp.cache.forceRefresh = false;
-                    },
+                    onRefresh: refresh,
                     child: MediaQuery.removePadding(
                       context: context,
                       removeTop: true,
                       child: ListView.builder(
-                        itemCount: (_participations != null ? _participations!.length : 0) +
-                            (_showReply ? 2 : 1),
+                        itemCount: (_participations != null
+                            ? _participations!.length +
+                                (widget.communication.replyToAllAllowed! && !_showReply ? 2 : 1)
+                            : 0),
                         itemBuilder: (BuildContext context, int index) {
                           if (index == 0) {
                             return Padding(
@@ -251,38 +249,24 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                   onPressed: _busy
                                       ? null
                                       : () async {
-                                          /* TODO rewrite this
                                           _busy = true;
                                           setState(() {});
                                           try {
-                                            await Client.getClient().request(Action.reply,
-                                                params: [_communication!.id.toString()],
-                                                body:
-                                                    '{"dateEnvoi":0,"corpsMessage": "${_textFieldController.text.replaceAll('\\', '\\\\').replaceAll('"', '\\"').replaceAll('\n', '<br/>')}"}');
+                                            await ConfigProvider.client!
+                                                .postCommunicationParticipation(
+                                                    widget.communication.id,
+                                                    _textFieldController.text
+                                                        .replaceAll('\\', '\\\\')
+                                                        .replaceAll('"', '\\"')
+                                                        .replaceAll('\n', '<br/>'));
                                             _textFieldController.clear();
-                                            final batch = (await DatabaseProvider.getDB()).batch();
-                                            await Downloader.clearConversation(_communication!.id);
-                                            await Downloader.fetchSingleConversation(
-                                                _communication!.id, batch);
-                                            await Client.getClient().process();
-                                            //There is no need to commit the batch since it is already commited in the callback of fetchSingleConversation.
-                                            //Committing the batch twice would duplicate all the messages.
-                                            await Conversation.byID(_communication!.id)
-                                                .then((conversation) {
-                                              if (!mounted) return;
-                                              setState(() {
-                                                _busy = false;
-                                                _showReply = false;
-                                                _communication = conversation;
-                                              });
-                                            });
-                                            MessagesPageState.currentState!.reloadFromDB();
+                                            await refresh();
                                           } on Exception catch (e, st) {
-                                            setState(() {
-                                              _busy = false;
-                                            });
                                             Util.onException(e, st);
-                                          }*/
+                                          } finally {
+                                            _busy = false;
+                                            setState(() {});
+                                          }
                                         },
                                   child: _busy
                                       ? Transform.scale(
@@ -302,5 +286,11 @@ class _CommunicationPageState extends State<CommunicationPage> {
         ),
       ),
     );
+  }
+
+  Future<void> refresh() async {
+    KlientApp.cache.forceRefresh = true;
+    await load();
+    KlientApp.cache.forceRefresh = false;
   }
 }

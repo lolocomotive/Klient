@@ -83,7 +83,7 @@ class DatabaseProvider {
     await db.rawQuery('''
       CREATE TABLE IF NOT EXISTS Cache (
         Id INTEGER PRIMARY KEY AUTOINCREMENT,
-        Uri TEXT NOT NULL,
+        Uri TEXT NOT NULL UNIQUE,
         Data TEXT NOT NULL,
         DateTime TEXT NOT NULL
       );
