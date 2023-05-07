@@ -226,18 +226,24 @@ class LessonCard extends StatelessWidget {
         ),
       ),
     );
-    return positionned
-        ? Positioned(
-            top: (_lesson.startDateTime.date().hour * 60 +
-                    _lesson.startDateTime.date().minute -
-                    Values.startTime * 60) *
-                MediaQuery.of(context).textScaleFactor *
-                (compact ? Values.compactHeightPerMinute : Values.heightPerMinute),
-            left: 0,
-            right: 0,
-            child: content,
-          )
-        : content;
+    return Theme(
+      data: Theme.of(context).copyWith(
+        splashColor: _lesson.subject.id.color.shade200.withAlpha(80),
+        highlightColor: _lesson.subject.id.color.shade200.withAlpha(50),
+      ),
+      child: positionned
+          ? Positioned(
+              top: (_lesson.startDateTime.date().hour * 60 +
+                      _lesson.startDateTime.date().minute -
+                      Values.startTime * 60) *
+                  MediaQuery.of(context).textScaleFactor *
+                  (compact ? Values.compactHeightPerMinute : Values.heightPerMinute),
+              left: 0,
+              right: 0,
+              child: content,
+            )
+          : content,
+    );
   }
 }
 

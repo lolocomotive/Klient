@@ -79,16 +79,66 @@ class _HomeworkCardState extends State<HomeworkCard> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(8),
           ),
-          child: ExpandableNotifier(
-            child: Expandable(
-              collapsed: _CardContents(
-                widget: widget,
-                onMarkedDone: onMarkedDone,
+          child: Container(
+            decoration: widget.compact
+                ? BoxDecoration(
+                    border: Border(
+                      left: BorderSide(color: widget._hw.subject!.id.color.shade200, width: 6),
+                    ),
+                  )
+                : null,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: widget._hw.subject!.id.color.shade200.withAlpha(50),
               ),
-              expanded: _CardContents(
-                widget: widget,
-                expanded: true,
-                onMarkedDone: onMarkedDone,
+              child: ExpandablePanel(
+                theme: ExpandableThemeData(
+                  iconColor: widget._hw.subject!.id.color.shade200,
+                  headerAlignment: ExpandablePanelHeaderAlignment.center,
+                ),
+                header: Container(
+                  color: widget.compact ? null : widget._hw.subject!.id.color.shade200,
+                  padding: widget.compact
+                      ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
+                      : const EdgeInsets.all(8.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Row(
+                          mainAxisAlignment: widget.compact
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment.spaceAround,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget._hw.title + (widget.compact ? ' - ' : ''),
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: widget.compact ? null : Colors.black,
+                                ),
+                              ),
+                            ),
+                            Text(widget._hw.done ? 'Fait' : 'À faire',
+                                style: TextStyle(
+                                  color: widget.compact ? null : Colors.black,
+                                )),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                collapsed: _CardContents(
+                  widget: widget,
+                  onMarkedDone: onMarkedDone,
+                ),
+                expanded: _CardContents(
+                  widget: widget,
+                  expanded: true,
+                  onMarkedDone: onMarkedDone,
+                ),
               ),
             ),
           ),
@@ -133,175 +183,123 @@ class _CardContentsState extends State<_CardContents> {
   @override
   Widget build(BuildContext context) {
     final bool online =
-        RegExp('<p.*#FFB622.*Ce travail à faire est à remettre directement en ligne.*<\\/p>')
+        RegExp('<p.*?#FFB622.*?Ce travail à faire est à remettre directement en ligne.*<\\/p>')
             .hasMatch(widget.widget._hw.html);
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
-      child: Container(
-        decoration: widget.widget.compact
-            ? BoxDecoration(
-                border: Border(
-                  left: BorderSide(color: widget.widget._hw.subject!.id.color.shade200, width: 6),
-                ),
-              )
-            : null,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Container(
-              color: widget.widget.compact ? null : widget.widget._hw.subject!.id.color.shade200,
-              padding: widget.widget.compact
-                  ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
-                  : const EdgeInsets.all(8.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: widget.widget.compact
-                          ? MainAxisAlignment.start
-                          : MainAxisAlignment.spaceAround,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            widget.widget._hw.title + (widget.widget.compact ? ' - ' : ''),
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: widget.widget.compact ? null : Colors.black,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: widget.widget.compact ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                online
+                    ? const OnlineWarning()
+                    : widget.widget._hw.html == ''
+                        ? Padding(
+                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                            child: Text(
+                              'Aucun contenu renseigné',
+                              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                              textAlign: TextAlign.center,
                             ),
+                          )
+                        : CustomHtml(
+                            data: widget.widget._hw.html.substringWords(
+                                    widget.expanded
+                                        ? widget.widget._hw.html.length
+                                        : min(
+                                            _CardContents.cutLength, widget.widget._hw.html.length),
+                                    _CardContents.cutThreshold) +
+                                (widget.expanded ||
+                                        widget.widget._hw.html.length <= _CardContents.cutThreshold
+                                    ? ''
+                                    : '...'),
                           ),
-                        ),
-                        Text(widget.widget._hw.done ? 'Fait' : 'À faire',
-                            style: TextStyle(
-                              color: widget.widget.compact ? null : Colors.black,
-                            )),
-                      ],
-                    ),
+                if (widget.widget._hw.attachments != null && widget.expanded)
+                  AttachmentsWidget(
+                    attachments: widget.widget._hw.attachments!,
+                    elevation: widget.widget.elevation * 2,
                   ),
-                  if (!online &&
-                      (widget.widget._hw.html.length > _CardContents.cutThreshold ||
-                          widget.widget._hw.attachments != null))
-                    Icon(
-                      widget.expanded ? Icons.expand_less : Icons.expand_more,
-                      color: widget.widget.compact ? null : Colors.black,
-                    )
-                ],
-              ),
-            ),
-            Padding(
-              padding: widget.widget.compact ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  online
-                      ? const OnlineWarning()
-                      : widget.widget._hw.html == ''
-                          ? Padding(
-                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
-                              child: Text(
-                                'Aucun contenu renseigné',
-                                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                                textAlign: TextAlign.center,
-                              ),
-                            )
-                          : CustomHtml(
-                              data: widget.widget._hw.html.substringWords(
-                                      widget.expanded
-                                          ? widget.widget._hw.html.length
-                                          : min(_CardContents.cutLength,
-                                              widget.widget._hw.html.length),
-                                      _CardContents.cutThreshold) +
-                                  (widget.expanded ||
-                                          widget.widget._hw.html.length <=
-                                              _CardContents.cutThreshold
-                                      ? ''
-                                      : '...'),
-                            ),
-                  if (widget.widget._hw.attachments != null && widget.expanded)
-                    AttachmentsWidget(
-                      attachments: widget.widget._hw.attachments!,
-                      elevation: widget.widget.elevation * 2,
-                    ),
-                  if (!online &&
-                      !widget.expanded &&
-                      (widget.widget._hw.attachments != null ||
-                          widget.widget._hw.html.length > _CardContents.cutThreshold))
-                    ExpandableButton(
-                      theme: const ExpandableThemeData(useInkWell: false),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Text(
-                          'Voir plus',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.bold),
-                        ),
+                if (!online &&
+                    !widget.expanded &&
+                    (widget.widget._hw.attachments != null ||
+                        widget.widget._hw.html.length > _CardContents.cutThreshold))
+                  ExpandableButton(
+                    theme: const ExpandableThemeData(useInkWell: false),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        'Voir plus',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                            color: Theme.of(context).colorScheme.primary,
+                            fontWeight: FontWeight.bold),
                       ),
                     ),
-                  if (!online && widget.expanded)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        TextButton(
-                          onPressed: _busy
-                              ? null
-                              : () async {
-                                  //TODO implement with new API
-                                  /*
+                  ),
+                if (!online && widget.expanded)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      TextButton(
+                        onPressed: _busy
+                            ? null
+                            : () async {
+                                //TODO implement with new API
+                                /*
+                                setState(() {
+                                  _busy = true;
+                                });
+                                if (ConfigProvider.demo) {
+                                  await (await DatabaseProvider.getDB()).update(
+                                    'Exercises',
+                                    {'Done': !widget.widget._hw.done ? 1 : 0},
+                                    where: 'ID = ?',
+                                    whereArgs: [widget.widget._hw.uid],
+                                  );
+
                                   setState(() {
-                                    _busy = true;
+                                    widget.widget._hw.done = !widget.widget._hw.done;
+                                    widget.onMarkedDone(widget.widget._hw.done);
+                                    _busy = false;
                                   });
-                                  if (ConfigProvider.demo) {
-                                    await (await DatabaseProvider.getDB()).update(
-                                      'Exercises',
-                                      {'Done': !widget.widget._hw.done ? 1 : 0},
-                                      where: 'ID = ?',
-                                      whereArgs: [widget.widget._hw.uid],
-                                    );
+                                } else {
+                                  final response = await Client.getClient().request(
+                                      Action.markExerciseDone,
+                                      body: '{"flagRealise":${!widget.widget._hw.done}}',
+                                      params: [
+                                        '0',
+                                        (widget.widget._hw.parentLesson ??
+                                                widget.widget._hw.lessonFor)
+                                            .toString(),
+                                        widget.widget._hw.uid.toString()
+                                      ]);
+                                  await (await DatabaseProvider.getDB()).update(
+                                    'Exercises',
+                                    {'Done': response['flagRealise'] ? 1 : 0},
+                                    where: 'ID = ?',
+                                    whereArgs: [widget.widget._hw.uid],
+                                  );
 
-                                    setState(() {
-                                      widget.widget._hw.done = !widget.widget._hw.done;
-                                      widget.onMarkedDone(widget.widget._hw.done);
-                                      _busy = false;
-                                    });
-                                  } else {
-                                    final response = await Client.getClient().request(
-                                        Action.markExerciseDone,
-                                        body: '{"flagRealise":${!widget.widget._hw.done}}',
-                                        params: [
-                                          '0',
-                                          (widget.widget._hw.parentLesson ??
-                                                  widget.widget._hw.lessonFor)
-                                              .toString(),
-                                          widget.widget._hw.uid.toString()
-                                        ]);
-                                    await (await DatabaseProvider.getDB()).update(
-                                      'Exercises',
-                                      {'Done': response['flagRealise'] ? 1 : 0},
-                                      where: 'ID = ?',
-                                      whereArgs: [widget.widget._hw.uid],
-                                    );
-
-                                    setState(() {
-                                      widget.widget._hw.done = response['flagRealise'];
-                                      widget.onMarkedDone(response['flagRealise']);
-                                      _busy = false;
-                                    });  
-                                  }
-                                  */
-                                },
-                          child:
-                              Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
-                        ),
-                      ],
-                    )
-                ],
-              ),
+                                  setState(() {
+                                    widget.widget._hw.done = response['flagRealise'];
+                                    widget.onMarkedDone(response['flagRealise']);
+                                    _busy = false;
+                                  });  
+                                }
+                                */
+                              },
+                        child: Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
+                      ),
+                    ],
+                  )
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
