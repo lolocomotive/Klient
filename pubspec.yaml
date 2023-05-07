@@ -57,6 +57,7 @@ dependencies:
     openid_client: ^0.4.7
     webview_flutter: ^4.2.0
     cached_network_image: ^3.2.3
+    connectivity_plus: ^3.0.6
 
 dev_dependencies:
     flutter_test:

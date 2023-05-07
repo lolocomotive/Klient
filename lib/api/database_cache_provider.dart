@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/database_provider.dart';
@@ -50,6 +51,7 @@ class DatabaseCacheProvider extends CacheProvider {
         .query('Cache', columns: ['Data'], where: 'Uri = ?', whereArgs: [key]);
     if (results.isEmpty) throw Exception('Key not found!');
     debugPrint('CACHE GET $key');
+
     return results.first['Data'] as String;
   }
 
@@ -73,7 +75,13 @@ class DatabaseCacheProvider extends CacheProvider {
   Future<bool> shouldUseCache(String key) async {
     if (!ready) throw Exception('Database not ready!');
     if (!_index.containsKey(key)) return false;
+
+    //Use cache if offline
+    if (await Connectivity().checkConnectivity() != ConnectivityResult.none) return true;
+
+    //Allow to override expiry duration
     if (forceRefresh) return false;
+
     Duration expiryTime;
     final route = key.substring(44).replaceAll(RegExp(r'\?.*'), '');
     switch (route) {
