@@ -25,9 +25,8 @@ import 'package:url_launcher/url_launcher.dart';
 class CustomHtml extends StatelessWidget {
   final String data;
   final Map<String, Style> style;
-  final Map<String, Style> defaultStyle = {};
 
-  CustomHtml({
+  const CustomHtml({
     Key? key,
     required this.data,
     this.style = const {},
@@ -35,6 +34,12 @@ class CustomHtml extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, Style> defaultStyle = {
+      'a': Style(
+        fontWeight: FontWeight.bold,
+        color: Theme.of(context).colorScheme.primary,
+      )
+    };
     return Html(
       data: data.replaceAll(
           RegExp(r'<p[^>]*>\s*<\/p>|<head>[\s\S]*?<\/head>', caseSensitive: false, multiLine: true),
