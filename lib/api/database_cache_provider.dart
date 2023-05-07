@@ -90,6 +90,7 @@ class DatabaseCacheProvider extends CacheProvider {
       case 'communications':
         expiryTime = const Duration(minutes: 30);
         break;
+      case 'users-info':
       case 'schools-info':
         expiryTime = const Duration(days: 7);
         break;

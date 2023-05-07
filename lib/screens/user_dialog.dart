@@ -5,6 +5,7 @@ import 'package:klient/screens/about.dart';
 import 'package:klient/screens/debug.dart';
 import 'package:klient/screens/settings.dart';
 import 'package:klient/widgets/default_card.dart';
+import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/user_avatar.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
@@ -30,10 +31,23 @@ class _UserDialogState extends State<UserDialog> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text(
-                  ConfigProvider.username ?? '',
-                  style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
-                ),
+                child: FutureBuilder<SkolengoResponse<User>>(
+                    future: ConfigProvider.client!
+                        .getUserInfo(ConfigProvider.client!.credentials!.idToken.claims.subject),
+                    builder: (context, snapshot) {
+                      if (snapshot.hasData) {
+                        return DefaultTransition(
+                          child: Text(
+                            '${snapshot.data!.data.firstName} ${snapshot.data!.data.lastName}',
+                            style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return const DefaultTransition(child: Text('Erreur'));
+                      } else {
+                        return const LinearProgressIndicator();
+                      }
+                    }),
               ),
               /* TODO rewrite this 
               if (Client.students.length > 1)
