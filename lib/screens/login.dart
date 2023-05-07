@@ -44,8 +44,6 @@ class LoginState extends State<Login> {
   final _controller = WebViewController();
   bool _showBrowser = false;
 
-  final bool _processing = false;
-
   final _searchController = TextEditingController();
 
   String _query = '';

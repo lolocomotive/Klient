@@ -77,8 +77,7 @@ class DatabaseCacheProvider extends CacheProvider {
     if (!_index.containsKey(key)) return false;
 
     //Use cache if offline
-    if (await Connectivity().checkConnectivity() != ConnectivityResult.none) return true;
-
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) return true;
     //Allow to override expiry duration
     if (forceRefresh) return false;
 
@@ -100,9 +99,8 @@ class DatabaseCacheProvider extends CacheProvider {
     if (route.startsWith('user-mail-settings')) {
       expiryTime = const Duration(days: 7);
     }
-    if (_index[key]!.date().add(expiryTime).isBefore(DateTime.now())) {
-      return false;
-    }
+    if (_index[key]!.date().add(expiryTime).isBefore(DateTime.now())) return false;
+
     return true;
   }
 }

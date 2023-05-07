@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/screens/communication.dart';
 import 'package:klient/screens/message_search.dart';
 import 'package:klient/widgets/communication_card.dart';
@@ -68,11 +69,23 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     }
   }
 
-  refresh() async {
-/*TODO rewrite this  
-   Client.getClient().clear();
-    await Downloader.fetchMessageData();
-    reloadFromDB(); */
+  Future<void> load() async {
+    final settings = await ConfigProvider.client!
+        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+    _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
+      settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
+      limit: 100,
+    ))
+        .data;
+    delayTransitionDone();
+    if (!mounted) return;
+    setState(() {});
+  }
+
+  Future<void> refresh() async {
+    KlientApp.cache.forceRefresh = true;
+    await load();
+    KlientApp.cache.forceRefresh = false;
   }
 
   delayTransitionDone() {
@@ -93,18 +106,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentId = null;
     currentSubject = null;
 
-    ConfigProvider.client!
-        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
-        .then((settings) async {
-      _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
-        settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
-        limit: 2000,
-      ))
-          .data;
-      delayTransitionDone();
-      if (!mounted) return;
-      setState(() {});
-    });
+    load();
   }
 
   List<Communication> _communications = [];
@@ -210,9 +212,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                         },
                         body: Scrollbar(
                           child: RefreshIndicator(
-                            onRefresh: () async {
-                              await refresh();
-                            },
+                            onRefresh: refresh,
                             child: _e != null
                                 ? Column(
                                     children: [

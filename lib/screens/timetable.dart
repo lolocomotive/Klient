@@ -21,6 +21,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/day_view.dart';
 import 'package:klient/widgets/default_activity.dart';
@@ -100,10 +101,10 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
       ],
       child: RefreshIndicator(
         onRefresh: () async {
-          /* TODO rewrite this
-          Client.getClient().clear();
-          await Downloader.fetchTimetable();
-          setState(() {}); */
+          KlientApp.cache.forceRefresh = true;
+          await _getCalendar();
+          KlientApp.cache.forceRefresh = false;
+          setState(() {});
         },
         child: SingleChildScrollView(
           child: SizedBox(

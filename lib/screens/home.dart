@@ -18,7 +18,9 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
@@ -60,45 +62,18 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
       ],
       child: RefreshIndicator(
         onRefresh: (() async {
-          /* TODO rewrite this
-          Client.getClient().clear();
+          KlientApp.cache.forceRefresh = true;
           await Future.wait(<Future>[
-            Downloader.fetchGradesData().then((_) => _gKey.currentState?.setState(() {})),
-            Downloader.fetchHomework().then((_) => _hKey.currentState?.setState(() {})),
-            Downloader.fetchNewsData().then((_) => _aKey.currentState?.setState(() {})),
-          ]);*/
+            getHomework().then((value) => _hKey.currentState?.setState(() {})),
+            getGrades().then((_) => _gKey.currentState?.setState(() {})),
+            ConfigProvider.client!
+                .getSchoolInfos()
+                .then((_) => _aKey.currentState?.setState(() {})),
+          ]);
+          KlientApp.cache.forceRefresh = false;
         }),
         child: SingleChildScrollView(
           child: LayoutBuilder(builder: (context, constraints) {
-            /* if (Client.currentlySelected == null) {
-              return FutureBuilder(
-                  future: Future.delayed(const Duration(seconds: 2)),
-                  builder: (context, snapshot) {
-                    return Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: AnimatedOpacity(
-                        opacity: snapshot.connectionState == ConnectionState.done ? 1 : 0,
-                        duration: const Duration(milliseconds: 300),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Si vous pouvez lire ce texte c\'est que quelque chose a mal tourné :/ Essayez de supprimer les données de l\'application puis de la redémarrer.',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 16.0),
-                              child: ElevatedButton(
-                                onPressed: () {/*Client.disconnect(context)*/},
-                                child: const Text('Supprimmer les données et redémarrer'),
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                    );
-                  });
-            }*/
             if (constraints.maxWidth > 1200) {
               return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -192,29 +167,10 @@ class HomeworkListWrapper extends StatefulWidget {
 }
 
 class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerProviderStateMixin {
-  Future<List<HomeworkAssignment>> _fetchHomework() async {
-    /* TODO rewrite this
-    final exercises = (await Exercise.fetchAll())
-        .where(
-            (exercise) => exercise.lessonFor != null && exercise.dateFor!.isAfter(DateTime.now()))
-        .toList();
-    exercises.sort(
-      (a, b) => a.dateFor!.millisecondsSinceEpoch - b.dateFor!.millisecondsSinceEpoch,
-    );
-    return exercises;
-    */
-    return (await ConfigProvider.client!.getHomeworkAssignments(
-      ConfigProvider.credentials!.idToken.claims.subject,
-      DateTime.now().toIso8601String().substring(0, 10),
-      DateTime.now().add(const Duration(days: 14)).toIso8601String().substring(0, 10),
-    ))
-        .data;
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<HomeworkAssignment>>(
-        future: _fetchHomework(),
+        future: getHomework(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -256,26 +212,10 @@ class GradeList extends StatefulWidget {
 }
 
 class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
-  Future<List<List<Evaluation>>> _fetchGrades() async {
-    final response = await ConfigProvider.client!
-        .getEvaluationServices(ConfigProvider.credentials!.idToken.claims.subject, '');
-    final evaluations = response.data.map((e) => e.evaluations).expand((e) => e).toList();
-
-    List<List<Evaluation>> r = [];
-    for (int i = 0; i < evaluations.length; i++) {
-      if (i % 2 == 0) {
-        r.add([evaluations[i]]);
-      } else {
-        r[(i / 2).floor()].add(evaluations[i]);
-      }
-    }
-    return r;
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<List<Evaluation>>>(
-        future: _fetchGrades(),
+        future: getGrades(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
