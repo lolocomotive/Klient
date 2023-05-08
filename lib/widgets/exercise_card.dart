@@ -53,6 +53,9 @@ class HomeworkCard extends StatefulWidget {
 class _HomeworkCardState extends State<HomeworkCard> {
   @override
   Widget build(BuildContext context) {
+    final tint = Theme.of(context).brightness == Brightness.light
+        ? widget._hw.subject!.id.color
+        : widget._hw.subject!.id.color.shade100;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -67,9 +70,7 @@ class _HomeworkCardState extends State<HomeworkCard> {
             ),
           ),
         Card(
-          surfaceTintColor: Theme.of(context).brightness == Brightness.light
-              ? widget._hw.subject!.id.color
-              : widget._hw.subject!.id.color.shade100,
+          surfaceTintColor: tint,
           shadowColor: Theme.of(context).brightness == Brightness.light
               ? widget._hw.subject!.id.color
               : widget._hw.subject!.id.color.shade200.withAlpha(100),
@@ -91,53 +92,62 @@ class _HomeworkCardState extends State<HomeworkCard> {
               data: Theme.of(context).copyWith(
                 splashColor: widget._hw.subject!.id.color.shade200.withAlpha(50),
               ),
-              child: ExpandablePanel(
-                theme: ExpandableThemeData(
-                  iconColor: widget._hw.subject!.id.color.shade200,
-                  headerAlignment: ExpandablePanelHeaderAlignment.center,
-                ),
-                header: Container(
-                  color: widget.compact ? null : widget._hw.subject!.id.color.shade200,
-                  padding: widget.compact
-                      ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
-                      : const EdgeInsets.all(8.0),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Row(
-                          mainAxisAlignment: widget.compact
-                              ? MainAxisAlignment.start
-                              : MainAxisAlignment.spaceAround,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                widget._hw.title + (widget.compact ? ' - ' : ''),
-                                overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: widget.compact ? null : Colors.black,
+              // The whole container is colored and the content overrides the color.
+              // This is a workaround because expandable doesn't allow to set the header/icon background color
+              child: Container(
+                color: widget.compact ? null : widget._hw.subject!.id.color.shade200,
+                child: ExpandablePanel(
+                  theme: ExpandableThemeData(
+                    iconSize: MediaQuery.of(context).textScaleFactor * 20,
+                    iconColor:
+                        widget.compact ? widget._hw.subject!.id.color.shade200 : Colors.black,
+                    headerAlignment: ExpandablePanelHeaderAlignment.center,
+                  ),
+                  header: Container(
+                    padding: widget.compact
+                        ? const EdgeInsets.fromLTRB(8, 4, 8, 0)
+                        : const EdgeInsets.all(8.0),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Row(
+                            mainAxisAlignment: widget.compact
+                                ? MainAxisAlignment.start
+                                : MainAxisAlignment.spaceAround,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  widget._hw.title + (widget.compact ? ' - ' : ''),
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: widget.compact ? null : Colors.black,
+                                    fontSize: MediaQuery.of(context).textScaleFactor * 12,
+                                  ),
                                 ),
                               ),
-                            ),
-                            Text(widget._hw.done ? 'Fait' : 'À faire',
-                                style: TextStyle(
-                                  color: widget.compact ? null : Colors.black,
-                                )),
-                          ],
+                              Text(widget._hw.done ? 'Fait' : 'À faire',
+                                  style: TextStyle(
+                                    color: widget.compact ? null : Colors.black,
+                                  )),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                ),
-                collapsed: _CardContents(
-                  widget: widget,
-                  onMarkedDone: onMarkedDone,
-                ),
-                expanded: _CardContents(
-                  widget: widget,
-                  expanded: true,
-                  onMarkedDone: onMarkedDone,
+                  collapsed: _CardContents(
+                    widget: widget,
+                    onMarkedDone: onMarkedDone,
+                    tint: tint,
+                  ),
+                  expanded: _CardContents(
+                    widget: widget,
+                    expanded: true,
+                    onMarkedDone: onMarkedDone,
+                    tint: tint,
+                  ),
                 ),
               ),
             ),
@@ -162,11 +172,14 @@ class _CardContents extends StatefulWidget {
   //The minimum length starting which strings are going to be cut
   static const cutThreshold = cutLength + 50;
 
+  final Color tint;
+
   const _CardContents({
     Key? key,
     required this.widget,
     required this.onMarkedDone,
     this.expanded = false,
+    required this.tint,
   }) : super(key: key);
 
   final HomeworkCard widget;
@@ -187,119 +200,125 @@ class _CardContentsState extends State<_CardContents> {
             .hasMatch(widget.widget._hw.html);
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Padding(
-            padding: widget.widget.compact ? EdgeInsets.zero : const EdgeInsets.all(8.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                online
-                    ? const OnlineWarning()
-                    : widget.widget._hw.html == ''
-                        ? Padding(
-                            padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
-                            child: Text(
-                              'Aucun contenu renseigné',
-                              style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                              textAlign: TextAlign.center,
+      child: Container(
+        color: ElevationOverlay.applySurfaceTint(
+            Theme.of(context).colorScheme.surface, widget.tint, widget.widget.elevation),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Padding(
+              padding: widget.widget.compact ? EdgeInsets.zero : const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  online
+                      ? const OnlineWarning()
+                      : widget.widget._hw.html == ''
+                          ? Padding(
+                              padding: const EdgeInsets.fromLTRB(0, 0, 0, 8.0),
+                              child: Text(
+                                'Aucun contenu renseigné',
+                                style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                          : CustomHtml(
+                              data: widget.widget._hw.html.substringWords(
+                                      widget.expanded
+                                          ? widget.widget._hw.html.length
+                                          : min(_CardContents.cutLength,
+                                              widget.widget._hw.html.length),
+                                      _CardContents.cutThreshold) +
+                                  (widget.expanded ||
+                                          widget.widget._hw.html.length <=
+                                              _CardContents.cutThreshold
+                                      ? ''
+                                      : '...'),
                             ),
-                          )
-                        : CustomHtml(
-                            data: widget.widget._hw.html.substringWords(
-                                    widget.expanded
-                                        ? widget.widget._hw.html.length
-                                        : min(
-                                            _CardContents.cutLength, widget.widget._hw.html.length),
-                                    _CardContents.cutThreshold) +
-                                (widget.expanded ||
-                                        widget.widget._hw.html.length <= _CardContents.cutThreshold
-                                    ? ''
-                                    : '...'),
-                          ),
-                if (widget.widget._hw.attachments != null && widget.expanded)
-                  AttachmentsWidget(
-                    attachments: widget.widget._hw.attachments!,
-                    elevation: widget.widget.elevation * 2,
-                  ),
-                if (!online &&
-                    !widget.expanded &&
-                    (widget.widget._hw.attachments != null ||
-                        widget.widget._hw.html.length > _CardContents.cutThreshold))
-                  ExpandableButton(
-                    theme: const ExpandableThemeData(useInkWell: false),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(
-                        'Voir plus',
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                            color: Theme.of(context).colorScheme.primary,
-                            fontWeight: FontWeight.bold),
+                  if (widget.widget._hw.attachments != null && widget.expanded)
+                    AttachmentsWidget(
+                      attachments: widget.widget._hw.attachments!,
+                      elevation: widget.widget.elevation * 2,
+                    ),
+                  if (!online &&
+                      !widget.expanded &&
+                      (widget.widget._hw.attachments != null ||
+                          widget.widget._hw.html.length > _CardContents.cutThreshold))
+                    ExpandableButton(
+                      theme: const ExpandableThemeData(useInkWell: false),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Text(
+                          'Voir plus',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              color: Theme.of(context).colorScheme.primary,
+                              fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
-                  ),
-                if (!online && widget.expanded)
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      TextButton(
-                        onPressed: _busy
-                            ? null
-                            : () async {
-                                //TODO implement with new API
-                                /*
-                                setState(() {
-                                  _busy = true;
-                                });
-                                if (ConfigProvider.demo) {
-                                  await (await DatabaseProvider.getDB()).update(
-                                    'Exercises',
-                                    {'Done': !widget.widget._hw.done ? 1 : 0},
-                                    where: 'ID = ?',
-                                    whereArgs: [widget.widget._hw.uid],
-                                  );
-
+                  if (!online && widget.expanded)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        TextButton(
+                          onPressed: _busy
+                              ? null
+                              : () async {
+                                  //TODO implement with new API
+                                  /*
                                   setState(() {
-                                    widget.widget._hw.done = !widget.widget._hw.done;
-                                    widget.onMarkedDone(widget.widget._hw.done);
-                                    _busy = false;
+                                    _busy = true;
                                   });
-                                } else {
-                                  final response = await Client.getClient().request(
-                                      Action.markExerciseDone,
-                                      body: '{"flagRealise":${!widget.widget._hw.done}}',
-                                      params: [
-                                        '0',
-                                        (widget.widget._hw.parentLesson ??
-                                                widget.widget._hw.lessonFor)
-                                            .toString(),
-                                        widget.widget._hw.uid.toString()
-                                      ]);
-                                  await (await DatabaseProvider.getDB()).update(
-                                    'Exercises',
-                                    {'Done': response['flagRealise'] ? 1 : 0},
-                                    where: 'ID = ?',
-                                    whereArgs: [widget.widget._hw.uid],
-                                  );
-
-                                  setState(() {
-                                    widget.widget._hw.done = response['flagRealise'];
-                                    widget.onMarkedDone(response['flagRealise']);
-                                    _busy = false;
-                                  });  
-                                }
-                                */
-                              },
-                        child: Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
-                      ),
-                    ],
-                  )
-              ],
+                                  if (ConfigProvider.demo) {
+                                    await (await DatabaseProvider.getDB()).update(
+                                      'Exercises',
+                                      {'Done': !widget.widget._hw.done ? 1 : 0},
+                                      where: 'ID = ?',
+                                      whereArgs: [widget.widget._hw.uid],
+                                    );
+      
+                                    setState(() {
+                                      widget.widget._hw.done = !widget.widget._hw.done;
+                                      widget.onMarkedDone(widget.widget._hw.done);
+                                      _busy = false;
+                                    });
+                                  } else {
+                                    final response = await Client.getClient().request(
+                                        Action.markExerciseDone,
+                                        body: '{"flagRealise":${!widget.widget._hw.done}}',
+                                        params: [
+                                          '0',
+                                          (widget.widget._hw.parentLesson ??
+                                                  widget.widget._hw.lessonFor)
+                                              .toString(),
+                                          widget.widget._hw.uid.toString()
+                                        ]);
+                                    await (await DatabaseProvider.getDB()).update(
+                                      'Exercises',
+                                      {'Done': response['flagRealise'] ? 1 : 0},
+                                      where: 'ID = ?',
+                                      whereArgs: [widget.widget._hw.uid],
+                                    );
+      
+                                    setState(() {
+                                      widget.widget._hw.done = response['flagRealise'];
+                                      widget.onMarkedDone(response['flagRealise']);
+                                      _busy = false;
+                                    });  
+                                  }
+                                  */
+                                },
+                          child:
+                              Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
+                        ),
+                      ],
+                    )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
