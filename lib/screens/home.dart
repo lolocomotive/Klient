@@ -183,7 +183,7 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
             );
           } else if (snapshot.hasError) {
             return DefaultCard(
-                child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
+                child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!));
           }
 
           return snapshot.data!.isEmpty
@@ -228,7 +228,7 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
             );
           } else if (snapshot.hasError) {
             return DefaultCard(
-                child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!));
+                child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!));
           }
           return DefaultTransition(
             child: snapshot.data!.isEmpty
@@ -296,7 +296,7 @@ class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin
               padding: const EdgeInsets.all(8.0),
               child: Center(
                 child: DefaultCard(
-                  child: ExceptionWidget(e: snapshot.error! as Exception, st: snapshot.stackTrace!),
+                  child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!),
                 ),
               ),
             );

@@ -134,8 +134,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                         return Column(
                           children: [
                             DefaultCard(
-                              child: ExceptionWidget(
-                                  e: snapshot.error! as Exception, st: snapshot.stackTrace!),
+                              child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!),
                             ),
                           ],
                         );
