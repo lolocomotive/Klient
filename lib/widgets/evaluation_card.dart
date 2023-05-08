@@ -85,8 +85,8 @@ class EvaluationCard extends StatelessWidget {
                   Row(
                     children: [
                       Text(
-                        //FIXME support for non-numeric grades
-                        _evaluation.result.mark.toString(),
+                        _evaluation.result.mark?.toString().replaceAll('.', ',') ??
+                            _evaluation.result.nonEvaluationReason!,
                         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
                       ),
                       if (_evaluation.scale != 20) Text('/${_evaluation.scale}')
@@ -102,8 +102,8 @@ class EvaluationCard extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                //FIXME support for non-numeric grades
-                                _evaluation.result.mark.toString().replaceAll('.', ','),
+                                _evaluation.result.mark?.toString().replaceAll('.', ',') ??
+                                    _evaluation.result.nonEvaluationReason!,
                                 style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15),
                               ),
                               const Divider(height: 10),
