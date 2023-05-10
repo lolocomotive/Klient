@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 
 class UserAvatar extends StatelessWidget {
   final String content;
+  final Color? color;
   const UserAvatar(
     this.content, {
     Key? key,
+    this.color,
   }) : super(key: key);
 
   @override
@@ -16,8 +18,9 @@ class UserAvatar extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(100),
             border: Border.all(
-              color: Theme.of(context).colorScheme.primary,
+              color: color ?? Theme.of(context).colorScheme.primary,
             ),
+            color: color?.withAlpha(50),
           ),
           child: Center(
             child: Text(

@@ -597,10 +597,10 @@ packages:
     dependency: "direct main"
     description:
       name: scolengo_api
-      sha256: "151bef8a6ab616421029154b51e6b91f2ab0e6219b53fdb65506d2b981154532"
+      sha256: da584eae970503ea6934515aba90b7ad917f8a53f208edd7c4e1bd44716b86d5
       url: "https://pub.dev"
     source: hosted
-    version: "0.0.9"
+    version: "0.0.13"
   settings_ui:
     dependency: "direct main"
     description:

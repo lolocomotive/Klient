@@ -42,6 +42,7 @@ class DefaultCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
+      clipBehavior: Clip.antiAlias,
       surfaceTintColor: surfaceTintColor,
       shadowColor: shadowColor,
       margin: const EdgeInsets.all(8.0),

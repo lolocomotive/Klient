@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/screens/new_communication.dart';
 import 'package:klient/screens/timetable.dart';
 
 import 'home.dart';
@@ -33,14 +34,11 @@ class Main extends StatefulWidget {
 
 class MainState extends State<Main> {
   int _currentIndex = 0;
-  @Deprecated('First steps will be removed')
-  _openFirstSteps() async {}
 
   MainState();
 
   @override
   Widget build(BuildContext context) {
-    _openFirstSteps();
     final Widget currentWidget;
     switch (_currentIndex) {
       case 0:
@@ -55,6 +53,18 @@ class MainState extends State<Main> {
         currentWidget = TimetablePage(key: GlobalKey());
     }
     return Scaffold(
+      floatingActionButton: currentWidget is MessagesPage
+          ? FloatingActionButton(
+              tooltip: 'Nouveau message',
+              backgroundColor: Theme.of(context).colorScheme.primary,
+              foregroundColor: Theme.of(context).colorScheme.onPrimary,
+              onPressed: () {
+                Navigator.of(context)
+                    .push(MaterialPageRoute(builder: (_) => const NewCommunicationPage()));
+              },
+              child: const Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         destinations: [
           const NavigationDestination(

@@ -256,8 +256,6 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                                 .postCommunicationParticipation(
                                                     widget.communication.id,
                                                     _textFieldController.text
-                                                        .replaceAll('\\', '\\\\')
-                                                        .replaceAll('"', '\\"')
                                                         .replaceAll('\n', '<br/>'));
                                             _textFieldController.clear();
                                             await refresh();

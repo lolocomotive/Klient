@@ -36,7 +36,7 @@ class Util {
     )
   ];
 
-  static void onException(Exception e, StackTrace st) {
+  static void onException(Object e, StackTrace st) {
     debugPrint(e.toString());
     debugPrintStack(stackTrace: st);
     debugPrint('Current app lifecycle state: ${KlientApp.currentLifecycleState}');
