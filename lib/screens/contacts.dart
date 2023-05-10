@@ -74,12 +74,23 @@ class _ContactsPageState extends State<ContactsPage> {
           } else if (!snapshot.hasData) {
             return const Center(child: CircularProgressIndicator());
           } else {
-            final contacts = snapshot.data!.data.contacts;
-            c = contacts;
+            c = snapshot.data!.data.contacts;
+            c.sort((a, b) {
+              if (a is PersonContact && b is PersonContact) {
+                return a.person!.lastName.compareTo(b.person!.lastName);
+              }
+              return a is GroupContact ? -1 : 1;
+            });
+            for (var element in c) {
+              if (element is GroupContact) {
+                element.personContacts?.sort((a, b) {
+                  return a.person!.lastName.compareTo(b.person!.lastName);
+                });
+              }
+            }
             return Column(
-              children: contacts
-                  .map((contact) => ContactDisplay(contact, widget.onContactSelected))
-                  .toList(),
+              children:
+                  c.map((contact) => ContactDisplay(contact, widget.onContactSelected)).toList(),
             );
           }
         },
@@ -135,7 +146,15 @@ class ContactDisplay extends StatelessWidget {
               child: Text('${persons.length} personnes'),
             ),
             expanded: Column(
-              children: persons.map((person) => ContactDisplay(person, onContactSelected)).toList(),
+              children: [
+                TextButton(
+                  onPressed: () {
+                    onContactSelected(contact);
+                  },
+                  child: const Text('Sélectionner tout le groupe'),
+                ),
+                ...persons.map((person) => ContactDisplay(person, onContactSelected)),
+              ],
             ),
           ),
         ),

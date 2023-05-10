@@ -347,6 +347,9 @@ class ContactChip extends StatelessWidget {
     } else if (contact is GroupContact) {
       final c = contact as GroupContact;
       return Chip(
+        surfaceTintColor: c.id.color.shade200,
+        side: BorderSide(color: c.id.color.shade200),
+        elevation: 8,
         label: Text('${c.label}'),
         key: ObjectKey(contact.id),
         onDeleted: onRemove,
