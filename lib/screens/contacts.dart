@@ -27,18 +27,47 @@ import 'package:klient/widgets/exception_widget.dart';
 import 'package:klient/widgets/user_avatar.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
-//TODO support search with delegates
-class ContactsPage extends StatelessWidget {
+class ContactsPage extends StatefulWidget {
   const ContactsPage({Key? key, required this.onContactSelected}) : super(key: key);
   final Function(Contact) onContactSelected;
+
+  @override
+  State<ContactsPage> createState() => _ContactsPageState();
+}
+
+class _ContactsPageState extends State<ContactsPage> {
+  List<Contact> c = [];
+  Future<SkolengoResponse<UsersMailSettings>>? _data;
+  @override
+  void initState() {
+    _data = ConfigProvider.client!
+        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return DefaultSliverActivity(
+      actions: [
+        IconButton(
+          tooltip: 'Rechercher',
+          icon: const Icon(Icons.search),
+          onPressed: () {
+            showSearch<Contact?>(
+              context: context,
+              delegate: ContactsSearchDelegate(
+                contacts: c,
+              ),
+            ).then((contact) {
+              if (contact != null) widget.onContactSelected(contact);
+            });
+          },
+        ),
+      ],
       title: 'Contacts',
       child: SingleChildScrollView(
           child: FutureBuilder<SkolengoResponse<UsersMailSettings>>(
-        future: ConfigProvider.client!
-            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject),
+        future: _data,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);
@@ -46,9 +75,11 @@ class ContactsPage extends StatelessWidget {
             return const Center(child: CircularProgressIndicator());
           } else {
             final contacts = snapshot.data!.data.contacts;
+            c = contacts;
             return Column(
-              children:
-                  contacts.map((contact) => ContactDisplay(contact, onContactSelected)).toList(),
+              children: contacts
+                  .map((contact) => ContactDisplay(contact, widget.onContactSelected))
+                  .toList(),
             );
           }
         },
@@ -116,4 +147,64 @@ class ContactDisplay extends StatelessWidget {
       );
     }
   }
+}
+
+class ContactsSearchDelegate extends SearchDelegate<Contact?> {
+  final List<Contact> contacts;
+  ContactsSearchDelegate({required this.contacts});
+
+  @override
+  List<Widget>? buildActions(BuildContext context) {
+    return [
+      IconButton(
+        tooltip: 'Vider',
+        icon: const Icon(Icons.clear),
+        onPressed: () {
+          query = '';
+        },
+      ),
+    ];
+  }
+
+  @override
+  Widget? buildLeading(BuildContext context) {
+    return IconButton(
+      tooltip: 'Retour',
+      icon: const Icon(Icons.arrow_back),
+      onPressed: () {
+        close(context, null);
+      },
+    );
+  }
+
+  @override
+  Widget buildResults(BuildContext context) {
+    final r = contacts.where(
+      (element) {
+        if (element is PersonContact) {
+          return element.person!.firstName.toLowerCase().contains(query.toLowerCase()) ||
+              element.person!.lastName.toLowerCase().contains(query.toLowerCase());
+        } else if (element is GroupContact) {
+          return element.label!.toLowerCase().contains(query.toLowerCase());
+        }
+        throw Exception('Contact type not supported: ${element.runtimeType.toString()}');
+      },
+    ).toList();
+    return ListView.builder(
+      itemCount: r.length,
+      itemBuilder: (context, index) {
+        return ContactDisplay(r[index], (contact) {
+          close(context, contact);
+        });
+      },
+    );
+  }
+
+  @override
+  Widget buildSuggestions(BuildContext context) {
+    return buildResults(context);
+  }
+
+  @override
+  String get searchFieldLabel => 'Recherche';
 }

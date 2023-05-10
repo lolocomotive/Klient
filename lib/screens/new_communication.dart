@@ -48,6 +48,13 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
   List<Contact> _recipients = [];
   List<Contact> _ccRecipients = [];
   List<Contact> _bccRecipients = [];
+  Future<SkolengoResponse<UsersMailSettings>>? _mailSettings;
+  @override
+  void initState() {
+    _mailSettings = ConfigProvider.client!
+        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+    super.initState();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -204,8 +211,7 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                                 );
                               }
                             },
-                            future: ConfigProvider.client!.getUsersMailSettings(
-                                ConfigProvider.credentials!.idToken.claims.subject),
+                            future: _mailSettings,
                           ),
                       ],
                     ),
