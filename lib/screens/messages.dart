@@ -41,6 +41,7 @@ class MessagesPage extends StatefulWidget {
 class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixin {
   final GlobalKey<MessagesPageState> key = GlobalKey();
   final List<int> _selection = [];
+  Folder? _folder;
   Exception? _e;
   StackTrace? _st;
   bool _sideBySide = false;
@@ -70,14 +71,12 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   Future<void> load() async {
-    _settings = (await ConfigProvider.client!
-            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject))
-        .data;
     _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
-      _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
+      _folder!.id,
       limit: 100,
     ))
         .data;
+    _loaded = true;
     delayTransitionDone();
     if (!mounted) return;
     setState(() {});
@@ -85,6 +84,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
 
   Future<void> refresh() async {
     KlientApp.cache.forceRefresh = true;
+    _settings = (await ConfigProvider.client!
+            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject))
+        .data;
     await load();
     KlientApp.cache.forceRefresh = false;
   }
@@ -106,10 +108,16 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentState = this;
     currentId = null;
     currentSubject = null;
-
-    load();
+    ConfigProvider.client!
+        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+        .then((response) {
+      _settings = response.data;
+      _folder = _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX);
+      load();
+    });
   }
 
+  bool _loaded = false;
   List<Communication> _communications = [];
   UsersMailSettings? _settings;
 
@@ -194,18 +202,72 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                   ),
                                 if (!_selection.isNotEmpty) const UserAvatarAction()
                               ],
-                              title: Text(
-                                _selection.isNotEmpty
-                                    ? _selection.length == 1
-                                        ? _communications[_selection[0]].subject
-                                        : '${_selection.length} conversations'
-                                    : 'Messagerie',
-                                style: TextStyle(
-                                  color: _selection.isNotEmpty
-                                      ? Theme.of(context).colorScheme.onPrimary
-                                      : Theme.of(context).colorScheme.onBackground,
-                                ),
-                              ),
+                              title: _selection.isNotEmpty
+                                  ? Text(
+                                      _selection.length == 1
+                                          ? _communications[_selection[0]].subject
+                                          : '${_selection.length} conversations',
+                                      style:
+                                          TextStyle(color: Theme.of(context).colorScheme.onPrimary),
+                                    )
+                                  : Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 8),
+                                      decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(8),
+                                        color: ElevationOverlay.applySurfaceTint(
+                                          Theme.of(context).colorScheme.surface,
+                                          Theme.of(context).colorScheme.primary,
+                                          innerBoxIsScrolled ? 12 : 2,
+                                        ),
+                                      ),
+                                      child: DropdownButton<Folder>(
+                                        borderRadius: BorderRadius.circular(16),
+                                        dropdownColor: ElevationOverlay.applySurfaceTint(
+                                          Theme.of(context).colorScheme.surface,
+                                          Theme.of(context).colorScheme.primary,
+                                          4,
+                                        ),
+                                        underline: Container(),
+                                        items: _settings?.folders.map<DropdownMenuItem<Folder>>(
+                                              (folder) {
+                                                final IconData icon;
+
+                                                if (folder.folderType == FolderType.INBOX) {
+                                                  icon = Icons.inbox;
+                                                } else if (folder.folderType == FolderType.SENT) {
+                                                  icon = Icons.send;
+                                                } else if (folder.folderType == FolderType.TRASH) {
+                                                  icon = Icons.delete;
+                                                } else if (folder.folderType == FolderType.DRAFTS) {
+                                                  icon = Icons.drafts;
+                                                } else if (folder.folderType ==
+                                                    FolderType.MODERATION) {
+                                                  icon = Icons.report;
+                                                } else {
+                                                  icon = Icons.folder;
+                                                }
+                                                return DropdownMenuItem(
+                                                  value: folder,
+                                                  child: Row(
+                                                    children: [
+                                                      Padding(
+                                                        padding: const EdgeInsets.all(8.0),
+                                                        child: Icon(icon),
+                                                      ),
+                                                      Text(folder.name),
+                                                    ],
+                                                  ),
+                                                );
+                                              },
+                                            ).toList() ??
+                                            [],
+                                        onChanged: (folder) {
+                                          _folder = folder;
+                                          load();
+                                        },
+                                        value: _folder,
+                                      ),
+                                    ),
                               floating: false,
                               forceElevated: innerBoxIsScrolled,
                               pinned: _selection.isNotEmpty,
@@ -222,16 +284,24 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                     ],
                                   )
                                 : _communications.isEmpty
-                                    ? const Center(
+                                    ? Center(
                                         child: Padding(
-                                          padding: EdgeInsets.fromLTRB(0, 16, 0, 16),
+                                          padding: const EdgeInsets.fromLTRB(0, 16, 0, 16),
                                           child: Column(
                                             mainAxisAlignment: MainAxisAlignment.center,
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
-                                              DelayedProgressIndicator(
-                                                delay: Duration(milliseconds: 500),
-                                              ),
+                                              _loaded
+                                                  ? Text(
+                                                      'Aucun message à afficher',
+                                                      style: TextStyle(
+                                                        color:
+                                                            Theme.of(context).colorScheme.secondary,
+                                                      ),
+                                                    )
+                                                  : const DelayedProgressIndicator(
+                                                      delay: Duration(milliseconds: 500),
+                                                    ),
                                             ],
                                           ),
                                         ),
@@ -349,6 +419,12 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   deleteCommunication(Communication comm) async {
+    if (_folder!.folderType == FolderType.TRASH) {
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Le message est déjà dans la corbeille.')));
+
+      return;
+    }
     try {
       await ConfigProvider.client!.patchCommunicationFolders(
         comm.id,
