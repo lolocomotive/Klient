@@ -28,7 +28,6 @@ import 'package:klient/util.dart';
 import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
-import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/delayed_progress_indicator.dart';
 import 'package:klient/widgets/exception_widget.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -213,8 +212,7 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                                 return ExceptionWidget(
                                     e: snapshot.error!, st: snapshot.stackTrace!);
                               } else if (snapshot.hasData) {
-                                return DefaultTransition(
-                                    child: CustomHtml(data: snapshot.data!.data.signature.content));
+                                return CustomHtml(data: snapshot.data!.data.signature.content);
                               } else {
                                 return const DelayedProgressIndicator(
                                   delay: Duration(milliseconds: 500),
@@ -223,6 +221,17 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                             },
                             future: _mailSettings,
                           ),
+                        ElevatedButton.icon(
+                          onPressed: send,
+                          icon: const Icon(Icons.send),
+                          label: const Text('Envoyer'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: ElevationOverlay.applySurfaceTint(
+                                Theme.of(context).colorScheme.surface,
+                                Theme.of(context).colorScheme.primary,
+                                4),
+                          ),
+                        ),
                       ],
                     ),
                   ),
