@@ -19,7 +19,6 @@
 
 import 'package:flutter/material.dart' hide Action;
 import 'package:klient/screens/communication.dart';
-import 'package:klient/screens/messages.dart';
 import 'package:klient/widgets/communication_card.dart';
 import 'package:morpheus/morpheus.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -27,6 +26,10 @@ import 'package:scolengo_api/scolengo_api.dart';
 class MessagesSearchDelegate extends SearchDelegate {
   static MessageSearchResultsState? messageSearchSuggestionState;
   static String? searchQuery;
+
+  final Function(Communication) onDelete;
+
+  MessagesSearchDelegate(this.onDelete);
 
   @override
   String get searchFieldLabel => 'Recherche';
@@ -71,12 +74,19 @@ class MessagesSearchDelegate extends SearchDelegate {
     if (MessagesSearchDelegate.messageSearchSuggestionState != null) {
       MessagesSearchDelegate.messageSearchSuggestionState!.refresh();
     }
-    return const MessageSearchResults();
+    return MessageSearchResults(
+      onDelete: onDelete,
+    );
   }
 }
 
 class MessageSearchResults extends StatefulWidget {
-  const MessageSearchResults({Key? key}) : super(key: key);
+  final Function(Communication) onDelete;
+
+  const MessageSearchResults({
+    Key? key,
+    required this.onDelete,
+  }) : super(key: key);
 
   @override
   State<MessageSearchResults> createState() => MessageSearchResultsState();
@@ -130,7 +140,7 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                               MorpheusPageRoute(
                                 transitionToChild: true,
                                 builder: (_) => CommunicationPage(
-                                  onDelete: deleteConversation,
+                                  onDelete: widget.onDelete,
                                   communication: _communications![index],
                                 ),
                                 parentKey: parentKey,

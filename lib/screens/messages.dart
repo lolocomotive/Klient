@@ -60,7 +60,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
         MorpheusPageRoute(
           //FIXME Builder is called twice
           builder: (_) => CommunicationPage(
-            onDelete: deleteConversationFromList,
+            onDelete: deleteSingleCommunication,
             communication: communication,
           ),
           parentKey: parentKey,
@@ -70,10 +70,11 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   Future<void> load() async {
-    final settings = await ConfigProvider.client!
-        .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+    _settings = (await ConfigProvider.client!
+            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject))
+        .data;
     _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
-      settings.data.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
+      _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
       limit: 100,
     ))
         .data;
@@ -110,6 +111,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   List<Communication> _communications = [];
+  UsersMailSettings? _settings;
 
   @override
   Widget build(BuildContext context) {
@@ -186,7 +188,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                     onPressed: () {
                                       showSearch(
                                         context: context,
-                                        delegate: MessagesSearchDelegate(),
+                                        delegate: MessagesSearchDelegate(deleteCommunication),
                                       );
                                     },
                                   ),
@@ -333,7 +335,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                 key: Key(currentId.toString()),
                                 //FIXME
                                 communication: Communication(id: '', subject: '', type: ''),
-                                onDelete: deleteConversationFromList,
+                                onDelete: deleteSingleCommunication,
                               ),
                       )
                   ],
@@ -346,36 +348,38 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     );
   }
 
-//FIXME rewrite this
-  deleteConversationFromList(Communication comm) async {
-    await deleteConversation(comm);
+  deleteCommunication(Communication comm) async {
     try {
-      _communications.removeAt(_communications.indexOf(comm));
+      await ConfigProvider.client!.patchCommunicationFolders(
+        comm.id,
+        [_settings!.folders.firstWhere((element) => element.folderType == FolderType.TRASH)],
+        ConfigProvider.credentials!.idToken.claims.subject,
+      );
+      _communications.remove(comm);
     } catch (_) {}
     setState(() {});
   }
 
+  deleteSingleCommunication(Communication comm) async {
+    await deleteCommunication(comm);
+    refreshCache();
+  }
+
+  refreshCache() async {
+    //We have to wait because the API doesn't update immediately.
+    await Future.delayed(const Duration(milliseconds: 500));
+    KlientApp.cache.forceRefresh = true;
+    await ConfigProvider.client!.getCommunicationsFromFolder(
+      _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
+      limit: 100,
+    );
+    KlientApp.cache.forceRefresh = false;
+  }
+
   void deleteSelection(List<int> selection) {
     for (var index in selection) {
-      deleteConversationFromList(_communications[index]);
+      deleteCommunication(_communications[index]);
     }
+    refreshCache();
   }
-}
-
-deleteConversation(Communication comm) async {
-  /*TODO rewrite this
-   final db = await DatabaseProvider.getDB();
-
-  try {
-    if (!ConfigProvider.demo) {
-      await Client.getClient().request(Action.deleteMessage, params: [comm.id.toString()]);
-    }
-    db.delete('Conversations', where: 'ID = ?', whereArgs: [comm.id]);
-    db.delete('Messages', where: 'ParentID = ?', whereArgs: [comm.id]);
-    for (var message in comm.messages) {
-      db.delete('MessageAttachments', where: 'ParentID = ?', whereArgs: [message.id]);
-    }
-  } on Exception catch (e, st) {
-    Util.onException(e, st);
-  } */
 }

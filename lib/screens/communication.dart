@@ -90,8 +90,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
                               Navigator.of(context).pop();
-                              //TODO fix this
-                              //await widget.onDelete(_communication);
+                              await widget.onDelete(widget.communication);
                             },
                             icon: const Icon(Icons.delete))
                       ],
