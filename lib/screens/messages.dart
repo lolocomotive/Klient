@@ -263,6 +263,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                             [],
                                         onChanged: (folder) {
                                           _folder = folder;
+                                          _loaded = false;
+                                          setState(() {});
                                           load();
                                         },
                                         value: _folder,
