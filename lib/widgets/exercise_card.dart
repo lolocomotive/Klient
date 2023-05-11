@@ -23,6 +23,9 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:intl/intl.dart';
 import 'package:klient/api/color_provider.dart';
+import 'package:klient/api/custom_requests.dart';
+import 'package:klient/config_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/custom_html.dart';
@@ -205,7 +208,7 @@ class _CardContents extends StatefulWidget {
 }
 
 class _CardContentsState extends State<_CardContents> {
-  final bool _busy = false;
+  bool _busy = false;
 
   @override
   Widget build(BuildContext context) {
@@ -275,49 +278,20 @@ class _CardContentsState extends State<_CardContents> {
                         onPressed: _busy
                             ? null
                             : () async {
-                                //TODO implement with new API
-                                /*
                                 setState(() {
                                   _busy = true;
                                 });
-                                if (ConfigProvider.demo) {
-                                  await (await DatabaseProvider.getDB()).update(
-                                    'Exercises',
-                                    {'Done': !widget.widget._hw.done ? 1 : 0},
-                                    where: 'ID = ?',
-                                    whereArgs: [widget.widget._hw.uid],
-                                  );
-      
-                                  setState(() {
-                                    widget.widget._hw.done = !widget.widget._hw.done;
-                                    widget.onMarkedDone(widget.widget._hw.done);
-                                    _busy = false;
-                                  });
-                                } else {
-                                  final response = await Client.getClient().request(
-                                      Action.markExerciseDone,
-                                      body: '{"flagRealise":${!widget.widget._hw.done}}',
-                                      params: [
-                                        '0',
-                                        (widget.widget._hw.parentLesson ??
-                                                widget.widget._hw.lessonFor)
-                                            .toString(),
-                                        widget.widget._hw.uid.toString()
-                                      ]);
-                                  await (await DatabaseProvider.getDB()).update(
-                                    'Exercises',
-                                    {'Done': response['flagRealise'] ? 1 : 0},
-                                    where: 'ID = ?',
-                                    whereArgs: [widget.widget._hw.uid],
-                                  );
-      
-                                  setState(() {
-                                    widget.widget._hw.done = response['flagRealise'];
-                                    widget.onMarkedDone(response['flagRealise']);
-                                    _busy = false;
-                                  });  
-                                }
-                                */
+                                final response =
+                                    await ConfigProvider.client!.patchHomeworkAssignment(
+                                  ConfigProvider.credentials!.idToken.claims.subject,
+                                  widget.widget._hw.id,
+                                  !widget.widget._hw.done,
+                                );
+                                KlientApp.cache.forceRefresh = true;
+                                getHomework().then((_) => KlientApp.cache.forceRefresh = false);
+                                widget.widget._hw.done = response.data.done;
+                                widget.onMarkedDone(response.data.done);
+                                _busy = false;
                               },
                         child: Text('Marquer comme ${widget.widget._hw.done ? "à faire" : "fait"}'),
                       ),
