@@ -62,7 +62,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
   Future<List<List<Lesson>>> _getCalendar() async {
     final response = await ConfigProvider.client!.getAgendas(
       ConfigProvider.credentials!.idToken.claims.subject,
-      startDate: DateTime.now().add(const Duration(days: -14)),
+      startDate: DateTime.now().add(const Duration(days: -2)),
       endDate: DateTime.now().add(
         const Duration(days: 14),
       ),
