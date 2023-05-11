@@ -28,8 +28,10 @@ import 'package:klient/widgets/user_avatar.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class ContactsPage extends StatefulWidget {
-  const ContactsPage({Key? key, required this.onContactSelected}) : super(key: key);
+  const ContactsPage({Key? key, required this.onContactSelected, this.selected}) : super(key: key);
   final Function(Contact) onContactSelected;
+//ID, label
+  final Map<String, String>? selected;
 
   @override
   State<ContactsPage> createState() => _ContactsPageState();
@@ -89,8 +91,13 @@ class _ContactsPageState extends State<ContactsPage> {
               }
             }
             return Column(
-              children:
-                  c.map((contact) => ContactDisplay(contact, widget.onContactSelected)).toList(),
+              children: c
+                  .map((contact) => ContactDisplay(
+                        contact,
+                        widget.onContactSelected,
+                        selected: widget.selected,
+                      ))
+                  .toList(),
             );
           }
         },
@@ -102,24 +109,60 @@ class _ContactsPageState extends State<ContactsPage> {
 class ContactDisplay extends StatelessWidget {
   final Contact _contact;
   final Function(Contact) onContactSelected;
+  final Map<String, String>? selected;
 
-  const ContactDisplay(this._contact, this.onContactSelected, {Key? key}) : super(key: key);
+  const ContactDisplay(this._contact, this.onContactSelected, {Key? key, this.selected})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final enabled = !(selected?.containsKey(_contact.id) ?? false);
+    final subtitleStyle =
+        enabled ? TextStyle(color: Theme.of(context).colorScheme.secondary) : null;
     if (_contact is PersonContact) {
       final contact = _contact as PersonContact;
       return ListTile(
+        enabled: enabled,
         leading: UserAvatar(
           contact.person!.firstName[0] + contact.person!.lastName[0],
           color: contact.person!.id.color.shade300,
         ),
-        title: Text(contact.name ?? '${contact.person!.firstName} ${contact.person!.lastName}'),
-        subtitle: Text(
-            contact.linksWithUser?.first.description ?? contact.linksWithUser!.first.groupId ?? ''),
+        title: Text(
+          contact.name ?? '${contact.person!.firstName} ${contact.person!.lastName}',
+          overflow: TextOverflow.fade,
+          softWrap: false,
+        ),
+        subtitle: Row(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Flexible(
+              child: Text(
+                (contact.linksWithUser?.first.description ?? ''),
+                overflow: TextOverflow.fade,
+                softWrap: false,
+                style: subtitleStyle,
+              ),
+            ),
+            if (contact.linksWithUser?.first.description != null &&
+                (selected?.containsKey(contact.id) ?? false))
+              Container(
+                width: 4 * MediaQuery.of(context).textScaleFactor,
+                height: 4 * MediaQuery.of(context).textScaleFactor,
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: enabled
+                      ? Theme.of(context).colorScheme.secondary
+                      : Theme.of(context).disabledColor,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            Text(selected?[contact.id] ?? '', style: subtitleStyle),
+          ],
+        ),
         onTap: () {
           onContactSelected(_contact);
         },
+        trailing: selected?.containsKey(contact.id) ?? false ? const Icon(Icons.check) : null,
       );
     } else if (_contact is GroupContact) {
       final contact = _contact as GroupContact;
@@ -131,14 +174,23 @@ class ContactDisplay extends StatelessWidget {
           child: ExpandablePanel(
             theme: ExpandableThemeData(
               iconColor: Theme.of(context).colorScheme.onBackground,
+              headerAlignment: ExpandablePanelHeaderAlignment.center,
             ),
             header: Padding(
               padding: const EdgeInsets.all(16.0),
-              child: Text(
-                contact.label ?? contact.id,
-                style: TextStyle(
-                  fontSize: 17 * MediaQuery.of(context).textScaleFactor,
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    contact.label ?? contact.id,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
+                    style: TextStyle(
+                      fontSize: 17 * MediaQuery.of(context).textScaleFactor,
+                    ),
+                  ),
+                  if (!enabled) const Icon(Icons.check),
+                ],
               ),
             ),
             collapsed: Padding(
@@ -153,7 +205,11 @@ class ContactDisplay extends StatelessWidget {
                   },
                   child: const Text('Sélectionner tout le groupe'),
                 ),
-                ...persons.map((person) => ContactDisplay(person, onContactSelected)),
+                ...persons.map((person) => ContactDisplay(
+                      person,
+                      onContactSelected,
+                      selected: selected,
+                    )),
               ],
             ),
           ),

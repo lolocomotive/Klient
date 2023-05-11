@@ -84,6 +84,9 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                           state.validate();
                         },
                         title: 'À',
+                        recipients: _recipients,
+                        ccRecipients: _ccRecipients,
+                        bccRecipients: _bccRecipients,
                         titleSize: 16,
                         hasError: state.hasError,
                         errorText: state.errorText,
@@ -116,15 +119,23 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                             RecipientList(
                               onUpdate: (recipients) {
                                 _ccRecipients = recipients;
+                                setState(() {});
                               },
                               title: 'CC',
+                              recipients: _recipients,
+                              ccRecipients: _ccRecipients,
+                              bccRecipients: _bccRecipients,
                             ),
                             const Divider(),
                             RecipientList(
                               onUpdate: (recipients) {
                                 _bccRecipients = recipients;
+                                setState(() {});
                               },
                               title: 'CCI',
+                              recipients: _recipients,
+                              ccRecipients: _ccRecipients,
+                              bccRecipients: _bccRecipients,
                             ),
                           ],
                         ),
@@ -202,7 +213,6 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                                 return ExceptionWidget(
                                     e: snapshot.error!, st: snapshot.stackTrace!);
                               } else if (snapshot.hasData) {
-                                print(snapshot.data!.data.signature.content);
                                 return DefaultTransition(
                                     child: CustomHtml(data: snapshot.data!.data.signature.content));
                               } else {
@@ -260,10 +270,16 @@ class RecipientList extends StatefulWidget {
     this.titleSize,
     this.hasError = false,
     this.errorText,
+    required this.recipients,
+    required this.ccRecipients,
+    required this.bccRecipients,
   }) : super(key: key);
   final Function(List<Contact>) onUpdate;
   final String title;
   final double? titleSize;
+  final List<Contact> recipients;
+  final List<Contact> ccRecipients;
+  final List<Contact> bccRecipients;
 
   @override
   State<RecipientList> createState() => _RecipientListState();
@@ -312,12 +328,20 @@ class _RecipientListState extends State<RecipientList> {
             onPressed: () async {
               await Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => ContactsPage(onContactSelected: (contact) {
-                    if (_contacts.contains(contact)) return;
-                    _contacts.add(contact);
-                    widget.onUpdate(_contacts);
-                    Navigator.of(context).pop();
-                  }),
+                  builder: (_) => ContactsPage(
+                    onContactSelected: (contact) {
+                      if (_contacts.where((element) => element.id == contact.id).isEmpty) {
+                        _contacts.add(contact);
+                        widget.onUpdate(_contacts);
+                      }
+                      Navigator.of(context).pop();
+                    },
+                    selected: Map.fromEntries([
+                      ...widget.recipients.map((e) => MapEntry(e.id, 'À')),
+                      ...widget.ccRecipients.map((e) => MapEntry(e.id, 'CC')),
+                      ...widget.bccRecipients.map((e) => MapEntry(e.id, 'CCI')),
+                    ]),
+                  ),
                 ),
               );
               setState(() {});
