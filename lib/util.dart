@@ -43,13 +43,12 @@ class Util {
     if (KlientApp.currentLifecycleState == AppLifecycleState.resumed) {
       KlientApp.messengerKey.currentState?.showSnackBar(
         SnackBar(
-            backgroundColor: KlientApp.theme!.colorScheme.surface,
             content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                ExceptionWidget(e: e, st: st),
-              ],
-            )),
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ExceptionWidget(e: e, st: st),
+          ],
+        )),
       );
     }
   }

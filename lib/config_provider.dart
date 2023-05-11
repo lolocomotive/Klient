@@ -78,8 +78,14 @@ class ConfigProvider {
       highlightColor: highlight,
       splashColor: splash,
       scaffoldBackgroundColor: colorScheme.background,
-      snackBarTheme: const SnackBarThemeData(
-        insetPadding: EdgeInsets.all(8),
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: ElevationOverlay.applySurfaceTint(
+          colorScheme.surface,
+          colorScheme.primary,
+          4,
+        ),
+        contentTextStyle: TextStyle(color: colorScheme.onSurface),
+        insetPadding: const EdgeInsets.all(8),
         behavior: SnackBarBehavior.floating,
         width: 700,
       ),
