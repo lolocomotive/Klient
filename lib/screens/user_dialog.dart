@@ -99,7 +99,6 @@ class _UserDialogState extends State<UserDialog> {
                       text: 'Se déconnecter',
                       // onTap: () => Client.disconnect(context),
                     ),
-                    Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
                     if (kDebugMode)
                       Divider(
                           height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
@@ -113,9 +112,6 @@ class _UserDialogState extends State<UserDialog> {
                             ..push(MaterialPageRoute(builder: (_) => const DebugScreen()));
                         },
                       ),
-                    if (kDebugMode)
-                      Divider(
-                          height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
                   ],
                 ),
               )
