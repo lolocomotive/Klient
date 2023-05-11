@@ -40,7 +40,7 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
   @override
   void initState() {
     _info = widget._info;
-
+    load();
     super.initState();
   }
 
