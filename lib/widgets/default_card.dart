@@ -27,6 +27,7 @@ class DefaultCard extends StatelessWidget {
   final void Function()? onTap;
   final Color? shadowColor;
   final Color? surfaceTintColor;
+  final Color? outlineColor;
 
   const DefaultCard(
       {Key? key,
@@ -35,6 +36,7 @@ class DefaultCard extends StatelessWidget {
       this.elevation,
       this.outlined = false,
       this.child,
+      this.outlineColor,
       this.onTap,
       this.padding = const EdgeInsets.all(16)})
       : super(key: key);
@@ -49,7 +51,11 @@ class DefaultCard extends StatelessWidget {
       elevation: elevation ?? 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(8),
-        side: outlined ? BorderSide(color: Theme.of(context).colorScheme.outline) : BorderSide.none,
+        side: outlined
+            ? BorderSide(
+                color: outlineColor ?? Theme.of(context).colorScheme.outline,
+              )
+            : BorderSide.none,
       ),
       //clipBehavior: Clip.antiAlias,
       child: InkWell(

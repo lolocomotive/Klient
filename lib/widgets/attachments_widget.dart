@@ -24,19 +24,31 @@ import 'package:scolengo_api/scolengo_api.dart';
 import 'default_card.dart';
 
 class AttachmentsWidget extends StatelessWidget {
+  final bool outlined;
+
+  final Color? outlineColor;
+
   const AttachmentsWidget({
     Key? key,
     required this.attachments,
     this.elevation,
+    this.color,
+    this.outlineColor,
+    this.outlined = false,
   }) : super(key: key);
 
   final List<Attachment> attachments;
   final double? elevation;
+  final MaterialColor? color;
 
   @override
   Widget build(BuildContext context) {
     return DefaultCard(
+        outlined: outlined,
+        outlineColor: outlineColor,
         elevation: elevation,
+        surfaceTintColor: color?.tint(context),
+        shadowColor: color?.shadow(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [

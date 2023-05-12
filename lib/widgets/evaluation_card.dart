@@ -52,11 +52,8 @@ class EvaluationCard extends StatelessWidget {
     );
     return Flexible(
       child: Card(
-          surfaceTintColor:
-              Theme.of(context).brightness == Brightness.light ? color : color.shade100,
-          shadowColor: Theme.of(context).brightness == Brightness.light
-              ? color
-              : color.shade200.withAlpha(100),
+          surfaceTintColor: color.tint(context),
+          shadowColor: color.shadow(context),
           margin: const EdgeInsets.all(8.0),
           elevation: 1,
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),

@@ -23,10 +23,12 @@ import 'package:klient/config_provider.dart';
 /// All screens have some thing in common.
 /// Having a widget with all the common parts makes it easier to modify later.
 class DefaultActivity extends StatelessWidget {
-  const DefaultActivity({Key? key, required this.child, this.appBar}) : super(key: key);
+  const DefaultActivity({Key? key, required this.child, this.appBar, this.background})
+      : super(key: key);
 
   final Widget child;
   final PreferredSizeWidget? appBar;
+  final Color? background;
 
   @override
   Widget build(BuildContext context) {
@@ -36,6 +38,7 @@ class DefaultActivity extends StatelessWidget {
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1600),
           child: Scaffold(
+            backgroundColor: background,
             appBar: appBar,
             body: child,
           ),
@@ -52,6 +55,7 @@ class DefaultSliverActivity extends StatelessWidget {
   final Widget? leading;
   final Color? titleBackground;
   final Color? titleColor;
+  final Color? background;
 
   const DefaultSliverActivity({
     Key? key,
@@ -61,11 +65,13 @@ class DefaultSliverActivity extends StatelessWidget {
     this.leading,
     this.titleBackground,
     this.titleColor,
+    this.background,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return DefaultActivity(
+      background: background,
       child: NestedScrollView(
         floatHeaderSlivers: true,
         headerSliverBuilder: (context, innerBoxIsScrolled) {

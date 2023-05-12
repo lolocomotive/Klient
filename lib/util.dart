@@ -161,3 +161,13 @@ extension FullName on User {
 extension Name on Participant {
   String get name => label ?? technicalUser?.label ?? person?.fullName ?? 'Inconnu';
 }
+
+extension CardColors on MaterialColor {
+  Color tint(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light ? this : shade200;
+  }
+
+  Color shadow(BuildContext context) {
+    return Theme.of(context).brightness == Brightness.light ? this : shade600.withAlpha(100);
+  }
+}

@@ -74,12 +74,8 @@ class LessonCard extends StatelessWidget {
           (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
           MediaQuery.of(context).textScaleFactor,
       child: Card(
-        surfaceTintColor: Theme.of(context).brightness == Brightness.light
-            ? _lesson.subject.id.color
-            : _lesson.subject.id.color.shade100,
-        shadowColor: Theme.of(context).brightness == Brightness.light
-            ? _lesson.subject.id.color
-            : _lesson.subject.id.color.shade200.withAlpha(100),
+        surfaceTintColor: _lesson.subject.id.color.tint(context),
+        shadowColor: _lesson.subject.id.color.shadow(context),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),

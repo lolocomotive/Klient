@@ -56,9 +56,7 @@ class HomeworkCard extends StatefulWidget {
 class _HomeworkCardState extends State<HomeworkCard> {
   @override
   Widget build(BuildContext context) {
-    final tint = Theme.of(context).brightness == Brightness.light
-        ? widget._hw.subject!.id.color
-        : widget._hw.subject!.id.color.shade100;
+    final tint = widget._hw.subject!.id.color.tint(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -74,9 +72,7 @@ class _HomeworkCardState extends State<HomeworkCard> {
           ),
         Card(
           surfaceTintColor: tint,
-          shadowColor: Theme.of(context).brightness == Brightness.light
-              ? widget._hw.subject!.id.color
-              : widget._hw.subject!.id.color.shade200.withAlpha(100),
+          shadowColor: widget._hw.subject!.id.color.shadow(context),
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,
@@ -250,6 +246,8 @@ class _CardContentsState extends State<_CardContents> {
                           ),
                 if (widget.widget._hw.attachments != null && widget.expanded)
                   AttachmentsWidget(
+                    outlineColor: widget.widget._hw.subject!.id.color.shade200,
+                    outlined: true,
                     attachments: widget.widget._hw.attachments!,
                     elevation: widget.widget.elevation * 2,
                   ),

@@ -19,6 +19,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/exercise_card.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -29,7 +30,7 @@ class HomeworkList extends StatelessWidget {
   final String _title;
   final bool showDate;
   final bool showSubject;
-  final Color color;
+  final MaterialColor color;
 
   const HomeworkList(this._hws, this._title, this.color,
       {Key? key, this.showDate = false, this.showSubject = false})
@@ -38,14 +39,14 @@ class HomeworkList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DefaultCard(
-      surfaceTintColor: Theme.of(context).brightness == Brightness.light ? color : null,
-      shadowColor: Theme.of(context).brightness == Brightness.light ? color : null,
+      surfaceTintColor: color.tint(context),
+      shadowColor: color.shadow(context),
       padding: const EdgeInsets.fromLTRB(8, 16, 8, 8),
       child: Column(
         children: [
           Text(
             _title,
-            style: const TextStyle(fontSize: 16),
+            style: TextStyle(fontSize: 16 * MediaQuery.of(context).textScaleFactor),
           ),
           ..._hws
               .map((e) => HomeworkCard(
