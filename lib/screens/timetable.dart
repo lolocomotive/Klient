@@ -59,31 +59,46 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
   int _page = 0;
 
   bool compact = ConfigProvider.compact!;
-  Future<List<List<Lesson>>> _getCalendar() async {
-    final response = await ConfigProvider.client!.getAgendas(
+  bool loaded = false;
+
+  Stream<List<List<Lesson>>>? _data;
+
+  @override
+  void initState() {
+    _data = _getCalendar().asBroadcastStream();
+    _data!.first.then((value) {
+      _pageController = PageController(viewportFraction: .8, initialPage: _page);
+    });
+    super.initState();
+  }
+
+  Stream<List<List<Lesson>>> _getCalendar() async* {
+    final responses = ConfigProvider.client!.getAgendas(
       ConfigProvider.credentials!.idToken.claims.subject,
       startDate: DateTime.now().add(const Duration(days: -2)),
       endDate: DateTime.now().add(
         const Duration(days: 14),
       ),
     );
-    final days = response.data
-        .where((element) => element.lessons != null)
-        .map((element) => element.lessons!)
-        .toList();
+    await for (final response in responses) {
+      final days = response.data
+          .where((element) => element.lessons != null)
+          .map((element) => element.lessons!)
+          .toList();
 
-    //Set _page to current or next day
-    for (var i = 0; i < days.length; i++) {
-      if (days[i][0].startDateTime.date().isSameDay(DateTime.now())) {
-        _page = i;
-        break;
-      } else if (days[i].last.startDateTime.date().isBefore(DateTime.now())) {
-        _page = i + 1;
-      } else {
-        break;
+      //Set _page to current or next day
+      for (var i = 0; i < days.length; i++) {
+        if (days[i][0].startDateTime.date().isSameDay(DateTime.now())) {
+          _page = i;
+          break;
+        } else if (days[i].last.startDateTime.date().isBefore(DateTime.now())) {
+          _page = i + 1;
+        } else {
+          break;
+        }
       }
+      yield days;
     }
-    return days;
   }
 
   @override
@@ -102,8 +117,9 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
       child: RefreshIndicator(
         onRefresh: () async {
           KlientApp.cache.forceRefresh = true;
-          await _getCalendar();
+          _getCalendar();
           KlientApp.cache.forceRefresh = false;
+          loaded = false;
           setState(() {});
         },
         child: SingleChildScrollView(
@@ -115,11 +131,8 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                 32,
             child: Stack(
               children: [
-                FutureBuilder<List<List<Lesson>>>(
-                    future: _getCalendar()
-                      ..then((value) {
-                        _pageController = PageController(viewportFraction: .8, initialPage: _page);
-                      }),
+                StreamBuilder<List<List<Lesson>>>(
+                    stream: _data,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
                         return const Padding(
@@ -140,7 +153,9 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
                         );
                       }
                       return DefaultTransition(
+                        animate: !loaded,
                         child: LayoutBuilder(builder: (context, constraints) {
+                          loaded = true;
                           var fraction = 0.8;
                           if (constraints.maxWidth > 700) {
                             fraction = 0.4;

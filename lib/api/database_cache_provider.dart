@@ -72,14 +72,18 @@ class DatabaseCacheProvider extends CacheProvider {
   }
 
   @override
-  Future<bool> shouldUseCache(String key) async {
-    if (!ready) throw Exception('Database not ready!');
-    if (!_index.containsKey(key)) return false;
+  Future<bool> useCache(String key) async {
+    if (forceRefresh) return false;
+    if (_index.containsKey(key)) return true;
+    return false;
+  }
+
+  @override
+  Future<bool> useNetwork(String key) async {
+    if (!(await useCache(key))) return true;
 
     //Use cache if offline
-    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) return true;
-    //Allow to override expiry duration
-    if (forceRefresh) return false;
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) return false;
 
     Duration expiryTime;
     final route = key.substring(44).replaceAll(RegExp(r'\?.*'), '');
@@ -100,8 +104,7 @@ class DatabaseCacheProvider extends CacheProvider {
     if (route.startsWith('user-mail-settings')) {
       expiryTime = const Duration(days: 7);
     }
-    if (_index[key]!.date().add(expiryTime).isBefore(DateTime.now())) return false;
-
-    return true;
+    if (_index[key]!.date().add(expiryTime).isBefore(DateTime.now())) return true;
+    return false;
   }
 }

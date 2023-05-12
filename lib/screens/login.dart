@@ -159,9 +159,13 @@ class LoginState extends State<Login> {
                         _query.length < 3
                             ? Text('Entrez au moins 3 caractères',
                                 style: TextStyle(color: Theme.of(context).colorScheme.secondary))
-                            : FutureBuilder<SkolengoResponse<List<School>>>(
-                                future: Skolengo.unauthenticated().searchSchool(_query),
+                            : StreamBuilder<SkolengoResponse<List<School>>>(
+                                stream: Skolengo.unauthenticated().searchSchool(_query),
                                 builder: (context, snapshot) {
+                                  if (snapshot.hasError) {
+                                    return ExceptionWidget(
+                                        e: snapshot.error!, st: snapshot.stackTrace!);
+                                  }
                                   if (snapshot.data != null) {
                                     List<School> schools = snapshot.data!.data;
                                     return Column(

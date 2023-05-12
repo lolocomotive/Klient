@@ -16,6 +16,7 @@ class UserAvatarAction extends StatefulWidget {
 }
 
 class _UserAvatarActionState extends State<UserAvatarAction> {
+  bool loaded = false;
   @override
   Widget build(BuildContext context) {
     return InkWell(
@@ -30,14 +31,18 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         );
       },
       borderRadius: BorderRadius.circular(1000),
-      child: FutureBuilder<SkolengoResponse<User>>(
-          future: ConfigProvider.client!
+      child: StreamBuilder<SkolengoResponse<User>>(
+          stream: ConfigProvider.client!
               .getUserInfo(ConfigProvider.client!.credentials!.idToken.claims.subject),
           builder: (context, snapshot) {
             if (snapshot.hasData) {
               return DefaultTransition(
-                  child: UserAvatar(
-                      snapshot.data!.data.firstName[0] + snapshot.data!.data.lastName[0]));
+                  animate: !loaded,
+                  child: Builder(builder: (context) {
+                    loaded = true;
+                    return UserAvatar(
+                        snapshot.data!.data.firstName[0] + snapshot.data!.data.lastName[0]);
+                  }));
             } else if (snapshot.hasError) {
               return const DefaultTransition(child: UserAvatar('ERR'));
             } else {

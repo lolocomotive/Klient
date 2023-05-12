@@ -20,27 +20,31 @@
 import 'package:klient/config_provider.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
-Future<List<HomeworkAssignment>> getHomework() async {
-  return (await ConfigProvider.client!.getHomeworkAssignments(
+Stream<List<HomeworkAssignment>> getHomework() async* {
+  final results = (ConfigProvider.client!.getHomeworkAssignments(
     ConfigProvider.credentials!.idToken.claims.subject,
     DateTime.now().toIso8601String().substring(0, 10),
     DateTime.now().add(const Duration(days: 14)).toIso8601String().substring(0, 10),
-  ))
-      .data;
+  ));
+  await for (final result in results) {
+    yield result.data;
+  }
 }
 
-Future<List<List<Evaluation>>> getGrades() async {
-  final response = await ConfigProvider.client!
+Stream<List<List<Evaluation>>> getGrades() async* {
+  final responses = ConfigProvider.client!
       .getEvaluationServices(ConfigProvider.credentials!.idToken.claims.subject, '');
-  final evaluations = response.data.map((e) => e.evaluations).expand((e) => e).toList();
+  await for (final response in responses) {
+    final evaluations = response.data.map((e) => e.evaluations).expand((e) => e).toList();
 
-  List<List<Evaluation>> r = [];
-  for (int i = 0; i < evaluations.length; i++) {
-    if (i % 2 == 0) {
-      r.add([evaluations[i]]);
-    } else {
-      r[(i / 2).floor()].add(evaluations[i]);
+    List<List<Evaluation>> r = [];
+    for (int i = 0; i < evaluations.length; i++) {
+      if (i % 2 == 0) {
+        r.add([evaluations[i]]);
+      } else {
+        r[(i / 2).floor()].add(evaluations[i]);
+      }
     }
+    yield r;
   }
-  return r;
 }

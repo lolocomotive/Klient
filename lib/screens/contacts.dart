@@ -40,7 +40,7 @@ class ContactsPage extends StatefulWidget {
 
 class _ContactsPageState extends State<ContactsPage> {
   List<Contact> c = [];
-  Future<SkolengoResponse<UsersMailSettings>>? _data;
+  Stream<SkolengoResponse<UsersMailSettings>>? _data;
   @override
   void initState() {
     _data = ConfigProvider.client!
@@ -69,8 +69,8 @@ class _ContactsPageState extends State<ContactsPage> {
       ],
       title: 'Contacts',
       child: SingleChildScrollView(
-          child: FutureBuilder<SkolengoResponse<UsersMailSettings>>(
-        future: _data,
+          child: StreamBuilder<SkolengoResponse<UsersMailSettings>>(
+        stream: _data,
         builder: (context, snapshot) {
           if (snapshot.hasError) {
             return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);

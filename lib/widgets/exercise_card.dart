@@ -286,7 +286,9 @@ class _CardContentsState extends State<_CardContents> {
                                   !widget.widget._hw.done,
                                 );
                                 KlientApp.cache.forceRefresh = true;
-                                getHomework().then((_) => KlientApp.cache.forceRefresh = false);
+                                getHomework()
+                                    .last
+                                    .then((_) => KlientApp.cache.forceRefresh = false);
                                 widget.widget._hw.done = response.data.done;
                                 widget.onMarkedDone(response.data.done);
                                 _busy = false;

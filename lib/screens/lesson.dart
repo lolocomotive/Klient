@@ -41,7 +41,7 @@ class LessonPage extends StatefulWidget {
 }
 
 class _LessonPageState extends State<LessonPage> {
-  Future<SkolengoResponse<Lesson>>? _data;
+  Stream<SkolengoResponse<Lesson>>? _data;
   @override
   void initState() {
     _data = ConfigProvider.client!
@@ -91,8 +91,8 @@ class _LessonPageState extends State<LessonPage> {
                 'Contenu de la séance',
                 color,
               ), */
-              FutureBuilder<SkolengoResponse<Lesson>>(
-                  future: _data,
+              StreamBuilder<SkolengoResponse<Lesson>>(
+                  stream: _data,
                   builder: (context, snapshot) {
                     if (snapshot.hasError) {
                       return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);

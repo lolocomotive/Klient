@@ -23,11 +23,13 @@ class DefaultTransition extends StatefulWidget {
   final Widget child;
   final Duration delay;
   final Duration duration;
+  final bool animate;
   const DefaultTransition({
     Key? key,
     required this.child,
     this.delay = Duration.zero,
     this.duration = const Duration(milliseconds: 200),
+    this.animate = true,
   }) : super(key: key);
 
   @override
@@ -64,6 +66,7 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
       parent: _controller,
       curve: Curves.easeIn,
     );
+
     super.initState();
   }
 
@@ -82,12 +85,14 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
     if (widget.duration == Duration.zero) {
       return widget.child;
     }
-    return ScaleTransition(
-      scale: Tween(begin: 1.05, end: 1.0).animate(_scaleAnimation),
-      child: FadeTransition(
-        opacity: Tween(begin: 0.0, end: 1.0).animate(_fadeAnimation),
-        child: widget.child,
-      ),
-    );
+    return widget.animate
+        ? ScaleTransition(
+            scale: Tween(begin: 1.05, end: 1.0).animate(_scaleAnimation),
+            child: FadeTransition(
+              opacity: Tween(begin: 0.0, end: 1.0).animate(_fadeAnimation),
+              child: widget.child,
+            ),
+          )
+        : widget.child;
   }
 }

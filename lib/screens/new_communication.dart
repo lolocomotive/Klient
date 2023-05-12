@@ -47,7 +47,7 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
   List<Contact> _recipients = [];
   List<Contact> _ccRecipients = [];
   List<Contact> _bccRecipients = [];
-  Future<SkolengoResponse<UsersMailSettings>>? _mailSettings;
+  Stream<SkolengoResponse<UsersMailSettings>>? _mailSettings;
   @override
   void initState() {
     _mailSettings = ConfigProvider.client!
@@ -206,7 +206,7 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                           ],
                         ),
                         if (_appendSignature)
-                          FutureBuilder<SkolengoResponse<UsersMailSettings>>(
+                          StreamBuilder<SkolengoResponse<UsersMailSettings>>(
                             builder: (context, snapshot) {
                               if (snapshot.hasError) {
                                 return ExceptionWidget(
@@ -219,7 +219,7 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                                 );
                               }
                             },
-                            future: _mailSettings,
+                            stream: _mailSettings,
                           ),
                         ElevatedButton.icon(
                           onPressed: send,
@@ -248,7 +248,8 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
       String contentHtml = _contentText.replaceAll('\n', '<br/>');
       if (_appendSignature) {
         final response = await ConfigProvider.client!
-            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+            .first;
         contentHtml +=
             "<div style='padding-top: 5px;'> <div><br>${response.data.signature.content}</div></div>";
       }

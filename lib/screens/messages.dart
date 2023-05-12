@@ -71,21 +71,29 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   Future<void> load() async {
-    _communications = (await ConfigProvider.client!.getCommunicationsFromFolder(
+    print('Load');
+    final responses = ConfigProvider.client!.getCommunicationsFromFolder(
       _folder!.id,
       limit: 100,
-    ))
-        .data;
-    _loaded = true;
-    delayTransitionDone();
-    if (!mounted) return;
-    setState(() {});
+    );
+    bool transitionned = false;
+    await for (final response in responses) {
+      if (!mounted) return;
+      _communications = response.data;
+      _loaded = true;
+      if (!transitionned) {
+        transitionned = true;
+        delayTransitionDone();
+      }
+      setState(() {});
+    }
   }
 
   Future<void> refresh() async {
     KlientApp.cache.forceRefresh = true;
     _settings = (await ConfigProvider.client!
-            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject))
+            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+            .last)
         .data;
     await load();
     KlientApp.cache.forceRefresh = false;
@@ -110,6 +118,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     currentSubject = null;
     ConfigProvider.client!
         .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+        .first
         .then((response) {
       _settings = response.data;
       _folder = _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX);
@@ -458,7 +467,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     //We have to wait because the API doesn't update immediately.
     await Future.delayed(const Duration(milliseconds: 500));
     KlientApp.cache.forceRefresh = true;
-    await ConfigProvider.client!.getCommunicationsFromFolder(
+    ConfigProvider.client!.getCommunicationsFromFolder(
       _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
       limit: 100,
     );

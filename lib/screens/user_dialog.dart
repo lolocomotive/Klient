@@ -19,6 +19,7 @@ class UserDialog extends StatefulWidget {
 }
 
 class _UserDialogState extends State<UserDialog> {
+  bool loaded = false;
   @override
   Widget build(BuildContext context) {
     return Dialog(
@@ -32,16 +33,21 @@ class _UserDialogState extends State<UserDialog> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: FutureBuilder<SkolengoResponse<User>>(
-                    future: ConfigProvider.client!
+                child: StreamBuilder<SkolengoResponse<User>>(
+                    stream: ConfigProvider.client!
                         .getUserInfo(ConfigProvider.client!.credentials!.idToken.claims.subject),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
                         return DefaultTransition(
-                          child: Text(
-                            snapshot.data!.data.fullName,
-                            style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
-                          ),
+                          animate: !loaded,
+                          child: Builder(builder: (context) {
+                            loaded = true;
+                            return Text(
+                              snapshot.data!.data.fullName,
+                              style:
+                                  TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
+                            );
+                          }),
                         );
                       } else if (snapshot.hasError) {
                         return const DefaultTransition(child: Text('Erreur'));

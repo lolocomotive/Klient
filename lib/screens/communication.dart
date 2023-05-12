@@ -54,13 +54,15 @@ class _CommunicationPageState extends State<CommunicationPage> {
   }
 
   load() async {
-    final response =
-        await ConfigProvider.client!.getCommunicationParticipations(widget.communication.id);
-    if (!mounted) return;
-    setState(() {
-      _participations = response.data;
-      delayTransitionDone();
-    });
+    final responses =
+        ConfigProvider.client!.getCommunicationParticipations(widget.communication.id);
+    await for (final response in responses) {
+      if (!mounted) return;
+      setState(() {
+        _participations = response.data;
+        delayTransitionDone();
+      });
+    }
   }
 
   delayTransitionDone() {

@@ -64,10 +64,11 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onRefresh: (() async {
           KlientApp.cache.forceRefresh = true;
           await Future.wait(<Future>[
-            getHomework().then((value) => _hKey.currentState?.setState(() {})),
-            getGrades().then((_) => _gKey.currentState?.setState(() {})),
+            getHomework().last.then((value) => _hKey.currentState?.setState(() {})),
+            getGrades().last.then((_) => _gKey.currentState?.setState(() {})),
             ConfigProvider.client!
                 .getSchoolInfos()
+                .last
                 .then((_) => _aKey.currentState?.setState(() {})),
           ]);
           KlientApp.cache.forceRefresh = false;
@@ -167,10 +168,11 @@ class HomeworkListWrapper extends StatefulWidget {
 }
 
 class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerProviderStateMixin {
+  bool loaded = false;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<HomeworkAssignment>>(
-        future: getHomework(),
+    return StreamBuilder<List<HomeworkAssignment>>(
+        stream: getHomework(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -196,7 +198,11 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
                   )),
                 )
               : DefaultTransition(
-                  child: HomeworkList(data: snapshot.data!),
+                  animate: !loaded,
+                  child: Builder(builder: (context) {
+                    loaded = true;
+                    return HomeworkList(data: snapshot.data!);
+                  }),
                 );
         });
   }
@@ -212,10 +218,11 @@ class GradeList extends StatefulWidget {
 }
 
 class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
+  bool loaded = false;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<List<Evaluation>>>(
-        future: getGrades(),
+    return StreamBuilder<List<List<Evaluation>>>(
+        stream: getGrades(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -231,37 +238,41 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
                 child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!));
           }
           return DefaultTransition(
-            child: snapshot.data!.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                        child: Text(
-                      'Rien à afficher',
-                      style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                    )),
-                  )
-                : SizedBox(
-                    child: Column(
-                      children: snapshot.data!
-                          .map(
-                            (twoGrades) => Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                EvaluationCard(
-                                  twoGrades[0],
-                                  compact: ConfigProvider.compact!,
-                                ),
-                                if (twoGrades.length > 1)
+            animate: !loaded,
+            child: Builder(builder: (context) {
+              loaded = true;
+              return snapshot.data!.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                          child: Text(
+                        'Rien à afficher',
+                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                      )),
+                    )
+                  : SizedBox(
+                      child: Column(
+                        children: snapshot.data!
+                            .map(
+                              (twoGrades) => Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
                                   EvaluationCard(
-                                    twoGrades[1],
+                                    twoGrades[0],
                                     compact: ConfigProvider.compact!,
-                                  )
-                              ],
-                            ),
-                          )
-                          .toList(),
-                    ),
-                  ),
+                                  ),
+                                  if (twoGrades.length > 1)
+                                    EvaluationCard(
+                                      twoGrades[1],
+                                      compact: ConfigProvider.compact!,
+                                    )
+                                ],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                    );
+            }),
           );
         });
   }
@@ -277,10 +288,11 @@ class ArticleList extends StatefulWidget {
 }
 
 class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin {
+  bool loaded = false;
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<SkolengoResponse<List<SchoolInfo>>>(
-        future: ConfigProvider.client!.getSchoolInfos(),
+    return StreamBuilder<SkolengoResponse<List<SchoolInfo>>>(
+        stream: ConfigProvider.client!.getSchoolInfos(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Padding(
@@ -302,21 +314,25 @@ class _ArticleListState extends State<ArticleList> with TickerProviderStateMixin
             );
           }
           return DefaultTransition(
-            child: snapshot.data!.data.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(
-                      child: Text(
-                        'Rien à afficher',
-                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+            animate: !loaded,
+            child: Builder(builder: (context) {
+              loaded = true;
+              return snapshot.data!.data.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(
+                        child: Text(
+                          'Rien à afficher',
+                          style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                        ),
                       ),
-                    ),
-                  )
-                : Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children:
-                        snapshot.data!.data.map((article) => SchoolInfoCard(article)).toList(),
-                  ),
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children:
+                          snapshot.data!.data.map((article) => SchoolInfoCard(article)).toList(),
+                    );
+            }),
           );
         });
   }

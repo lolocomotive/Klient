@@ -45,11 +45,13 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
   }
 
   load() async {
-    final response = await ConfigProvider.client!.getSchoolInfo(_info.id);
-    if (!mounted) return;
-    setState(() {
-      _info = response.data;
-    });
+    final responses = ConfigProvider.client!.getSchoolInfo(_info.id);
+    await for (final response in responses) {
+      if (!mounted) return;
+      setState(() {
+        _info = response.data;
+      });
+    }
   }
 
   @override
