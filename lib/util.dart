@@ -153,3 +153,11 @@ Skolengo createClient() {
   });
   return client;
 }
+
+extension FullName on User {
+  String get fullName => '$firstName $lastName';
+}
+
+extension Name on Participant {
+  String get name => label ?? technicalUser?.label ?? person?.fullName ?? 'Inconnu';
+}

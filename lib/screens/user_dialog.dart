@@ -4,6 +4,7 @@ import 'package:klient/config_provider.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/screens/debug.dart';
 import 'package:klient/screens/settings.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/user_avatar.dart';
@@ -38,7 +39,7 @@ class _UserDialogState extends State<UserDialog> {
                       if (snapshot.hasData) {
                         return DefaultTransition(
                           child: Text(
-                            '${snapshot.data!.data.firstName} ${snapshot.data!.data.lastName}',
+                            snapshot.data!.data.fullName,
                             style: TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
                           ),
                         );
@@ -151,7 +152,7 @@ class UserWidget extends StatelessWidget {
                   child: UserAvatar(user.firstName[0] + user.lastName[0])),
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Text('${user.firstName} ${user.lastName}'),
+                child: Text(user.fullName),
               ),
             ]),
             Positioned.fill(

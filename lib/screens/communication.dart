@@ -157,7 +157,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                       children: [
                                         Expanded(
                                           child: Text(
-                                            '${participation.sender!.person?.firstName} ${participation.sender!.person?.lastName}',
+                                            participation.sender!.name,
                                             textAlign: TextAlign.left,
                                             overflow: TextOverflow.ellipsis,
                                             style: TextStyle(

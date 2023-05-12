@@ -373,7 +373,7 @@ class ContactChip extends StatelessWidget {
         surfaceTintColor: c.person!.id.color.shade200,
         side: BorderSide(color: c.person!.id.color.shade200),
         elevation: 8,
-        label: Text('${c.person!.firstName} ${c.person!.lastName}'),
+        label: Text(c.person!.fullName),
         key: ObjectKey(contact.id),
         onDeleted: onRemove,
       );

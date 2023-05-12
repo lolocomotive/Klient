@@ -72,7 +72,7 @@ class SchoolInfoCard extends StatelessWidget {
                       _info.author == null
                           ? const Text('Auteur inconnu')
                           : Text(
-                              '${_info.author!.firstName} ${_info.author!.lastName}',
+                              _info.author!.fullName,
                               style: const TextStyle(fontSize: 16),
                             ),
                       if (_info.attachments != null)

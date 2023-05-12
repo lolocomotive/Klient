@@ -29,6 +29,7 @@ class CommunicationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final sender = _communication.lastParticipation?.sender;
     return Row(
       mainAxisAlignment: MainAxisAlignment.start,
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -57,18 +58,20 @@ class CommunicationCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      HtmlUnescape().convert(_communication.recipientsSummary ?? '').innerText,
+                      sender!.name,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
                       ),
-                      overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
                     ),
                   ),
                   Text(
                     _communication.lastParticipation!.dateTime.format(),
                     textAlign: TextAlign.right,
-                    overflow: TextOverflow.ellipsis,
+                    overflow: TextOverflow.fade,
+                    softWrap: false,
                     style: TextStyle(
                         fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
                         fontSize: 14),
@@ -82,7 +85,8 @@ class CommunicationCard extends StatelessWidget {
                     child: Text(
                       _communication.subject,
                       textAlign: TextAlign.left,
-                      overflow: TextOverflow.ellipsis,
+                      overflow: TextOverflow.fade,
+                      softWrap: false,
                       style: TextStyle(
                           fontWeight: _communication.read! ? FontWeight.normal : FontWeight.bold,
                           fontSize: 14),

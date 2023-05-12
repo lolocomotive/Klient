@@ -113,6 +113,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
         .then((response) {
       _settings = response.data;
       _folder = _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX);
+      setState(() {});
       load();
     });
   }
@@ -227,6 +228,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                           Theme.of(context).colorScheme.primary,
                                           4,
                                         ),
+                                        isExpanded: true,
                                         underline: Container(),
                                         items: _settings?.folders.map<DropdownMenuItem<Folder>>(
                                               (folder) {
@@ -254,7 +256,13 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                         padding: const EdgeInsets.all(8.0),
                                                         child: Icon(icon),
                                                       ),
-                                                      Text(folder.name),
+                                                      Flexible(
+                                                        child: Text(
+                                                          folder.name,
+                                                          overflow: TextOverflow.fade,
+                                                          softWrap: false,
+                                                        ),
+                                                      ),
                                                     ],
                                                   ),
                                                 );
@@ -264,6 +272,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         onChanged: (folder) {
                                           _folder = folder;
                                           _loaded = false;
+                                          _communications = [];
                                           setState(() {});
                                           load();
                                         },
@@ -294,11 +303,14 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                             crossAxisAlignment: CrossAxisAlignment.center,
                                             children: [
                                               _loaded
-                                                  ? Text(
-                                                      'Aucun message à afficher',
-                                                      style: TextStyle(
-                                                        color:
-                                                            Theme.of(context).colorScheme.secondary,
+                                                  ? DefaultTransition(
+                                                      child: Text(
+                                                        'Aucun message à afficher',
+                                                        style: TextStyle(
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .secondary,
+                                                        ),
                                                       ),
                                                     )
                                                   : const DelayedProgressIndicator(

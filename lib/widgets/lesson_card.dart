@@ -169,10 +169,7 @@ class LessonCard extends StatelessWidget {
                             //if (_lesson.length > 1 && _lesson.isModified)
                             //  Text(_lesson.modificationMessage!),
                             if (_lesson.isLong || !hasIcons)
-                              Text(_lesson.teachers
-                                      ?.map((e) => '${e.lastName} ${e.firstName}')
-                                      .join(', ') ??
-                                  ''),
+                              Text(_lesson.teachers?.map((e) => e.fullName).join(', ') ?? ''),
                             if (_lesson.isLong)
                               Text(
                                 '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',

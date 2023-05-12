@@ -21,6 +21,7 @@ import 'package:expandable/expandable.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/api/color_provider.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/exception_widget.dart';
@@ -128,7 +129,7 @@ class ContactDisplay extends StatelessWidget {
           color: contact.person!.id.color.shade300,
         ),
         title: Text(
-          contact.name ?? '${contact.person!.firstName} ${contact.person!.lastName}',
+          contact.name ?? contact.person!.fullName,
           overflow: TextOverflow.fade,
           softWrap: false,
         ),
@@ -257,8 +258,7 @@ class ContactsSearchDelegate extends SearchDelegate<Contact?> {
     final r = contacts.where(
       (element) {
         if (element is PersonContact) {
-          return element.person!.firstName.toLowerCase().contains(query.toLowerCase()) ||
-              element.person!.lastName.toLowerCase().contains(query.toLowerCase());
+          return element.person!.fullName.toLowerCase().contains(query.toLowerCase());
         } else if (element is GroupContact) {
           return element.label!.toLowerCase().contains(query.toLowerCase());
         }
