@@ -23,6 +23,7 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         showDialog(
           context: context,
           builder: (_) => UserDialog(onUpdate: () {
+            if (!mounted) return;
             setState(() {});
             if (widget.onUpdate != null) widget.onUpdate!();
           }),

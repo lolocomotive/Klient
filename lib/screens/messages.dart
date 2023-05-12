@@ -233,7 +233,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         items: _settings?.folders.map<DropdownMenuItem<Folder>>(
                                               (folder) {
                                                 final IconData icon;
-
                                                 if (folder.folderType == FolderType.INBOX) {
                                                   icon = Icons.inbox;
                                                 } else if (folder.folderType == FolderType.SENT) {

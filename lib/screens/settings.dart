@@ -80,22 +80,52 @@ class _SettingsPageState extends State<SettingsPage> {
                       SettingsTile(
                         leading: const Icon(Icons.invert_colors),
                         title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             const Text('Thème'),
-                            Expanded(
-                              child: Padding(
-                                padding: const EdgeInsets.fromLTRB(16.0, 0, 0, 0),
+                            Flexible(
+                              child: Container(
+                                padding: const EdgeInsets.only(left: 16, right: 8),
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(8),
+                                  color: ElevationOverlay.applySurfaceTint(
+                                    Theme.of(context).colorScheme.surface,
+                                    Theme.of(context).colorScheme.primary,
+                                    2,
+                                  ),
+                                ),
                                 child: DropdownButton(
-                                  isExpanded: true,
+                                  borderRadius: BorderRadius.circular(16),
+                                  dropdownColor: ElevationOverlay.applySurfaceTint(
+                                    Theme.of(context).colorScheme.surface,
+                                    Theme.of(context).colorScheme.primary,
+                                    4,
+                                  ),
+                                  underline: Container(),
                                   value: ConfigProvider.enforcedBrightness == null
                                       ? 'default'
                                       : ConfigProvider.enforcedBrightness == Brightness.light
                                           ? 'light'
                                           : 'dark',
                                   items: const [
-                                    DropdownMenuItem(value: 'default', child: Text('Système')),
-                                    DropdownMenuItem(value: 'light', child: Text('Clair')),
-                                    DropdownMenuItem(value: 'dark', child: Text('Sombre')),
+                                    DropdownMenuItem(
+                                        value: 'default',
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8),
+                                          child: Text('Système'),
+                                        )),
+                                    DropdownMenuItem(
+                                        value: 'light',
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8),
+                                          child: Text('Clair'),
+                                        )),
+                                    DropdownMenuItem(
+                                        value: 'dark',
+                                        child: Padding(
+                                          padding: EdgeInsets.symmetric(horizontal: 8),
+                                          child: Text('Sombre'),
+                                        )),
                                   ],
                                   onChanged: (dynamic value) {
                                     ConfigProvider.getStorage()
