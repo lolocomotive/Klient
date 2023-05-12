@@ -121,6 +121,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
         .first
         .then((response) {
       _settings = response.data;
+      _settings!.folders.sort(
+        (a, b) => a.position.compareTo(b.position),
+      );
       _folder = _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX);
       setState(() {});
       load();
@@ -230,7 +233,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                           innerBoxIsScrolled ? 12 : 2,
                                         ),
                                       ),
-                                      child: DropdownButton<Folder>(
+                                      child: DropdownButton<String>(
                                         borderRadius: BorderRadius.circular(16),
                                         dropdownColor: ElevationOverlay.applySurfaceTint(
                                           Theme.of(context).colorScheme.surface,
@@ -239,7 +242,11 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         ),
                                         isExpanded: true,
                                         underline: Container(),
-                                        items: _settings?.folders.map<DropdownMenuItem<Folder>>(
+                                        items: _settings?.folders
+                                                .where((folder) =>
+                                                    folder.folderType != FolderType.DRAFTS &&
+                                                    folder.folderType != FolderType.MODERATION)
+                                                .map<DropdownMenuItem<String>>(
                                               (folder) {
                                                 final IconData icon;
                                                 if (folder.folderType == FolderType.INBOX) {
@@ -257,7 +264,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                   icon = Icons.folder;
                                                 }
                                                 return DropdownMenuItem(
-                                                  value: folder,
+                                                  value: folder.id,
                                                   child: Row(
                                                     children: [
                                                       Padding(
@@ -276,15 +283,34 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                 );
                                               },
                                             ).toList() ??
-                                            [],
+                                            [
+                                              const DropdownMenuItem(
+                                                child: Row(
+                                                  children: [
+                                                    Padding(
+                                                      padding: EdgeInsets.all(8.0),
+                                                      child: Icon(Icons.inbox),
+                                                    ),
+                                                    Flexible(
+                                                      child: Text(
+                                                        'Chargement...',
+                                                        overflow: TextOverflow.fade,
+                                                        softWrap: false,
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              )
+                                            ],
                                         onChanged: (folder) {
-                                          _folder = folder;
+                                          _folder = _settings?.folders
+                                              .firstWhere((element) => element.id == folder);
                                           _loaded = false;
                                           _communications = [];
                                           setState(() {});
                                           load();
                                         },
-                                        value: _folder,
+                                        value: _folder?.id,
                                       ),
                                     ),
                               floating: false,
