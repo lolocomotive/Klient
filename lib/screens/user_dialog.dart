@@ -7,6 +7,7 @@ import 'package:klient/screens/settings.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
+import 'package:klient/widgets/exception_widget.dart';
 import 'package:klient/widgets/user_avatar.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
@@ -50,7 +51,7 @@ class _UserDialogState extends State<UserDialog> {
                           }),
                         );
                       } else if (snapshot.hasError) {
-                        return const DefaultTransition(child: Text('Erreur'));
+                        return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);
                       } else {
                         return const LinearProgressIndicator();
                       }
