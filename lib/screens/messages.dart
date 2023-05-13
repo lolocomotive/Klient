@@ -22,6 +22,7 @@ import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/screens/communication.dart';
 import 'package:klient/screens/message_search.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/communication_card.dart';
 import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
@@ -47,6 +48,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   bool _sideBySide = false;
   String? currentSubject;
   String? currentId;
+  int? _size;
+  int _page = 0;
+  final int _pageSize = 20;
   bool _transitionDone = false;
 
   void openConversation(BuildContext context, GlobalKey? parentKey, Communication communication) {
@@ -70,16 +74,31 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     }
   }
 
-  Future<void> load() async {
-    print('Load');
+  Future<void> load([transitionned = false]) async {
     final responses = ConfigProvider.client!.getCommunicationsFromFolder(
       _folder!.id,
-      limit: 100,
+      offset: _pageSize * _page,
+      limit: _pageSize,
     );
-    bool transitionned = false;
+
+    bool isFirst = true;
     await for (final response in responses) {
+      _size = response.meta!['totalResourceCount'];
       if (!mounted) return;
-      _communications = response.data;
+
+      for (final comm in response.data) {
+        //Remove duplicate entries
+        _communications.removeWhere((element) => element.id == comm.id);
+        _communications.add(comm);
+      }
+      if (!isFirst) {
+        // Sort if it's not the first response in the stream
+        // because there could have been other responses in between
+        _communications.sort((a, b) =>
+            b.lastParticipation!.dateTime.date().compareTo(a.lastParticipation!.dateTime.date()));
+        isFirst = false;
+      }
+
       _loaded = true;
       if (!transitionned) {
         transitionned = true;
@@ -306,6 +325,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                           _folder = _settings?.folders
                                               .firstWhere((element) => element.id == folder);
                                           _loaded = false;
+                                          _page = 0;
                                           _communications = [];
                                           setState(() {});
                                           load();
@@ -355,13 +375,24 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                         ),
                                       )
                                     : ListView.builder(
-                                        itemCount: _communications
-                                            .length /* +
-                                            (Downloader.loadingMessages ? 1 : 0)*/
-                                        ,
+                                        cacheExtent: 1000,
+                                        itemCount: _communications.length +
+                                            (_communications.length < _size! ? 1 : 0),
                                         padding: const EdgeInsets.all(0),
                                         itemBuilder: (BuildContext context, int index) {
                                           final parentKey = GlobalKey();
+                                          if (index == _communications.length) {
+                                            if ((_page + 1) * _pageSize >= index) {
+                                              _page++;
+                                              load(true);
+                                            }
+                                            return const Center(
+                                              child: Padding(
+                                                padding: EdgeInsets.all(8.0),
+                                                child: CircularProgressIndicator(),
+                                              ),
+                                            );
+                                          }
                                           return DefaultTransition(
                                             duration: _transitionDone
                                                 ? Duration.zero
@@ -452,7 +483,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                             : CommunicationPage(
                                 key: Key(currentId.toString()),
                                 //FIXME
-                                communication: Communication(id: '', subject: '', type: ''),
+                                communication: _communications.firstWhere(
+                                  (element) => element.id == currentId,
+                                ),
                                 onDelete: deleteSingleCommunication,
                               ),
                       )
@@ -495,7 +528,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     KlientApp.cache.forceRefresh = true;
     ConfigProvider.client!.getCommunicationsFromFolder(
       _settings!.folders.firstWhere((element) => element.folderType == FolderType.INBOX).id,
-      limit: 100,
+      limit: 20,
     );
     KlientApp.cache.forceRefresh = false;
   }
