@@ -18,6 +18,7 @@
  */
 
 import 'package:klient/config_provider.dart';
+import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 Stream<List<HomeworkAssignment>> getHomework() async* {
@@ -44,14 +45,16 @@ Stream<List<List<Evaluation>>> getGrades() async* {
         throw Exception('Unknown evalutation type: ${e.runtimeType}');
       }
     });
-    final evaluationsExpanded = [];
+    final evaluationsExpanded = <Evaluation>[];
     for (final e in evaluations) {
-      if (e is List) {
+      if (e is List<Evaluation>) {
         evaluationsExpanded.addAll(e);
-      } else {
+      } else if (e is Evaluation) {
         evaluationsExpanded.add(e);
       }
     }
+    evaluationsExpanded.sort((a, b) => b.date.date().compareTo(a.date.date()));
+
     List<List<Evaluation>> r = [];
     for (int i = 0; i < evaluationsExpanded.length; i++) {
       if (i % 2 == 0) {
