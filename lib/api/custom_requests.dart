@@ -35,14 +35,29 @@ Stream<List<List<Evaluation>>> getGrades() async* {
   final responses = ConfigProvider.client!
       .getEvaluationServices(ConfigProvider.credentials!.idToken.claims.subject, '');
   await for (final response in responses) {
-    final evaluations = response.data.map((e) => e.evaluations).expand((e) => e).toList();
-
-    List<List<Evaluation>> r = [];
-    for (int i = 0; i < evaluations.length; i++) {
-      if (i % 2 == 0) {
-        r.add([evaluations[i]]);
+    final evaluations = response.data.map((e) {
+      if (e is Evaluation) {
+        return e;
+      } else if (e is EvaluationService) {
+        return e.evaluations;
       } else {
-        r[(i / 2).floor()].add(evaluations[i]);
+        throw Exception('Unknown evalutation type: ${e.runtimeType}');
+      }
+    });
+    final evaluationsExpanded = [];
+    for (final e in evaluations) {
+      if (e is List) {
+        evaluationsExpanded.addAll(e);
+      } else {
+        evaluationsExpanded.add(e);
+      }
+    }
+    List<List<Evaluation>> r = [];
+    for (int i = 0; i < evaluationsExpanded.length; i++) {
+      if (i % 2 == 0) {
+        r.add([evaluationsExpanded[i]]);
+      } else {
+        r[(i / 2).floor()].add(evaluationsExpanded[i]);
       }
     }
     yield r;
