@@ -53,11 +53,13 @@ class CustomHtml extends StatelessWidget {
       },
       customRenders: {
         networkImageMatcher(): CustomRender.widget(
-            widget: (context, buildChildren) => CachedNetworkImage(
-                  imageUrl: context.tree.element!.attributes['src']!,
-                  progressIndicatorBuilder: (context, url, progress) => Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Center(child: CircularProgressIndicator(value: progress.progress)),
+            widget: (context, buildChildren) => InteractiveViewer(
+                  child: CachedNetworkImage(
+                    imageUrl: context.tree.element!.attributes['src']!,
+                    progressIndicatorBuilder: (context, url, progress) => Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Center(child: CircularProgressIndicator(value: progress.progress)),
+                    ),
                   ),
                 ))
       },

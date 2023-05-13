@@ -71,12 +71,14 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
               if (widget._info.illustration != null)
                 Hero(
                   tag: widget._info.illustration!.url,
-                  child: Image(
-                    fit: BoxFit.cover,
-                    width: MediaQuery.of(context).size.width,
-                    image: CachedNetworkImageProvider(
-                      widget._info.illustration!.url,
-                      headers: ConfigProvider.client!.headers,
+                  child: InteractiveViewer(
+                    child: Image(
+                      fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width,
+                      image: CachedNetworkImageProvider(
+                        widget._info.illustration!.url,
+                        headers: ConfigProvider.client!.headers,
+                      ),
                     ),
                   ),
                 ),

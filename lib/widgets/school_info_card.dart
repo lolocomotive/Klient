@@ -53,13 +53,15 @@ class SchoolInfoCard extends StatelessWidget {
             if (_info.illustration != null)
               Hero(
                 tag: _info.illustration!.url,
-                child: Image(
-                    fit: BoxFit.cover,
-                    width: MediaQuery.of(context).size.width,
-                    image: CachedNetworkImageProvider(
-                      _info.illustration!.url,
-                      headers: ConfigProvider.client!.headers,
-                    )),
+                child: InteractiveViewer(
+                  child: Image(
+                      fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width,
+                      image: CachedNetworkImageProvider(
+                        _info.illustration!.url,
+                        headers: ConfigProvider.client!.headers,
+                      )),
+                ),
               ),
             Padding(
               padding: const EdgeInsets.all(16.0),
