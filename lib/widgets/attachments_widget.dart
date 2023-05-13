@@ -63,12 +63,18 @@ class AttachmentsWidget extends StatelessWidget {
               return Column(
                 children: [
                   ListTile(
+                    visualDensity: VisualDensity.compact,
                     title: Text(entry.value.name),
-                    subtitle: Text('${entry.value.size.niceSize()}o'),
-                    leading: const Icon(Icons.audio_file),
+                    subtitle: Text(
+                      '${entry.value.size.niceSize()}o',
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                    ),
+                    leading: Icon(entry.value.name.icon),
                     onTap: () => print('download'),
                   ),
-                  if (entry.key < attachments.length - 1) const Divider(),
+                  if (entry.key < attachments.length - 1) const Divider(height: 2),
                 ],
               );
             }).toList(),
