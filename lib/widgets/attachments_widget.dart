@@ -17,9 +17,17 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_cache_manager/file.dart';
+import 'package:flutter_cache_manager/flutter_cache_manager.dart';
+import 'package:klient/config_provider.dart';
 import 'package:klient/util.dart';
+import 'package:open_file/open_file.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:scolengo_api/scolengo_api.dart';
+import 'package:share_plus/share_plus.dart';
 
 import 'default_card.dart';
 
@@ -62,17 +70,8 @@ class AttachmentsWidget extends StatelessWidget {
             ...attachments.asMap().entries.map((entry) {
               return Column(
                 children: [
-                  ListTile(
-                    visualDensity: VisualDensity.compact,
-                    title: Text(entry.value.name),
-                    subtitle: Text(
-                      '${entry.value.size.niceSize()}o',
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
-                    ),
-                    leading: Icon(entry.value.name.icon),
-                    onTap: () => print('download'),
+                  AttachmentWidget(
+                    attachment: entry.value,
                   ),
                   if (entry.key < attachments.length - 1) const Divider(height: 2),
                 ],
@@ -80,5 +79,94 @@ class AttachmentsWidget extends StatelessWidget {
             }).toList(),
           ],
         ));
+  }
+}
+
+class AttachmentWidget extends StatefulWidget {
+  const AttachmentWidget({
+    Key? key,
+    required this.attachment,
+  }) : super(key: key);
+  final Attachment attachment;
+
+  @override
+  State<AttachmentWidget> createState() => _AttachmentWidgetState();
+}
+
+class _AttachmentWidgetState extends State<AttachmentWidget> {
+  bool _dowloading = false;
+  int? _progress;
+  int? _total;
+  File? _file;
+  @override
+  void initState() {
+    DefaultCacheManager().getFileFromCache(widget.attachment.url).then((value) {
+      _file = value?.file;
+      setState(() {});
+    });
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return ListTile(
+      trailing: _file == null
+          ? null
+          : IconButton(
+              icon: const Icon(Icons.share),
+              onPressed: () {
+                Share.shareXFiles([XFile(_file!.path)]);
+              },
+            ),
+      visualDensity: VisualDensity.compact,
+      title: Text(widget.attachment.name),
+      subtitle: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '${widget.attachment.size.niceSize()}o',
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.secondary,
+            ),
+          ),
+          if (_dowloading)
+            LinearProgressIndicator(
+              value: _progress == null ? null : _progress! / _total!,
+            )
+        ],
+      ),
+      leading: Icon(widget.attachment.name.icon),
+      onTap: () {
+        _dowloading = true;
+        setState(() {});
+
+        DefaultCacheManager()
+            .getFileStream(widget.attachment.url,
+                withProgress: true, headers: ConfigProvider.client!.headers)
+            .listen((response) async {
+          if (response is DownloadProgress) {
+            setState(() {
+              _progress = response.downloaded;
+              _total = response.totalSize;
+            });
+          }
+          if (response is FileInfo) {
+            _dowloading = false;
+            setState(() {});
+            final path = '${(await getExternalCacheDirectories())!.first.path}/attachments/';
+            await Directory(path).create(recursive: true);
+            _file = await response.file.copy('$path${widget.attachment.name}');
+            print(_file!.path);
+            OpenFile.open(_file!.path).then((value) => print('${value.type} ${value.message}'));
+          }
+        }).onError((e, st) {
+          _dowloading = false;
+          setState(() {});
+          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
+            content: Text('Erreur de téléchargement'),
+          ));
+        });
+      },
+    );
   }
 }
