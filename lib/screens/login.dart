@@ -19,6 +19,7 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/database_provider.dart';
 import 'package:klient/main.dart';
@@ -47,6 +48,9 @@ class LoginState extends State<Login> {
   final _searchController = TextEditingController();
 
   String _query = '';
+  bool _useLocation = false;
+
+  Stream<SkolengoResponse<List<School>>>? _data;
   LoginState();
 
   _postLogin(Database db) async {
@@ -140,55 +144,133 @@ class LoginState extends State<Login> {
           : SingleChildScrollView(
               child: Column(
                 children: [
-                  DefaultCard(
-                    child: Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: TextField(
-                            controller: _searchController,
-                            decoration:
-                                const InputDecoration(hintText: 'Rechercher un établissement'),
-                            onChanged: (value) {
-                              setState(() {
-                                _query = value;
-                              });
-                            },
-                          ),
-                        ),
-                        _query.length < 3
-                            ? Text('Entrez au moins 3 caractères',
-                                style: TextStyle(color: Theme.of(context).colorScheme.secondary))
-                            : StreamBuilder<SkolengoResponse<List<School>>>(
-                                stream: Skolengo.unauthenticated().searchSchool(_query),
-                                builder: (context, snapshot) {
-                                  if (snapshot.hasError) {
-                                    return ExceptionWidget(
-                                        e: snapshot.error!, st: snapshot.stackTrace!);
-                                  }
-                                  if (snapshot.data != null) {
-                                    List<School> schools = snapshot.data!.data;
-                                    return Column(
-                                      children: schools
-                                          .map((e) => ListTile(
-                                                title: Text(e.name),
-                                                subtitle: Text(
-                                                  '${e.addressLine1} ${e.city}',
-                                                  style: TextStyle(
-                                                    color: Theme.of(context).colorScheme.secondary,
-                                                  ),
-                                                ),
-                                                onTap: () {
-                                                  _login(e);
-                                                },
-                                              ))
-                                          .toList(),
-                                    );
-                                  }
-                                  return const CircularProgressIndicator();
+                  Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 600),
+                      child: DefaultCard(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.all(8.0),
+                              child: TextField(
+                                controller: _searchController,
+                                decoration:
+                                    const InputDecoration(hintText: 'Rechercher un établissement'),
+                                onChanged: (value) {
+                                  setState(() {
+                                    _query = value;
+                                    _useLocation = false;
+                                    if (_query.length > 3) {
+                                      _data = Skolengo.unauthenticated()
+                                          .searchSchool(value)
+                                          .asBroadcastStream();
+                                    } else {
+                                      _data = null;
+                                    }
+                                  });
                                 },
                               ),
-                      ],
+                            ),
+                            StreamBuilder<SkolengoResponse<List<School>>>(
+                              stream: _data,
+                              builder: (context, snapshot) {
+                                if (snapshot.hasError) {
+                                  return ExceptionWidget(
+                                      e: snapshot.error!, st: snapshot.stackTrace!);
+                                }
+                                if (!_useLocation && _query.length <= 3) {
+                                  return Text(
+                                    'Entrez au moins 3 caractères',
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.secondary,
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  );
+                                }
+                                if (snapshot.hasData) {
+                                  List<School> schools = snapshot.data!.data;
+                                  if (schools.isEmpty) {
+                                    return Text(
+                                      'Aucun résultat',
+                                      style: TextStyle(
+                                        color: Theme.of(context).colorScheme.secondary,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    );
+                                  }
+                                  return Column(
+                                    children: schools
+                                        .map((e) => ListTile(
+                                              title: Text(e.name),
+                                              subtitle: Text(
+                                                '${e.addressLine1} ${e.city}',
+                                                style: TextStyle(
+                                                  color: Theme.of(context).colorScheme.secondary,
+                                                ),
+                                              ),
+                                              onTap: () {
+                                                _login(e);
+                                              },
+                                            ))
+                                        .toList(),
+                                  );
+                                }
+                                return const Center(child: CircularProgressIndicator());
+                              },
+                            ),
+                            const Padding(
+                              padding: EdgeInsets.all(8.0),
+                              child: Text('Ou', textAlign: TextAlign.center),
+                            ),
+                            ElevatedButton(
+                              style: ButtonStyle(
+                                backgroundColor: MaterialStateProperty.resolveWith(
+                                  (states) => ElevationOverlay.applySurfaceTint(
+                                    Theme.of(context).colorScheme.surface,
+                                    Theme.of(context).colorScheme.primary,
+                                    3,
+                                  ),
+                                ),
+                                elevation: MaterialStateProperty.resolveWith(
+                                  (states) => 2,
+                                ),
+                              ),
+                              onPressed: () async {
+                                _data = null;
+                                _useLocation = true;
+
+                                setState(() {});
+                                bool serviceEnabled;
+                                LocationPermission permission;
+                                serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                                if (!serviceEnabled) {
+                                  throw Exception('Location services are disabled.');
+                                }
+
+                                permission = await Geolocator.checkPermission();
+                                if (permission == LocationPermission.denied) {
+                                  permission = await Geolocator.requestPermission();
+                                  if (permission == LocationPermission.denied) {
+                                    throw Exception('Location permissions are denied');
+                                  }
+                                }
+
+                                if (permission == LocationPermission.deniedForever) {
+                                  throw Exception(
+                                      'Location permissions are permanently denied, we cannot request permissions.');
+                                }
+                                final position = await Geolocator.getCurrentPosition();
+                                _data = Skolengo.unauthenticated()
+                                    .searchSchoolGPS(position.latitude, position.longitude)
+                                    .asBroadcastStream();
+                                setState(() {});
+                              },
+                              child: const Text('Utiliser la géolocalisation'),
+                            )
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                   FutureBuilder<AppInfo>(
