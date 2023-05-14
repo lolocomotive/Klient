@@ -107,6 +107,14 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
     super.initState();
   }
 
+  copy(File file) async {
+    final path = '${(await getExternalCacheDirectories())!.first.path}/attachments/';
+    await Directory(path).create(recursive: true);
+    final dest = path + widget.attachment.name;
+    if (file.path == dest) return;
+    _file = await file.copy(dest);
+  }
+
   @override
   Widget build(BuildContext context) {
     return ListTile(
@@ -114,7 +122,8 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
           ? null
           : IconButton(
               icon: const Icon(Icons.share),
-              onPressed: () {
+              onPressed: () async {
+                await copy(_file!);
                 Share.shareXFiles([XFile(_file!.path)]);
               },
             ),
@@ -153,10 +162,7 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
           if (response is FileInfo) {
             _dowloading = false;
             setState(() {});
-            final path = '${(await getExternalCacheDirectories())!.first.path}/attachments/';
-            await Directory(path).create(recursive: true);
-            _file = await response.file.copy('$path${widget.attachment.name}');
-            print(_file!.path);
+            await copy(response.file);
             OpenFile.open(_file!.path).then((value) => print('${value.type} ${value.message}'));
           }
         }).onError((e, st) {
