@@ -56,16 +56,18 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   void openConversation(BuildContext context, GlobalKey? parentKey, Communication communication) {
     if (_sideBySide) {
       setState(() {
-        /*FIXME
-         currentId = communicationId;
-        currentSubject = conversationSubject; */
+        currentId = communication.id;
+        currentSubject = communication.subject;
       });
     } else {
       Navigator.of(context).push(
         MorpheusPageRoute(
           //FIXME Builder is called twice
           builder: (_) => CommunicationPage(
-            onDelete: deleteSingleCommunication,
+            onDelete: (communication) {
+              Navigator.of(context).pop();
+              deleteSingleCommunication(communication);
+            },
             communication: communication,
           ),
           parentKey: parentKey,
@@ -83,7 +85,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
 
     bool isFirst = true;
     await for (final response in responses) {
-      _size = response.meta!['totalResourceCount'];
+      _size = response.meta?['totalResourceCount'];
       if (!mounted) return;
 
       for (final comm in response.data) {
@@ -327,6 +329,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                           _loaded = false;
                                           _page = 0;
                                           _communications = [];
+                                          currentId = null;
+                                          currentSubject = null;
                                           setState(() {});
                                           load();
                                         },
@@ -482,11 +486,14 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                 child: Text('Cliquer sur une conversation pour l\'afficher ici'))
                             : CommunicationPage(
                                 key: Key(currentId.toString()),
-                                //FIXME
                                 communication: _communications.firstWhere(
                                   (element) => element.id == currentId,
                                 ),
-                                onDelete: deleteSingleCommunication,
+                                onDelete: (comm) {
+                                  currentId = null;
+                                  currentSubject = null;
+                                  deleteSingleCommunication(comm);
+                                },
                               ),
                       )
                   ],

@@ -91,7 +91,6 @@ class _CommunicationPageState extends State<CommunicationPage> {
                         IconButton(
                             tooltip: 'Supprimer la conversation',
                             onPressed: () async {
-                              Navigator.of(context).pop();
                               await widget.onDelete(widget.communication);
                             },
                             icon: const Icon(Icons.delete))
