@@ -33,8 +33,23 @@ Stream<List<HomeworkAssignment>> getHomework() async* {
 }
 
 Stream<List<List<Evaluation>>> getGrades() async* {
-  final responses = ConfigProvider.client!
-      .getEvaluationServices(ConfigProvider.credentials!.idToken.claims.subject, '');
+  final settingsResponse = await ConfigProvider.client!
+      .getEvaluationSettings(
+        ConfigProvider.credentials!.idToken.claims.subject,
+      )
+      .first;
+
+  final responses = ConfigProvider.client!.getEvaluationServices(
+    ConfigProvider.credentials!.idToken.claims.subject,
+    settingsResponse.data.periods.firstWhere(
+      (element) =>
+          element.startDate.date().isBefore(DateTime.now()) &&
+          element.endDate.date().isAfter(DateTime.now()),
+      orElse: () {
+        return settingsResponse.data.periods.first;
+      },
+    ).id,
+  );
   await for (final response in responses) {
     final evaluations = response.data.map((e) {
       if (e is Evaluation) {
