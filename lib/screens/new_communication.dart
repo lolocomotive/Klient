@@ -48,10 +48,14 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
   List<Contact> _ccRecipients = [];
   List<Contact> _bccRecipients = [];
   Stream<SkolengoResponse<UsersMailSettings>>? _mailSettings;
+  String? _signature;
   @override
   void initState() {
     _mailSettings = ConfigProvider.client!
         .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject);
+    _mailSettings!.first.then((value) => setState(() {
+          _signature = value.data.signature.content;
+        }));
     super.initState();
   }
 
@@ -206,20 +210,21 @@ class _NewCommunicationPageState extends State<NewCommunicationPage> {
                           ],
                         ),
                         if (_appendSignature)
-                          StreamBuilder<SkolengoResponse<UsersMailSettings>>(
-                            builder: (context, snapshot) {
-                              if (snapshot.hasError) {
-                                return ExceptionWidget(
-                                    e: snapshot.error!, st: snapshot.stackTrace!);
-                              } else if (snapshot.hasData) {
-                                return CustomHtml(data: snapshot.data!.data.signature.content);
+                          Builder(
+                            builder: (context) {
+                              if (_signature != null) {
+                                return CustomHtml(data: _signature!);
                               } else {
-                                return const DelayedProgressIndicator(
-                                  delay: Duration(milliseconds: 500),
+                                return const Center(
+                                  child: Padding(
+                                    padding: EdgeInsets.all(8.0),
+                                    child: DelayedProgressIndicator(
+                                      delay: Duration(milliseconds: 500),
+                                    ),
+                                  ),
                                 );
                               }
                             },
-                            stream: _mailSettings,
                           ),
                         ElevatedButton.icon(
                           onPressed: send,
