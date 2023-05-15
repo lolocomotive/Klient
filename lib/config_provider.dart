@@ -36,6 +36,7 @@ class ConfigProvider {
   //TODO rewrite this with proper getters/setters
   static FlutterSecureStorage? _storage;
   static String? username;
+  static Future<String>? currentlySelectedId;
   static bool? compact;
   static Credential? credentials;
   static School? school;

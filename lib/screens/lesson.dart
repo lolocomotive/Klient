@@ -44,8 +44,9 @@ class _LessonPageState extends State<LessonPage> {
   Stream<SkolengoResponse<Lesson>>? _data;
   @override
   void initState() {
-    _data = ConfigProvider.client!
-        .getLesson(ConfigProvider.credentials!.idToken.claims.subject, widget._lesson.id);
+    ConfigProvider.currentlySelectedId!.then((id) {
+      _data = ConfigProvider.client!.getLesson(id, widget._lesson.id);
+    });
     super.initState();
   }
 

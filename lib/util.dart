@@ -138,6 +138,12 @@ extension HtmlUtils on String {
           .replaceAll(RegExp(r'^\s+'), '');
 }
 
+Future<String> getStudentId(Skolengo client) async {
+  final response =
+      await client.getUserInfo(ConfigProvider.credentials!.idToken.claims.subject).first;
+  return response.data.students?.first.id ?? ConfigProvider.credentials!.idToken.claims.subject;
+}
+
 Skolengo createClient() {
   final client = Skolengo.fromCredentials(
     ConfigProvider.credentials!,
@@ -145,6 +151,7 @@ Skolengo createClient() {
     cacheProvider: KlientApp.cache,
     debug: kDebugMode,
   );
+  ConfigProvider.currentlySelectedId = getStudentId(client);
   ConfigProvider.credentials!.onTokenChanged.listen((event) {
     ConfigProvider.getStorage()
         .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));

@@ -281,7 +281,7 @@ class _CardContentsState extends State<_CardContents> {
                                 });
                                 final response =
                                     await ConfigProvider.client!.patchHomeworkAssignment(
-                                  ConfigProvider.credentials!.idToken.claims.subject,
+                                  await ConfigProvider.currentlySelectedId!,
                                   widget.widget._hw.id,
                                   !widget.widget._hw.done,
                                 );

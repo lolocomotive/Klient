@@ -23,7 +23,7 @@ import 'package:scolengo_api/scolengo_api.dart';
 
 Stream<List<HomeworkAssignment>> getHomework() async* {
   final results = (ConfigProvider.client!.getHomeworkAssignments(
-    ConfigProvider.credentials!.idToken.claims.subject,
+    await ConfigProvider.currentlySelectedId!,
     DateTime.now().toIso8601String().substring(0, 10),
     DateTime.now().add(const Duration(days: 14)).toIso8601String().substring(0, 10),
   ));
@@ -35,12 +35,15 @@ Stream<List<HomeworkAssignment>> getHomework() async* {
 Stream<List<List<Evaluation>>> getGrades() async* {
   final settingsResponse = await ConfigProvider.client!
       .getEvaluationSettings(
-        ConfigProvider.credentials!.idToken.claims.subject,
+        await ConfigProvider.currentlySelectedId!,
       )
       .first;
-
+  if (settingsResponse.data.periods.isEmpty) {
+    yield [];
+    return;
+  }
   final responses = ConfigProvider.client!.getEvaluationServices(
-    ConfigProvider.credentials!.idToken.claims.subject,
+    await ConfigProvider.currentlySelectedId!,
     settingsResponse.data.periods.firstWhere(
       (element) =>
           element.startDate.date().isBefore(DateTime.now()) &&

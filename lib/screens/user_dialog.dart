@@ -36,17 +36,39 @@ class _UserDialogState extends State<UserDialog> {
                 padding: const EdgeInsets.all(8.0),
                 child: StreamBuilder<SkolengoResponse<User>>(
                     stream: ConfigProvider.client!
-                        .getUserInfo(ConfigProvider.client!.credentials!.idToken.claims.subject),
+                        .getUserInfo(ConfigProvider.credentials!.idToken.claims.subject),
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
+                        final students = snapshot.data!.data.students;
                         return DefaultTransition(
                           animate: !loaded,
                           child: Builder(builder: (context) {
                             loaded = true;
-                            return Text(
-                              snapshot.data!.data.fullName,
-                              style:
-                                  TextStyle(fontSize: MediaQuery.of(context).textScaleFactor * 30),
+                            return Column(
+                              children: [
+                                Text(
+                                  snapshot.data!.data.fullName,
+                                  style: TextStyle(
+                                      fontSize: MediaQuery.of(context).textScaleFactor * 30),
+                                ),
+                                if (students != null && students.length > 1)
+                                  DefaultCard(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                                      children: students
+                                          .map((student) => UserWidget(student, () {
+                                                ConfigProvider.currentlySelectedId =
+                                                    Future.value(student.id);
+                                                setState(() {});
+                                                Navigator.of(context).pop();
+                                                if (widget.onUpdate != null) {
+                                                  widget.onUpdate!();
+                                                }
+                                              }))
+                                          .toList(),
+                                    ),
+                                  ),
+                              ],
                             );
                           }),
                         );
@@ -57,25 +79,6 @@ class _UserDialogState extends State<UserDialog> {
                       }
                     }),
               ),
-              /* TODO rewrite this 
-              if (Client.students.length > 1)
-                DefaultCard(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      ...Client.students
-                          .map((student) => UserWidget(student, () {
-                                Client.currentlySelected = student;
-                                setState(() {});
-                                Navigator.of(context).pop();
-                                if (widget.onUpdate != null) {
-                                  widget.onUpdate!();
-                                }
-                              }))
-                          .toList(),
-                    ],
-                  ),
-                ), */
               DefaultCard(
                 child: Column(
                   children: [
@@ -164,13 +167,17 @@ class UserWidget extends StatelessWidget {
             ]),
             Positioned.fill(
               child: IgnorePointer(
-                child: AnimatedOpacity(
-                  opacity: /*user.id == Client.currentlySelected!.uid ? 1 : 0*/ 1,
-                  duration: const Duration(milliseconds: 300),
-                  child: Container(
-                    color: Theme.of(context).highlightColor,
-                  ),
-                ),
+                child: FutureBuilder<String>(
+                    future: ConfigProvider.currentlySelectedId,
+                    builder: (context, snapshot) {
+                      return AnimatedOpacity(
+                        opacity: user.id == snapshot.data ? 1 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        child: Container(
+                          color: Theme.of(context).highlightColor,
+                        ),
+                      );
+                    }),
               ),
             ),
           ],
