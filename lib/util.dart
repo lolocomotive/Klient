@@ -21,6 +21,7 @@ import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/widgets/exception_widget.dart';
@@ -138,10 +139,16 @@ extension HtmlUtils on String {
           .replaceAll(RegExp(r'^\s+'), '');
 }
 
-Future<String> getStudentId(Skolengo client) async {
-  final response =
-      await client.getUserInfo(ConfigProvider.credentials!.idToken.claims.subject).first;
-  return response.data.students?.first.id ?? ConfigProvider.credentials!.idToken.claims.subject;
+Future<String> _getStudentId(Skolengo client) async {
+  final user = await ConfigProvider.user!;
+  if (user.students != null && user.students!.isNotEmpty) {
+    switchUser(user.students!.first);
+  }
+  return user.students?.first.id ?? ConfigProvider.credentials!.idToken.claims.subject;
+}
+
+Future<User> _getUser(Skolengo client) async {
+  return (await client.getUserInfo(ConfigProvider.credentials!.idToken.claims.subject).first).data;
 }
 
 Skolengo createClient() {
@@ -151,7 +158,8 @@ Skolengo createClient() {
     cacheProvider: KlientApp.cache,
     debug: kDebugMode,
   );
-  ConfigProvider.currentlySelectedId = getStudentId(client);
+  ConfigProvider.user = _getUser(client);
+  ConfigProvider.currentId = _getStudentId(client);
   ConfigProvider.credentials!.onTokenChanged.listen((event) {
     ConfigProvider.getStorage()
         .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));

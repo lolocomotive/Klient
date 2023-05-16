@@ -74,7 +74,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
 
   Stream<List<List<Lesson>>> _getCalendar() async* {
     final responses = ConfigProvider.client!.getAgendas(
-      await ConfigProvider.currentlySelectedId!,
+      await ConfigProvider.currentId!,
       startDate: DateTime.now().add(const Duration(days: -2)),
       endDate: DateTime.now().add(
         const Duration(days: 14),

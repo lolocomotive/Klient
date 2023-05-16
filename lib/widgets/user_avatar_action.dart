@@ -31,18 +31,14 @@ class _UserAvatarActionState extends State<UserAvatarAction> {
         );
       },
       borderRadius: BorderRadius.circular(1000),
-      child: StreamBuilder<SkolengoResponse<User>>(
-          stream: ConfigProvider.client!
-              .getUserInfo(ConfigProvider.client!.credentials!.idToken.claims.subject),
+      child: FutureBuilder<User>(
+          future: ConfigProvider.user,
           builder: (context, snapshot) {
             if (snapshot.hasData) {
-              return DefaultTransition(
-                  animate: !loaded,
-                  child: Builder(builder: (context) {
-                    loaded = true;
-                    return UserAvatar(
-                        snapshot.data!.data.firstName[0] + snapshot.data!.data.lastName[0]);
-                  }));
+              return Builder(builder: (context) {
+                loaded = true;
+                return UserAvatar(snapshot.data!.firstName[0] + snapshot.data!.lastName[0]);
+              });
             } else if (snapshot.hasError) {
               return const DefaultTransition(child: UserAvatar('ERR'));
             } else {

@@ -64,7 +64,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
         onRefresh: (() async {
           KlientApp.cache.forceRefresh = true;
           await Future.wait(<Future>[
-            getHomework().last.then((value) => _hKey.currentState?.setState(() {})),
+            getHomework().last.then((_) => _hKey.currentState?.setState(() {})),
             getGrades().last.then((_) => _gKey.currentState?.setState(() {})),
             ConfigProvider.client!
                 .getSchoolInfos()
@@ -92,9 +92,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                        const SectionTitle('Dernières notes'),
-                        // if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
                         GradeList(key: _gKey),
                       ],
                     ),
@@ -116,9 +113,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                 children: [
                   const SectionTitle('Travail à faire'),
                   HomeworkListWrapper(key: _hKey),
-                  //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                  const SectionTitle('Dernières notes'),
-                  //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
                   GradeList(key: _gKey),
                   const SectionTitle('Actualités'),
                   ArticleList(key: _aKey),
@@ -134,9 +128,6 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     children: [
                       const SectionTitle('Travail à faire'),
                       HomeworkListWrapper(key: _hKey),
-                      //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
-                      const SectionTitle('Dernières notes'),
-                      //if (Client.currentlySelected!.permissions.contains('vsc-notes-consulter'))
                       GradeList(key: _gKey),
                     ],
                   ),
@@ -221,58 +212,95 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
   bool loaded = false;
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder<List<List<Evaluation>>>(
-        stream: getGrades(),
+    return FutureBuilder<User>(
+        future: ConfigProvider.user,
         builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Padding(
-              padding: EdgeInsets.all(8.0),
-              child: Center(
-                child: DelayedProgressIndicator(
-                  delay: Duration(milliseconds: 500),
-                ),
+          if (snapshot.hasError) {
+            return ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!);
+          }
+          if (!snapshot.hasData) {
+            return const Center(
+              child: DelayedProgressIndicator(
+                delay: Duration(milliseconds: 500),
               ),
             );
-          } else if (snapshot.hasError) {
-            return DefaultCard(
-                child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!));
           }
-          return DefaultTransition(
-            animate: !loaded,
-            child: Builder(builder: (context) {
-              loaded = true;
-              return snapshot.data!.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(
-                          child: Text(
-                        'Rien à afficher',
-                        style: TextStyle(color: Theme.of(context).colorScheme.secondary),
-                      )),
-                    )
-                  : SizedBox(
-                      child: Column(
-                        children: snapshot.data!
-                            .map(
-                              (twoGrades) => Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  EvaluationCard(
-                                    twoGrades[0],
-                                    compact: ConfigProvider.compact!,
-                                  ),
-                                  if (twoGrades.length > 1)
-                                    EvaluationCard(
-                                      twoGrades[1],
-                                      compact: ConfigProvider.compact!,
-                                    )
-                                ],
-                              ),
-                            )
-                            .toList(),
-                      ),
+          print('[Permissions] for: ${ConfigProvider.currentSchool}');
+          for (final permission in snapshot.data!.permissions!) {
+            if (permission.schoolId == ConfigProvider.currentSchool) {
+              print('[Permission] service: ${permission.service}');
+              print('[Permission] operations: ${permission.permittedOperations}');
+            } else {
+              print('not school ${permission.schoolId} != ${ConfigProvider.currentSchool}');
+            }
+          }
+          if (snapshot.data!.permissions!
+              .where(
+                (permission) =>
+                    permission.schoolId == ConfigProvider.school!.id &&
+                    permission.service == 'EVAL' &&
+                    permission.permittedOperations.contains('READ_EVALUATIONS'),
+              )
+              .isEmpty) return Container();
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const SectionTitle('Dernières notes'),
+              StreamBuilder<List<List<Evaluation>>>(
+                  stream: getGrades(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: Center(
+                          child: DelayedProgressIndicator(
+                            delay: Duration(milliseconds: 500),
+                          ),
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return DefaultCard(
+                          child: ExceptionWidget(e: snapshot.error!, st: snapshot.stackTrace!));
+                    }
+                    return DefaultTransition(
+                      animate: !loaded,
+                      child: Builder(builder: (context) {
+                        loaded = true;
+                        return snapshot.data!.isEmpty
+                            ? Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: Center(
+                                    child: Text(
+                                  'Rien à afficher',
+                                  style: TextStyle(color: Theme.of(context).colorScheme.secondary),
+                                )),
+                              )
+                            : SizedBox(
+                                child: Column(
+                                  children: snapshot.data!
+                                      .map(
+                                        (twoGrades) => Row(
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            EvaluationCard(
+                                              twoGrades[0],
+                                              compact: ConfigProvider.compact!,
+                                            ),
+                                            if (twoGrades.length > 1)
+                                              EvaluationCard(
+                                                twoGrades[1],
+                                                compact: ConfigProvider.compact!,
+                                              )
+                                          ],
+                                        ),
+                                      )
+                                      .toList(),
+                                ),
+                              );
+                      }),
                     );
-            }),
+                  }),
+            ],
           );
         });
   }

@@ -43,9 +43,8 @@ class _ContactsPageState extends State<ContactsPage> {
   Stream<SkolengoResponse<UsersMailSettings>>? _data;
   @override
   void initState() {
-    ConfigProvider.currentlySelectedId!.then((id) async {
-      _data =
-          ConfigProvider.client!.getUsersMailSettings(await ConfigProvider.currentlySelectedId!);
+    ConfigProvider.currentId!.then((id) async {
+      _data = ConfigProvider.client!.getUsersMailSettings(await ConfigProvider.currentId!);
     });
     super.initState();
   }

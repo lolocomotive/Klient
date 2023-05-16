@@ -112,10 +112,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
 
   Future<void> refresh() async {
     KlientApp.cache.forceRefresh = true;
-    _settings = (await ConfigProvider.client!
-            .getUsersMailSettings(await ConfigProvider.currentlySelectedId!)
-            .last)
-        .data;
+    _settings =
+        (await ConfigProvider.client!.getUsersMailSettings(await ConfigProvider.currentId!).last)
+            .data;
     await load();
     KlientApp.cache.forceRefresh = false;
   }
@@ -517,7 +516,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
       await ConfigProvider.client!.patchCommunicationFolders(
         comm.id,
         [_settings!.folders.firstWhere((element) => element.folderType == FolderType.TRASH)],
-        await ConfigProvider.currentlySelectedId!,
+        await ConfigProvider.currentId!,
       );
       _communications.remove(comm);
     } catch (_) {}

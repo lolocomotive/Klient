@@ -19,7 +19,6 @@
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 import 'package:klient/database_provider.dart';
 import 'package:klient/util.dart';
 import 'package:scolengo_api/scolengo_api.dart';

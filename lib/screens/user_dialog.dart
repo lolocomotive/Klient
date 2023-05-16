@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/screens/debug.dart';
@@ -34,12 +35,11 @@ class _UserDialogState extends State<UserDialog> {
             children: [
               Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: StreamBuilder<SkolengoResponse<User>>(
-                    stream: ConfigProvider.client!
-                        .getUserInfo(ConfigProvider.credentials!.idToken.claims.subject),
+                child: FutureBuilder<User>(
+                    future: ConfigProvider.user,
                     builder: (context, snapshot) {
                       if (snapshot.hasData) {
-                        final students = snapshot.data!.data.students;
+                        final students = snapshot.data!.students;
                         return DefaultTransition(
                           animate: !loaded,
                           child: Builder(builder: (context) {
@@ -47,7 +47,7 @@ class _UserDialogState extends State<UserDialog> {
                             return Column(
                               children: [
                                 Text(
-                                  snapshot.data!.data.fullName,
+                                  snapshot.data!.fullName,
                                   style: TextStyle(
                                       fontSize: MediaQuery.of(context).textScaleFactor * 30),
                                 ),
@@ -56,10 +56,11 @@ class _UserDialogState extends State<UserDialog> {
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.stretch,
                                       children: students
-                                          .map((student) => UserWidget(student, () {
-                                                ConfigProvider.currentlySelectedId =
-                                                    Future.value(student.id);
+                                          .map((student) => UserWidget(student, () async {
+                                                final f = switchUser(student);
                                                 setState(() {});
+                                                await f;
+                                                if (!mounted) return;
                                                 Navigator.of(context).pop();
                                                 if (widget.onUpdate != null) {
                                                   widget.onUpdate!();
@@ -168,7 +169,7 @@ class UserWidget extends StatelessWidget {
             Positioned.fill(
               child: IgnorePointer(
                 child: FutureBuilder<String>(
-                    future: ConfigProvider.currentlySelectedId,
+                    future: ConfigProvider.currentId,
                     builder: (context, snapshot) {
                       return AnimatedOpacity(
                         opacity: user.id == snapshot.data ? 1 : 0,
