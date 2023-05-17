@@ -117,7 +117,7 @@ class _TimetablePageState extends State<TimetablePage> with TickerProviderStateM
       child: RefreshIndicator(
         onRefresh: () async {
           KlientApp.cache.forceRefresh = true;
-          _getCalendar();
+          await _getCalendar().last;
           KlientApp.cache.forceRefresh = false;
           loaded = false;
           setState(() {});

@@ -47,6 +47,8 @@ class _CommunicationPageState extends State<CommunicationPage> {
   bool _transitionDone = false;
   List<Participation>? _participations;
 
+  Future<void>? _transition;
+
   @override
   void initState() {
     super.initState();
@@ -56,11 +58,17 @@ class _CommunicationPageState extends State<CommunicationPage> {
   load() async {
     final responses =
         ConfigProvider.client!.getCommunicationParticipations(widget.communication.id);
+    bool isFirst = true;
     await for (final response in responses) {
       if (!mounted) return;
+      if (!isFirst) {
+        await _transition;
+      } else {
+        delayTransitionDone();
+      }
+      isFirst = false;
       setState(() {
         _participations = response.data;
-        delayTransitionDone();
       });
     }
   }
@@ -69,9 +77,8 @@ class _CommunicationPageState extends State<CommunicationPage> {
     setState(() {
       _transitionDone = false;
     });
-    Future.delayed(const Duration(milliseconds: 400)).then((_) {
-      _transitionDone = true;
-    });
+    _transition = Future.delayed(const Duration(milliseconds: 400))
+      ..then((_) => _transitionDone = true);
   }
 
   @override

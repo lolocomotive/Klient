@@ -225,15 +225,7 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
               ),
             );
           }
-          print('[Permissions] for: ${ConfigProvider.currentSchool}');
-          for (final permission in snapshot.data!.permissions!) {
-            if (permission.schoolId == ConfigProvider.currentSchool) {
-              print('[Permission] service: ${permission.service}');
-              print('[Permission] operations: ${permission.permittedOperations}');
-            } else {
-              print('not school ${permission.schoolId} != ${ConfigProvider.currentSchool}');
-            }
-          }
+
           if (snapshot.data!.permissions!
               .where(
                 (permission) =>

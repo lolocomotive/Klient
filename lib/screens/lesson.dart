@@ -46,6 +46,7 @@ class _LessonPageState extends State<LessonPage> {
   void initState() {
     ConfigProvider.currentId!.then((id) {
       _data = ConfigProvider.client!.getLesson(id, widget._lesson.id);
+      setState(() {});
     });
     super.initState();
   }
@@ -86,12 +87,6 @@ class _LessonPageState extends State<LessonPage> {
                   ],
                 ),
               ),
-              /* TODO implement lessonContent display
-              HomeworkList(
-                _lesson.exercises.where((e) => e.type == ExerciseType.lessonContent).toList(),
-                'Contenu de la séance',
-                color,
-              ), */
               StreamBuilder<SkolengoResponse<Lesson>>(
                   stream: _data,
                   builder: (context, snapshot) {
