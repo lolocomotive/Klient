@@ -45,6 +45,7 @@ class _ContactsPageState extends State<ContactsPage> {
   void initState() {
     ConfigProvider.currentId!.then((id) async {
       _data = ConfigProvider.client!.getUsersMailSettings(await ConfigProvider.currentId!);
+      setState(() {});
     });
     super.initState();
   }
