@@ -108,7 +108,7 @@ class ConfigProvider {
       getStorage().delete(key: key);
     } else if (value is String) {
       getStorage().write(key: key, value: value);
-    } else if (value is bool) {
+    } else if (value is bool || value is num) {
       getStorage().write(key: key, value: value.toString());
     } else if (value is Enum) {
       getStorage().write(key: key, value: value.name);
