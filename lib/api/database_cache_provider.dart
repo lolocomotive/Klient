@@ -30,6 +30,7 @@ class DatabaseCacheProvider extends CacheProvider {
 
   ///Set this to true to ignore the cache.
   bool forceRefresh = false;
+  bool forceNetwork = false;
 
   init() async {
     final stopwatch = Stopwatch()..start();
@@ -79,6 +80,7 @@ class DatabaseCacheProvider extends CacheProvider {
 
   @override
   Future<bool> useNetwork(String key) async {
+    if (forceNetwork) return true;
     if (!(await useCache(key))) return true;
 
     //Use cache if offline

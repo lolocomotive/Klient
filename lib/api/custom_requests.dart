@@ -32,7 +32,7 @@ Stream<List<HomeworkAssignment>> getHomework() async* {
   }
 }
 
-Stream<List<List<Evaluation>>> getGrades() async* {
+Stream<List<Evaluation>> getEvaluations() async* {
   try {
     final settingsResponse = await ConfigProvider.client!
         .getEvaluationSettings(
@@ -64,24 +64,16 @@ Stream<List<List<Evaluation>>> getGrades() async* {
           throw Exception('Unknown evalutation type: ${e.runtimeType}');
         }
       });
-      final evaluationsExpanded = <Evaluation>[];
+      final r = <Evaluation>[];
       for (final e in evaluations) {
         if (e is List<Evaluation>) {
-          evaluationsExpanded.addAll(e);
+          r.addAll(e);
         } else if (e is Evaluation) {
-          evaluationsExpanded.add(e);
+          r.add(e);
         }
       }
-      evaluationsExpanded.sort((a, b) => b.date.date().compareTo(a.date.date()));
+      r.sort((a, b) => b.date.date().compareTo(a.date.date()));
 
-      List<List<Evaluation>> r = [];
-      for (int i = 0; i < evaluationsExpanded.length; i++) {
-        if (i % 2 == 0) {
-          r.add([evaluationsExpanded[i]]);
-        } else {
-          r[(i / 2).floor()].add(evaluationsExpanded[i]);
-        }
-      }
       yield r;
     }
   } on Exception catch (e) {
@@ -94,6 +86,33 @@ Stream<List<List<Evaluation>>> getGrades() async* {
     } else {
       rethrow;
     }
+  }
+}
+
+Stream<List<List<Evaluation>>> getEvaluationsAsTable() async* {
+  final results = getEvaluations();
+  await for (final evaluations in results) {
+    List<List<Evaluation>> r = [];
+    for (int i = 0; i < evaluations.length; i++) {
+      if (i % 2 == 0) {
+        r.add([evaluations[i]]);
+      } else {
+        r[(i / 2).floor()].add(evaluations[i]);
+      }
+    }
+    yield r;
+  }
+}
+
+Stream<List<SchoolInfo>> getSchoolInfos() async* {
+  await for (final response in ConfigProvider.client!.getSchoolInfos()) {
+    yield response.data;
+  }
+}
+
+Stream<List<Communication>> getUnread(String folderId) async* {
+  await for (final response in ConfigProvider.client!.getCommunicationsFromFolder(folderId)) {
+    yield response.data.where((element) => !element.read!).toList();
   }
 }
 

@@ -56,18 +56,17 @@ class DatabaseProvider {
 
     final dbPath = '$dbDir/klient.db';
 
-    final password = ConfigProvider.dbPassword ??
+    ConfigProvider.dbPassword = ConfigProvider.dbPassword ??
         base64Url.encode(List<int>.generate(32, (i) => Random.secure().nextInt(256)));
-    ConfigProvider.getStorage().write(key: 'dbPassword', value: password);
     try {
-      _database = await openDB(dbPath, password);
+      _database = await openDB(dbPath, ConfigProvider.dbPassword!);
     } on DatabaseException catch (e, st) {
       // Delete database if password is wrong
       debugPrint(e.toString());
       debugPrintStack(stackTrace: st);
       print('Deleting database');
       await deleteDb(dbPath);
-      _database = await openDB(dbPath, password);
+      _database = await openDB(dbPath, ConfigProvider.dbPassword!);
     }
   }
 

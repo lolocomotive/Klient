@@ -22,6 +22,7 @@ import 'dart:io';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
+import 'package:klient/api/background_tasks.dart';
 import 'package:klient/api/database_cache_provider.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/notifications_provider.dart';
@@ -34,11 +35,9 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('FR_fr');
   await ConfigProvider.load();
-  //await Client.getCurrentlySelected();
 
-  //TODO fix Background fetch
-  //await initPlatformState();
-  //registerTasks();
+  await initPlatformState();
+  registerTasks();
   KlientApp.cache = DatabaseCacheProvider();
   final stopwatch = Stopwatch()..start();
   await KlientApp.cache.init();

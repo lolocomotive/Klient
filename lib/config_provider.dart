@@ -32,26 +32,92 @@ import 'package:klient/widgets/color_picker.dart';
 import 'package:openid_client/openid_client.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
+enum NotificationType { messages, evaluations, info, homework }
+
 class ConfigProvider {
-  //TODO rewrite this with proper getters/setters
   static FlutterSecureStorage? _storage;
+
   static String? username;
   static Future<String>? currentId;
   static Future<User>? user;
   static String? currentSchool;
-  static bool? compact;
-  static Credential? credentials;
-  static School? school;
-  static bool? notifMsgEnabled;
-  static Brightness? enforcedBrightness;
-  static bool demo = false;
   static ColorScheme? lightDynamic;
   static ColorScheme? darkDynamic;
-  static Color? enforcedColor;
+  static bool? compact;
   static Skolengo? client;
-  static String? dbPassword;
-
   static late HSLColor bgColor;
+
+  static Credential? _credentials;
+  static Credential? get credentials => _credentials;
+  static set credentials(Credential? value) {
+    _credentials = value;
+    setValue('credentials', value);
+  }
+
+  static School? _school;
+  static School? get school => _school;
+  static set school(School? value) {
+    _school = value;
+    setValue('school', value);
+  }
+
+  static const disabled = {
+    NotificationType.messages: false,
+    NotificationType.evaluations: false,
+    NotificationType.info: false,
+    NotificationType.homework: false,
+  };
+  static Map<NotificationType, bool>? _notificationSettings;
+  static Map<NotificationType, bool>? get notificationSettings => _notificationSettings;
+  static set notificationSettings(Map<NotificationType, bool>? value) {
+    _notificationSettings = value;
+    setValue('notifications', value?.map((key, value) => MapEntry(key.name, value)));
+  }
+
+  static Brightness? _enforcedBrightness;
+  static Brightness? get enforcedBrightness => _enforcedBrightness;
+  static set enforcedBrightness(Brightness? value) {
+    _enforcedBrightness = value;
+    setValue('display.enforcedBrightness', value);
+  }
+
+  static bool _demo = false;
+  static bool get demo => _demo;
+  static set demo(bool value) {
+    _demo = value;
+    setValue('demoMode', value);
+  }
+
+  static Color? _enforcedColor;
+  static Color? get enforcedColor => _enforcedColor;
+  static set enforcedColor(Color? value) {
+    _enforcedColor = value;
+    setValue(
+        'display.enforcedColor', value == null ? -1 : ColorPickerPageState.colors.indexOf(value));
+  }
+
+  static String? _dbPassword;
+  static String? get dbPassword => _dbPassword;
+  static set dbPassword(String? value) {
+    _dbPassword = value;
+    setValue('dbPassword', value);
+  }
+
+  static setValue(String key, dynamic value) {
+    if (value == null) {
+      getStorage().delete(key: key);
+    } else if (value is String) {
+      getStorage().write(key: key, value: value);
+    } else if (value is bool) {
+      getStorage().write(key: key, value: value.toString());
+    } else if (value is Enum) {
+      getStorage().write(key: key, value: value.name);
+    } else if (value is Map) {
+      getStorage().write(key: key, value: jsonEncode(value));
+    } else {
+      getStorage().write(key: key, value: jsonEncode(value.toJson()));
+    }
+  }
 
   static setTheme() {
     Color primary =
@@ -95,34 +161,31 @@ class ConfigProvider {
     );
   }
 
-  static setMessageNotifications(bool value, Function callback) {
-    if (value == true) {
+  static setNotifications(bool value, Function callback, NotificationType notificationType) {
+    if (value) {
       if (Platform.isLinux) {
-        notifMsgEnabled = true;
-        getStorage()
-            .write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
+        _notificationSettings![notificationType] = true;
         callback();
+      } else {
+        FlutterLocalNotificationsPlugin()
+            .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
+            .requestPermission()
+            .then((success) {
+          if (success == true) {
+            _notificationSettings![notificationType] = true;
+          } else {
+            _notificationSettings![notificationType] = false;
+          }
+          callback();
+          notificationSettings = _notificationSettings;
+        });
         return;
       }
-
-      FlutterLocalNotificationsPlugin()
-          .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
-          .requestPermission()
-          .then((success) {
-        if (success == true) {
-          notifMsgEnabled = true;
-        } else {
-          notifMsgEnabled = false;
-        }
-        getStorage()
-            .write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
-        callback();
-      });
     } else {
-      notifMsgEnabled = false;
-      getStorage().write(key: 'notifications.messages', value: notifMsgEnabled! ? 'true' : 'false');
+      _notificationSettings![notificationType] = false;
       callback();
     }
+    notificationSettings = _notificationSettings;
   }
 
   static FlutterSecureStorage getStorage() {
@@ -168,43 +231,32 @@ class ConfigProvider {
             }
             break;
           case 'display.enforcedBrightness':
-            enforcedBrightness = value == 'light'
-                ? Brightness.light
-                : value == 'dark'
-                    ? Brightness.dark
-                    : null;
+            enforcedBrightness = Brightness.values.byName(value);
             break;
-          case 'notifications.messages':
-            if (Platform.isLinux) {
-              notifMsgEnabled = value == 'true';
-              break;
+          case 'notifications':
+            _notificationSettings = Map<NotificationType, bool>.from(jsonDecode(value).map(
+              (key, value) => MapEntry(NotificationType.values.byName(key), value),
+            ));
+            if (_notificationSettings!.values.contains(true)) {
+              FlutterLocalNotificationsPlugin()
+                  .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
+                  .areNotificationsEnabled()
+                  .then((enabled) {
+                if (enabled != true) {
+                  notificationSettings = Map.from(disabled);
+                }
+              });
             }
-            FlutterLocalNotificationsPlugin()
-                .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
-                .areNotificationsEnabled()
-                .then((enabled) {
-              notifMsgEnabled = value == 'true' && enabled == true;
-            });
             break;
           case 'lessonColors':
             ColorProvider.init(value);
         }
       });
+      notificationSettings ??= Map.from(disabled);
     } on PlatformException catch (_) {
       // Workaround for https://github.com/mogol/flutter_secure_storage/issues/43
       await getStorage().deleteAll();
       await Future.delayed(const Duration(seconds: 1));
     }
-  }
-
-  static setColor(Color? color) {
-    enforcedColor = color;
-    final int index;
-    if (color == null) {
-      index = -1;
-    } else {
-      index = ColorPickerPageState.colors.indexOf(color);
-    }
-    getStorage().write(key: 'display.enforcedColor', value: index.toString());
   }
 }

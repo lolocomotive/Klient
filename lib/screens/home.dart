@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
           KlientApp.cache.forceRefresh = true;
           await Future.wait(<Future>[
             getHomework().last.then((_) => _hKey.currentState?.setState(() {})),
-            getGrades().last.then((_) => _gKey.currentState?.setState(() {})),
+            getEvaluationsAsTable().last.then((_) => _gKey.currentState?.setState(() {})),
             ConfigProvider.client!
                 .getSchoolInfos()
                 .last
@@ -229,7 +229,8 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
           if (snapshot.data!.permissions!
               .where(
                 (permission) =>
-                    permission.schoolId == ConfigProvider.school!.id &&
+                    permission.schoolId ==
+                        (ConfigProvider.currentSchool ?? ConfigProvider.school!.id) &&
                     permission.service == 'EVAL' &&
                     permission.permittedOperations.contains('READ_EVALUATIONS'),
               )
@@ -239,7 +240,7 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
             children: [
               const SectionTitle('Dernières notes'),
               StreamBuilder<List<List<Evaluation>>>(
-                  stream: getGrades(),
+                  stream: getEvaluationsAsTable(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Padding(

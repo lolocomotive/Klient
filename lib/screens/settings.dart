@@ -58,16 +58,53 @@ class _SettingsPageState extends State<SettingsPage> {
                   ),
                   tiles: <SettingsTile>[
                     SettingsTile.switchTile(
-                      initialValue: ConfigProvider.notifMsgEnabled,
+                      initialValue: ConfigProvider.notificationSettings![NotificationType.messages],
                       onToggle: (value) {
-                        ConfigProvider.setMessageNotifications(value, () {
+                        ConfigProvider.setNotifications(value, () {
                           setState(() {});
-                        });
+                        }, NotificationType.messages);
                       },
                       leading: const Icon(Icons.message_outlined),
                       title: const Text('Messagerie'),
                       description:
                           const Text('Recevoir une notification quand il y a un nouveau message'),
+                    ),
+                    SettingsTile.switchTile(
+                      initialValue:
+                          ConfigProvider.notificationSettings![NotificationType.evaluations],
+                      onToggle: (value) {
+                        ConfigProvider.setNotifications(value, () {
+                          setState(() {});
+                        }, NotificationType.evaluations);
+                      },
+                      leading: const Icon(Icons.auto_graph_outlined),
+                      title: const Text('Dernières notes'),
+                      description:
+                          const Text('Recevoir une notification quand il y a une nouvelle note'),
+                    ),
+                    SettingsTile.switchTile(
+                      initialValue: ConfigProvider.notificationSettings![NotificationType.homework],
+                      onToggle: (value) {
+                        ConfigProvider.setNotifications(value, () {
+                          setState(() {});
+                        }, NotificationType.homework);
+                      },
+                      leading: const Icon(Icons.today_outlined),
+                      title: const Text('Travail à faire'),
+                      description: const Text(
+                          'Recevoir une notification quand un travail à faire est ajouté'),
+                    ),
+                    SettingsTile.switchTile(
+                      initialValue: ConfigProvider.notificationSettings![NotificationType.info],
+                      onToggle: (value) {
+                        ConfigProvider.setNotifications(value, () {
+                          setState(() {});
+                        }, NotificationType.info);
+                      },
+                      leading: const Icon(Icons.newspaper),
+                      title: const Text('Actualités'),
+                      description:
+                          const Text('Recevoir une notification quand une actualité est publiée'),
                     ),
                   ],
                 ),
@@ -128,8 +165,6 @@ class _SettingsPageState extends State<SettingsPage> {
                                         )),
                                   ],
                                   onChanged: (dynamic value) {
-                                    ConfigProvider.getStorage()
-                                        .write(key: 'display.enforcedBrightness', value: value);
                                     ConfigProvider.enforcedBrightness = value == 'light'
                                         ? Brightness.light
                                         : value == 'dark'
@@ -154,7 +189,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               ColorPicker(
                                 color: ConfigProvider.enforcedColor,
                                 onChange: (color) {
-                                  ConfigProvider.setColor(color);
+                                  ConfigProvider.enforcedColor = color;
                                   KlientState.currentState!.setState(() {});
                                 },
                               )
@@ -232,7 +267,6 @@ class _CompactSelectorState extends State<CompactSelector> {
                 borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   setState(() {
-                    ConfigProvider.getStorage().write(key: 'display.compact', value: 'false');
                     ConfigProvider.compact = false;
                   });
                 },
@@ -270,7 +304,6 @@ class _CompactSelectorState extends State<CompactSelector> {
                 borderRadius: BorderRadius.circular(8),
                 onTap: () {
                   setState(() {
-                    ConfigProvider.getStorage().write(key: 'display.compact', value: 'true');
                     ConfigProvider.compact = true;
                   });
                 },

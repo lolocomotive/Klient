@@ -16,7 +16,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
@@ -54,7 +53,6 @@ class LoginState extends State<Login> {
   LoginState();
 
   _postLogin(Database db) async {
-    await ConfigProvider.getStorage().write(key: 'firstTime', value: 'true');
     await _resetDb(db);
     widget.onLogin();
     await KlientApp.cache.init();
@@ -93,10 +91,6 @@ class LoginState extends State<Login> {
 
     ConfigProvider.credentials = await authenticator.authorize();
     ConfigProvider.school = school;
-
-    ConfigProvider.getStorage()
-      ..write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()))
-      ..write(key: 'school', value: jsonEncode(ConfigProvider.school!.toJson()));
 
     _postLogin(await DatabaseProvider.getDB());
 

@@ -16,39 +16,58 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
-/* TODO rewrite this
 import 'dart:io';
+import 'dart:math';
 
 import 'package:background_fetch/background_fetch.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:html_unescape/html_unescape.dart';
+import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
-import 'package:klient/database_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/notifications_provider.dart';
+import 'package:klient/util.dart';
+import 'package:scolengo_api/scolengo_api.dart';
 
 void backgroundFetchHeadlessTask(HeadlessTask task) async {
   String taskId = task.taskId;
   bool isTimeout = task.timeout;
-  print('Starting headless Task $taskId');
+  print('[Background Task $taskId] Start');
   if (isTimeout) {
-    print('[BackgroundFetch] Headless task timed-out: $taskId');
+    print('[Background Task $taskId] Headless task timed-out: $taskId');
     BackgroundFetch.finish(taskId);
     return;
   }
+  process(taskId);
+}
+
+process(String taskId) async {
   try {
-    String? token = await ConfigProvider.getStorage().read(key: 'token');
-    if (token != null && token != '') {
-      print('Logging in');
-      Client(token);
-      print('Fetching data');
-      await Downloader.downloadAll();
-      print('Showing notifications');
-      await showNotifications();
+    if (ConfigProvider.client == null) {
+      await ConfigProvider.load();
     }
+    if (ConfigProvider.credentials == null) {
+      print('[Background Task $taskId] Not logged in, exiting');
+      BackgroundFetch.finish(taskId);
+      return;
+    }
+    print('[Background Task $taskId] Checking connectivity...');
+    if (await Connectivity().checkConnectivity() == ConnectivityResult.none) {
+      print('[Background Task $taskId] No connectivity, exiting');
+      BackgroundFetch.finish(taskId);
+      return;
+    }
+    print('[Background Task $taskId] Logging in...');
+    KlientApp.cache.forceNetwork = true;
+    ConfigProvider.client = createClient();
+    await ConfigProvider.client!.getAppCurrentConfig().last;
+    print('[Background Task $taskId] Fetching data...');
+    await showNotifications();
   } catch (_, st) {
     print(_.toString());
     print(st.toString());
   } finally {
+    KlientApp.cache.forceNetwork = false;
     BackgroundFetch.finish(taskId);
   }
 }
@@ -72,50 +91,124 @@ Future<void> initPlatformState() async {
         forceAlarmManager: false,
         requiredNetworkType: NetworkType.ANY,
       ), (String taskId) async {
-    print('[BackgroundFetch] Event #received $taskId');
-    await Downloader.downloadAll();
-    await showNotifications();
+    process(taskId);
     BackgroundFetch.finish(taskId);
   }, (String taskId) async {
-    print('[BackgroundFetch] TASK TIMEOUT taskId: $taskId');
+    print('[Background Task $taskId] TASK TIMEOUT');
     BackgroundFetch.finish(taskId);
   });
-  print('[BackgroundFetch] configure success: $status');
+  print('[Background Tasks] configure success: $status');
 }
 
-Future<void> showNotifications() async {
-  if (ConfigProvider.notifMsgEnabled!) {
-    const AndroidNotificationDetails msgChannel = AndroidNotificationDetails(
-      'channel-msg',
-      'channel-msg',
-      channelDescription: 'The channel for displaying messages',
-      importance: Importance.max,
-      priority: Priority.high,
-    );
-    const NotificationDetails msgDetails = NotificationDetails(android: msgChannel);
-    List<Conversation> convs = (await Conversation.fetchAll());
+Future<void> showNotificationsCategory<T extends BaseResponse>(
+    String id, String description, Stream<List<T>> data, NotificationBuilder<T> build) async {
+  final channel = AndroidNotificationDetails(
+    id,
+    id,
+    channelDescription: description,
+    importance: Importance.max,
+    priority: Priority.high,
+  );
+  final details = NotificationDetails(android: channel);
+  print('[Background@showNotifications:$id] Getting cache...');
+  final cached = await data.first;
+  print('[Background@showNotifications:$id] Getting network...');
+  final real = await data.last;
+  print('[Background@showNotifications:$id] Comparing cache with network data...');
 
-    convs = convs.where((conv) => !conv.read).where((conv) => !conv.notificationShown).toList();
-    if (convs.isEmpty) {
-      print('Showing no message notifications');
-    } else {
-      print('Message notifications to show:');
-      print(convs.map((e) => e.subject).toList());
-    }
-    for (var i = 0; i < convs.length; i++) {
-      Conversation conv = convs[i];
-      (await DatabaseProvider.getDB()).update('Conversations', {'NotificationShown': 1},
-          where: 'ID = ?', whereArgs: [conv.id.toString()]);
+  for (var i = 0; i < real.length; i++) {
+    if (cached.where((element) => element.id == real[i].id).isEmpty) {
+      final notification = build(real[i]);
       await (await NotificationsProvider.getNotifications()).show(
-        conv.id,
-        '${conv.lastAuthor} - ${conv.subject}',
-        HtmlUnescape().convert(conv.preview),
-        msgDetails,
-        payload: 'conv-${conv.id}',
+        notification.id,
+        notification.title,
+        notification.body,
+        details,
+        payload: notification.payload,
       );
     }
-  } else {
-    print('Message notifications disabled');
   }
 }
-*/
+
+class Notification {
+  final int id;
+  final String title;
+  final String body;
+  final String payload;
+
+  Notification(this.id, this.title, this.body, this.payload);
+}
+
+typedef NotificationBuilder<T> = Notification Function(T data);
+
+Future<void> showNotifications() async {
+  if (ConfigProvider.notificationSettings![NotificationType.messages] ?? false) {
+    print('[Background@showNotifications:messages] Getting settings...');
+    final folderId = (await ConfigProvider.client!
+            .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+            .first)
+        .data
+        .folders
+        .firstWhere((folder) => folder.folderType == FolderType.INBOX)
+        .id;
+
+    await showNotificationsCategory<Communication>(
+      'messages',
+      'The channel for displaying new messages',
+      getUnread(folderId).asBroadcastStream(),
+      (comm) => Notification(
+        int.parse(comm.id),
+        '${comm.lastParticipation?.sender?.label ?? comm.lastParticipation?.sender?.person?.fullName ?? 'Auteur inconnu'} - ${comm.subject}',
+        comm.lastParticipation?.content.innerText ?? 'Aucun contenu',
+        'comm-${comm.id}',
+      ),
+    );
+  } else {
+    print('[Background@showNotifications:messages] Message notifications disabled');
+  }
+  if (ConfigProvider.notificationSettings![NotificationType.evaluations] ?? false) {
+    await showNotificationsCategory<Evaluation>(
+      'eval',
+      'The channel for displaying new evaluations',
+      getEvaluations().asBroadcastStream(),
+      (eval) => Notification(
+        Random().nextInt(1000000),
+        'Nouvelle note - ${eval.subject.label}',
+        '${eval.result.mark ?? eval.result.nonEvaluationReason}/${eval.scale ?? 20}',
+        'eval-${eval.id}',
+      ),
+    );
+  } else {
+    print('[Background@showNotifications:eval] Evaluation notifications disabled');
+  }
+  if (ConfigProvider.notificationSettings![NotificationType.info] ?? false) {
+    await showNotificationsCategory<SchoolInfo>(
+      'info',
+      'The channel for displaying new school infos',
+      getSchoolInfos().asBroadcastStream(),
+      (info) => Notification(
+        Random().nextInt(100000),
+        info.title,
+        info.content.innerText,
+        'eval-${info.id}',
+      ),
+    );
+  } else {
+    print('[Background@showNotifications:schoolinfo] Evaluation notifications disabled');
+  }
+  if (ConfigProvider.notificationSettings![NotificationType.homework] ?? false) {
+    await showNotificationsCategory<HomeworkAssignment>(
+      'homework',
+      'The channel for displaying new homework assignments',
+      getHomework().asBroadcastStream(),
+      (homework) => Notification(
+        Random().nextInt(100000),
+        homework.title,
+        homework.html.innerText,
+        'eval-${homework.id}',
+      ),
+    );
+  } else {
+    print('[Background@showNotifications:homework] Evaluation notifications disabled');
+  }
+}

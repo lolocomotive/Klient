@@ -17,8 +17,6 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'dart:convert';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:klient/api/custom_requests.dart';
@@ -161,8 +159,7 @@ Skolengo createClient() {
   ConfigProvider.user = _getUser(client);
   ConfigProvider.currentId = _getStudentId(client);
   ConfigProvider.credentials!.onTokenChanged.listen((event) {
-    ConfigProvider.getStorage()
-        .write(key: 'credentials', value: jsonEncode(ConfigProvider.credentials!.toJson()));
+    ConfigProvider.credentials = ConfigProvider.credentials;
     client.headers['Authorization'] =
         'Bearer ${TokenResponse.fromJson(ConfigProvider.credentials!.response!).accessToken}';
   });
