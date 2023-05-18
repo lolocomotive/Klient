@@ -41,32 +41,37 @@ class CustomHtml extends StatelessWidget {
       )
     };
     return Html(
-      data: data.replaceAll(
-          RegExp(r'<p[^>]*>\s*<\/p>|<head>[\s\S]*?<\/head>', caseSensitive: false, multiLine: true),
-          ''),
-      // Remove empty paragraphs and head tag
       // Empty paragraphs take up too much space.
-      // Head tag is removed as a workaround for https://github.com/Sub6Resources/flutter_html/issues/1227
+      data: data.replaceAll(RegExp(r'<p[^>]*>\s*<\/p>', caseSensitive: false, multiLine: true), ''),
       style: defaultStyle..addAll(style),
-      onLinkTap: (url, context, attributes, element) {
+      onLinkTap: (url, context, element) {
         launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
       },
-      customRenders: {
-        networkImageMatcher(): CustomRender.widget(
-            widget: (context, buildChildren) => InteractiveViewer(
-                  child: CachedNetworkImage(
-                    imageUrl: context.tree.element!.attributes['src']!,
-                    progressIndicatorBuilder: (context, url, progress) => Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Center(child: CircularProgressIndicator(value: progress.progress)),
-                    ),
-                  ),
-                ))
-      },
+      extensions: [CachedImageRenderer()],
     );
   }
+}
 
-  CustomRenderMatcher networkImageMatcher() => (context) =>
-      context.tree.element?.localName == 'img' &&
-      context.tree.element?.attributes.containsKey('src') == true;
+class CachedImageRenderer extends HtmlExtension {
+  @override
+  Set<String> get supportedTags => {'img'};
+  @override
+  bool matches(context) =>
+      context.attributes.containsKey('src') && !context.attributes['src']!.startsWith('data:');
+
+  @override
+  InlineSpan build(
+      ExtensionContext context, Map<StyledElement, InlineSpan> Function() parseChildren) {
+    return WidgetSpan(
+      child: InteractiveViewer(
+        child: CachedNetworkImage(
+          imageUrl: context.attributes['src']!,
+          progressIndicatorBuilder: (context, url, progress) => Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Center(child: CircularProgressIndicator(value: progress.progress)),
+          ),
+        ),
+      ),
+    );
+  }
 }
