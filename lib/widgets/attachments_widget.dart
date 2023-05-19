@@ -63,7 +63,9 @@ class AttachmentsWidget extends StatelessWidget {
             Text(
               'Pièces jointes',
               style: TextStyle(
-                color: Theme.of(context).colorScheme.primary,
+                color:
+                    (Theme.of(context).brightness == Brightness.light ? color : color?.shade200) ??
+                        Theme.of(context).colorScheme.primary,
                 fontWeight: FontWeight.bold,
               ),
             ),
