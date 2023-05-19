@@ -21,6 +21,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
+import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
 import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
@@ -68,6 +69,30 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      '${widget._info.author?.fullName ?? 'Auteur inconnu'} - ${widget._info.publicationDateTime.format()}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.primary,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      widget._info.school.name,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               if (widget._info.illustration != null)
                 Hero(
                   tag: widget._info.illustration!.url,

@@ -20,7 +20,7 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
-import 'package:klient/screens/article.dart';
+import 'package:klient/screens/school_info.dart';
 import 'package:klient/util.dart';
 import 'package:morpheus/morpheus.dart';
 import 'package:scolengo_api/scolengo_api.dart';
@@ -88,6 +88,15 @@ class SchoolInfoCard extends StatelessWidget {
                   Text(
                     _info.title,
                   ),
+                  if (_info.content.innerText != '')
+                    Text(
+                      _info.content.innerText,
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    )
                 ],
               ),
             ),
