@@ -91,7 +91,7 @@ class _DefaultTransitionState extends State<DefaultTransition> with TickerProvid
     }
     return widget.animate
         ? ScaleTransition(
-            scale: Tween(begin: 1.05, end: 1.0).animate(_scaleAnimation),
+            scale: Tween(begin: 1.0, end: 1.0).animate(_scaleAnimation),
             child: FadeTransition(
               opacity: Tween(begin: 0.0, end: 1.0).animate(_fadeAnimation),
               child: widget.child,

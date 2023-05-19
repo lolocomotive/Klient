@@ -43,7 +43,6 @@ class ParticipationCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print('rebuilding participation card ${participation.id}');
     final MaterialColor? color =
         participation.sender?.person?.id.color ?? participation.sender?.technicalUser?.id.color;
     return AnimatedSize(
@@ -76,7 +75,7 @@ class ParticipationCard extends StatelessWidget {
                         style: TextStyle(
                             fontSize: 14,
                             color: Theme.of(context).brightness == Brightness.light
-                                ? color
+                                ? HSLColor.fromColor(color!.shade100).withLightness(.4).toColor()
                                 : color?.shade200,
                             fontWeight: FontWeight.bold),
                       ),
@@ -86,7 +85,7 @@ class ParticipationCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 14,
                         color: Theme.of(context).brightness == Brightness.light
-                            ? color
+                            ? HSLColor.fromColor(color!.shade100).withLightness(.4).toColor()
                             : color?.shade200,
                       ),
                     ),

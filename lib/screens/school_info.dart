@@ -69,6 +69,20 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              if (widget._info.illustration != null)
+                Hero(
+                  tag: widget._info.id,
+                  child: InteractiveViewer(
+                    child: Image(
+                      fit: BoxFit.cover,
+                      width: MediaQuery.of(context).size.width,
+                      image: CachedNetworkImageProvider(
+                        widget._info.illustration!.url,
+                        headers: ConfigProvider.client!.headers,
+                      ),
+                    ),
+                  ),
+                ),
               Padding(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -93,20 +107,6 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
                   ],
                 ),
               ),
-              if (widget._info.illustration != null)
-                Hero(
-                  tag: widget._info.illustration!.url,
-                  child: InteractiveViewer(
-                    child: Image(
-                      fit: BoxFit.cover,
-                      width: MediaQuery.of(context).size.width,
-                      image: CachedNetworkImageProvider(
-                        widget._info.illustration!.url,
-                        headers: ConfigProvider.client!.headers,
-                      ),
-                    ),
-                  ),
-                ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: CustomHtml(

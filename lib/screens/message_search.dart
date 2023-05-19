@@ -18,9 +18,7 @@
  */
 
 import 'package:flutter/material.dart' hide Action;
-import 'package:klient/screens/communication.dart';
 import 'package:klient/widgets/communication_card.dart';
-import 'package:morpheus/morpheus.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class MessagesSearchDelegate extends SearchDelegate {
@@ -136,16 +134,17 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                             ),
                           ),
                           onTap: () {
-                            Navigator.of(context).push(
-                              MorpheusPageRoute(
-                                transitionToChild: true,
-                                builder: (_) => CommunicationPage(
-                                  onDelete: widget.onDelete,
-                                  communication: _communications![index],
-                                ),
-                                parentKey: parentKey,
-                              ),
-                            );
+                            //FIXME
+                            //Navigator.of(context).push(
+                            //  MorpheusPageRoute(
+                            //    transitionToChild: true,
+                            //    builder: (_) => CommunicationPage(
+                            //      onDelete: widget.onDelete,
+                            //      communication: _communications![index],
+                            //    ),
+                            //    parentKey: parentKey,
+                            //  ),
+                            //);
                           });
                     },
                     separatorBuilder: (context, index) {

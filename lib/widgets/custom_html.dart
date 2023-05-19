@@ -22,7 +22,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_html/flutter_html.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class CustomHtml extends StatelessWidget {
+class CustomHtml extends StatefulWidget {
   final String data;
   final Map<String, Style> style;
 
@@ -33,6 +33,14 @@ class CustomHtml extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  State<CustomHtml> createState() => _CustomHtmlState();
+}
+
+class _CustomHtmlState extends State<CustomHtml> {
+  Widget? _cache;
+  String? _oldData;
+
+  @override
   Widget build(BuildContext context) {
     final Map<String, Style> defaultStyle = {
       'a': Style(
@@ -40,15 +48,20 @@ class CustomHtml extends StatelessWidget {
         color: Theme.of(context).colorScheme.primary,
       )
     };
-    return Html(
-      // Empty paragraphs take up too much space.
-      data: data.replaceAll(RegExp(r'<p[^>]*>\s*<\/p>', caseSensitive: false, multiLine: true), ''),
-      style: defaultStyle..addAll(style),
-      onLinkTap: (url, context, element) {
-        launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
-      },
-      extensions: [CachedImageRenderer()],
-    );
+    //HACK: This keeps the HTML from being reparsed each frame during animations.
+    _cache = _oldData != widget.data || _cache == null
+        ? Html(
+            // Empty paragraphs take up too much space.
+            data: widget.data
+                .replaceAll(RegExp(r'<p[^>]*>\s*<\/p>', caseSensitive: false, multiLine: true), ''),
+            style: defaultStyle..addAll(widget.style),
+            onLinkTap: (url, context, element) {
+              launchUrl(Uri.parse(url!), mode: LaunchMode.externalApplication);
+            },
+            extensions: [CachedImageRenderer()],
+          )
+        : _cache;
+    return _cache!;
   }
 }
 

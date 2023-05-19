@@ -17,6 +17,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
@@ -102,7 +103,20 @@ class MainState extends State<Main> {
           });
         },
       ),
-      body: currentWidget,
+      body: PageTransitionSwitcher(
+        transitionBuilder: (
+          child,
+          primaryAnimation,
+          secondaryAnimation,
+        ) {
+          return FadeThroughTransition(
+            animation: primaryAnimation,
+            secondaryAnimation: secondaryAnimation,
+            child: child,
+          );
+        },
+        child: currentWidget,
+      ),
       backgroundColor: ConfigProvider.bgColor.toColor(),
     );
   }

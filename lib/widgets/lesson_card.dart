@@ -19,13 +19,13 @@
 
 import 'dart:math';
 
+import 'package:animations/animations.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/api/color_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/screens/lesson.dart';
 import 'package:klient/screens/timetable.dart';
 import 'package:klient/util.dart';
-import 'package:morpheus/morpheus.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 extension IsLong on Lesson {
@@ -73,147 +73,150 @@ class LessonCard extends StatelessWidget {
               .inMinutes *
           (compact ? Values.compactHeightPerMinute : Values.heightPerMinute) *
           MediaQuery.of(context).textScaleFactor,
-      child: Card(
-        surfaceTintColor: _lesson.subject.id.color.tint(context),
-        shadowColor: _lesson.subject.id.color.shadow(context),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
-        clipBehavior: Clip.antiAlias,
-        child: CustomPaint(
-          painter: _lesson.canceled ? StripesPainter(_lesson.subject.id.color) : null,
-          child: InkWell(
-            onTap: () {
-              if (!positionned) return;
-              Navigator.of(context).push(
-                MorpheusPageRoute(
-                  builder: (_) => LessonPage(_lesson),
-                  parentKey: _key,
-                ),
-              );
-            },
-            key: _key,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                if (!compact)
-                  Container(
-                    padding: const EdgeInsets.all(8.0),
-                    color: _lesson.subject.id.color.shade200,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        Flexible(
-                          child: Text(
-                            _lesson.title,
-                            overflow: TextOverflow.ellipsis,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black,
+      child: OpenContainer(
+        backgroundColor: Colors.black26,
+        closedColor: Colors.transparent,
+        openColor: Colors.transparent,
+        openElevation: 0,
+        closedElevation: 0,
+        openBuilder: (context, action) => LessonPage(_lesson),
+        closedBuilder: (context, action) => Card(
+          surfaceTintColor: _lesson.subject.id.color.tint(context),
+          shadowColor: _lesson.subject.id.color.shadow(context),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(8),
+          ),
+          clipBehavior: Clip.antiAlias,
+          child: CustomPaint(
+            painter: _lesson.canceled ? StripesPainter(_lesson.subject.id.color) : null,
+            child: InkWell(
+              onTap: () {
+                if (!positionned) return;
+                action();
+              },
+              key: _key,
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  if (!compact)
+                    Container(
+                      padding: const EdgeInsets.all(8.0),
+                      color: _lesson.subject.id.color.shade200,
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              _lesson.title,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                              ),
                             ),
                           ),
-                        ),
-                        //FIXME not in new API ?
-                        //if (_lesson.modified)
-                        //  Text(
-                        //    _lesson.modificationMessage!,
-                        //    style: const TextStyle(color: Colors.black),
-                        //  ),
-                      ],
-                    ),
-                  ),
-                if (compact)
-                  Expanded(
-                    child: Container(
-                      decoration: BoxDecoration(
-                          border: Border(
-                              left:
-                                  BorderSide(color: _lesson.subject.id.color.shade200, width: 6))),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                //FIXME not in new API?
-                                //if (_lesson.isModified)
-                                //  Padding(
-                                //    padding: const EdgeInsets.only(right: 4.0),
-                                //    child: Tooltip(
-                                //        message: _lesson.modificationMessage ?? 'Cours modifié',
-                                //        child: Icon(
-                                //          Icons.info_outline,
-                                //          size: MediaQuery.of(context).textScaleFactor * 18,
-                                //        )),
-                                //  ),
-                                Text(
-                                  '${_lesson.title} ',
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Flexible(
-                                    child: Text(
-                                  _lesson.location,
-                                  overflow: TextOverflow.ellipsis,
-                                )),
-                              ],
-                            ),
-                            //if (_lesson.length > 1 && _lesson.isModified)
-                            //  Text(_lesson.modificationMessage!),
-                            if (_lesson.isLong || !hasIcons)
-                              Text(_lesson.teachers?.map((e) => e.fullName).join(', ') ?? ''),
-                            if (_lesson.isLong)
-                              Text(
-                                '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',
-                              ),
-                            Flexible(child: iconsRow)
-                          ],
-                        ),
+                          //FIXME not in new API ?
+                          //if (_lesson.modified)
+                          //  Text(
+                          //    _lesson.modificationMessage!,
+                          //    style: const TextStyle(color: Colors.black),
+                          //  ),
+                        ],
                       ),
                     ),
-                  )
-                else
-                  Expanded(
-                    child: Stack(
-                      children: [
-                        Center(
+                  if (compact)
+                    Expanded(
+                      child: Container(
+                        decoration: BoxDecoration(
+                            border: Border(
+                                left: BorderSide(
+                                    color: _lesson.subject.id.color.shade200, width: 6))),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
-                                child: Text(
-                                  _lesson.location,
-                                  textAlign: TextAlign.center,
-                                ),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  //FIXME not in new API?
+                                  //if (_lesson.isModified)
+                                  //  Padding(
+                                  //    padding: const EdgeInsets.only(right: 4.0),
+                                  //    child: Tooltip(
+                                  //        message: _lesson.modificationMessage ?? 'Cours modifié',
+                                  //        child: Icon(
+                                  //          Icons.info_outline,
+                                  //          size: MediaQuery.of(context).textScaleFactor * 18,
+                                  //        )),
+                                  //  ),
+                                  Text(
+                                    '${_lesson.title} ',
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Flexible(
+                                      child: Text(
+                                    _lesson.location,
+                                    overflow: TextOverflow.ellipsis,
+                                  )),
+                                ],
                               ),
-                              Padding(
-                                padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
-                                child: Text(
+                              //if (_lesson.length > 1 && _lesson.isModified)
+                              //  Text(_lesson.modificationMessage!),
+                              if (_lesson.isLong || !hasIcons)
+                                Text(_lesson.teachers?.map((e) => e.fullName).join(', ') ?? ''),
+                              if (_lesson.isLong)
+                                Text(
                                   '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',
-                                  textAlign: TextAlign.center,
                                 ),
-                              ),
+                              Flexible(child: iconsRow)
                             ],
                           ),
                         ),
-                        Column(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: iconsRow,
+                      ),
+                    )
+                  else
+                    Expanded(
+                      child: Stack(
+                        children: [
+                          Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
+                                  child: Text(
+                                    _lesson.location,
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.fromLTRB(8.0, 0, 8.0, 8.0),
+                                  child: Text(
+                                    '${_lesson.startDateTime.hm()} - ${_lesson.endDateTime.hm()}',
+                                    textAlign: TextAlign.center,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
-                        )
-                      ],
-                    ),
-                  )
-              ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.all(8.0),
+                                child: iconsRow,
+                              ),
+                            ],
+                          )
+                        ],
+                      ),
+                    )
+                ],
+              ),
             ),
           ),
         ),

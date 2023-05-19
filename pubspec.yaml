@@ -45,10 +45,6 @@ dependencies:
     package_info_plus: ^4.0.0
     expandable: ^5.0.1
     dynamic_color: ^1.6.0
-    morpheus:
-        git:
-            url: https://github.com/lolocomotive/morpheus
-            ref: 587d07abc9b3da6612147fb5a4335e09567cc1e7
     # The following adds the Cupertino Icons font to your application.
     # Use with the CupertinoIcons class for iOS style icons.
     # cupertino_icons: ^1.0.2
@@ -62,6 +58,11 @@ dependencies:
     open_file: ^3.3.1
     share_plus: ^7.0.0
     geolocator: ^9.0.2
+    animations:
+        git:
+            url: https://github.com/lolocomotive/packages
+            ref: b22562b41a0a721b974de281527b25c03e1161c9
+            path: packages/animations
 
 dev_dependencies:
     flutter_test:
