@@ -18,6 +18,7 @@
  */
 
 import 'package:flutter/material.dart';
+import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/new_communication.dart';
 import 'package:klient/screens/timetable.dart';
@@ -52,6 +53,7 @@ class MainState extends State<Main> {
       default:
         currentWidget = TimetablePage(key: GlobalKey());
     }
+
     return Scaffold(
       floatingActionButton: currentWidget is MessagesPage
           ? FloatingActionButton(
@@ -73,8 +75,8 @@ class MainState extends State<Main> {
             label: 'Accueil',
           ),
           NavigationDestination(
-            icon: FutureBuilder<int>(
-                future: /*Conversation.unreadCount()*/ Future.value(0), //TODO rewrite this
+            icon: StreamBuilder<int>(
+                stream: unreadCount().asBroadcastStream(),
                 builder: (context, snapshot) {
                   return Badge(
                     textColor: Theme.of(context).colorScheme.background,

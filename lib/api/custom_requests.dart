@@ -116,6 +116,19 @@ Stream<List<Communication>> getUnread(String folderId) async* {
   }
 }
 
+Stream<int> unreadCount() async* {
+  final folderId = (await ConfigProvider.client!
+          .getUsersMailSettings(ConfigProvider.credentials!.idToken.claims.subject)
+          .first)
+      .data
+      .folders
+      .firstWhere((folder) => folder.folderType == FolderType.INBOX)
+      .id;
+  await for (final unread in getUnread(folderId).asBroadcastStream()) {
+    yield unread.length;
+  }
+}
+
 switchUser(User student) async {
   if (student.school != null) {
     ConfigProvider.client!.headers['X-Skolengo-School-Id'] = student.school!.id;
