@@ -43,9 +43,15 @@ class ConfigProvider {
   static String? currentSchool;
   static ColorScheme? lightDynamic;
   static ColorScheme? darkDynamic;
-  static bool? compact;
   static Skolengo? client;
   static late HSLColor bgColor;
+
+  static bool? _compact;
+  static bool? get compact => _compact;
+  static set compact(bool? value) {
+    _compact = value;
+    setValue('display.compact', value);
+  }
 
   static Credential? _credentials;
   static Credential? get credentials => _credentials;
