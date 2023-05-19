@@ -334,3 +334,13 @@ extension FileIcon on String {
     }
   }
 }
+
+class KeyProvider {
+  static final Map<String, GlobalKey> _keys = {};
+  static GlobalKey get(String id) {
+    if (!_keys.containsKey(id)) {
+      _keys[id] = GlobalKey();
+    }
+    return _keys[id]!;
+  }
+}

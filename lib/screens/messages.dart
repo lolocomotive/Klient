@@ -52,7 +52,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   int _page = 0;
   final int _pageSize = 20;
   bool _transitionDone = false;
-  Future<void>? _transition;
 
   void openConversation(BuildContext context, GlobalKey? parentKey, Communication communication) {
     if (_sideBySide) {
@@ -99,9 +98,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
         // because there could have been other responses in between
         _communications.sort((a, b) =>
             b.lastParticipation!.dateTime.date().compareTo(a.lastParticipation!.dateTime.date()));
-
-        // This keeps the animation from being played twice
-        await _transition;
       } else if (!transitionned) {
         transitionned = true;
         delayTransitionDone();
@@ -126,8 +122,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
     setState(() {
       _transitionDone = false;
     });
-    _transition = Future.delayed(const Duration(milliseconds: 400))
-      ..then((_) => _transitionDone = true);
+    Future.delayed(const Duration(milliseconds: 400)).then((_) => _transitionDone = true);
   }
 
   static MessagesPageState? currentState;

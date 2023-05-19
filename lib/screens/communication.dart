@@ -22,7 +22,7 @@ import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/default_activity.dart';
-import 'package:klient/widgets/participation_widget.dart';
+import 'package:klient/widgets/participation_card.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class CommunicationPage extends StatefulWidget {
@@ -43,26 +43,22 @@ class _CommunicationPageState extends State<CommunicationPage> {
   bool _transitionDone = false;
   List<Participation>? _participations;
 
-  Future<void>? _transition;
-
   @override
   void initState() {
     super.initState();
+    if (widget.communication.lastParticipation != null) {
+      _participations = [widget.communication.lastParticipation!];
+      delayTransitionDone();
+    }
     load();
   }
 
   load() async {
     final responses =
         ConfigProvider.client!.getCommunicationParticipations(widget.communication.id);
-    bool isFirst = true;
     await for (final response in responses) {
       if (!mounted) return;
-      if (!isFirst) {
-        await _transition;
-      } else {
-        delayTransitionDone();
-      }
-      isFirst = false;
+
       setState(() {
         _participations = response.data;
       });
@@ -73,8 +69,7 @@ class _CommunicationPageState extends State<CommunicationPage> {
     setState(() {
       _transitionDone = false;
     });
-    _transition = Future.delayed(const Duration(milliseconds: 400))
-      ..then((_) => _transitionDone = true);
+    Future.delayed(const Duration(milliseconds: 400)).then((_) => _transitionDone = true);
   }
 
   @override
@@ -137,13 +132,13 @@ class _CommunicationPageState extends State<CommunicationPage> {
                                   child: const Text('Répondre à tous')),
                             );
                           }
-                          final parentKey = GlobalKey();
                           final participation = _participations![index];
                           return ParticipationCard(
                             transitionDone: _transitionDone,
-                            parentKey: parentKey,
                             participation: participation,
                             index: index,
+                            key: KeyProvider.get(participation.id),
+                            sizeKey: KeyProvider.get('${participation.id}-size'),
                           );
                         },
                       ),
