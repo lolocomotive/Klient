@@ -31,7 +31,7 @@ class EvaluationCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final MaterialColor color = ColorProvider.getColor(_evaluation.subject.id);
     final titleRow = Row(
-      mainAxisAlignment: compact ? MainAxisAlignment.start : MainAxisAlignment.spaceAround,
+      mainAxisAlignment: compact ? MainAxisAlignment.spaceBetween : MainAxisAlignment.spaceAround,
       children: [
         Flexible(
           child: Text(
