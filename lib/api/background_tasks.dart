@@ -73,12 +73,12 @@ process(String taskId) async {
 }
 
 registerTasks() {
-  if (Platform.isLinux) return;
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) return;
   BackgroundFetch.registerHeadlessTask(backgroundFetchHeadlessTask);
 }
 
 Future<void> initPlatformState() async {
-  if (Platform.isLinux) return;
+  if (Platform.isLinux || Platform.isWindows || Platform.isMacOS) return;
   int status = await BackgroundFetch.configure(
       BackgroundFetchConfig(
         minimumFetchInterval: 15,

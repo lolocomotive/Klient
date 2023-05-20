@@ -45,6 +45,7 @@ class Login extends StatefulWidget {
 
 class LoginState extends State<Login> {
   late final WebViewController _controller;
+  late final Webview _webview;
   bool _showBrowser = false;
 
   final _searchController = TextEditingController();
@@ -92,20 +93,17 @@ class LoginState extends State<Login> {
     urlLauncher(String url) async {
       setState(() {});
       if (isDesktop) {
-        final webview = await WebviewWindow.create(
+        _webview = await WebviewWindow.create(
             configuration: const CreateConfiguration(
           title: 'Se connecter',
           titleBarHeight: 40,
-          windowHeight: 1080,
-          windowWidth: 1920,
           titleBarTopPadding: 0,
         ));
-        webview.launch(url);
-        webview.addOnUrlRequestCallback((url) {
+        _webview.launch(url);
+        _webview.addOnUrlRequestCallback((url) {
           print(url);
           if (url.startsWith('skoapp-prod://')) {
-            webview.launch(url.replaceAll('skoapp-prod://', 'http://localhost:3000/'));
-            webview.close();
+            _webview.launch(url.replaceAll('skoapp-prod://', 'http://localhost:3000/'));
           }
         });
       } else {
@@ -122,6 +120,10 @@ class LoginState extends State<Login> {
 
     ConfigProvider.credentials = await authenticator.authorize();
     ConfigProvider.school = school;
+
+    if (isDesktop) {
+      _webview.close();
+    }
 
     _postLogin(await DatabaseProvider.getDB());
 
