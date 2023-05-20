@@ -21,6 +21,7 @@ import 'dart:ui';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:klient/config_provider.dart';
 
 class BlurImage extends StatelessWidget {
   final String url;
@@ -44,6 +45,7 @@ class BlurImage extends StatelessWidget {
           child: ColorFiltered(
             colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.srcATop),
             child: CachedNetworkImage(
+              httpHeaders: ConfigProvider.client!.headers,
               imageUrl: url,
               fit: BoxFit.cover,
               width: MediaQuery.of(context).size.width,
@@ -63,6 +65,7 @@ class BlurImage extends StatelessWidget {
             ],
           ),
           child: CachedNetworkImage(
+            httpHeaders: ConfigProvider.client!.headers,
             imageUrl: url,
             fit: BoxFit.contain,
           ),
