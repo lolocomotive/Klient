@@ -454,9 +454,12 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                               _selection.add(index);
                                                               setState(() {});
                                                             } else {
-                                                              action();
-                                                              openConversation(context, parentKey,
-                                                                  _communications[index]);
+                                                              if (_sideBySide) {
+                                                                openConversation(context, parentKey,
+                                                                    _communications[index]);
+                                                              } else {
+                                                                action();
+                                                              }
                                                             }
                                                           },
                                                           onLongPress: () {

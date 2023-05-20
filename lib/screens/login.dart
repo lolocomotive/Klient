@@ -17,6 +17,9 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:io';
+
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:klient/config_provider.dart';
@@ -41,7 +44,7 @@ class Login extends StatefulWidget {
 }
 
 class LoginState extends State<Login> {
-  final _controller = WebViewController();
+  late final WebViewController _controller;
   bool _showBrowser = false;
 
   final _searchController = TextEditingController();
@@ -51,6 +54,23 @@ class LoginState extends State<Login> {
 
   Stream<SkolengoResponse<List<School>>>? _data;
   LoginState();
+  final isDesktop = Platform.isLinux || Platform.isWindows || Platform.isMacOS;
+  @override
+  initState() {
+    if (isDesktop) {
+    } else {
+      _controller = WebViewController();
+      _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
+      _controller.setNavigationDelegate(NavigationDelegate(onUrlChange: (change) {
+        if (change.url == null) return;
+        if (change.url!.startsWith('skoapp-prod://')) {
+          _controller.loadRequest(
+              Uri.parse(change.url!.replaceAll('skoapp-prod://', 'http://localhost:3000/')));
+        }
+      }));
+    }
+    super.initState();
+  }
 
   _postLogin(Database db) async {
     await _resetDb(db);
@@ -66,21 +86,32 @@ class LoginState extends State<Login> {
   }
 
   _login(School school) async {
-    _controller.setJavaScriptMode(JavaScriptMode.unrestricted);
-    _controller.setNavigationDelegate(NavigationDelegate(onUrlChange: (change) {
-      if (change.url == null) return;
-      if (change.url!.startsWith('skoapp-prod://')) {
-        _controller.loadRequest(
-            Uri.parse(change.url!.replaceAll('skoapp-prod://', 'http://localhost:3000/')));
-      }
-    }));
     final client = Skolengo.unauthenticated();
     final oidclient = await client.getOIDClient(school);
 
     urlLauncher(String url) async {
       setState(() {});
-      _showBrowser = true;
-      _controller.loadRequest(Uri.parse(url));
+      if (isDesktop) {
+        final webview = await WebviewWindow.create(
+            configuration: const CreateConfiguration(
+          title: 'Se connecter',
+          titleBarHeight: 40,
+          windowHeight: 1080,
+          windowWidth: 1920,
+          titleBarTopPadding: 0,
+        ));
+        webview.launch(url);
+        webview.addOnUrlRequestCallback((url) {
+          print(url);
+          if (url.startsWith('skoapp-prod://')) {
+            webview.launch(url.replaceAll('skoapp-prod://', 'http://localhost:3000/'));
+            webview.close();
+          }
+        });
+      } else {
+        _showBrowser = true;
+        _controller.loadRequest(Uri.parse(url));
+      }
     }
 
     final authenticator = Authenticator(

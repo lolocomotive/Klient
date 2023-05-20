@@ -92,7 +92,10 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        GradeList(key: _gKey),
+                        GradeList(
+                          key: _gKey,
+                          divider: false,
+                        ),
                       ],
                     ),
                   ),
@@ -203,8 +206,9 @@ class _HomeworkListWrapperState extends State<HomeworkListWrapper> with TickerPr
 class GradeList extends StatefulWidget {
   const GradeList({
     Key? key,
+    this.divider = true,
   }) : super(key: key);
-
+  final bool divider;
   @override
   State<GradeList> createState() => _GradeListState();
 }
@@ -239,7 +243,7 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const Divider(),
+              if (widget.divider) const Divider(),
               const SectionTitle('Dernières notes'),
               StreamBuilder<List<List<Evaluation>>>(
                   stream: getEvaluationsAsTable(),

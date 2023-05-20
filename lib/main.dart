@@ -19,6 +19,7 @@
 
 import 'dart:io';
 
+import 'package:desktop_webview_window/desktop_webview_window.dart';
 import 'package:dynamic_color/dynamic_color.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -31,8 +32,14 @@ import 'package:klient/util.dart';
 
 import 'screens/multiview.dart';
 
-void main() async {
+void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (runWebViewTitleBarWidget(
+    args,
+  )) {
+    return;
+  }
+
   await initializeDateFormatting('FR_fr');
   await ConfigProvider.load();
 
