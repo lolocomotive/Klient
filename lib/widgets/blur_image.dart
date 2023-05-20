@@ -36,7 +36,11 @@ class BlurImage extends StatelessWidget {
       alignment: Alignment.center,
       children: [
         ImageFiltered(
-          imageFilter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+          imageFilter: ImageFilter.blur(
+            sigmaX: 10,
+            sigmaY: 10,
+            tileMode: TileMode.mirror,
+          ),
           child: ColorFiltered(
             colorFilter: ColorFilter.mode(Colors.black.withOpacity(0.1), BlendMode.srcATop),
             child: CachedNetworkImage(
