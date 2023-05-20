@@ -114,6 +114,7 @@ class _HomePageState extends State<HomePage> with TickerProviderStateMixin {
                   const SectionTitle('Travail à faire'),
                   HomeworkListWrapper(key: _hKey),
                   GradeList(key: _gKey),
+                  const Divider(),
                   const SectionTitle('Actualités'),
                   ArticleList(key: _aKey),
                 ],
@@ -238,6 +239,7 @@ class _GradeListState extends State<GradeList> with TickerProviderStateMixin {
           return Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              const Divider(),
               const SectionTitle('Dernières notes'),
               StreamBuilder<List<List<Evaluation>>>(
                   stream: getEvaluationsAsTable(),
@@ -372,7 +374,7 @@ class SectionTitle extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(16.0, 16, 16, 8),
       child: Text(
         _title,
-        style: const TextStyle(fontSize: 20),
+        style: TextStyle(fontSize: 24 * MediaQuery.of(context).textScaleFactor),
       ),
     );
   }
@@ -414,7 +416,12 @@ class _HomeworkListState extends State<HomeworkList> {
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Afficher le travail fait'),
+                  Text(
+                    'Afficher le travail fait',
+                    style: TextStyle(
+                      fontSize: 16 * MediaQuery.of(context).textScaleFactor,
+                    ),
+                  ),
                   Switch(
                       value: _showDone,
                       onChanged: (value) {

@@ -50,7 +50,7 @@ class DefaultCard extends StatelessWidget {
       margin: const EdgeInsets.all(8.0),
       elevation: elevation ?? 1,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         side: outlined
             ? BorderSide(
                 color: outlineColor ?? Theme.of(context).colorScheme.outline,
@@ -59,7 +59,7 @@ class DefaultCard extends StatelessWidget {
       ),
       //clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(16),
         onTap: onTap,
         child: Padding(padding: padding, child: child),
       ),

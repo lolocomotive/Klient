@@ -154,7 +154,6 @@ class _CommunicationPageState extends State<CommunicationPage> {
                   Card(
                     margin: const EdgeInsets.all(8.0),
                     elevation: 1,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                     child: Padding(
                       padding: const EdgeInsets.all(8.0),
                       child: Column(

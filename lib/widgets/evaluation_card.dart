@@ -56,7 +56,7 @@ class EvaluationCard extends StatelessWidget {
           shadowColor: color.shadow(context),
           margin: const EdgeInsets.all(8.0),
           elevation: 1,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           clipBehavior: Clip.antiAlias,
           child: Container(
             decoration: compact

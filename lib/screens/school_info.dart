@@ -17,12 +17,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
 import 'package:klient/util.dart';
 import 'package:klient/widgets/attachments_widget.dart';
+import 'package:klient/widgets/blur_image.dart';
 import 'package:klient/widgets/custom_html.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/default_transition.dart';
@@ -70,21 +70,22 @@ class _SchoolInfoPageState extends State<SchoolInfoPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               if (widget._info.illustration != null)
-                Hero(
-                  tag: widget._info.id,
-                  child: InteractiveViewer(
-                    child: Image(
-                      fit: BoxFit.cover,
-                      width: MediaQuery.of(context).size.width,
-                      image: CachedNetworkImageProvider(
-                        widget._info.illustration!.url,
-                        headers: ConfigProvider.client!.headers,
-                      ),
+                ConstrainedBox(
+                  constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.width),
+                  child: Container(
+                    margin: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.surface,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: BlurImage(
+                      url: widget._info.illustration!.url,
                     ),
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [

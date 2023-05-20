@@ -126,9 +126,6 @@ class _LessonPageState extends State<LessonPage> {
                                         elevation: 4,
                                         margin: const EdgeInsets.all(8.0),
                                         clipBehavior: Clip.antiAlias,
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(8),
-                                        ),
                                         surfaceTintColor: color.tint(context),
                                         shadowColor: color.shadow(context),
                                         child: Container(

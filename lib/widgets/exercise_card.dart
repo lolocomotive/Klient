@@ -62,12 +62,26 @@ class _HomeworkCardState extends State<HomeworkCard> {
       children: [
         if (widget.showDate)
           Padding(
-            padding: const EdgeInsets.fromLTRB(16.0, 0, 16.0, 0),
-            child: Text(
-              '${widget.showSubject ? '${widget._hw.subject?.label}: ' : ''}'
-              'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
-                  ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime.date())}',
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  widget.showSubject ? '${widget._hw.subject?.label} ' : '',
+                  style: TextStyle(
+                    color: tint,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 16 * MediaQuery.of(context).textScaleFactor,
+                  ),
+                ),
+                Text(
+                  'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
+                      ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime.date())}',
+                  style: TextStyle(
+                    fontSize: 16 * MediaQuery.of(context).textScaleFactor,
+                  ),
+                ),
+              ],
             ),
           ),
         Card(
@@ -76,9 +90,6 @@ class _HomeworkCardState extends State<HomeworkCard> {
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
-          ),
           child: Container(
             decoration: widget.compact
                 ? BoxDecoration(
@@ -126,17 +137,18 @@ class _HomeworkCardState extends State<HomeworkCard> {
                         Expanded(
                           child: Row(
                             mainAxisAlignment: widget.compact
-                                ? MainAxisAlignment.start
+                                ? MainAxisAlignment.spaceBetween
                                 : MainAxisAlignment.spaceAround,
+                            crossAxisAlignment: CrossAxisAlignment.end,
                             children: [
                               Flexible(
                                 child: Text(
-                                  widget._hw.title + (widget.compact ? ' - ' : ''),
-                                  overflow: TextOverflow.ellipsis,
+                                  widget._hw.title,
+                                  overflow: TextOverflow.fade,
+                                  softWrap: false,
                                   style: TextStyle(
-                                    fontWeight: FontWeight.bold,
                                     color: widget.compact ? null : Colors.black,
-                                    fontSize: MediaQuery.of(context).textScaleFactor * 12,
+                                    fontSize: MediaQuery.of(context).textScaleFactor * 16,
                                   ),
                                 ),
                               ),

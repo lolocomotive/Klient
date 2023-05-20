@@ -18,11 +18,10 @@
  */
 
 import 'package:animations/animations.dart';
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:klient/config_provider.dart';
 import 'package:klient/screens/school_info.dart';
 import 'package:klient/util.dart';
+import 'package:klient/widgets/blur_image.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class SchoolInfoCard extends StatelessWidget {
@@ -35,25 +34,49 @@ class SchoolInfoCard extends StatelessWidget {
       padding: const EdgeInsets.all(8.0),
       child: OpenContainer(
           closedColor: ElevationOverlay.applySurfaceTint(
-              Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 1),
+              Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 3),
           openColor: ElevationOverlay.applySurfaceTint(
-              Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 1),
+              Theme.of(context).colorScheme.surface, Theme.of(context).colorScheme.primary, 3),
           backgroundColor: Colors.black12,
           closedElevation: 2,
           openElevation: 0,
           openBuilder: (context, action) => SchoolInfoPage(_info),
           closedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(16),
           ),
           clipBehavior: Clip.antiAlias,
           closedBuilder: (context, action) {
             return Column(
               children: [
+                if (_info.illustration != null)
+                  Hero(
+                    tag: _info.id,
+                    child: Container(
+                      clipBehavior: Clip.antiAlias,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surface,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: InteractiveViewer(
+                          child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(maxHeight: MediaQuery.of(context).size.width / 1.5),
+                        child: BlurImage(
+                          url: _info.illustration!.url,
+                        ),
+                      )),
+                    ),
+                  ),
                 Padding(
                   padding: const EdgeInsets.all(16.0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
+                      Text(
+                        _info.title,
+                        style: TextStyle(fontSize: 20 * MediaQuery.of(context).textScaleFactor),
+                      ),
+                      const Divider(),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -61,13 +84,11 @@ class SchoolInfoCard extends StatelessWidget {
                               ? const Text('Auteur inconnu')
                               : Text(
                                   _info.author!.fullName,
-                                  style: const TextStyle(fontSize: 16),
+                                  style: TextStyle(
+                                      fontSize: 14 * MediaQuery.of(context).textScaleFactor),
                                 ),
                           Text(_info.publicationDateTime.format()),
                         ],
-                      ),
-                      Text(
-                        _info.title,
                       ),
                       if (_info.content.innerText != '')
                         Text(
@@ -81,19 +102,6 @@ class SchoolInfoCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                if (_info.illustration != null)
-                  Hero(
-                    tag: _info.id,
-                    child: InteractiveViewer(
-                      child: Image(
-                          fit: BoxFit.cover,
-                          width: MediaQuery.of(context).size.width,
-                          image: CachedNetworkImageProvider(
-                            _info.illustration!.url,
-                            headers: ConfigProvider.client!.headers,
-                          )),
-                    ),
-                  ),
               ],
             );
           }),

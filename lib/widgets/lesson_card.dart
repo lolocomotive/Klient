@@ -84,7 +84,7 @@ class LessonCard extends StatelessWidget {
           surfaceTintColor: _lesson.subject.id.color.tint(context),
           shadowColor: _lesson.subject.id.color.shadow(context),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(16),
           ),
           clipBehavior: Clip.antiAlias,
           child: CustomPaint(

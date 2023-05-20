@@ -57,7 +57,7 @@ class ParticipationCard extends StatelessWidget {
           margin: const EdgeInsets.all(8.0),
           elevation: 1,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(14, 10, 14, 10),

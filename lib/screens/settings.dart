@@ -124,7 +124,7 @@ class _SettingsPageState extends State<SettingsPage> {
                               child: Container(
                                 padding: const EdgeInsets.only(left: 16, right: 8),
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(16),
                                   color: ElevationOverlay.applySurfaceTint(
                                     Theme.of(context).colorScheme.surface,
                                     Theme.of(context).colorScheme.primary,
@@ -264,7 +264,7 @@ class _CompactSelectorState extends State<CompactSelector> {
             Flexible(
               flex: 1,
               child: InkWell(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   setState(() {
                     ConfigProvider.compact = false;
@@ -301,7 +301,7 @@ class _CompactSelectorState extends State<CompactSelector> {
             Flexible(
               flex: 1,
               child: InkWell(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(16),
                 onTap: () {
                   setState(() {
                     ConfigProvider.compact = true;

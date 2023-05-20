@@ -242,7 +242,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                   : Container(
                                       padding: const EdgeInsets.symmetric(horizontal: 8),
                                       decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(8),
+                                        borderRadius: BorderRadius.circular(16),
                                         color: ElevationOverlay.applySurfaceTint(
                                           Theme.of(context).colorScheme.surface,
                                           Theme.of(context).colorScheme.primary,
@@ -416,7 +416,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                         backgroundColor: Colors.black26,
                                                         closedElevation: 1,
                                                         closedShape: RoundedRectangleBorder(
-                                                          borderRadius: BorderRadius.circular(8),
+                                                          borderRadius: BorderRadius.circular(16),
                                                         ),
                                                         clipBehavior: Clip.antiAlias,
                                                         closedColor:
@@ -438,7 +438,8 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                         ),
                                                         closedBuilder: (context, action) => InkWell(
                                                           child: Padding(
-                                                            padding: const EdgeInsets.all(8.0),
+                                                            padding: const EdgeInsets.symmetric(
+                                                                vertical: 10, horizontal: 14),
                                                             child: CommunicationCard(
                                                                 _communications[index]),
                                                           ),
