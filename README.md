@@ -21,6 +21,7 @@ Go to the [Releases](https://github.com/lolocomotive/klient/releases) page. The 
 ```bash
 sudo apt install  libgtk-3-0 libblkid1 liblzma5 libsqlite3-0 libsqlite3-0-dev webkit2gtk-4.1
 ```
+</details>
 
 ### Windows
 
