@@ -1,0 +1,15 @@
+display_name: Klient
+
+icon: android/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png
+
+keywords:
+    - Skolengo
+
+generic_name: Klient
+
+startup_notify: true
+
+categories:
+    - Education
+
+include: []

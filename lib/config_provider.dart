@@ -243,7 +243,7 @@ class ConfigProvider {
             _notificationSettings = Map<NotificationType, bool>.from(jsonDecode(value).map(
               (key, value) => MapEntry(NotificationType.values.byName(key), value),
             ));
-            if (_notificationSettings!.values.contains(true)) {
+            if (_notificationSettings!.values.contains(true) && Platform.isAndroid) {
               FlutterLocalNotificationsPlugin()
                   .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>()!
                   .areNotificationsEnabled()

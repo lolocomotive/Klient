@@ -64,6 +64,7 @@ dependencies:
             ref: b22562b41a0a721b974de281527b25c03e1161c9
             path: packages/animations
     desktop_webview_window: ^0.2.0
+    html: ^0.15.3
 
 dev_dependencies:
     flutter_test:
