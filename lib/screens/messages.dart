@@ -411,8 +411,6 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                               ? 14
                                                               : 7),
                                                       child: OpenContainer(
-                                                        transitionType:
-                                                            ContainerTransitionType.fadeThrough,
                                                         backgroundColor: Colors.black26,
                                                         closedElevation: 1,
                                                         closedShape: RoundedRectangleBorder(
