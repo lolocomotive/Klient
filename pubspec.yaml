@@ -45,10 +45,6 @@ dependencies:
     package_info_plus: ^4.0.0
     expandable: ^5.0.1
     dynamic_color: ^1.6.0
-    # The following adds the Cupertino Icons font to your application.
-    # Use with the CupertinoIcons class for iOS style icons.
-    # cupertino_icons: ^1.0.2
-
     scolengo_api: ^1.1.3
     openid_client: ^0.4.7
     webview_flutter: ^4.2.0
@@ -65,6 +61,14 @@ dependencies:
             path: packages/animations
     desktop_webview_window: ^0.2.0
     html: ^0.15.3
+    full_text_search:
+        git:
+            url: https://github.com/lolocomotive/full_text_search
+            ref: d679c2d05a59c228e149301f6b06101bdeb96137
+
+    # The following adds the Cupertino Icons font to your application.
+    # Use with the CupertinoIcons class for iOS style icons.
+    # cupertino_icons: ^1.0.2
 
 dev_dependencies:
     flutter_test:

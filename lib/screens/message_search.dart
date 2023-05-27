@@ -19,6 +19,8 @@
 
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart' hide Action;
+import 'package:full_text_search/full_text_search.dart';
+import 'package:full_text_search/searches.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/screens/communication.dart';
 import 'package:klient/util.dart';
@@ -27,7 +29,6 @@ import 'package:scolengo_api/scolengo_api.dart';
 
 class MessagesSearchDelegate extends SearchDelegate {
   static MessageSearchResultsState? messageSearchSuggestionState;
-  static String? searchQuery;
 
   final Function(Communication) onDelete;
 
@@ -67,7 +68,6 @@ class MessagesSearchDelegate extends SearchDelegate {
 
   @override
   Widget buildSuggestions(BuildContext context) {
-    searchQuery = query;
     MessagesSearchDelegate.messageSearchSuggestionState?.refresh();
     return MessageSearchResults(
       onDelete: onDelete,
@@ -92,7 +92,9 @@ class MessageSearchResults extends StatefulWidget {
 
 class MessageSearchResultsState extends State<MessageSearchResults> {
   List<Communication>? _communications;
+  List<IndexEntry<Communication>>? _index;
   List<Communication>? _fullCommunications;
+  String? oldQuery;
 
   MessageSearchResultsState() {
     MessagesSearchDelegate.messageSearchSuggestionState = this;
@@ -100,24 +102,18 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
   }
 
   refresh() {
-    _communications = _fullCommunications?.where(
-      (element) {
-        if (element.subject.toLowerCase().contains(widget.query.toLowerCase())) return true;
-        if (element.lastParticipation?.content.innerText
-                .toLowerCase()
-                .contains(widget.query.toLowerCase()) ==
-            true) return true;
-        if (element.lastParticipation?.sender?.label
-                ?.toLowerCase()
-                .contains(widget.query.toLowerCase()) ==
-            true) return true;
-        if (element.recipientsSummary?.innerText
-                .toLowerCase()
-                .contains(widget.query.toLowerCase()) ==
-            true) return true;
-        return false;
-      },
-    ).toList();
+    if (widget.query.toLowerCase() == oldQuery?.toLowerCase()) return;
+    if (_index == null) return;
+    FullTextSearch<IndexEntry<Communication>>(
+      term: widget.query,
+      items: _index!,
+      tokenize: (entry) => entry.tokens,
+      isStartsWith: false,
+    ).findResults().then((results) {
+      _communications = results.map((e) => e.item).toList();
+      oldQuery = widget.query;
+      setState(() {});
+    });
   }
 
   @override
@@ -207,7 +203,22 @@ class MessageSearchResultsState extends State<MessageSearchResults> {
                 limit: 1 << 32)
             .first)
         .data;
+    _index = _fullCommunications!.map((e) => IndexEntry<Communication>(e, e.tokenize)).toList();
     refresh();
-    setState(() {});
   }
+}
+
+extension Tokenize on Communication {
+  List<String> get tokenize => [
+        subject.toLowerCase() + (lastParticipation?.content.innerText.toLowerCase() ?? ''),
+        (lastParticipation?.sender?.label?.toLowerCase() ?? ''),
+        (recipientsSummary?.innerText.toLowerCase() ?? '')
+      ];
+}
+
+class IndexEntry<T> {
+  final T item;
+  final List<String> tokens;
+
+  IndexEntry(this.item, this.tokens);
 }
