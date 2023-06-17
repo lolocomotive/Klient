@@ -17,6 +17,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
+import 'dart:convert';
+
 import 'package:animations/animations.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:klient/config_provider.dart';
@@ -54,26 +56,29 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   bool _transitionDone = false;
 
   void openConversation(BuildContext context, GlobalKey? parentKey, Communication communication) {
+    // Mark communication as read
+    communication.read = true;
+    // Synchronize local cache
+    final page = (_communications.indexOf(communication) / 20).floor();
+    final cacheUrl =
+        '${Skolengo.url}/communications?filter%5Bfolders.id%5D=${_folder!.id}&page%5Blimit%5D=$_pageSize&page%5Boffset%5D=${page * _pageSize}&include=lastParticipation,lastParticipation.sender,lastParticipation.sender.person,lastParticipation.sender.technicalUser';
+    KlientApp.cache.useCache(cacheUrl).then((useCache) async {
+      if (useCache) {
+        final cached = jsonDecode(await KlientApp.cache.get(cacheUrl));
+        for (int i = 0; i < cached['data'].length; i++) {
+          if (cached['data'][i]['id'] == communication.id) {
+            cached['data'][i]['read'] = communication.read;
+          }
+        }
+        KlientApp.cache.set(cacheUrl, jsonEncode(cached));
+      }
+    });
+
     if (_sideBySide) {
-      setState(() {
-        currentId = communication.id;
-        currentSubject = communication.subject;
-      });
-    } else {
-      //Navigator.of(context).push(
-      //  MorpheusPageRoute(
-      //    //FIXME Builder is called twice
-      //    builder: (_) => CommunicationPage(
-      //      onDelete: (communication) {
-      //        Navigator.of(context).pop();
-      //        deleteSingleCommunication(communication);
-      //      },
-      //      communication: communication,
-      //    ),
-      //    parentKey: parentKey,
-      //  ),
-      //);
+      currentId = communication.id;
+      currentSubject = communication.subject;
     }
+    setState(() {});
   }
 
   Future<void> load([bool transitionned = false]) async {
@@ -126,6 +131,7 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
   }
 
   static MessagesPageState? currentState;
+
   @override
   initState() {
     super.initState();
@@ -452,10 +458,9 @@ class MessagesPageState extends State<MessagesPage> with TickerProviderStateMixi
                                                               _selection.add(index);
                                                               setState(() {});
                                                             } else {
-                                                              if (_sideBySide) {
-                                                                openConversation(context, parentKey,
-                                                                    _communications[index]);
-                                                              } else {
+                                                              openConversation(context, parentKey,
+                                                                  _communications[index]);
+                                                              if (!_sideBySide) {
                                                                 action();
                                                               }
                                                             }
