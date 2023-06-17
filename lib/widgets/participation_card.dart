@@ -94,12 +94,12 @@ class ParticipationCard extends StatelessWidget {
                 CustomHtml(
                   data: HtmlUnescape().convert(participation.content),
                   style: {
-                    'body': Style(margin: Margins.all(0), padding: EdgeInsets.zero),
+                    'body': Style(margin: Margins.all(0), padding: HtmlPaddings.zero),
                     'blockquote': Style(
                       border: Border(
                           left:
                               BorderSide(color: Theme.of(context).colorScheme.secondary, width: 2)),
-                      padding: const EdgeInsets.fromLTRB(8, 0, 0, 0),
+                      padding: HtmlPaddings.only(left: 8),
                       margin: Margins.all(0),
                       fontStyle: FontStyle.italic,
                     )

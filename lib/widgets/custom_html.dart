@@ -68,13 +68,13 @@ class _CustomHtmlState extends State<CustomHtml> {
 class CachedImageRenderer extends HtmlExtension {
   @override
   Set<String> get supportedTags => {'img'};
+
   @override
   bool matches(context) =>
       context.attributes.containsKey('src') && !context.attributes['src']!.startsWith('data:');
 
   @override
-  InlineSpan build(
-      ExtensionContext context, Map<StyledElement, InlineSpan> Function() parseChildren) {
+  InlineSpan build(ExtensionContext context) {
     return WidgetSpan(
       child: InteractiveViewer(
         child: CachedNetworkImage(
