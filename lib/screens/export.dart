@@ -371,8 +371,9 @@ class _ExportPageState extends State<ExportPage> {
           zipFile: zipfile,
           recurseSubDirs: true,
           onZipping: (filePath, isDirectory, progress) {
+            print('ZIP progress:$progress');
             setState(() {
-              zipProgress = progress;
+              zipProgress = progress / 100;
               ziplog += '\n$filePath';
               _logController.jumpTo(_logController.position.maxScrollExtent);
             });
