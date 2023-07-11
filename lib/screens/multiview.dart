@@ -54,7 +54,7 @@ class MainState extends State<Main> {
       default:
         currentWidget = TimetablePage(key: GlobalKey());
     }
-
+    final stream = unreadCount().asBroadcastStream();
     return Scaffold(
       floatingActionButton: currentWidget is MessagesPage
           ? FloatingActionButton(
@@ -77,7 +77,7 @@ class MainState extends State<Main> {
           ),
           NavigationDestination(
             icon: StreamBuilder<int>(
-                stream: unreadCount().asBroadcastStream(),
+                stream: stream,
                 builder: (context, snapshot) {
                   return Badge(
                     textColor: Theme.of(context).colorScheme.background,

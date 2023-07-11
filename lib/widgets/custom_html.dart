@@ -76,12 +76,19 @@ class CachedImageRenderer extends HtmlExtension {
   @override
   InlineSpan build(ExtensionContext context) {
     return WidgetSpan(
-      child: InteractiveViewer(
-        child: CachedNetworkImage(
-          imageUrl: context.attributes['src']!,
-          progressIndicatorBuilder: (context, url, progress) => Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(child: CircularProgressIndicator(value: progress.progress)),
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        clipBehavior: Clip.antiAlias,
+        padding: const EdgeInsets.all(8),
+        child: InteractiveViewer(
+          child: CachedNetworkImage(
+            imageUrl: context.attributes['src']!,
+            progressIndicatorBuilder: (context, url, progress) => Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Center(child: CircularProgressIndicator(value: progress.progress)),
+            ),
           ),
         ),
       ),

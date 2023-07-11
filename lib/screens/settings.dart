@@ -20,6 +20,7 @@
 import 'package:flutter/material.dart';
 import 'package:klient/config_provider.dart';
 import 'package:klient/main.dart';
+import 'package:klient/screens/export.dart';
 import 'package:klient/widgets/color_picker.dart';
 import 'package:klient/widgets/default_activity.dart';
 import 'package:klient/widgets/lesson_card.dart';
@@ -109,96 +110,110 @@ class _SettingsPageState extends State<SettingsPage> {
                   ],
                 ),
                 SettingsSection(
+                  title: Text(
+                    'Affichage',
+                    style: boldPrimary,
+                  ),
+                  tiles: <SettingsTile>[
+                    SettingsTile(
+                      leading: const Icon(Icons.invert_colors),
+                      title: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Thème'),
+                          Flexible(
+                            child: Container(
+                              padding: const EdgeInsets.only(left: 16, right: 8),
+                              decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(16),
+                                color: ElevationOverlay.applySurfaceTint(
+                                  Theme.of(context).colorScheme.surface,
+                                  Theme.of(context).colorScheme.primary,
+                                  2,
+                                ),
+                              ),
+                              child: DropdownButton(
+                                borderRadius: BorderRadius.circular(16),
+                                dropdownColor: ElevationOverlay.applySurfaceTint(
+                                  Theme.of(context).colorScheme.surface,
+                                  Theme.of(context).colorScheme.primary,
+                                  4,
+                                ),
+                                underline: Container(),
+                                value: ConfigProvider.enforcedBrightness == null
+                                    ? 'default'
+                                    : ConfigProvider.enforcedBrightness == Brightness.light
+                                        ? 'light'
+                                        : 'dark',
+                                items: const [
+                                  DropdownMenuItem(
+                                      value: 'default',
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                        child: Text('Système'),
+                                      )),
+                                  DropdownMenuItem(
+                                      value: 'light',
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                        child: Text('Clair'),
+                                      )),
+                                  DropdownMenuItem(
+                                      value: 'dark',
+                                      child: Padding(
+                                        padding: EdgeInsets.symmetric(horizontal: 8),
+                                        child: Text('Sombre'),
+                                      )),
+                                ],
+                                onChanged: (dynamic value) {
+                                  ConfigProvider.enforcedBrightness = value == 'light'
+                                      ? Brightness.light
+                                      : value == 'dark'
+                                          ? Brightness.dark
+                                          : null;
+                                  // If we don't setState here the value does not update when the setting does not change what is displayed.
+                                  setState(() {});
+                                  KlientState.currentState!.setState(() {});
+                                },
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SettingsTile(
+                        leading: const Icon(Icons.color_lens),
+                        title: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            const Text('Couleur principale'),
+                            ColorPicker(
+                              color: ConfigProvider.enforcedColor,
+                              onChange: (color) {
+                                ConfigProvider.enforcedColor = color;
+                                KlientState.currentState!.setState(() {});
+                              },
+                            )
+                          ],
+                        )),
+                    SettingsTile(
+                      title: const CompactSelector(),
+                    )
+                  ],
+                ),
+                SettingsSection(
                     title: Text(
-                      'Affichage',
+                      'Données personnelles',
                       style: boldPrimary,
                     ),
                     tiles: <SettingsTile>[
                       SettingsTile(
-                        leading: const Icon(Icons.invert_colors),
-                        title: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            const Text('Thème'),
-                            Flexible(
-                              child: Container(
-                                padding: const EdgeInsets.only(left: 16, right: 8),
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(16),
-                                  color: ElevationOverlay.applySurfaceTint(
-                                    Theme.of(context).colorScheme.surface,
-                                    Theme.of(context).colorScheme.primary,
-                                    2,
-                                  ),
-                                ),
-                                child: DropdownButton(
-                                  borderRadius: BorderRadius.circular(16),
-                                  dropdownColor: ElevationOverlay.applySurfaceTint(
-                                    Theme.of(context).colorScheme.surface,
-                                    Theme.of(context).colorScheme.primary,
-                                    4,
-                                  ),
-                                  underline: Container(),
-                                  value: ConfigProvider.enforcedBrightness == null
-                                      ? 'default'
-                                      : ConfigProvider.enforcedBrightness == Brightness.light
-                                          ? 'light'
-                                          : 'dark',
-                                  items: const [
-                                    DropdownMenuItem(
-                                        value: 'default',
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8),
-                                          child: Text('Système'),
-                                        )),
-                                    DropdownMenuItem(
-                                        value: 'light',
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8),
-                                          child: Text('Clair'),
-                                        )),
-                                    DropdownMenuItem(
-                                        value: 'dark',
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(horizontal: 8),
-                                          child: Text('Sombre'),
-                                        )),
-                                  ],
-                                  onChanged: (dynamic value) {
-                                    ConfigProvider.enforcedBrightness = value == 'light'
-                                        ? Brightness.light
-                                        : value == 'dark'
-                                            ? Brightness.dark
-                                            : null;
-                                    // If we don't setState here the value does not update when the setting does not change what is displayed.
-                                    setState(() {});
-                                    KlientState.currentState!.setState(() {});
-                                  },
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SettingsTile(
-                          leading: const Icon(Icons.color_lens),
-                          title: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Couleur principale'),
-                              ColorPicker(
-                                color: ConfigProvider.enforcedColor,
-                                onChange: (color) {
-                                  ConfigProvider.enforcedColor = color;
-                                  KlientState.currentState!.setState(() {});
-                                },
-                              )
-                            ],
-                          )),
-                      SettingsTile(
-                        title: const CompactSelector(),
+                        title: const Text('Exporter les données'),
+                        leading: const Icon(Icons.import_export),
+                        onPressed: (context) => Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (context) => const ExportPage())),
                       )
-                    ])
+                    ]),
               ],
             ),
           ),

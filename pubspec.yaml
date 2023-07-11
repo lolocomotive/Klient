@@ -59,12 +59,17 @@ dependencies:
             url: https://github.com/lolocomotive/packages
             ref: b22562b41a0a721b974de281527b25c03e1161c9
             path: packages/animations
-    desktop_webview_window: ^0.2.0
+    desktop_webview_window:
+        git:
+            url: https://github.com/lolocomotive/flutter-plugins
+            ref: bc2ecc506ba394a547dd961b9a4b381e7d508222
+            path: packages/desktop_webview_window
     html: ^0.15.3
     full_text_search:
         git:
             url: https://github.com/lolocomotive/full_text_search
             ref: d679c2d05a59c228e149301f6b06101bdeb96137
+    flutter_archive: ^5.0.0
 
     # The following adds the Cupertino Icons font to your application.
     # Use with the CupertinoIcons class for iOS style icons.

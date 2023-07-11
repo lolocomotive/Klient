@@ -2,6 +2,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart' hide Action;
 import 'package:klient/api/custom_requests.dart';
 import 'package:klient/config_provider.dart';
+import 'package:klient/database_provider.dart';
+import 'package:klient/main.dart';
 import 'package:klient/screens/about.dart';
 import 'package:klient/screens/debug.dart';
 import 'package:klient/screens/settings.dart';
@@ -10,6 +12,7 @@ import 'package:klient/widgets/default_card.dart';
 import 'package:klient/widgets/default_transition.dart';
 import 'package:klient/widgets/exception_widget.dart';
 import 'package:klient/widgets/user_avatar.dart';
+import 'package:restart_app/restart_app.dart';
 import 'package:scolengo_api/scolengo_api.dart';
 
 class UserDialog extends StatefulWidget {
@@ -106,10 +109,20 @@ class _UserDialogState extends State<UserDialog> {
                       },
                     ),
                     Divider(height: 1, color: Theme.of(context).colorScheme.primary.withAlpha(80)),
-                    const Option(
+                    Option(
                       icon: Icons.logout_outlined,
                       text: 'Se déconnecter',
-                      // onTap: () => Client.disconnect(context),
+                      onTap: () {
+                        ConfigProvider.getStorage().deleteAll();
+                        DatabaseProvider.getDB()
+                            .then((value) => DatabaseProvider.deleteDb(value.path));
+                        try {
+                          Restart.restartApp();
+                        } catch (_) {
+                          KlientApp.messengerKey.currentState?.showSnackBar(const SnackBar(
+                              content: Text("Veuillez redémarrer l'application manuellement.")));
+                        }
+                      },
                     ),
                     if (kDebugMode)
                       Divider(

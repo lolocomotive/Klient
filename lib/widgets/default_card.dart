@@ -28,6 +28,7 @@ class DefaultCard extends StatelessWidget {
   final Color? shadowColor;
   final Color? surfaceTintColor;
   final Color? outlineColor;
+  final EdgeInsets margin;
 
   const DefaultCard(
       {Key? key,
@@ -38,7 +39,8 @@ class DefaultCard extends StatelessWidget {
       this.child,
       this.outlineColor,
       this.onTap,
-      this.padding = const EdgeInsets.all(16)})
+      this.padding = const EdgeInsets.all(16),
+      this.margin = const EdgeInsets.all(8.0)})
       : super(key: key);
 
   @override
@@ -47,7 +49,7 @@ class DefaultCard extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       surfaceTintColor: surfaceTintColor,
       shadowColor: shadowColor,
-      margin: const EdgeInsets.all(8.0),
+      margin: margin,
       elevation: elevation ?? 1,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
