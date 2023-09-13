@@ -159,7 +159,7 @@ class LessonCard extends StatelessWidget {
                                   ),
                                   Flexible(
                                       child: Text(
-                                    _lesson.location,
+                                    _lesson.location ?? '',
                                     overflow: TextOverflow.ellipsis,
                                   )),
                                 ],
@@ -189,7 +189,7 @@ class LessonCard extends StatelessWidget {
                                 Padding(
                                   padding: const EdgeInsets.fromLTRB(8.0, 8.0, 8.0, 4.0),
                                   child: Text(
-                                    _lesson.location,
+                                    _lesson.location ?? '',
                                     textAlign: TextAlign.center,
                                   ),
                                 ),
