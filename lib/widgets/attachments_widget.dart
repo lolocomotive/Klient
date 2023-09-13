@@ -112,7 +112,7 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
   copy(File file) async {
     final path = '${(await getExternalCacheDirectories())!.first.path}/attachments/';
     await Directory(path).create(recursive: true);
-    final dest = path + widget.attachment.name;
+    final dest = path + (widget.attachment.name ?? '');
     if (file.path == dest) return;
     _file = await file.copy(dest);
   }
@@ -130,12 +130,12 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
               },
             ),
       visualDensity: VisualDensity.compact,
-      title: Text(widget.attachment.name),
+      title: Text(widget.attachment.name ?? ''),
       subtitle: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            '${widget.attachment.size.niceSize()}o',
+            '${widget.attachment.size?.niceSize() ?? '?'}o',
             style: TextStyle(
               color: Theme.of(context).colorScheme.secondary,
             ),
@@ -146,7 +146,7 @@ class _AttachmentWidgetState extends State<AttachmentWidget> {
             )
         ],
       ),
-      leading: Icon(widget.attachment.name.icon),
+      leading: Icon(widget.attachment.name?.icon),
       onTap: () {
         _dowloading = true;
         setState(() {});
