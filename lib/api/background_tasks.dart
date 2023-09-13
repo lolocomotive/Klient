@@ -203,7 +203,7 @@ Future<void> showNotifications() async {
       getHomework().asBroadcastStream(),
       (homework) => Notification(
         Random().nextInt(100000),
-        homework.title,
+        homework.title ?? 'Nouveau travail à faire',
         homework.html.innerText,
         'eval-${homework.id}',
       ),

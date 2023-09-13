@@ -56,7 +56,7 @@ class HomeworkCard extends StatefulWidget {
 class _HomeworkCardState extends State<HomeworkCard> {
   @override
   Widget build(BuildContext context) {
-    final tint = widget._hw.subject!.id.color.tint(context);
+    final tint = widget._hw.subject != null ? widget._hw.subject!.id.color.tint(context) : Color.fromARGB(127, 255, 255, 255);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
@@ -75,8 +75,10 @@ class _HomeworkCardState extends State<HomeworkCard> {
                   ),
                 ),
                 Text(
-                  'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
-                      ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime.date())}',
+                  widget._hw.dueDateTime != null ?
+                    'À faire pour ${DateFormat('EEEE${widget._hw.dueDateTime!.date().millisecondsSinceEpoch - DateTime.now().millisecondsSinceEpoch > 604800000 ? ' dd / MM ' : ''}'
+                      ' - HH:mm', 'FR_fr').format(widget._hw.dueDateTime!.date())}'
+                    : '',
                   style: TextStyle(
                     fontSize: 16 * MediaQuery.of(context).textScaleFactor,
                   ),
@@ -86,7 +88,7 @@ class _HomeworkCardState extends State<HomeworkCard> {
           ),
         Card(
           surfaceTintColor: tint,
-          shadowColor: widget._hw.subject!.id.color.shadow(context),
+          shadowColor: widget._hw.subject != null ? widget._hw.subject!.id.color.shadow(context) : Color.fromARGB(64, 0, 0, 0),
           margin: const EdgeInsets.all(8.0),
           clipBehavior: Clip.antiAlias,
           elevation: widget.elevation,
@@ -94,24 +96,24 @@ class _HomeworkCardState extends State<HomeworkCard> {
             decoration: widget.compact
                 ? BoxDecoration(
                     border: Border(
-                      left: BorderSide(color: widget._hw.subject!.id.color.shade200, width: 6),
+                      left: BorderSide(color: widget._hw.subject != null ? widget._hw.subject!.id.color.shade200 : Color.fromARGB(127, 255, 255, 255), width: 6),
                     ),
                   )
                 : null,
             child: Theme(
               data: Theme.of(context).copyWith(
-                splashColor: widget._hw.subject!.id.color.shade200.withAlpha(50),
+                splashColor: widget._hw.subject != null ? widget._hw.subject!.id.color.shade200.withAlpha(50) : Color.fromARGB(50, 255, 255, 255),
               ),
               // The whole container is colored and the content overrides the color.
               // This is a workaround because expandable doesn't allow to set the header/icon background color
               child: Container(
-                color: widget.compact ? null : widget._hw.subject!.id.color.shade200,
+                color: widget.compact ? null : widget._hw.subject != null ? widget._hw.subject!.id.color.shade200 : Color.fromARGB(127, 255, 255, 255),
                 child: ExpandablePanel(
                   theme: ExpandableThemeData(
                     crossFadePoint: .3,
                     iconPadding: widget.compact ? const EdgeInsets.only(right: 4, top: 2) : null,
                     iconColor:
-                        widget.compact ? widget._hw.subject!.id.color.shade200 : Colors.black,
+                        widget.compact && widget._hw.subject != null ? widget._hw.subject!.id.color.shade200 : Colors.black,
                     headerAlignment: ExpandablePanelHeaderAlignment.center,
                   ),
                   builder: (context, collapsed, expanded) {
@@ -143,7 +145,7 @@ class _HomeworkCardState extends State<HomeworkCard> {
                             children: [
                               Flexible(
                                 child: Text(
-                                  widget._hw.title,
+                                  widget._hw.title ?? '',
                                   overflow: TextOverflow.fade,
                                   softWrap: false,
                                   style: TextStyle(
@@ -222,7 +224,7 @@ class _CardContentsState extends State<_CardContents> {
   Widget build(BuildContext context) {
     final bool online =
         RegExp('<p.*?#FFB622.*?Ce travail à faire est à remettre directement en ligne.*<\\/p>')
-            .hasMatch(widget.widget._hw.html);
+            .hasMatch(widget.widget._hw.html ?? '');
     return ExpandableButton(
       theme: const ExpandableThemeData(useInkWell: false),
       child: Column(

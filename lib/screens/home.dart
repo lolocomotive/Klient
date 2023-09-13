@@ -466,9 +466,9 @@ class _HomeworkListState extends State<HomeworkList> {
                 HomeworkAssignment modified = (homework..done = done);
                 mutableData!.add(modified);
                 mutableData!.sort(
-                  (a, b) =>
-                      a.dueDateTime.date().millisecondsSinceEpoch -
-                      b.dueDateTime.date().millisecondsSinceEpoch,
+                  (a, b) => a.dueDateTime != null && b.dueDateTime != null ?
+                      a.dueDateTime!.date().millisecondsSinceEpoch -
+                      b.dueDateTime!.date().millisecondsSinceEpoch : -1,
                 );
                 setState(() {});
               },
