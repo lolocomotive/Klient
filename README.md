@@ -70,11 +70,7 @@ Details on how to create a key are available on the [Android Developers website]
 
 | Home                                  | Messages                                      | Timetable                                       |
 | ------------------------------------- | --------------------------------------------- | ----------------------------------------------- |
-| 
-
-![Home](./screenshots/Phone_Home.png) | ![Messages](./screenshots/Phone_Messages.png) | ![Timetable](./screenshots/Phone_Timetable.png)
-
- |
+| ![Home](./screenshots/Phone_Home.png) | ![Messages](./screenshots/Phone_Messages.png) | ![Timetable](./screenshots/Phone_Timetable.png) |
 
 ## To do
 
